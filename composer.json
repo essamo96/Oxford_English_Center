@@ -1,0 +1,67 @@
+{
+    "name": "laravel/laravel",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "bacon/bacon-qr-code": "^2.0",
+        "guzzlehttp/guzzle": "^7.8",
+        "intervention/image": "^2.7",
+        "laravel/framework": "^9.0",
+        "laravel/tinker": "^2.8",
+        "laravel/ui": "3.4",
+        "mpdf/mpdf": "^8.2",
+        "phpmailer/phpmailer": "^6.9",
+        "pusher/pusher-php-server": "^7.2",
+        "spatie/laravel-permission": "^5.11",
+        "unisharp/laravel-filemanager": "^2.7",
+        "yajra/laravel-datatables-oracle": "^10.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^9.6",
+        "filp/whoops": "^2.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
