@@ -156,7 +156,7 @@
                     <!--begin::Content-->
                     <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
                         <!--begin::Image Rotation-->
-                        <div class="image-rotation-container mb-10 mb-lg-20">
+                        <div class="image-rotation-container mb-5 mb-lg-20">
                             <img class="rotating-image d-none d-lg-block mx-auto w-275px w-md-50 w-xl-500px active"
                                  src="{{ asset('assets/media/illustrations/sigma-1/7-dark.png') }}" alt="" />
                             <img class="rotating-image d-none d-lg-block mx-auto w-275px w-md-50 w-xl-500px"
@@ -165,7 +165,7 @@
                                  src="{{ asset('assets/oxford/img/logo.png') }}" alt="" />
                         </div>
                         <!--end::Image Rotation-->
-                        <h1 class="d-none d-lg-block fw-bolder fs-2qx text-center mb-7" style="color: #003366;">أوكسفورد للغات</h1>
+                        <h1 class="d-none d-lg-block fw-bolder fs-2qx text-center mb-7" style="color: #003366;">أكسفورد للغات</h1>
                         <div class="d-none d-lg-block fs-base text-center" style="color: #4B5563; max-width: 450px;">
                         مرحباً بك في لوحة تحكم أكسفورد. يمكنك من هنا إدارة جميع جوانب الموقع، المواعيد، الدورات، والطلاب بكل سهولة واحترافية.
                         </div>
