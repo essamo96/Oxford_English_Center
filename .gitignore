@@ -21,3 +21,5 @@ yarn-error.log
 *.mp4
 *.sql
 *.bak
+/scratch/
+/.vscode/

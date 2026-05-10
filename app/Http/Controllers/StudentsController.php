@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Validation\Rule;
-use Crypt;
-use Image;
+use Illuminate\Support\Facades\Crypt;
+use Intervention\Image\Facades\Image;
 use App\Models\Fees;
 use App\Models\Students;
 use App\Models\Pending_Data;
@@ -13,6 +13,9 @@ use App\Models\Questions;
 use Illuminate\Http\Request;
 use App\Models\GroupStudents;
 use App\Models\GroupExamDates;
+use App\Models\Message;
+use App\Models\Students_Admin_Messages;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -31,6 +34,16 @@ class StudentsController extends Controller {
 
     public function __construct() {
         parent::__construct();
+    }
+
+    public function getCoursesPartial() {
+        $student_groups_model = new GroupStudents();
+        $user_id = Auth::guard('students')->user()->id;
+        $student_groups = $student_groups_model->getStudentGroup($user_id)->filter(function($item) {
+            return $item->group !== null;
+        });
+        
+        return view('frontend.students.courses_partial', ['student_groups' => $student_groups]);
     }
 
     public function getIndex() {
@@ -64,12 +77,12 @@ class StudentsController extends Controller {
     }
 
     //////////////////////////////////////////////
-    public function getEvaluate($id) {
+    public function getEvaluate(Request $request, string $id) {
         try {
 
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect('/teacher');
         }
         $teacher = Teachers::find($id);
@@ -87,7 +100,7 @@ class StudentsController extends Controller {
 
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect('/student');
         }
         $student = Students::find($id);
@@ -112,7 +125,7 @@ class StudentsController extends Controller {
         return view('frontend.students.success', parent::$data);
     }
 
-    public function getAjaxGroupFees($group_id) {
+    public function getAjaxGroupFees(string $group_id) {
         $student_fee = new Fees();
         $user_id = Auth::guard('students')->user()->id;
         $groupStudents = new GroupStudents();
@@ -121,7 +134,7 @@ class StudentsController extends Controller {
     }
 
     //////////////////////////////////////////////
-    public function getDegrees($group_id) {
+    public function getDegrees(string $group_id) {
         //print_r($group_id);die;
         $studentGroup = new GroupStudents();
         parent::$data['student_group'] = $studentGroup->getStudent($group_id);
@@ -136,13 +149,13 @@ class StudentsController extends Controller {
         $info = $student->getStudentPending_Data($user_id);
         
         if (!empty($info)) {
-            $request->session()->flash('danger','User has a pending request' ); 
+            session()->flash('danger','User has a pending request' ); 
             return redirect(route('student.view'));
         }
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
                     'mobile' => ['required', Rule::unique('students')->ignore(Auth::guard('students')->user()->id)],
-                    'dob' => 'require   d',
+                    'dob' => 'required',
                     'job' => 'required',
                     'email' => 'required|email',
         ]);
@@ -175,68 +188,14 @@ class StudentsController extends Controller {
             $student = new Students();
             $info = $student->getStudent($user_id);
             $info->update(['ask_update' => 1]);
-            $request->session()->flash('success', self::UPDATE_SUCCESS);
+            session()->flash('success', self::UPDATE_SUCCESS);
         } else {
-            $request->session()->flash('danger', self::EXECUTION_ERROR);
+            session()->flash('danger', self::EXECUTION_ERROR);
         }
 
         return redirect(route('student.view'));
     }
 
-//    public function postEdit(Request $request) {
-//        // dd($_POST);
-//        $student = new Students();
-//        $user_id = Auth::guard('students')->user()->id;
-//
-//        $info = $student->getStudent($user_id);
-//        if ($info) {
-//            $mobile = $request->get('mobile');
-//            $name = $request->get('name');
-//            $dob = $request->get('dob');
-//            $job = $request->get('job');
-//            $email = $request->get('email');
-//
-//            if ($request->hasFile('fileToUpload')) {
-//                $image = $request->file('fileToUpload');
-//                //print_r("file found");die;
-//                $destinationPath = 'uploads/Images/profile/';
-//                $filename = 'image_' . strtotime(date("Y-m-d H:i:s")) . '.' . $image->getClientOriginalExtension();
-//                Image::make($image)->resize(200, 200)->save($destinationPath . $filename);
-//                $imageUrl = $destinationPath . $filename;
-//                $update = $student->updateImage($user_id, $imageUrl);
-//            }
-//
-//            $validator = Validator::make([
-//                        'name' => $name,
-//                        'mobile' => $mobile,
-//                        'dob' => $dob,
-//                        'job' => $job,
-//                        'email' => $email,
-//                            ], [
-//                        'name' => 'required',
-//                        'mobile' => ['required', Rule::unique('students')->ignore($user_id)],
-//                        'dob' => 'required',
-//                        'job' => 'required',
-//                        'email' => 'required|email',
-//            ]);
-//
-//            if ($validator->fails()) {
-//                $request->session()->flash('danger', $validator->messages());
-//                return redirect(route('student.view'));
-//            } else {
-//                $update = $student->updateStudentFrontEnd($info, $dob, $job, $email, $name, $mobile);
-//                if ($update) {
-//                    $update->update(['ask_update' => 0]);
-//                    $request->session()->flash('success', self::UPDATE_SUCCESS);
-//                    return redirect(route('student.view'));
-//                } else {
-//                    $request->session()->flash('danger', self::EXECUTION_ERROR);
-//                    return redirect(route('student.view', ['id' => $encrypted_id]))->withInput();
-//                }
-//            }
-//        }
-//    }
-//////////////////////////////////////////////
     public function postPassword(Request $request) {
         $student = new Students();
         $user_id = Auth::guard('students')->user()->id;
@@ -254,7 +213,7 @@ class StudentsController extends Controller {
                 $imageUrl = $destinationPath . $filename;
                 $update = $student->updateImage($user_id, $imageUrl);
                 if (!$password) {
-                    $request->session()->flash('success', self::UPDATE_SUCCESS);
+                    session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('student.view'));
                 }
             }
@@ -269,21 +228,21 @@ class StudentsController extends Controller {
                 ]);
 
                 if ($validator->fails()) {
-                    $request->session()->flash('danger', $validator->messages());
+                    session()->flash('danger', $validator->messages());
                     return redirect(route('student.view'))->withInput();
                 } else {
                     $update = $student->updatePassword($user_id, Hash::make($password));
                     if ($update) {
-                        $request->session()->flash('success', self::PASSWORD_SUCCESS);
+                        session()->flash('success', self::PASSWORD_SUCCESS);
                         return redirect(route('student.view'));
                     } else {
-                        $request->session()->flash('danger', self::EXECUTION_ERROR);
+                        session()->flash('danger', self::EXECUTION_ERROR);
                         return redirect(route('student.view'))->withInput();
                     }
                 }
             }
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('student.view'));
         }
     }
@@ -292,47 +251,70 @@ class StudentsController extends Controller {
     public function indexStudentNotify(Request $request) {
         $student = Auth::guard('students')->user();
         $notifys = $student->notifications;
+        
+        // Fetch group messages (last 20 across all student groups)
+        $groupIds = GroupStudents::where('student_id', $student->id)->pluck('group_id')->toArray();
+        $group_messages = Message::whereIn('group_id', $groupIds)
+            ->with(['chatGroup.teacher', 'chatGroup.program'])
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        // Fetch Admin Messages (direct correspondence)
+        $admin_messages = Students_Admin_Messages::where('student_id', $student->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         parent::$data['notifys'] = $notifys;
+        parent::$data['group_messages'] = $group_messages;
+        parent::$data['admin_messages'] = $admin_messages;
+        parent::$data['student_groups'] = GroupStudents::where('student_id', $student->id)->with('group')->get();
+        
         return view('frontend.students.studentNotify', parent::$data);
+    }
+
+    public function postSendMessageToAdmin(Request $request) {
+        $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required'
+        ]);
+
+        $student = Auth::guard('students')->user();
+        $msg = new Students_Admin_Messages();
+        $msg->student_id = $student->id;
+        $msg->title = $request->title;
+        $msg->content = $request->content;
+        $msg->seen = 0;
+        $msg->save();
+
+        return response()->json(['status' => 'success', 'message' => 'Message sent to administration successfully.']);
     }
 
 //////////////////////////////////////////////
     public function getStudentGroueMarks(Request $request) {
-        $student_id = $request->get('student_id');
-        try {
-            $student_id = Crypt::decrypt($student_id);
-        } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
-            return redirect()->back();
-        }
-// DD($student_id);
+        $student_id = Auth::guard('students')->user()->id;
+        
         $groups_student = GroupStudents::where('student_id', $student_id)->whereNull('deleted_at')->get();
-// DD($groups_student);
-        if ($groups_student != null) {
+        if ($groups_student->count() > 0) {
             parent::$data['data'] = $groups_student;
             return view('frontend.students.student_marks', parent::$data);
         } else {
-
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
+            parent::$data['data'] = collect();
+            return view('frontend.students.student_marks', parent::$data);
         }
     }
 
 //////////////////////////////////////////////
     public function getStudentGroueProgress(Request $request) {
-        $student_id = $request->get('student_id');
-        try {
-            $student_id = Crypt::decrypt($student_id);
-        } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
-            return redirect()->back();
-        }
+        $student_id = Auth::guard('students')->user()->id;
+
         $groups_student = GroupStudents::where('student_id', $student_id)->whereNull('deleted_at')->get();
-        if ($groups_student != null) {
+        if ($groups_student->count() > 0) {
             parent::$data['data'] = $groups_student;
             return view('frontend.students.group_progress', parent::$data);
         } else {
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
+            parent::$data['data'] = collect();
+            return view('frontend.students.group_progress', parent::$data);
         }
     }
 }

@@ -104,11 +104,14 @@ Route::group(['middleware' => ['auth:students']], function () {
     Route::post('students/grope/Progress', ['as' => 'student.showGroueProgress', 'uses' => 'StudentsController@getStudentGroueProgress']);
     Route::post('grope/Exam/{student_id}', ['as' => 'student.ExamDates', 'uses' => 'StudentsController@getGroupStudentExamDates']);
     Route::get('student/evaluate/{id}', ['as' => 'student.evaluate', 'uses' => 'StudentsController@getEvaluate']);
+    Route::get('student/courses/partial', ['as' => 'student.courses.partial', 'uses' => 'StudentsController@getCoursesPartial']);
+    Route::post('student/admin/send-message', ['as' => 'student.send_admin_message', 'uses' => 'StudentsController@postSendMessageToAdmin']);
     //Chat
     Route::post('student/ask_update/profile', ['as' => 'ask.update.profile', 'uses' => 'StudentsController@updateProfile']);
     Route::get('load-latest-messages_student', 'MessagesController@getLoadLatestMessages')->defaults('type', 'student');
-    Route::post('send_student', 'MessagesController@postSendMessage')->defaults('type', 'student');
+    Route::post('send_student', ['as' => 'student.postSendMessage', 'uses' => 'MessagesController@postSendMessage'])->defaults('type', 'student');
     Route::get('fetch-old-messages', 'MessagesController@getOldMessages');
+    Route::get('student/certificate/download/{id}', ['as' => 'student.certificate.download', 'uses' => 'CertificatesController@generat_pdf_student']);
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // route to open admin page
@@ -125,7 +128,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
 Route::prefix('emails')->group(function () {
     Route::get('mailable', function () {
         $student = Students::find(100);
-        return new App\Mail\NewStudentEmail($student);
+        return new App\Mail\NewStudentEmail($student, 'testuser', 'testpass');
     });
 });
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web', 'auth:admin']], function () {
@@ -362,7 +365,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('groups/status', ['as' => 'groups.status', 'middleware' => ['permission:admin.groups.status'], 'uses' => 'GroupsController@postStatus']);
     Route::post('groups/details', ['as' => 'groups.details', 'uses' => 'GroupsController@getGroupDetails']);
     Route::post('teachers/details', ['as' => 'teachers.details', 'uses' => 'GroupsController@getTeacherDetails']);
-    Route::post('programs/details', ['as' => 'programs.details', 'uses' => 'GroupsController@getProgramDetails']);
+    Route::post('programs/details', ['as' => 'programs.details.post', 'uses' => 'GroupsController@getProgramDetails']);
     Route::post('groups/send-email', ['as' => 'groups.send.CEmail', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@sendBulkEmail']);
 
     Route::get('groups/student/{id}', ['as' => 'groups.student.view', 'middleware' => ['permission:admin.groups.student.view'], 'uses' => 'GroupsController@getStudentIndex']);
@@ -397,6 +400,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('students/edit/{id}', ['as' => 'students.edit', 'middleware' => ['permission:admin.students.edit'], 'uses' => 'StudentsController@postEdit']);
     Route::post('students/delete', ['as' => 'students.delete', 'middleware' => ['permission:admin.students.delete'], 'uses' => 'StudentsController@postDelete']);
     Route::post('students/status', ['as' => 'students.status', 'middleware' => ['permission:admin.students.status'], 'uses' => 'StudentsController@postStatus']);
+    Route::post('students/details', ['as' => 'students.details', 'middleware' => ['permission:admin.students.view'], 'uses' => 'StudentsController@getStudentDetails']);
+
     Route::get('students/password/{id}', ['as' => 'students.password', 'middleware' => ['permission:admin.students.view'], 'uses' => 'StudentsController@getPassword']);
     Route::post('students/password/{id}', ['as' => 'students.password', 'middleware' => ['permission:admin.students.view'], 'uses' => 'StudentsController@postPassword']);
 

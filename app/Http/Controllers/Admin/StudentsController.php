@@ -56,6 +56,16 @@ class StudentsController extends AdminController
         return view('admin.students.view', parent::$data);
     }
 
+    public function getStudentDetails(Request $request)
+    {
+        $id = $request->get('id');
+        $student = Students::with(['gropes.group'])->find($id);
+        if (!$student) return "Student not found";
+
+        return view('admin.students.parts.student_modal_content', compact('student'))->render();
+    }
+
+
     //////////////////////////////////////////////
     public function getDelayIndex()
     {
@@ -167,17 +177,18 @@ class StudentsController extends AdminController
 
             return '
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50px me-3">
+                    <div class="symbol symbol-50px me-3 cursor-pointer" onclick="showStudentModal('.$row->id.')">
                         <img src="'.$avatar.'" alt="'.$row->name.'">
                     </div>
                     <div class="d-flex justify-content-start flex-column text-start">
                         <div class="d-flex align-items-center">
-                            <a href="'.route('students.edit', Crypt::encrypt($row->id)).'" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
+                            <a href="javascript:;" onclick="showStudentModal('.$row->id.')" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
                             '.$genderIcon.'
                         </div>
                         <span class="text-gray-400 fw-semibold d-block fs-7">'.$email.'</span>
                     </div>
                 </div>';
+
         });
 
         $datatable->editColumn('company_name', function ($row) {
@@ -362,15 +373,16 @@ class StudentsController extends AdminController
         ]);
         //////////////////////////////////////////////////////////
         if ($validator->fails()) {
-            $request->session()->flash('danger', $validator->messages());
+            session()->flash('danger', $validator->messages());
             return redirect(route('students.add'))->withInput();
         } else {
             $username = $this->split_myString($mobile);
             $password = $this->split_myString($mobile);
             $students = new Students();
-            $add = $students->addStudent($name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status);
+            $gender = $request->get('gender', 1);
+            $add = $students->addStudent($name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status, 0, $gender);
             if ($add) {
-                $student_id = $add->id;
+                $student_id = $students->id;
                 if (isset($newGropeId) && $student_id != null) {
                     $opj = new GroupStudents();
                     $group_id = $newGropeId;
@@ -378,28 +390,28 @@ class StudentsController extends AdminController
                     $student_book_total = $request->student_book_total ? $request->student_book_total : 0;
                     $addToGrope = $opj->addGroupStudent($student_id, $student_fee_total, $student_book_total, $group_id);
                 } else {
-                    $request->session()->flash('danger', 'يرجي اختيار مجموعة لهذا الطالب..!');
+                    session()->flash('danger', 'يرجي اختيار مجموعة لهذا الطالب..!');
                     return redirect(route('students.add'));
                 }
 
-                $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
-                $request->session()->flash('success', self::DONE_ADD);
+                session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
+                session()->flash('success', self::DONE_ADD);
 
                 return redirect(route('students.view'));
             } else {
-                $request->session()->flash('danger', self::EXECUTION_ERROR);
+                session()->flash('danger', self::EXECUTION_ERROR);
                 return redirect(route('students.add'))->withInput();
             }
         }
     }
 
     //////////////////////////////////////////////
-    public function getEdit(Request $request, $id)
+    public function getEdit(Request $request, string $id)
     {
         try {
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('news.view'));
         }
         //////////////////////////////////////////////
@@ -415,19 +427,19 @@ class StudentsController extends AdminController
             parent::$data['grope_Student'] = $grope_Student;
             return view('admin.students.edit', parent::$data);
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
     }
 
     ////////////////////////////////////////////////
-    public function postEdit(Request $request, $id)
+    public function postEdit(Request $request, string $id)
     {
         try {
             $encrypted_id = $id;
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('pages.view'));
         }
         /////////////////////////////
@@ -457,7 +469,7 @@ class StudentsController extends AdminController
 
             //////////////////////////////////////////////////////////
             if ($validator->fails()) {
-                $request->session()->flash('danger', $validator->messages());
+                session()->flash('danger', $validator->messages());
                 return redirect(route('students.edit', ['id' => $encrypted_id]))->withInput();
             } else {
                 $username = $this->split_myString($mobile);
@@ -465,15 +477,15 @@ class StudentsController extends AdminController
                 $update = $students->updateStudent($info, $name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status);
                 if ($update) {
 
-                    $request->session()->flash('success', self::UPDATE_SUCCESS);
+                    session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('students.view'));
                 } else {
-                    $request->session()->flash('danger', self::EXECUTION_ERROR);
+                    session()->flash('danger', self::EXECUTION_ERROR);
                     return redirect(route('students.edit', ['id' => $encrypted_id]))->withInput();
                 }
             }
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
     }
@@ -574,12 +586,12 @@ class StudentsController extends AdminController
     }
 
     //////////////////////////////////////////////
-    public function getPassword(Request $request, $id)
+    public function getPassword(Request $request, string $id)
     {
         try {
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
         $students = new Students();
@@ -588,19 +600,19 @@ class StudentsController extends AdminController
             parent::$data['info'] = $info;
             return view('admin.students.password', parent::$data);
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
     }
 
     //////////////////////////////////////////////
-    public function postPassword(Request $request, $id)
+    public function postPassword(Request $request, string $id)
     {
         try {
             $encrypted_id = $id;
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
         $students = new Students();
@@ -617,46 +629,46 @@ class StudentsController extends AdminController
                 'password_confirmation' => 'required|between:6,16'
             ]);
             if ($validator->fails()) {
-                $request->session()->flash('danger', $validator->messages());
+                session()->flash('danger', $validator->messages());
                 return redirect(route('students.password', ['id' => $encrypted_id]))->withInput();
             } else {
                 $update = $students->updatePassword($id, Hash::make($password));
                 if ($update) {
-                    $request->session()->flash('success', self::PASSWORD_SUCCESS);
+                    session()->flash('success', self::PASSWORD_SUCCESS);
                     return redirect(route('students.view'));
                 } else {
-                    $request->session()->flash('danger', self::EXECUTION_ERROR);
+                    session()->flash('danger', self::EXECUTION_ERROR);
                     return redirect(route('students.password', ['id' => $encrypted_id]))->withInput();
                 }
             }
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
     }
 
     /////////////////////////////////////////
-    function split_myString($str)
+    function split_myString(string $str)
     {
         $myString = str_split($str, 4);
         return $myString[1] . $myString[2];
     }
 
     /////////////////////////////////////////
-    public function getStudentClassEdit(Request $request, $student_id, $group_id)
+    public function getStudentClassEdit(Request $request, string $student_id, string $group_id)
     {
         try {
             $encrypted_id = $group_id;
             $group_id = Crypt::decrypt($group_id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
         try {
             $encrypted_student_id = $student_id;
             $student_id = Crypt::decrypt($student_id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
 
@@ -669,7 +681,7 @@ class StudentsController extends AdminController
         $group_students = new GroupStudents();
         $data = $group_students->checkStudentGroupExist($student_id, $group_id);
         if (!$data) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('groups.view'));
         }
         parent::$data['group_students'] = $data;
@@ -678,19 +690,19 @@ class StudentsController extends AdminController
     }
 
     /////////////////////////////////////////
-    public function getStudentAddGrope(Request $request, $student_id)
+    public function getStudentAddGrope(Request $request, string $student_id)
     {
         // try {
         //     $group_id = Crypt::decrypt($group_id);
         // } catch (DecryptException $e) {
-        //     $request->session()->flash('danger', self::NOT_FOUND);
+        //     session()->flash('danger', self::NOT_FOUND);
         //     return redirect(route('students.view'));
         // }
         try {
 
             $student_id = Crypt::decrypt($student_id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('students.view'));
         }
         $group_students = new GroupStudents();
@@ -722,7 +734,7 @@ class StudentsController extends AdminController
         try {
             $student_id = Crypt::decrypt($student_id = $request->get('student_id'));
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('groups.view'));
         }
         $new_grope = $request->get('new_grope');
@@ -738,14 +750,14 @@ class StudentsController extends AdminController
             // 'group_id' => 'required|numeric',
         ]);
         if ($validator->fails()) {
-            $request->session()->flash('danger', $validator->messages());
+            session()->flash('danger', $validator->messages());
             return redirect()->back()->withInput();
         } else {
 
             // $group_students = new GroupStudents();
             // $data = $group_students->checkStudentGroupExist($student_id,$new_grope);
             // if ($data) {
-            //     $request->session()->flash('danger', "عذرا الطالب مسجل مسبقا بهذه المجموعة");
+            //     session()->flash('danger', "عذرا الطالب مسجل مسبقا بهذه المجموعة");
             //     return redirect()->back()->withInput();
             // } else {
 
@@ -757,10 +769,10 @@ class StudentsController extends AdminController
             $add = $obj->save();
             if ($add) {
 
-                $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
+                session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('students.gropes', $student_id));
             } else {
-                $request->session()->flash('danger', self::EXECUTION_ERROR);
+                session()->flash('danger', self::EXECUTION_ERROR);
                 return redirect()->back()->withInput();
             }
             // }
@@ -774,21 +786,21 @@ class StudentsController extends AdminController
             $encrypted_id = $request->id;
             $id = Crypt::decrypt($encrypted_id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('groups.view'));
         }
         try {
             $encrypted = $request->group_id;
             $group_id = Crypt::decrypt($encrypted);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('groups.view'));
         }
         try {
             $encryptedd = $request->student_id;
             $student_id = Crypt::decrypt($encryptedd);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('groups.view'));
         }
         $group_new_id = $request->grope;
@@ -797,16 +809,16 @@ class StudentsController extends AdminController
         // dd($data);
 
         if ($data) {
-            $request->session()->flash('danger', "عذرا الطالب موجود بالفعل بهذه المجموعة");
+            session()->flash('danger', "عذرا الطالب موجود بالفعل بهذه المجموعة");
             return redirect()->back()->withInput();
         } else {
             $group_students = new GroupStudents();
             $update = $group_students->changeGropeStudent($id, $group_new_id);
             if ($update) {
-                $request->session()->flash('success', self::DONE_UPDATE);
+                session()->flash('success', self::DONE_UPDATE);
                 return redirect(route('groups.view'));
             } else {
-                $request->session()->flash('danger', self::EXECUTION_ERROR);
+                session()->flash('danger', self::EXECUTION_ERROR);
                 return redirect(route('groups.view'))->withInput();
             }
             return view('admin.students.edit_student_grope', parent::$data);
@@ -814,7 +826,7 @@ class StudentsController extends AdminController
     }
 
     ////////////////////////////////////////////////
-    public function getIndexOfGropes($id)
+    public function getIndexOfGropes(string $id)
     {
         $student = new Students();
         $student = $student->getStudent($id);
@@ -824,7 +836,7 @@ class StudentsController extends AdminController
     }
 
     ////////////////////////////////////////////////
-    public function getListOfGropes(Request $request, $id)
+    public function getListOfGropes(Request $request, string $id)
     {
         // return response()->json(['data' => "asasasasa"]);
 
@@ -1311,7 +1323,7 @@ class StudentsController extends AdminController
 
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect('/student');
         }
         $student = Students::find($id);

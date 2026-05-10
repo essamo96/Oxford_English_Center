@@ -1,181 +1,195 @@
 @extends('frontend.layouts.master')
-@section('title', 'Courses')
+@section('title', 'Student Evaluation')
+
+@section('css')
+<link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">
+<style>
+    .eval-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.09); border: 1px solid #edf2f7; }
+    .eval-card-header { background: var(--primary); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .rating-row:hover { background: #f8fafc; }
+    .radio-cell { text-align: center; padding: 10px 8px; }
+    .radio-label { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-size: 11px; font-weight: 700; color: var(--light-text); }
+    .radio-label input { display: none; }
+    .radio-mark { width: 28px; height: 28px; border-radius: 6px; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transition: all .2s; }
+    .radio-label:hover .radio-mark { border-color: var(--accent); color: var(--accent); }
+    .radio-label input:checked + .radio-mark { background: var(--accent); border-color: var(--accent); color: var(--primary); box-shadow: 0 3px 8px rgba(245,197,24,.3); }
+    .total-box { background: var(--primary); border-radius: 10px; padding: 16px 20px; text-align: center; }
+    .total-box .total-num { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
+    .total-box .total-label { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 4px; }
+    .modern-select { height: 42px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: var(--primary); padding: 0 12px; width: 100%; }
+    .modern-select:focus { border-color: var(--accent); box-shadow: none; outline: none; }
+    .modern-textarea { width: 100%; border-radius: 8px; border: 1px solid #e2e8f0; padding: 12px; font-size: 13px; resize: vertical; color: #4a5568; }
+    .modern-textarea:focus { border-color: var(--accent); outline: none; }
+</style>
+@endsection
+
 @section('content')
-    <div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/gallary.jpg') }}');">
-        <div class="container">
-            <div class="pagination-area">
-                <h1>Evaluate Area</h1>
-                <ul>
-                    <li><a href="{{ url('/') }}">Home</a> -</li>
-                    <li><a href="{{ url('/teacher') }}">Teacher Area</a> -</li>
-                    <li>{{ $student_info->student->name }} Evaluate</li>
-                </ul>
+<div class="student-dashboard-wrapper">
+    <div id="bg-particles"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+
+        {{-- Breadcrumbs Navigation --}}
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+            <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
+            <span style="margin: 0 5px;">/</span>
+            <span style="color: var(--primary);">Courses</span>
+            <span style="margin: 0 5px;">/</span>
+            <strong>{{ $student_info->group->name }}</strong>
+            <span style="margin: 0 5px;">/</span>
+            <span>Evaluation</span>
+        </div>
+
+        {{-- Page Header --}}
+        <div class="page-header-block d-flex justify-content-between align-items-center">
+            <div>
+                <p class="page-title m-0"><i class="fa fa-star-half-o"></i> Performance Evaluation</p>
+                <p class="page-subtitle m-0">
+                    Student: <strong>{{ $student_info->student->name }}</strong> &nbsp;|&nbsp;
+                    Group: <strong>{{ $student_info->group->name }}</strong>
+                </p>
+            </div>
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 13px;" onclick="window.print()">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 13px;">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
             </div>
         </div>
-    </div>
-    <div class="section-space accent-bg">
-        <div class="container">
-            <div class="row">
-                @include('frontend.layouts.error')
-                <div class="profile-details tab-content">
-                    <div class="" id="Courses">
-                        <h3 class="title-section title-bar-high mb-40"><span
-                                style="color:rgb(255, 187, 0)">{{ $student_info->group->name }}</span> Course - Students
-                            <span style="color:rgb(255, 187, 0)"> {{ $student_info->student->name }}</span> Evaluate Page
-                        </h3>
-                        <div class="orders-info">
-                            <form class="form-horizontal" id="checkout-form" action="{{ route('teacher.evaluate.post') }}"
-                                method="post" enctype="multipart/form-data">
-                                <div class="row" style="justify-content: space-between ; display: flex;">
-                                    <select class="form-select form-control activeG  col-5" name="evaluation_sort" style="margin-block: 10px; width:50% ;margin: 2%;"
-                                        aria-label="Default select example">
-                                        <option value="1" selected>التقييم الاول - الاسبوع 1-3</option>
-                                        <option value="2">التقييم الثاني  - الاسبوع 4-6</option>
-                                        <option value="3">التقييم الثالث  - الاسبوع 7-9</option>
-                                        <option value="4">التقييم النهائي - الاسبوع 10-12</option>
 
-                                    </select>
-                                    <select class="form-select form-control activeG  col-5" name="progress" style="margin-block: 10px; width:50%;  margin: 2%;"
-                                        aria-label="Default select example">
-                                        <option value="30" selected>الوحدات من - 1-3</option>
-                                        <option value="60">الوحدات من  -  4-6</option>
-                                        <option value="90">الوحدات من  -  7-9</option>
-                                        <option value="100">الوحدة الاخيرة</option>
+        @include('frontend.layouts.error')
 
-                                    </select>
+        <form id="evaluation-form" action="{{ route('teacher.evaluate.post') }}" method="post">
+            {{ csrf_field() }}
+            <input type="hidden" name="g_id" value="{{ Crypt::encrypt($student_info->group_id) }}">
+            <input type="hidden" name="s_id" value="{{ Crypt::encrypt($student_info->student_id) }}">
 
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-responsive">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center" style="width: 50px">#</th>
-                                                <th>Question</th>
-                                                <th class="deg-fld">
-                                                    مقبول - 1
-                                                    {{-- out of 15 Marks --}}
-                                                </th>
-                                                <th class="deg-fld">
-                                                    جيد - 2
-                                                    {{-- out of 15 Marks --}}
-                                                </th>
-                                                <th class="deg-fld">
-                                                    جيد جدا - 3
-                                                    {{-- out of 60 Marks --}}
-                                                </th>
-                                                <th class="deg-fld">
-                                                    ممتاز - 4
-                                                    {{-- out of 60 Marks --}}
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php $counter = 1; ?>
-                                            @foreach ($questions as $key => $question)
-                                                <tr>
-                                                    <th class="text-center">{{ $counter }}</th>
-                                                    <td>
-                                                        {{ $question->name_en }}
-                                                        <input type="hidden" name="question_ids[]"
-                                                            value="{{ $question->id }}">
-                                                    </td>
-                                                    <td>
-                                                        <input type="radio" value="1"
-                                                            name="evaluate_degree[{{ $question->id }}][]"
-                                                            id="evaluate_degree_" data_id="" required placeholder=""
-                                                            class="deg-input tes form-check-input">
-
-                                                    </td>
-                                                    <td><input type="radio" value="2"
-                                                            name="evaluate_degree[{{ $question->id }}][]"
-                                                            id="evaluate_degree_" data_id="" placeholder=""
-                                                            class="deg-input tes form-check-input"></td>
-                                                    <td><input type="radio" value="3"
-                                                            name="evaluate_degree[{{ $question->id }}][]"
-                                                            id="evaluate_degree_" data_id="" placeholder=""
-                                                            class="deg-input tes form-check-input"></td>
-                                                    <td><input type="radio" value="4"
-                                                            name="evaluate_degree[{{ $question->id }}][]"
-                                                            id="evaluate_degree_" data_id="" placeholder=""
-                                                            class="deg-input tes form-check-input"></td>
-
-                                                </tr>
-                                                <?php $counter++; ?>
-                                            @endforeach
-                                            <td colspan="2" style="text-align: right;" class="table-active"><input
-                                                    type="text" value="" name="evaluate1_total" id="total"
-                                                    data_id="" placeholder="" class="deg-input tes"></td>
-                                            <td colspan="4" class="table-active"><strong>المجموع</strong></td>
-                                            <input type="hidden" name="g_id"
-                                                value="{{ Crypt::encrypt($student_info->group_id) }} ">
-                                            <input type="hidden" name="s_id"
-                                                value="{{ Crypt::encrypt($student_info->student_id) }} ">
-
-                                        </tbody>
-                                    </table>
-                                    <table class="table table-bordered table-responsive">
-                                        <thead>
-                                            <tr>
-
-                                                <th
-                                                    style="text-align: right; padding-right: 29px; text-decoration: 2px underline; padding-bottom: 5px;">
-                                                    ملاحظات مدرب/ة المستوي :</th>
-
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-
-                                            <tr>
-                                                <td>
-                                                    <textarea style="  width: 100%;  box-sizing: border-box;" name="note" rows="6"></textarea>
-                                                </td>
-                                            </tr>
-
-
-                                        </tbody>
-                                    </table>
-                                    <div class="save-tbl-btn">
-                                        <button class="view-all-accent-btn" id="saveEvaluation" type="submit"
-                                            value="Login">Save</button>
-                                    </div>
-                                </div>
-
-                                {{ csrf_field() }}
-                            </form>
+            <div class="eval-card">
+                {{-- Header selects --}}
+                <div class="eval-card-header">
+                    <div style="color:white; font-size:14px; font-weight:700;"><i class="fa fa-sliders" style="color:var(--accent);"></i> Evaluation Settings</div>
+                    <div class="d-flex gap-15 flex-wrap" style="flex:1; max-width:600px; justify-content:flex-end;">
+                        <div style="flex:1; min-width:200px;">
+                            <label style="font-size:11px; color:rgba(255,255,255,.6); display:block; margin-bottom:4px;">Evaluation Period</label>
+                            <select class="modern-select" name="evaluation_sort" required>
+                                <option value="1">Evaluation 1 — Weeks 1-3</option>
+                                <option value="2">Evaluation 2 — Weeks 4-6</option>
+                                <option value="3">Evaluation 3 — Weeks 7-9</option>
+                                <option value="4">Final Evaluation — Weeks 10-12</option>
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <label style="font-size:11px; color:rgba(255,255,255,.6); display:block; margin-bottom:4px;">Current Units</label>
+                            <select class="modern-select" name="progress" required>
+                                <option value="30">Units 1-3</option>
+                                <option value="60">Units 4-6</option>
+                                <option value="90">Units 7-9</option>
+                                <option value="100">Final Unit</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+
+                {{-- Evaluation Table --}}
+                <div class="table-responsive">
+                    <table class="marks-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;padding-left:16px; width:40px;">#</th>
+                                <th style="text-align:left;">Criteria</th>
+                                <th style="width:70px;">Acceptable<br><small style="opacity:.7;">1</small></th>
+                                <th style="width:70px;">Good<br><small style="opacity:.7;">2</small></th>
+                                <th style="width:70px;">Very Good<br><small style="opacity:.7;">3</small></th>
+                                <th style="width:70px;">Excellent<br><small style="opacity:.7;">4</small></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($questions as $index => $question)
+                                <tr class="rating-row">
+                                    <td style="text-align:left;padding-left:16px;color:var(--light-text);font-weight:600;">{{ $index + 1 }}</td>
+                                    <td style="text-align:left;">
+                                        <div style="font-size:13px;font-weight:600;color:var(--primary);">{{ $question->name_en }}</div>
+                                        <input type="hidden" name="question_ids[]" value="{{ $question->id }}">
+                                    </td>
+                                    @for ($i = 1; $i <= 4; $i++)
+                                        <td class="radio-cell">
+                                            <label class="radio-label">
+                                                <input type="radio" value="{{ $i }}" name="evaluate_degree[{{ $question->id }}][]" required class="deg-input">
+                                                <span class="radio-mark">{{ $i }}</span>
+                                            </label>
+                                        </td>
+                                    @endfor
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Footer: Notes + Total + Submit --}}
+                <div style="padding: 20px 24px; background: #f8fafc; border-top: 1px solid #edf2f7;">
+                    <div class="row" style="align-items:flex-end;">
+                        <div class="col-md-8">
+                            <label style="font-size:13px; font-weight:700; color:var(--primary); display:block; margin-bottom:8px;">
+                                <i class="fa fa-pencil-square-o" style="color:var(--accent);"></i> Instructor Notes
+                            </label>
+                            <textarea class="modern-textarea" name="note" rows="4" placeholder="Add specific feedback for the student..."></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="total-box" style="margin-bottom:12px;">
+                                <div class="total-label">Score</div>
+                                <div class="total-num" id="total-score">0</div>
+                                <div class="total-label">Total Points</div>
+                                <input type="hidden" name="evaluate1_total" id="total-input">
+                            </div>
+                            <button type="submit" class="btn-modern btn-modern-accent w-100" style="justify-content:center; padding:12px;">
+                                <i class="fa fa-save"></i> Submit Evaluation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </form>
+
     </div>
+</div>
 @stop
-@section('css')
-    <style>
-        .save-tbl-btn {
-            text-align: center;
-        }
 
-        .view-all-accent-btn {
-            width: 15%;
-        }
-    </style>
-@stop
 @section('js')
-    <script>
-        const radioButtons = document.querySelectorAll('input[type="radio"]');
-        const resultInput = document.getElementById('total');
-
-        radioButtons.forEach((radioButton) => {
-            radioButton.addEventListener('click', () => {
-                let sum = 0;
-                radioButtons.forEach((radioButton) => {
-                    if (radioButton.checked) {
-                        sum += Number(radioButton.value);
-                    }
-                });
-                resultInput.value = sum;
-            });
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('bg-particles', {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color:  { value: ['#f5c518', '#3182ce', '#ffffff'] },
+                shape:  { type: 'circle' },
+                opacity: { value: 0.3, random: true },
+                size:    { value: 3, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'bubble' }, onclick: { enable: true, mode: 'push' } },
+                modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
         });
-    </script>
+    }
+});
+
+    $(document).ready(function () {
+        $('.deg-input').change(function () {
+            var total = 0;
+            $('input[type="radio"]:checked').each(function () {
+                total += parseInt($(this).val());
+            });
+            $('#total-score').text(total);
+            $('#total-input').val(total);
+        });
+    });
+</script>
 @stop

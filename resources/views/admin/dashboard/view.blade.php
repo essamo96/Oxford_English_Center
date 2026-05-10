@@ -303,10 +303,11 @@
     <!--end::Col-->
 </div>
 
-<!--begin::Groups Overview Row-->
+<!--begin::Groups & Course Progress Row-->
 <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
-    <div class="col-xl-12">
-        <div class="card card-flush shadow-sm border-0">
+    <!--begin::Col: Groups Overview-->
+    <div class="col-xl-8">
+        <div class="card card-flush h-xl-100 shadow-sm border-0">
             <div class="card-header pt-7">
                 <h3 class="card-title align-items-start flex-column">
                     <span class="card-label fw-bold text-gray-800">المجموعات النشطة</span>
@@ -336,8 +337,78 @@
             </div>
         </div>
     </div>
+    <!--end::Col-->
+
+    <!--begin::Col: Course Progress-->
+    <div class="col-xl-4">
+        <!--begin::List widget 20-->
+        <div class="card h-xl-100 shadow-sm border-0">
+            <!--begin::Header-->
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title align-items-start flex-column">
+                    <span class="card-label fw-bold text-gray-800">التقدم في الكورسات</span>
+                    <span class="text-gray-400 mt-1 fw-bold fs-7">إحصائيات الكورسات النشطة</span>
+                </h3>
+                <!--begin::Toolbar-->
+                <div class="card-toolbar">
+                    <a href="{{ route('programs.view') }}" class="btn btn-sm btn-light-primary">كل الكورسات</a>
+                </div>
+                <!--end::Toolbar-->
+            </div>
+            <!--end::Header-->
+            <!--begin::Body-->
+            <div class="card-body pt-6">
+                @foreach($course_progress as $program)
+                <!--begin::Item-->
+                <div class="d-flex flex-stack">
+                    <!--begin::Symbol-->
+                    <div class="symbol symbol-40px me-4">
+                        @if($program->image)
+                            <img src="{{ url($program->image) }}" class="symbol-label" alt="{{ $program->title }}">
+                        @else
+                            @php
+                                $colors = ['primary', 'success', 'info', 'warning', 'danger', 'dark'];
+                                $color = $colors[$loop->index % count($colors)];
+                                $letter = substr($program->title, 0, 1);
+                            @endphp
+                            <div class="symbol-label fs-2 fw-semibold bg-light-{{ $color }} text-{{ $color }}">{{ $letter }}</div>
+                        @endif
+                    </div>
+                    <!--end::Symbol-->
+                    <!--begin::Section-->
+                    <div class="d-flex align-items-center flex-row-fluid flex-wrap">
+                        <!--begin:Author-->
+                        <div class="flex-grow-1 me-2">
+                            <a href="{{ route('programs.details', $program->id) }}" class="text-gray-800 text-hover-primary fs-6 fw-bold">{{ $program->title }}</a>
+                            <span class="text-muted fw-semibold d-block fs-7">{{ $program->active_groups_count }} مجموعات نشطة</span>
+                        </div>
+                        <!--end:Author-->
+                        <!--begin::Actions-->
+                        <a href="{{ route('programs.details', $program->id) }}" class="btn btn-sm btn-icon btn-bg-light btn-active-color-primary w-30px h-30px">
+                            <i class="ki-duotone ki-arrow-right fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </a>
+                        <!--begin::Actions-->
+                    </div>
+                    <!--end::Section-->
+                </div>
+                <!--end::Item-->
+                @if(!$loop->last)
+                <!--begin::Separator-->
+                <div class="separator separator-dashed my-4"></div>
+                <!--end::Separator-->
+                @endif
+                @endforeach
+            </div>
+            <!--end::Body-->
+        </div>
+        <!--end::List widget 20-->
+    </div>
+    <!--end::Col-->
 </div>
-<!--end::Groups Overview Row-->
+<!--end::Groups & Course Progress Row-->
 
 
 <div class="row g-5 g-xl-10">

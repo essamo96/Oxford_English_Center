@@ -403,27 +403,28 @@ class Students extends Authenticatable
 
             /*
         |--------------------------------------------------
-        | Date Filters
+        | Date Filters & Today Logic
         |--------------------------------------------------
         */
-            if ($dateFrom) {
-                $query->whereDate('created_at', '>=', $dateFrom);
-            }
+            $isToday = $filters['is_today'] ?? '';
 
-            if ($dateTo) {
-                $query->whereDate('created_at', '<=', $dateTo);
-            }
-
-            /*
-        |--------------------------------------------------
-        | Default Today (فقط إذا لم يتم تحديد أي تاريخ)
-        |--------------------------------------------------
-        */
-            $hasDateFilter = !empty($dateFrom) || !empty($dateTo); // ← هنا التعديل
-
-            if (!$hasDateFilter) {
+            if ($isToday == '1') {
                 $query->whereDate('created_at', Carbon::today());
+            } else {
+                if ($dateFrom) {
+                    $query->whereDate('created_at', '>=', $dateFrom);
+                }
+                if ($dateTo) {
+                    $query->whereDate('created_at', '<=', $dateTo);
+                }
+
+                // If no date filters and not explicitly "Show All", default to Today
+                // Note: We use 'all' or empty string to distinguish "Show All" 
+                if (!$dateFrom && !$dateTo && $isToday !== 'all') {
+                    $query->whereDate('created_at', Carbon::today());
+                }
             }
+
 
             return $query;
         } catch (\Exception $e) {

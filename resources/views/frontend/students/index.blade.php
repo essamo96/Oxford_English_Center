@@ -1,720 +1,418 @@
 @extends('frontend.layouts.master')
 @section('title', 'Student Area')
+
 @section('css')
+<link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}">
+<link href="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
 <style>
-    .bg-textPrimary2 {
-        /* background: #FFFFFF; */
-        color: #fdc800;
-
-    }
-
-    .user-name {
-        position: relative;
-        left: 68px;
-    }
-
-    .img-responsive2 {
-        border-radius: 30px;
-        box-shadow: 0px 0px 10px rgb(223 162 249), 0px 3px 3px rgb(227 248 38 / 33%);
-        margin-bottom: -41px;
-    }
-
-    .lecturers-social2 {
-        position: relative;
-    }
-
-    .row2 {
-        position: relative;
-        top: -167px;
-    }
-
-    .course-details-inner,
-    .course-details-inner {
-        padding: 25px;
-    }
-
-    .sidebar-course-price {
-        width: 300px
-    }
-
-    .sidebar-course-price span {
-        font-size: 16px;
-    }
-
-    .swal2-show {
-        background-color: #00142ba9;
-        border-radius: 20px;
-        color: white;
-    }
-
-    .swal2-title {
-        color: #fdc800;
-    }
-
-    .swal2-success-circular-line-left,
-    .swal2-success-circular-line-right,
-    .swal2-success-fix {
-        visibility: hidden;
-    }
-
-    .swal2-popup {
-        width: 450px;
-        height: 375px;
-    }
-
-    #alert-code,
-    #go-back {
-        border-radius: 10px;
-        font-size: 15px;
-        direction: rtl;
-        background-color: #002147;
-        color: #fdc800;
-        margin-left: 148px;
-    }
-
-    .swal2-html-container {
-        font-size: 15px;
-    }
-
-    #profileImg {
-        margin-inline: 47px;
-        margin-bottom: 17px;
-        box-shadow: rgb(0 33 71) 0px 13px 27px -5px, rgb(0 0 0 / 30%) 0px 8px 16px -8px;
-        margin-left: 52px;
-    }
-
-    .fa-2x {
-        font-size: 1.5rem;
-    }
-
-    .fa-camera:before {
-        content: "\f030";
-        color: #fdc800;
-        font-size: 20px;
-        padding: 8px;
-    }
-
-    .courses-box1 .single-item-wrapper .courses-img-wrapper img {
-        width: 35%;
-    }
-
-    .courses-box1 {
-        width: 268px;
-        margin-right: 5px;
-    }
-
-    .courses-page-area1 {
-        padding: 38px 0;
-    }
-
-    .enroll-btn22 {
-        color: #000000;
-        padding: 18px 0;
-        background: #ff7d7de0;
-        text-transform: uppercase;
-        font-size: 14px;
-        font-weight: 700;
-        display: inline-block;
-        border: none;
-        width: 60%;
-        border: 2px solid #ff0a00;
-    }
-
-    .enroll-btn22:hover {
-        background: #fdc80000;
-        color: #fd0000;
-    }
-
-    .enroll-btn2 {
-        color: #000000;
-        padding: 18px 0;
-        background: #005bc499;
-        text-transform: uppercase;
-        font-size: 14px;
-        font-weight: 700;
-        display: inline-block;
-        border: none;
-        width: 60%;
-        border: 2px solid #002147;
-    }
-
-    .enroll-btn2:hover {
-        background: #fdc80000;
-        color: #002147;
-    }
-
-    #count {
-        display: inline;
-        padding: 3px;
-        font-family: 'Roboto';
-        color: white;
-    }
-
-    .course-details-comments .media .media-body h3 a {
-        background-color: #002147;
-        color: white;
-        padding: 8px;
-        border-radius: 50px;
-        font-size: 15px;
-
-
-    }
-
-    .course-details-comments .media .media-body h3 a:hover {
-        padding: 8px;
-        color: #fdc800;
-        padding-inline: 25px;
-        transform: translateX(10px);
-
-    }
-
-    .course-details-comments .media .media-body p {
-        color: #000000;
-        text-align: justify;
-        margin: 0 0 6px 0;
-        font-size: 16px;
-        transition: font-size 0.3s ease;
-    }
-
-    .course-details-comments .media .media-body p:hover {
-        color: #000000;
-        font-size: x-large;
-        font-family: math;
-        transform: translateX(10px);
-    }
-
-    .lecturers-contact-info {
-        text-align: center;
-        margin-left: 32px;
-        padding-left: 6px;
-    }
-    .tab-content>.active {
-        display: block;
-        margin-top: 58px;
+    .input-group-btn {
+        background-color: #f0f0f0;
+        border-radius: 0 5px 5px 0;
     }
 </style>
 @endsection
+
 @section('content')
-<div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/gallary.jpg') }}');">
+<div class="student-dashboard-wrapper">
     <div class="container">
-        <div class="pagination-area">
-            <h1>Student Area</h1>
-            <ul>
-                <li><a href="{{ url('/') }}">Home</a> -</li>
-                <li>Student Area</li>
-            </ul>
+        <!-- Dashboard Header Card -->
+        <div class="dashboard-header">
+            <div id="particles-js"></div>
+            <div class="header-content">
+                @if ($student_info->image != '')
+                    <img src="{{ asset($student_info->image) }}" class="student-avatar-large" alt="{{ $student_info->name }}" />
+                @else
+                    <img src="{{ url('assets/oxford/img/students/avatar.png') }}" class="student-avatar-large" alt="Avatar" />
+                @endif
+                
+                <div class="header-info">
+                    <p>Welcome back,</p>
+                    <h1>{{ $student_info->name ?: 'Oxford Student' }}</h1>
+                    <div class="status-badge {{ $student_info->delaying != 0 ? 'status-delayed' : 'status-active' }}">
+                        {{ $student_info->delaying != 0 ? 'Delayed' : 'Active Student' }}
+                    </div>
+                </div>
+
+                <div class="header-actions" style="margin-left: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <!-- Print Dashboard -->
+                    <button onclick="window.print()" class="header-action-btn btn-print-dashboard" title="Print Dashboard">
+                        <i class="fa fa-print fa-lg"></i>
+                        <span class="action-label">Print</span>
+                    </button>
+
+                    <!-- Marks Quick Link -->
+                    <a href="#StudentGroupsMarks" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="Markstudent header-action-btn" data-toggle="tab" title="My Marks">
+                        <i class="fa fa-check-square-o fa-lg"></i>
+                        <span class="action-label">Marks</span>
+                    </a>
+                    
+                    <!-- Progress Quick Link -->
+                    <a href="#StudentGroupsProgress" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="StudentGroupsProgress header-action-btn" data-toggle="tab" title="My Progress">
+                        <i class="fa fa-line-chart fa-lg"></i>
+                        <span class="action-label">Progress</span>
+                    </a>
+
+                    <!-- Exam Dates Quick Link -->
+                    <a href="#Exam" data-toggle="tab" class="header-action-btn" title="Exam Dates">
+                        <i class="fa fa-calendar fa-lg"></i>
+                        <span class="action-label">Exams</span>
+                    </a>
+
+                    <!-- Notifications -->
+                    <a href="#AdminNotify" class="AdminNotify header-action-btn" data-toggle="tab" title="Messages" style="position: relative;">
+                        <i class="fa fa-envelope-o fa-lg"></i>
+                        @if($count > 0)
+                            <span class="badge badge-danger unread-badge animate__animated animate__heartBeat animate__infinite">{{ $count }}</span>
+                        @endif
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div class="section-space accent-bg">
-    <div class="container">
-        @include('frontend.chat.chat-box')
-        <input type="hidden" id="current_user" value="{{ \Auth::user()->id }}" />
-        <input type="hidden" id="current_group" value="{{ $groups_array }}" />
-        <input type="hidden" id="user_type" value="student" />
-        <input type="hidden" id="pusher_app_key" value="{{ env('PUSHER_APP_KEY') }}" />
-        <input type="hidden" id="pusher_cluster" value="{{ env('PUSHER_APP_CLUSTER') }}" />
+
         <div class="row">
             @include('frontend.layouts.error')
-            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
-                <ul class="profile-title">
-                    <li class="active"><a href="#Welcome" data-toggle="tab" aria-expanded="false">Welcome</a></li>
-                    <li><a href="#Courses" data-toggle="tab" aria-expanded="false">Courses</a></li>
-                    <li><a href="#Exam" id="exam" data-toggle="tab" aria-expanded="false">Exam Data</a></li>
-                    <li><a href="#Teacher_Evaluations" id="exam" data-toggle="tab" aria-expanded="false">Teacher
-                            Evaluations</a>
-                    </li>
-                    <li><a href="#Profile" data-toggle="tab" aria-expanded="false">Profile</a></li>
-                    <li><a href="#Password" data-toggle="tab" aria-expanded="false">Change Password</a></li>
-                    <li><a href="{{ url('/logout') }}">Logout </a></li>
-                </ul>
-            </div>
-            <div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">
-                <div class="Home-details tab-content">
+            @include('frontend.chat.chat-box')
+            <input type="hidden" id="current_user" value="{{ \Auth::user()->id }}" />
+            <input type="hidden" id="current_group" value="{{ $groups_array }}" />
+            <input type="hidden" id="user_type" value="student" />
+            <input type="hidden" id="pusher_app_key" value="{{ env('PUSHER_APP_KEY') }}" />
+            <input type="hidden" id="pusher_cluster" value="{{ env('PUSHER_APP_CLUSTER') }}" />
+            
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="dashboard-content tab-content">
                     <div class="tab-pane fade active in" id="Welcome">
-                        <div class="tab-pane fade active in" id="Home">
-                            <h3 class="title-section title-bar-high mb-40">WELCOME TO OXFORD FAMILY</h3>
-                            <div class="form-horizontal" id="checkout-form">
-                                <div class="lecturers-page-area">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
-                                                <div class="lecturers-contact-info">
-                                                    @if ($student_info->image != '')
-                                                    <img src="{{ asset($student_info->image) }}"
-                                                         class="img-responsive" alt="team" />
-                                                    @else
-                                                    <img src="{{ url('assets/oxford/img/students/avatar.png') }}"
-                                                         class="img-responsive" alt="team" />
-                                                    @endif
-                                                    {{-- <img src="img/team/13.jpg" class="img-responsive" alt="team"> --}}
-                                                    @if ($student_info->name != '')
-                                                    <h2 style="right: 0px;">
-                                                        <strong class="profile-usertitle-name"> {{ $student_info->name }}</strong>
-                                                        <br>
-                                                        <span href="#" style=""
-                                                              class="<?= $student_info->delaying != 0 ? 'enroll-btn22' : 'enroll-btn2' ?> m-2"><?= $student_info->delaying != 0 ? 'Delayed' : 'Active' ?></span>
-
-                                                    </h2>
-                                                    @else
-                                                    <h2 style="right: 0px;">NO Name</h2>
-                                                    @endif
-                                                    <ul class="lecturers-social2">
-                                                        <li><a href="#AdminNotify" class="AdminNotify" data-toggle="tab"
-                                                               aria-expanded="false">
-                                                                <i class="fa fa-envelope-o"
-                                                                   aria-hidden="true"></i><strong id="count"
-                                                                   style="">{{ $count }}</strong></a>
-                                                        </li>
-                                                        <li alt="incoming messages"><a href="#"><i id="dialog-btn"
-                                                                                                   class="bi bi-chat " aria-hidden="true"></i></a>
-                                                        </li>
-                                                        <li><a href="#" data-toggle="tab" aria-expanded="false"><i
-                                                                    class="bi bi-bell-fill" aria-hidden="true"></i></a>
-                                                        </li>
-                                                        <li><a href="{{ route('student.notifications') }}"><i
-                                                                    class="bi bi-chat-heart"aria-hidden="true"></i></a>
-                                                        </li>
-                                                    </ul>
-
-                                                </div>
-                                            </div>
-                                            <div class="col-xl-8 col-lg-8 col-md-6 col-sm-12">
-
-                                                <h3 class="title-default-left title-bar-big-left-close">Qualifications
-                                                </h3>
-                                                <ul class="course-feature2">
-                                                    @if ($student_info->name != '')
-                                                    <li>{{ $student_info->name }}</li>
-                                                    @endif
-                                                    @if ($student_info->mobile != '')
-                                                    <li>{{ $student_info->mobile }}</li>
-                                                    @endif
-                                                    @if ($student_info->email != '')
-                                                    <li>{{ $student_info->email }}</li>
-                                                    @endif
-                                                    @if ($student_info->dob != '')
-                                                    <li>{{ $student_info->dob }}</li>
-                                                    @endif
-                                                    @if ($student_info->join_date != '')
-                                                    <li>{{ $student_info->join_date }}</li>
-                                                    @endif
-
-                                                    @if ($student_info->jop != '')
-                                                    <li>{{ $student_info->jop }}</li>
-                                                    @endif
-                                                </ul>
-                                                {{-- @if ($grope_name != '') --}}
-
-                                                <div class="lecturers-contact-info">
-                                                    <ul class="lecturers-contact">
-                                                        <a href="#StudentGroupsMarks"
-                                                           data-student_id="{{ Crypt::encrypt($student_info->id) }}"
-                                                           class="Markstudent" data-toggle="tab"
-                                                           aria-expanded="false">
-                                                            <li><i class="bi bi-patch-check"
-                                                                   aria-hidden="true"></i>Your Marks
-                                                                {{-- {{ $grope_name }} --}}
-                                                            </li>
-                                                        </a>
-                                                    </ul>
-                                                </div>
-                                                {{-- @endif --}}
-                                                <div class="lecturers-contact-info" >
-                                                    <ul class="lecturers-contact">
-                                                        <a href="#StudentGroupsProgress"
-                                                           data-student_id="{{ Crypt::encrypt($student_info->id) }}"
-                                                           class="StudentGroupsProgress" data-toggle="tab"
-                                                           aria-expanded="false">
-                                                            <li><i class="bi bi-graph-up-arrow"
-                                                                   aria-hidden="true"></i>progress</li>
-                                                        </a>
-                                                    </ul>
-                                                </div>
-                                            </div>
+                        <div class="row">
+                            <!-- Academic Profile Tiles -->
+                            <div class="col-md-12 mb-30 animate-up delay-1">
+                                <h3 class="mb-20"><i class="fa fa-graduation-cap"></i> Academic Profile</h3>
+                                <div class="welcome-grid">
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-user"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Full Name</h4>
+                                            <p>{{ $student_info->name }}</p>
                                         </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-id-card"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Student ID</h4>
+                                            <p>#{{ $student_info->id }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-calendar"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Join Date</h4>
+                                            <p>{{ $student_info->join_date ?: 'N/A' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-check-circle"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Status</h4>
+                                            <p><span class="badge {{ $student_info->delaying != 0 ? 'status-delayed' : 'status-active' }}">{{ $student_info->delaying != 0 ? 'Delayed' : 'Active' }}</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <!-- Contact Details Tiles -->
+                            <div class="col-md-12 mb-30 animate-up delay-2">
+                                <h3 class="mb-20"><i class="fa fa-phone"></i> Contact Details</h3>
+                                <div class="welcome-grid">
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-envelope"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Email Address</h4>
+                                            <p>{{ $student_info->email }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-mobile-phone"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Phone</h4>
+                                            <p>{{ $student_info->mobile }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-birthday-cake"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Date of Birth</h4>
+                                            <p>{{ $student_info->dob }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-tile">
+                                        <div class="tile-icon"><i class="fa fa-briefcase"></i></div>
+                                        <div class="tile-content">
+                                            <h4>Major / Job</h4>
+                                            <p>{{ $student_info->job }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Access Section -->
+                        <div class="row mt-30 animate-up delay-3">
+                            <div class="col-md-12">
+                                <div class="info-card" style="background: rgba(245, 197, 24, 0.05); border-left: 5px solid var(--accent);">
+                                    <h3 class="mb-20"><i class="fa fa-rocket"></i> Quick Access</h3>
+                                    <div class="quick-access-grid">
+                                        <a href="#StudentGroupsMarks" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="Markstudent btn-modern btn-modern-primary" data-toggle="tab">
+                                            <i class="fa fa-check-square-o"></i> View My Marks
+                                        </a>
+                                        <a href="#StudentGroupsProgress" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="StudentGroupsProgress btn-modern btn-modern-accent" data-toggle="tab">
+                                            <i class="fa fa-bar-chart"></i> Track Progress
+                                        </a>
+                                        <button onclick="window.print()" class="btn-modern btn-modern-primary" style="background: #1a2744; color: white;">
+                                            <i class="fa fa-print"></i> Print Academic Record
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="Profile">
-                        {{-- <div class="tab-pane fade active in" id="Home"> --}}
-                        <h3 class="title-section title-bar-high mb-40">Personal Information</h3>
-                        <div class="form-horizontal" id="checkout-form">
-                            <div class="personal-info">
-                                <form class="form-horizontal" id="checkout-form" method="post"
-                                      enctype="multipart/form-data" action="/student/editProfile">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Avatar</label>
-                                        <div class="col-sm-9 public-profile-content">
-                                            @if ($student_info->image != '')
-                                            <img id="profileImg" src="{{ url($student_info->image) }}"
-                                                 alt="" style="margin-left: 52px;" />
-                                            @else
-                                            <img src="{{ url('assets/oxford/img/students/avatar.png') }}"
-                                                 style="box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;"
-                                                 alt="" />
-                                            @endif
-                                            <div class="col-sm-4 public-profile-content">
-                                                <div class="file-title"
-                                                     style="    color: #002147;margin-bottom: 20px;">new avatar JPEG
-                                                    80x80 px</div>
-                                                <div class="file-upload-area">
-                                                    {{-- <span class="fa fa-2x fa-camera"></span> --}}
-                                                        <input class="fa fa-2x fa-camera" type="file"
-                                                           name="fileToUpload" id="fileToUpload">
-                                                </div>
+                        <div class="info-card">
+                            <h3 class="mb-30"><i class="fa fa-user-circle"></i> Edit Profile Information</h3>
+                            <form method="post" enctype="multipart/form-data" action="/student/editProfile">
+                                {{ csrf_field() }}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- Modern Avatar Upload -->
+                                        <div class="profile-avatar-edit">
+                                            <div class="avatar-preview-wrapper">
+                                                @if ($student_info->image != '')
+                                                    <img id="profilePreview" src="{{ url($student_info->image) }}" alt="Profile" />
+                                                @else
+                                                    <img id="profilePreview" src="{{ url('assets/oxford/img/students/avatar.png') }}" alt="Avatar" />
+                                                @endif
                                             </div>
+                                            <label for="fileToUpload" class="avatar-edit-overlay" title="Change Photo">
+                                                <i class="fa fa-camera"></i>
+                                            </label>
+                                            <input type="file" name="fileToUpload" id="fileToUpload" style="display: none;" onchange="document.getElementById('profilePreview').src = window.URL.createObjectURL(this.files[0])">
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Name</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" id="name" name="name"
-                                                   value="<?= $student_info->name ?>" type="text" >
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Mobile No.</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" id="mobile" name="mobile"
-                                                   value="<?= $student_info->mobile ?>" type="text" >
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Date Of Birth</label>
-                                        <div class="col-sm-9">
-                                            <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
-                                                <input type="text" class="form-control"  name="dob"
-                                                       value="<?= $student_info->dob ?>">
-                                                <span class="input-group-btn">
-                                                    <button class="btn default" type="button">
-                                                        <i class="fa fa-calendar"></i>
-                                                    </button>
-                                                </span>
-                                            </div>
+                                        
+                                        <div class="text-center mb-30">
+                                            <p class="text-muted small">Click the camera icon to upload a new profile picture.</p>
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Jobs</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" style="background: #fff" id="job"
-                                                   name="job" value="<?= $student_info->job ?>" type="text">
+                                    <div class="col-md-12">
+                                        <div class="modern-form-grid">
+                                            <div class="form-group-modern">
+                                                <label>Full Name</label>
+                                                <input class="form-control-modern" name="name" value="{{ $student_info->name }}" type="text" placeholder="Enter your full name">
+                                            </div>
+                                            
+                                            <div class="form-group-modern">
+                                                <label>Mobile Number</label>
+                                                <input class="form-control-modern" name="mobile" value="{{ $student_info->mobile }}" type="text" placeholder="Enter your phone number">
+                                            </div>
+                                            
+                                            <div class="form-group-modern">
+                                                <label>Birth Date</label>
+                                                <input type="date" class="form-control-modern" name="dob" value="{{ $student_info->dob }}">
+                                            </div>
+                                            
+                                            <div class="form-group-modern">
+                                                <label>Job / Field of Study</label>
+                                                <input class="form-control-modern" name="job" value="{{ $student_info->job }}" type="text" placeholder="e.g. Engineer, Student">
+                                            </div>
+                                            
+                                            <div class="form-group-modern" style="grid-column: span 2;">
+                                                <label>Email Address</label>
+                                                <input class="form-control-modern" name="email" value="{{ $student_info->email }}" type="email" placeholder="yourname@example.com">
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-30 text-right">
+                                            @if($student_info->ask_update == 0)
+                                                <a class="btn btn-warning btn-lg" data-href="{{ route('ask.update.profile') }}" id="ask_updte" data-id="{{ Crypt::encrypt($student_info->id) }}">
+                                                    <i class="fa fa-paper-plane"></i> Request Profile Update
+                                                </a>
+                                            @elseif($student_info->ask_update == 1)
+                                                <button class="btn btn-info btn-lg disabled" disabled>
+                                                    <i class="fa fa-clock-o"></i> Waiting for Admin Approval
+                                                </button>
+                                            @elseif($student_info->ask_update == 2)
+                                                <button class="btn btn-success btn-lg" type="submit">
+                                                    <i class="fa fa-save"></i> Update My Profile
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Email</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" style="background: #fff" id="email"
-                                                   name="email" value="<?= $student_info->email ?>" type="text">
-                                        </div>
-                                    </div>
-                                    @if($student_info->ask_update == 0)
-                                    <div class="form-group mb-none">
-                                        <div class="col-sm-offset-3 col-sm-9">
-                                            <a class="view-all-accent-btn disabled col-sm-9" data-href="{{ route('ask.update.profile') }}" id='ask_updte'   
-                                               data-id="{{ Crypt::encrypt($student_info->id) }}">Ask Update</a>
-                                        </div>
-                                    </div>
-                                    @elseif($student_info->ask_update == 1)
-                                    <div class="form-group mb-none">
-                                        <div class="col-sm-offset-3 col-sm-9">
-                                            <span class="view-all-accent-btn disabled btn-info col-sm-9" 
-                                                    value="">Waiting for approval</span>
-                                        </div>
-                                    </div>
-                                    @else
-                                       @if($student_info->ask_update == 2)
-                                    <div class="form-group mb-none">
-                                        <div class="col-sm-offset-3 col-sm-9">
-                                            <button class="view-all-accent-btn disabled col-sm-9 btn-success" type="submit"
-                                                    value="">Update</button>
-                                        </div>
-                                    </div>
-                                    @endif
-                                    @endif
-                                    {{ csrf_field() }}
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
-                        {{-- </div> --}}
                     </div>
                     <div class="tab-pane fade" id="Courses">
-                        <h3 class="title-section title-bar-high mb-40">Coursess <button class="btn btn-success btn-sm"
-                                                                                        id="alert-code" value="<?= Crypt::encrypt($student_info->id) ?>"> Join Grope <i
-                                    class="bi bi-grid-fill"></i></button>
-                        </h3>
-                        <div class="courses-page-area1">
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-xl-9 col-lg-9 col-md-8 col-sm-12 order-md-2"
-                                         style="margin-top: 49px;">
-                                        <div class="tab-content">
-                                            <div class="tab-pane tab-item animated fadeIn active" id="menu-1"
-                                                 role="tabpanel" aria-labelledby="menu-1-tab">
-                                                <div class="row " style="display: flex; flex-wrap: wrap;">
-                                                    @foreach ($student_groups as $group)
-                                                    <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12"
-                                                         style="display: flex; flex-direction: column">
+                        <div class="d-flex justify-content-between align-items-center mb-30">
+                            <h3 class="m-0"><i class="fa fa-book"></i> My Registered Courses</h3>
+                            <button class="btn btn-modern btn-modern-accent" id="alert-code" value="{{ Crypt::encrypt($student_info->id) }}">
+                                <i class="fa fa-plus-circle"></i> Join Group
+                            </button>
+                        </div>
+                        
+                        <div class="course-grid">
+                            @foreach ($student_groups as $group)
+                            <div class="course-card">
+                                <div class="course-img-wrapper">
+                                    <img src="{{ $group->group->image ? url($group->group->image) : url('assets/oxford/img/logo.png') }}" class="course-img" alt="Course">
+                                    <div class="course-overlay">
+                                        <a href="#Info" data-toggle="tab" class="joinG btn-join-circle" 
+                                           data-group_id="{{ Crypt::encrypt($group->group_id) }}" 
+                                           data-student_id="{{ Crypt::encrypt($group->student_id) }}">
+                                            <i class="fa fa-external-link"></i>
+                                            <span>Join</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="course-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-10">
+                                        <h4 class="course-title">{{ $group->group->program->title }}</h4>
+                                        <span class="badge {{ $group->group->status == 1 ? 'status-active' : 'status-delayed' }}">
+                                            {{ $group->group->status == 1 ? 'Active' : 'Finished' }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="course-meta">
+                                        <div class="meta-item" title="Lecturer">
+                                            <i class="fa fa-user"></i> {{ $group->group->teacher->name }}
+                                        </div>
+                                        <div class="meta-item" title="Group Name">
+                                            <i class="fa fa-tag"></i> {{ $group->group->name }}
+                                        </div>
+                                        @if($group->group->ctime)
+                                        <div class="meta-item" title="Class Days">
+                                            <i class="fa fa-calendar-check-o"></i> {{ $group->group->ctime->days }}
+                                        </div>
+                                        @endif
+                                        <div class="meta-item" title="Start Date">
+                                            <i class="fa fa-clock-o"></i> {{ date('d M Y', strtotime($group->group->start_date)) }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="progress-info d-flex justify-content-between small">
+                                            <span>Progress</span>
+                                            <span>{{ $group->progress ?: 0 }}%</span>
+                                        </div>
+                                        <div class="custom-progress">
+                                            <div class="progress-fill" style="width: {{ $group->progress ?: 0 }}%"></div>
+                                        </div>
 
-                                                        <div class="courses-box1 ">
-                                                            <div class="single-item-wrapper">
-                                                                <div
-                                                                    class="courses-img-wrapper hvr-bounce-to-bottom">
-                                                                    <img class="img-responsive"
-                                                                         @if ($group->group->image != null) src="{{ url($group->group->image) }}" 
-                                                                    @else
-                                                                    src="{{ url('assets/oxford/img/logo.png') }}" @endif
-                                                                    alt="courses" style=" width: 100%;">
-                                                                    <a href="#Info"
-                                                                       data-toggle="tab"aria-expanded="false"
-                                                                       id="joinG" class="joinG"
-                                                                       data-group_id="{{ Crypt::encrypt($group->group_id) }}"
-                                                                       data-student_id="{{ Crypt::encrypt($group->student_id) }}">
-                                                                        {{-- <i class="fa fa-link getinfo" data-group_id="" aria-hidden="true"></i>  --}}
-                                                                        Join </a>
-                                                                </div>
-                                                                <div class="courses-content-wrapper">
-                                                                    <a href="grope/detailes">
-                                                                        <h3 class="item-title">
-                                                                            {{ $group->group->program->title }} @if($group->group->status == 1)<span class="btn-success btn-sm"> Active </span> @else<span class="btn-danger btn-sm"> Finished </span> @endif
-                                                                        </h3>
-                                                                    </a>
-                                                                    <p class="item-content"
-                                                                       style="color:#002147; font-size:15px; margin:3px;">
-                                                                        {{ $group->group->name }}
-                                                                        ||
-                                                                        {{ $group->group->teacher->name }} </p>
-                                                                    <p
-                                                                        style="color:#002147; font-size:15px; margin:2px;">
-                                                                        progress level ||@if ($group->progress == 30 || $group->progress == null)
-                                                                        Units 1 to 3
-                                                                        @elseif ($group->progress == 60)
-                                                                        Units 4 to 6
-                                                                        @elseif ($group->progress == 90)
-                                                                        Units 7 to 9
-                                                                        @else
-                                                                        Units 10
-                                                                        @endif
-                                                                    </p>
-                                                                    <div class="progress"
-                                                                         style="color: orange ;height: 16px;"
-                                                                         role="progressbar"
-                                                                         aria-valuenow="{{ $group->progress }}"
-                                                                         aria-valuemin="0" aria-valuemax="100">
-                                                                        <div class="progress-bar bg-warning"
-                                                                             style="width: {{ $group->progress }}%; background-color: orange ;">
-                                                                            <span
-                                                                                style="padding-left: 120px; color :#002147;    font-size: 10px;">{{ $group->progress != null ? $group->progress : 0 }}%</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <p class="item-content">
-                                                                        {{ $group->group->program->short }}</p>
-                                                                    <ul class="courses-info">
-                                                                        @if ($group->group->program->title == 'IELTS PRO')
-                                                                        <li>Course
-                                                                            <br>
-                                                                            <span> 5 Weeks</span>
-                                                                        </li>
-                                                                        <li>No.Hours
-                                                                            <br><span>40</span>
-                                                                        </li>
-                                                                        @elseif ($group->group->program->title == 'Writing Pro')
-                                                                        <li>Course
-                                                                            <br>
-                                                                            <span> 6 Weeks</span>
-                                                                        </li>
-                                                                        <li>No.Hours
-                                                                            <br><span>40</span>
-                                                                        </li>
-                                                                        @elseif ($group->group->program->title == 'Conversation Pro')
-                                                                        <li>Course
-                                                                            <br>
-                                                                            <span> 5 Weeks</span>
-                                                                        </li>
-                                                                        <li>No.Hours
-                                                                            <br><span>30</span>
-                                                                        </li>
-                                                                        @else
-                                                                        <li>Course
-                                                                            <br>
-                                                                            <span> 3 Months</span>
-                                                                        </li>
-                                                                        <li>No.Hours
-                                                                            <br><span>72</span>
-                                                                        </li>
-                                                                        @endif
-
-                                                                        <li>times
-                                                                            <br><span>{{ $group->group->ctime->times }}
-                                                                            </span>
-                                                                        </li>
-                                                                        <li
-                                                                            style="padding-top: 20px; display: flex; justify-content: center; ">
-                                                                            Chat Teacher <a
-                                                                                style="padding-left: 26px;"
-                                                                                href="javascript:void(0);"
-                                                                                data-id="{{ $group->group->id }}"
-                                                                                data-user="{{ $group->name }}"
-                                                                                title="Open course Chat"
-                                                                                class="btn-view chat-toggle bi bi-send-fill">
-                                                                                Open Chat</a>
-                                                                        </li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {{-- <button class="btn btn-success btn-sm"id="alert-code" href="#Courses2" data-toggle="tab" aria-expanded="false"> Grope <i class="bi bi-grid-fill"></i></button> --}}
-                                                    </div>
-                                                    @endforeach
-                                                </div>
-                                                @include('frontend.chat.chat-box')
-                                                <input type="hidden" id="current_user"
-                                                       value="{{ \Auth::user()->id }}" />
-                                                <input type="hidden" id="current_group"
-                                                       value="{{ $groups_array }}" />
-                                                <input type="hidden" id="pusher_app_key"
-                                                       value="{{ env('PUSHER_APP_KEY') }}" />
-                                                <input type="hidden" id="pusher_cluster"
-                                                       value="{{ env('PUSHER_APP_CLUSTER') }}" />
-                                            </div>
+                                        <div class="d-flex gap-10">
+                                            <a href="#Info" data-toggle="tab" class="joinG btn btn-sm btn-primary flex-grow-1" 
+                                               data-group_id="{{ Crypt::encrypt($group->group_id) }}" 
+                                               data-student_id="{{ Crypt::encrypt($group->student_id) }}">
+                                                <i class="fa fa-info-circle"></i> Details
+                                            </a>
+                                            @if($group->cer_code)
+                                            <a href="{{ route('student.certificate.download', Crypt::encrypt($group->id)) }}" 
+                                               class="btn btn-sm btn-success" title="Download Certificate">
+                                                <i class="fa fa-download"></i>
+                                            </a>
+                                            @endif
+                                            <a href="javascript:void(0);" data-id="{{ $group->group->id }}" data-user="{{ $group->group->name }}" 
+                                               class="chat-toggle btn btn-sm btn-outline-light" title="Course Chat">
+                                                <i class="fa fa-comments"></i>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            @endforeach
                         </div>
-
                     </div>
                     <div class="tab-pane fade" id="Exam">
-                        <h3 class="title-section title-bar-high mb-40">Exam Data</h3>
-                        <div class="form-horizontal" id="checkout-form">
-                            <div class="personal-info">
-                                {{-- @foreach ($studentGropesExamday as $group) --}}
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-responsive">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 120px;">Group Name</th>
-                                                <th>Progress Test 1</th>
-                                                <th>Progress Test 2</th>
-                                                <th>Final Exam</th>
-
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($studentGropesExamday as $group)
-                                            <tr>
-
-                                                <td>{{ $group->group->name }}</td>
-                                                @if ($group->progress_test1 != null)
-                                                <td><span
-                                                        style="color:#002147">{{ $group->progress_test1 }}</span>
-                                                </td>
-                                                @else
-                                                <td><span style="color:red"
-                                                          class="bi bi-dash-circle-fill"></span></td>
-                                                @endif
-
-                                                @if ($group->progress_test2 != null)
-                                                <td><span
-                                                        style="color:#002147">{{ $group->progress_test2 }}</span>
-                                                </td>
-                                                @else
-                                                <td><span style="color:red"
-                                                          class="bi bi-dash-circle-fill"></span></td>
-                                                @endif
-
-                                                @if ($group->final_exam != null)
-                                                <td><span
-                                                        style="color:#002147">{{ $group->final_exam }}</span>
-                                                </td>
-                                                @else
-                                                <td><span style="color:red"
-                                                          class="bi bi-dash-circle-fill"></span></td>
-                                                @endif
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-
-                                </div>
+                        <div class="info-card">
+                            <h3><i class="fa fa-file-text-o"></i> Exam Records</h3>
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>Group Name</th>
+                                            <th>Progress Test 1</th>
+                                            <th>Progress Test 2</th>
+                                            <th>Final Exam</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($studentGropesExamday as $group)
+                                        <tr>
+                                            <td><strong>{{ $group->group->name }}</strong></td>
+                                            <td>{!! $group->progress_test1 ? '<span class="text-primary">'.$group->progress_test1.'</span>' : '<span class="text-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                                            <td>{!! $group->progress_test2 ? '<span class="text-primary">'.$group->progress_test2.'</span>' : '<span class="text-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                                            <td>{!! $group->final_exam ? '<span class="text-success" style="font-weight:700">'.$group->final_exam.'</span>' : '<span class="text-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-
                     </div>
                     <div class="tab-pane fade" id="Teacher_Evaluations">
-                        <h3 class="title-section title-bar-high mb-40">Teacher Evaluations</h3>
-                        <div class="form-horizontal" id="checkout-form">
-                            <div class="personal-info">
-                                {{-- @foreach ($studentGropesExamday as $group) --}}
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-responsive">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 120px;">Teacher Image</th>
-                                                <th>Teacher Name</th>
-                                                <th>Evaluations</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($teacherStudentEvaluation  as $group)
-
-                                            <tr>
-                                                <td>
-                                                    @if ($group->image != null)
-                                                    <img src="<?= url($group->image) ?>"
-                                                         style="margin-left: 26px; width: 50%; border-radius: 50%;">
-                                                    @else
-                                                    <img src="<?= url('assets/oxford/img/students/avatar.png') ?>"
-                                                         style="margin-left: 26px; width: 50%; border-radius: 50%;">
-                                                    @endif
-                                                </td>
-                                                <td>{{ $group->name }}</td>
-
-                                                <td><a style="background-color:#ffae00" 
-                                                       href="{{ route('student.evaluate',Crypt::encrypt($group->id))}}"
-                                                       title="Exam Dates" class="btn btn-primary btn-sm">
-                                                        Add Evaluation</a>
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-
-                                </div>
+                        <div class="info-card">
+                            <h3><i class="fa fa-star-o"></i> Teacher Evaluations</h3>
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>Teacher</th>
+                                            <th>Name</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($teacherStudentEvaluation as $group)
+                                        <tr>
+                                            <td style="width: 80px;">
+                                                <img src="{{ $group->image ? url($group->image) : url('assets/oxford/img/students/avatar.png') }}" 
+                                                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent);">
+                                            </td>
+                                            <td><strong>{{ $group->name }}</strong></td>
+                                            <td class="text-center">
+                                                <a href="{{ route('student.evaluate', Crypt::encrypt($group->id)) }}" class="btn btn-sm btn-warning">
+                                                    <i class="fa fa-star"></i> Rate Teacher
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-
                     </div>
                     <div class="tab-pane fade" id="Password">
-                        <h3 class="title-section title-bar-high mb-40">Change Password</h3>
-                        <form class="form-horizontal" id="checkout-form" method="post"
-                              enctype="multipart/form-data">
-                            <div class="personal-info">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">Change Password</label>
-                                    <div class="col-sm-9">
-                                        <!--                                        <input class="form-control mb-10" id="last-name" type="password" name="cpassword" placeholder="Current Password">-->
-                                        <input class="form-control mb-10" id="last-name" type="password"
-                                               name="npassword" placeholder="New Password">
-                                        <input class="form-control mb-10" id="last-name" type="password"
-                                               name="rpassword" placeholder="Repeat Password">
+                        <div class="info-card">
+                            <h3 class="mb-30" style="border-bottom: 2px solid var(--bg-light); padding-bottom: 15px;">
+                                <i class="fa fa-lock" style="color: var(--accent); margin-right: 10px;"></i>Change Password
+                            </h3>
+                            <form class="form-horizontal modern-form" id="checkout-form" method="post" enctype="multipart/form-data">
+                                <div class="row">
+                                    <div class="col-md-8 col-md-offset-2">
+                                        <div class="form-group mb-20">
+                                            <label class="control-label" style="text-align: left; margin-bottom: 10px; display: block; color: var(--primary); font-weight: 600;">New Password</label>
+                                            <input class="form-control-modern" type="password" name="npassword" placeholder="Enter new password">
+                                        </div>
+                                        <div class="form-group mb-30">
+                                            <label class="control-label" style="text-align: left; margin-bottom: 10px; display: block; color: var(--primary); font-weight: 600;">Repeat Password</label>
+                                            <input class="form-control-modern" type="password" name="rpassword" placeholder="Confirm new password">
+                                        </div>
+                                        <div class="form-group mb-none text-center">
+                                            <button class="btn-modern btn-modern-accent" style="width: 100%; padding: 12px; font-size: 16px;" type="submit" value="Login">
+                                                <i class="fa fa-save"></i> Save Changes
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group mb-none">
-                                    <div class="col-sm-offset-3 col-sm-9">
-                                        <button class="view-all-accent-btn disabled col-sm-9" type="submit"
-                                                value="Login">Save</button>
-                                    </div>
-                                </div>
-                            </div>
-                            {{ csrf_field() }}
-                        </form>
+                                {{ csrf_field() }}
+                            </form>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="Info">
 
@@ -734,8 +432,6 @@
         </div>
     </div>
 </div>
-</div>
-
 
 <!-- Modal -->
 <div class="modal fade" id="SubjectsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
@@ -775,16 +471,7 @@
     </div>
 </div>
 @stop
-@section('css')
-<link href="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}"
-      rel="stylesheet" type="text/css" />
-<style>
-    .input-group-btn {
-        background-color: #f0f0f0;
-        border-radius: 0 5px 5px 0;
-    }
-</style>
-@stop
+
 @section('js')
 <script src="https://cdn.jsdelivr.net/jquery.autocomplete/1.0.7/jquery.autocomplete.min.js"></script>
 
@@ -822,15 +509,18 @@ $('.date-picker').datepicker();
 {{-- get notification by auth student --}}
 <script>
     $(document).on('click', ".AdminNotify", function () {
+        var $container = $('#AdminNotify');
+        $container.html('<div class="text-center p-50"><i class="fa fa-spinner fa-spin fa-3x text-primary"></i><p class="mt-10">Loading messages...</p></div>');
+        
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: "{{ route('student.notifications') }}",
-            data: {
-                "_token": "{{ csrf_token() }}",
-            }
-
-        }).success(function (data) {
-            $('#AdminNotify').html(data);
+        }).done(function (data) {
+            $container.html(data);
+            // Hide badge after opening
+            $('.unread-badge').fadeOut();
+        }).fail(function() {
+            $container.html('<div class="alert alert-danger">Error loading messages. Please check your connection.</div>');
         });
     });
 </script>
@@ -860,16 +550,32 @@ $('.date-picker').datepicker();
     $("#alert-code").click(function () {
         var student_id = $("#alert-code").val();
         Swal.fire({
-            icon: 'info',
-            title: 'Enter Your Active Group Code !!',
-            input: 'password',
+            title: '<div class="animate__animated animate__pulse animate__infinite"><i class="fa fa-shield fa-2x" style="color: #f5c518"></i></div><br>Enter Group Code',
+            text: 'Unlock your course materials by entering your unique group access code.',
+            input: 'text',
+            background: '#1a2744',
+            color: '#fff',
+            confirmButtonColor: '#f5c518',
+            confirmButtonText: 'Verify & Join',
+            showCancelButton: true,
+            cancelButtonColor: '#d33',
+            customClass: {
+                input: 'swal-modern-input',
+                title: 'swal-modern-title',
+                confirmButton: 'btn-modern-accent',
+                cancelButton: 'btn-modern-danger'
+            },
             inputAttributes: {
                 autocapitalize: 'off',
+                placeholder: 'XXXX-XXXX',
+                style: 'text-align: center; font-size: 24px; letter-spacing: 2px;'
             },
-            showCancelButton: true,
-            confirmButtonText: 'Confirm',
             showLoaderOnConfirm: true,
             preConfirm: (inputValue) => {
+                if (!inputValue) {
+                    Swal.showValidationMessage('<i class="fa fa-info-circle"></i> Please enter your group code');
+                    return false;
+                }
                 return $.ajax({
                     url: 'grope/code/check',
                     type: 'POST',
@@ -880,30 +586,54 @@ $('.date-picker').datepicker();
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    success: function (response) {
-                        if (response.status === 200) {
-                            Swal.fire('Success',
-                                    'You have been added to the group successfully',
-                                    'success');
-                            setTimeout(function () {
-                                location.reload();
-                            }, 5000);
-                        } else {
-                            Swal.fire('Error',
-                                    'Your Code Incorrect Or terminated !!!!',
-                                    'error');
+                    success: function(response) {
+                        // Handle case where server returns 200 but body says 404/error
+                        if (response.status !== 200) {
+                            Swal.showValidationMessage(`<i class="fa fa-exclamation-triangle"></i> ${response.message || 'Incorrect Code'}`);
                         }
+                        return response;
                     },
-                    error: function (response) {
-                        if (response.status === 404) {
-                            Swal.fire('Error',
-                                    'You are already registered in this group!!',
-                                    'error');
+                    error: function(xhr) {
+                        let errorMsg = 'System Error: Please contact support.';
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            } else if (xhr.responseText && xhr.responseText.includes('SQLSTATE')) {
+                                errorMsg = 'Database Error: Please ensure you enter valid characters.';
+                            }
+                        } catch(e) {
+                            console.error('Error parsing response', e);
                         }
+                        
+                        Swal.showValidationMessage(`<i class="fa fa-exclamation-triangle"></i> ${errorMsg}`);
+                        return false;
                     }
                 });
             },
+            allowOutsideClick: () => !Swal.isLoading()
         }).then((result) => {
+            if (result.value && result.value.status === 200) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Access Granted!',
+                    text: 'You have been added to the group successfully.',
+                    background: '#1a2744',
+                    color: '#fff',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                
+                // Refresh courses section via AJAX
+                $.ajax({
+                    url: "{{ route('student.courses.partial') }}",
+                    type: 'GET',
+                    success: function(html) {
+                        $('.course-grid').fadeOut(400, function() {
+                            $(this).html(html).fadeIn(400);
+                        });
+                    }
+                });
+            }
         });
     });
 </script>
@@ -911,26 +641,33 @@ $('.date-picker').datepicker();
 <script>
     // Attach click event listener to dialog button
     document.getElementById('dialog-btn').addEventListener('click', function () {
-        // Show SweetAlert dialog with input fields
         Swal.fire({
-            title: 'Send Message',
+            title: '<i class="fa fa-envelope-o"></i> Send Message',
+            background: '#1a2744',
+            color: '#fff',
             html: `
-    <div class="form-group">
-      <label for="message-title" style="color:#fdc800">Message Title:</label>
-      <input type="text" class="form-control" id="message-title">
-    </div>
-    <div class="form-group">
-      <label for="message-body" style="color:#fdc800">Message Body:</label>
-      <textarea class="form-control" id="message-body"></textarea>
-    </div>`,
-            confirmButtonText: 'Send Message',
+                <div class="text-left" style="padding: 10px;">
+                    <div class="form-group">
+                        <label for="message-title" style="color:#f5c518; font-weight: 700;">Message Title:</label>
+                        <input type="text" class="form-control" id="message-title" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-body" style="color:#f5c518; font-weight: 700;">Message Body:</label>
+                        <textarea class="form-control" id="message-body" rows="4" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px;"></textarea>
+                    </div>
+                </div>`,
+            confirmButtonColor: '#f5c518',
+            confirmButtonText: 'Send Message Now',
+            showCancelButton: true,
+            cancelButtonColor: '#d33',
             focusConfirm: false,
             preConfirm: function () {
-                // Get input values
                 var title = Swal.getPopup().querySelector('#message-title').value;
                 var body = Swal.getPopup().querySelector('#message-body').value;
-
-                // Send message with Ajax
+                if (!title || !body) {
+                    Swal.showValidationMessage('Please fill in both fields');
+                    return false;
+                }
                 return $.ajax({
                     url: "{{ route('student.admin.messages') }}",
                     method: 'POST',
@@ -939,62 +676,65 @@ $('.date-picker').datepicker();
                         body: body,
                         _token: "{{ csrf_token() }}"
                     }),
-
                     contentType: 'application/json',
                     dataType: 'json'
                 });
             },
-            allowOutsideClick: function () {
-                return !Swal.isLoading();
-            }
+            allowOutsideClick: () => !Swal.isLoading()
         }).then(function (result) {
-            // Handle success response
-            Swal.fire({
-
-                html: `Your message will be answered within 24 hours.`,
-                title: 'Message sent!',
-                icon: 'success',
-            });
+            if (result.isConfirmed) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Message Sent!',
+                    text: 'Your message will be answered within 24 hours.',
+                    background: '#1a2744',
+                    color: '#fff',
+                    confirmButtonColor: '#f5c518'
+                });
+            }
         }).catch(function (error) {
-            // Handle error response
             Swal.fire({
-                title: 'Something error!',
-                icon: 'error'
+                title: 'Error!',
+                text: 'Something went wrong while sending the message.',
+                icon: 'error',
+                background: '#1a2744',
+                color: '#fff'
             });
         });
     });
 </script>
 <script>
     $(document).on('click', ".Markstudent", function () {
-        var student_id = $(this).data("student_id");
+        var $container = $('#StudentGroupsMarks');
+        $container.html('<div class="text-center p-50"><i class="fa fa-spinner fa-spin fa-3x text-primary"></i><p class="mt-10">Loading marks...</p></div>');
+        
         $.ajax({
             type: "POST",
             url: "{{ route('student.showGroueMarks') }}",
             data: {
-                'student_id': student_id,
                 "_token": "{{ csrf_token() }}"
             }
-
-        }).success(function (data) {
-            console.log(data);
-            $('#StudentGroupsMarks').html(data);
+        }).done(function (data) {
+            $container.html(data);
+        }).fail(function() {
+            $container.html('<div class="alert alert-danger">Error loading marks. Please try again.</div>');
         });
     });
-</script>
-<script>
+
     $(document).on('click', ".StudentGroupsProgress", function () {
-        var student_id = $(this).data("student_id");
+        var $container = $('#StudentGroupsProgress');
+        $container.html('<div class="text-center p-50"><i class="fa fa-spinner fa-spin fa-3x text-accent"></i><p class="mt-10">Loading progress...</p></div>');
+        
         $.ajax({
             type: "POST",
             url: "{{ route('student.showGroueProgress') }}",
             data: {
-                'student_id': student_id,
                 "_token": "{{ csrf_token() }}"
             }
-
-        }).success(function (data) {
-            console.log(data);
-            $('#StudentGroupsProgress').html(data);
+        }).done(function (data) {
+            $container.html(data);
+        }).fail(function() {
+            $container.html('<div class="alert alert-danger">Error loading progress. Please try again.</div>');
         });
     });
 </script>
@@ -1056,5 +796,51 @@ $('.date-picker').datepicker();
     });
 </script>
 
+<!-- Particles.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": { "value": 40, "density": { "enable": true, "value_area": 800 } },
+                    "color": { "value": ["#ffffff", "#f5c518", "#3182ce"] },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.5, "random": true },
+                    "size": { "value": 6, "random": true, "anim": { "enable": true, "speed": 2, "size_min": 2, "sync": false } },
+                    "line_linked": { "enable": false },
+                    "move": { "enable": true, "speed": 1.2, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": { "onhover": { "enable": true, "mode": "bubble" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+                    "modes": { "bubble": { "distance": 200, "size": 12, "duration": 2, "opacity": 0.8, "speed": 3 }, "push": { "particles_nb": 4 } }
+                },
+                "retina_detect": true
+            });
+        }
+    });
+</script>
+
+<script>
+    // Auto-activate tab based on URL hash (e.g. /student#Exam)
+    $(document).ready(function() {
+        var hash = window.location.hash;
+        if (hash) {
+            var tabId = hash.replace('#', '');
+            var $tabLink = $('[href="#' + tabId + '"][data-toggle="tab"]');
+            if ($tabLink.length) {
+                $tabLink.tab('show');
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            }
+        }
+        $('[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            var target = $(e.target).attr('href');
+            if (target && target.startsWith('#')) {
+                history.replaceState(null, null, target);
+            }
+        });
+    });
+</script>
 
 @stop

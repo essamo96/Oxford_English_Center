@@ -15,5 +15,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'verified'])->group(function (
     Route::post('students-list', [StudentsController::class, 'getList'])->name('students.list');
     Route::post('students-delete', [StudentsController::class, 'delete'])->name('students.delete');
     Route::post('students-add', [StudentsController::class, 'add'])->name('students.add');
+    Route::post('students/details', [StudentsController::class, 'getStudentDetails'])->name('students.details');
+
     
 });

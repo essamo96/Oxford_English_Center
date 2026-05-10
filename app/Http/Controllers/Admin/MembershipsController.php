@@ -31,6 +31,13 @@ use Illuminate\Support\Facades\Mail;
 
 class MembershipsController extends AdminController
 {
+    /** @var mixed */
+    public $mysettings;
+    /** @var mixed */
+    public $social;
+    /** @var string */
+    public $path;
+
 
     const INSERT_SUCCESS_MESSAGE = "نجاح، تم الإضافة بتجاح";
     const UPDATE_SUCCESS = "نجاح، تم التعديل بنجاح";
@@ -67,7 +74,7 @@ class MembershipsController extends AdminController
             try {
                 $id = Crypt::decrypt($id);
             } catch (DecryptException $e) {
-                \Log::warning('Decryption error:', ['error' => $e->getMessage()]);
+                Log::warning('Decryption error:', ['error' => $e->getMessage()]);
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'خطأ في فك التشفير'
@@ -119,10 +126,10 @@ class MembershipsController extends AdminController
                             'recipients'  => [['name' => $student->name, 'email' => $student->email]],
                         ]);
 
-                        \Log::info('Welcome campaign started for: ' . $student->email);
+                        Log::info('Welcome campaign started for: ' . $student->email);
                         $mailSent = true;
                     } catch (\Exception $mailException) {
-                        \Log::error('Email campaign failed for student ' . $student->id . ':', [
+                        Log::error('Email campaign failed for student ' . $student->id . ':', [
                             'email' => $student->email,
                             'error' => $mailException->getMessage(),
                         ]);
@@ -156,7 +163,7 @@ class MembershipsController extends AdminController
 
         } catch (\Exception $mainException) {
             // التقاط أي خطأ غير متوقع
-            \Log::critical('General Error in postStatus: ' . $mainException->getMessage(), [
+            Log::critical('General Error in postStatus: ' . $mainException->getMessage(), [
                 'file' => $mainException->getFile(),
                 'line' => $mainException->getLine(),
             ]);
@@ -230,7 +237,7 @@ class MembershipsController extends AdminController
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Bulk Membership Activation Error: ' . $e->getMessage());
+            Log::error('Bulk Membership Activation Error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => self::EXECUTION_ERROR], 500);
         }
     }
@@ -277,12 +284,13 @@ class MembershipsController extends AdminController
 
             return '
                 <div class="d-flex align-items-center">
-                    <div class="symbol symbol-50px me-3">
+                    <div class="symbol symbol-50px me-3 cursor-pointer" onclick="showStudentModal('.$row->id.')">
                         <img src="'.$avatar.'" alt="'.$row->name.'">
                     </div>
                     <div class="d-flex justify-content-start flex-column">
                         <div class="d-flex align-items-center">
-                            <a href="#" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
+                            <a href="javascript:;" onclick="showStudentModal('.$row->id.')" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
+
                             '.$genderIcon.'
                         </div>
                         <span class="text-gray-400 fw-semibold d-block fs-7">'.$email.'</span>
@@ -346,7 +354,7 @@ class MembershipsController extends AdminController
     /**
      * Generate a safe 7-digit login from the mobile number.
      */
-    private function extractLoginFromMobile($mobile)
+    private function extractLoginFromMobile(string $mobile)
     {
         $mobileDigits = preg_replace('/\D+/', '', (string) $mobile);
 
@@ -451,7 +459,7 @@ class MembershipsController extends AdminController
         return view('admin.dashboard.studentMesages', parent::$data);
     }
 
-    public function getStudentChatHistory($id)
+    public function getStudentChatHistory(string $id)
     {
         try {
             $id = Crypt::decrypt($id);
@@ -606,7 +614,7 @@ class MembershipsController extends AdminController
         return view('admin.dashboard.teacherMesages', parent::$data);
     }
 
-    public function getTeacherChatHistory($id)
+    public function getTeacherChatHistory(string $id)
     {
         try {
             $id = Crypt::decrypt($id);

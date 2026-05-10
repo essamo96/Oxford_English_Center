@@ -98,12 +98,12 @@
     <div class="modal bg-body fade" tabindex="-1" id="program_details_modal">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content shadow-none">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fs-2qx fw-bold text-primary" id="modal_program_title">تفاصيل البرنامج</h5>
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title fs-4 fw-bold text-primary" id="modal_program_title">تفاصيل البرنامج</h5>
 
                     <!--begin::Close-->
                     <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="ki-duotone ki-cross fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
                     </div>
                     <!--end::Close-->
                 </div>
@@ -114,8 +114,8 @@
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light-primary fw-bold" data-bs-dismiss="modal">إغلاق</button>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-light-primary fw-bold" data-bs-dismiss="modal">إغلاق</button>
                 </div>
             </div>
         </div>

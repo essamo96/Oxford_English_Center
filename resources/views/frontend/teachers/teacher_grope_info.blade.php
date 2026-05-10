@@ -1,102 +1,98 @@
-<div class="tab-pane fade active in" id="Courses2">
-    <h3 class="title-section title-bar-high mb-40">Coursess
-        <button href="#Courses" class="btn btn-success btn-sm" id="go-back" data-toggle="tab" aria-expanded="false"> back
-            <i class="bi bi-grid-fill"></i></button>
-    </h3>
+<div class="info-card" style="padding: 0; overflow: hidden; border: none; background: transparent; box-shadow: none;">
+    <!-- Modern Header -->
+    <div class="detail-header" style="background: linear-gradient(135deg, #1a2744 0%, #2d3748 100%); padding: 18px 22px; border-radius: 12px 12px 0 0; color: white;">
+        <div class="d-flex justify-content-between align-items-center mb-10">
+            <div style="font-size:16px; font-weight:700; color:white;"><i class="fa fa-graduation-cap" style="color:var(--accent);"></i> {{ $data->group->program->title }}</div>
+            <button href="#Courses" class="btn btn-sm modern-back-btn" id="go-back" data-toggle="tab">
+                <i class="fa fa-arrow-left"></i> Back
+            </button>
+        </div>
+        <div class="d-flex align-items-center gap-15">
+            <span class="badge" style="background: rgba(245, 197, 24, 0.2); color: #f5c518; border: 1px solid rgba(245, 197, 24, 0.3);">{{ $data->group->name }}</span>
+            <span class="opacity-70"><i class="fa fa-clock-o"></i> {{ $data->group->ctime->times }}</span>
+        </div>
+    </div>
 
-
-    <!-- Courses Page 3 Area Start Here -->
-    <div class="courses-page-area3">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-9 col-lg-9 col-md-8 col-sm-12">
-                    <div class="row">
-                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                            <div class="course-details-inner">
-                                <h2 class="title-default-left title-bar-high">{{ $data->group->name }}</h2>
-                                <div class="row-12" style="height: 363px;">
-                                    <div class="sidebar-course-price col-3" style="width: 323px; HEIGHT: 200PX;">
-                                        <a href="{{ $data->group->zoom }}"><span href="#"
-                                                style=""class="enroll-btn">zoom</span></a>
-                                                @if ($data->group->teacher_lib)
-                                                    
-                                                <span href="{{$data->group->teacher_lib}}" download="{{$data->group->name}}" style="" class="download-btn">Media</span>
-                                                @elseif ($data->group->teacher_lib != $data->group->teacher_lib)
-                                                <span href="{{$data->group->teacher_lib}}" download="{{$data->group->name}}" style="" class="download-btn">New Media </span>
-                                                @else
-                                               <a href="{{route('teacher.showGroueStudents',['group_id' => Crypt::encrypt($data->group_id),'teacher_id' => Crypt::encrypt($data->group->teacher_id)])}}"> <span  class="download-btn bi bi-people-fill Tstudent">Students</span></a>
-                                                @endif
-                                               <a href="{{ url('group/' . $data->group_id) }}"> <span  style="" class="enroll-btn">Marks</span></a>
-                                               <a href="{{ url('group/attendance/' . $data->group_id) }}"> <span  style="" class="download-btn bi bi-calendar-check">Attendance sheet</span></a>
-                                               
-                                               <a href="{{ url('examDate/' . $data->group_id) }}"> <span  style="" class="enroll-btn">Exams</span></a>
-                                                {{-- <span href="#" style="" class="download-btn">certificate</span> --}}
-                                    </div>
-                                    <img alt="Comments"
-                                        @if ($data->group->image != null)
-                                         src="{{ url($data->group->image) }}" 
-                                        @else
-                                        src="{{ url('assets/oxford/img/logo.png') }}" 
-                                        @endif width="200px" height="200px"
-                                    
-                                        style="    position: relative;
-                                                               top: -202px;
-                                                               left: 519px;"
-                                        class="media-object col-3">
-                                </div>
-                                <h3 class="sidebar-title" style="margin-top: 50px;">Course Features</h3>
-                                @if ($data != null)
-                                    
-                                <ul class="course-feature">
-                                    <li>Lecturer: {{$data->group->teacher->name}}</li>
-                                    <li>Course Duration: 72 Hours</li>
-                                    <li>Time: {{$data->group->ctime->times}}</li>
-                                    <li>Days: {{$data->group->ctime->days}}</li>
-                                    <li>End: {{ date('d F Y', strtotime($data->group->end_date)) }}</li>
-                                    <li>Sessions Per Week: 3</li>
-                                    <li>Numper Of Weeks: 12</li>
-                                    <li>Total Classes : 36</li>
-                                    <li>Start: {{ date('d F Y', strtotime($data->group->start_date)) }}</li>
-                                </ul>
-                                @endif
-                            </div>
-
-                            <div class="section-divider"></div>
-                            <div class="course-details-inner">
-                                <div class="course-details-comments">
-                                    <h3 class="sidebar-title">Student Grope</h3>
-                                    <div class="media" >
-                                        <a href="#" class="pull-left">
-                                            <img alt="Comments" src="{{ url('assets/oxford/img/logo.png') }}"
-                                                width="50px" height="50px" class="media-object">
-                                        </a>
-                                        <div class="media-body" style="padding-top: 10px;">
-                                            <h3><a href="#" >Student name</a></h3>
-                                            <h4>notes</h4>
-                                            <p>Rimply dummy text of the printinwhen an unknown
-                                                printer took eype and scramb relofeletog and
-                                                typesetting industry. Lorem </p>
-                                            <div class="replay-area">
-                                                {{-- <ul>
-                                                                            <li><i class="fa fa-star"
-                                                                                    aria-hidden="true"></i></li>
-                                                                            <li><i class="fa fa-star"
-                                                                                    aria-hidden="true"></i></li>
-                                                                            <li><i class="fa fa-star"
-                                                                                    aria-hidden="true"></i></li>
-                                                                            <li><i class="fa fa-star"
-                                                                                    aria-hidden="true"></i></li>
-                                                                            <li><i class="fa fa-star"
-                                                                                    aria-hidden="true"></i></li>
-                                                                        </ul> --}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="section-divider"></div>
-                        </div>
+    <div class="dashboard-content" style="margin-top: 0; border-radius: 0 0 12px 12px;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-card" style="background: var(--bg-light); border: 1px solid #e1e4e8; height: 100%;">
+                    <h4 class="mb-20 text-primary" style="font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+                        <i class="fa fa-info-circle"></i> Group Logistics
+                    </h4>
+                    <div class="mb-15">
+                        <label class="text-muted small d-block">Schedule Days</label>
+                        <p class="m-0" style="font-weight: 600; color: var(--primary);">{{ $data->group->ctime->days }}</p>
                     </div>
+                    <div class="mb-15">
+                        <label class="text-muted small d-block">Time Slot</label>
+                        <p class="m-0" style="font-weight: 600; color: var(--primary);">{{ $data->group->ctime->times }}</p>
+                    </div>
+                    <div class="mb-15">
+                        <label class="text-muted small d-block">Duration</label>
+                        <p class="m-0" style="font-weight: 600; color: var(--primary);">36 Sessions (72 Hours)</p>
+                    </div>
+                    <div class="mb-15">
+                        <label class="text-muted small d-block">Start Date</label>
+                        <p class="m-0" style="font-weight: 600; color: var(--primary);">{{ date('d M Y', strtotime($data->group->start_date)) }}</p>
+                    </div>
+                    <div class="mb-20">
+                        <label class="text-muted small d-block">Estimated End</label>
+                        <p class="m-0" style="font-weight: 600; color: var(--primary);">{{ date('d M Y', strtotime($data->group->end_date)) }}</p>
+                    </div>
+                    
+                    <hr style="border-top: 1px solid #ddd;">
+                    
+                    <a href="javascript:void(0);" data-id="{{ $data->group->id }}" data-user="{{ $data->group->name }}" 
+                       class="chat-toggle btn btn-primary w-100" style="padding: 12px; border-radius: 8px; font-weight: 700;">
+                        <i class="fa fa-comments"></i> Launch Group Chat
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div style="font-size:14px; font-weight:700; color:var(--primary); margin-bottom:14px;"><i class="fa fa-cogs" style="color:var(--accent);"></i> Instructor Tools</div>
+                <div class="action-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                    @if($data->group->zoom)
+                        <a href="{{ $data->group->zoom }}" target="_blank" class="action-card zoom" style="text-decoration: none;">
+                            <i class="fa fa-video-camera" style="color: #2D8CFF;"></i>
+                            <span style="display: block; font-weight: 700; color: #1a2744;">Start Zoom Class</span>
+                        </a>
+                    @endif
+
+                    @if($data->group->teacher_lib)
+                        <a href="{{ $data->group->teacher_lib }}" download="{{ $data->group->name }}" class="action-card download" style="text-decoration: none;">
+                            <i class="fa fa-folder-open" style="color: #FFC107;"></i>
+                            <span style="display: block; font-weight: 700; color: #1a2744;">Media Library</span>
+                        </a>
+                    @endif
+
+                    <a href="{{ route('teacher.showGroueStudents', ['group_id' => Crypt::encrypt($data->group_id), 'teacher_id' => Crypt::encrypt($data->group->teacher_id)]) }}" class="action-card drive" style="text-decoration: none;">
+                        <i class="fa fa-users" style="color: #1FA463;"></i>
+                        <span style="display: block; font-weight: 700; color: #1a2744;">Students List</span>
+                    </a>
+
+                    <a href="{{ url('group/' . $data->group_id) }}" class="action-card zoom" style="text-decoration: none; border-color: #f5c518;">
+                        <i class="fa fa-check-square-o" style="color: #f5c518;"></i>
+                        <span style="display: block; font-weight: 700; color: #1a2744;">Record Marks</span>
+                    </a>
+
+                    <a href="{{ url('group/attendance/' . $data->group_id) }}" class="action-card drive" style="text-decoration: none;">
+                        <i class="fa fa-calendar-check-o" style="color: #1FA463;"></i>
+                        <span style="display: block; font-weight: 700; color: #1a2744;">Attendance Sheet</span>
+                    </a>
+
+                    <a href="{{ url('examDate/' . $data->group_id) }}" class="action-card download" style="text-decoration: none;">
+                        <i class="fa fa-file-text-o" style="color: #FFC107;"></i>
+                        <span style="display: block; font-weight: 700; color: #1a2744;">Exams Schedule</span>
+                    </a>
+                </div>
+                
+                <div class="info-card mt-20" style="background: rgba(245, 197, 24, 0.05); border: 1px solid rgba(245, 197, 24, 0.2); border-radius: 10px;">
+                    <p class="m-0 small" style="color: #856404; line-height: 1.6;">
+                        <i class="fa fa-info-circle"></i> 
+                        <strong>Pro Tip:</strong> Ensure you record attendance within the first 15 minutes of the session. Students can view their marks and progress in real-time once you save them.
+                    </p>
                 </div>
             </div>
         </div>

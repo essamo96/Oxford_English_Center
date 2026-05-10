@@ -1,115 +1,167 @@
 @extends('frontend.layouts.master')
-@section('title', 'Courses')
+@section('title', 'Attendance Management')
+
 @section('css')
-    <style>
-        #alert-code,
-        #go-back {
-            border-radius: 10px;
-            font-size: 15px;
-            direction: rtl;
-            background-color: #002147;
-            color: #fdc800;
-            margin-left: 512px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">
+<style>
+    .attendance-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+    .attendance-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .select-all-bar { background: rgba(26,39,68,.05); border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; font-weight: 700; color: var(--primary); font-size: 13px; cursor: pointer; }
+</style>
 @endsection
+
 @section('content')
-    <div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/gallary.jpg') }}');">
-        <div class="container">
-            <div class="pagination-area">
-                <h1>Courses Area</h1>
-                <ul>
-                    <li><a href="{{ url('/') }}">Home</a> -</li>
-                    <li><a href="{{ url('/teacher') }}">Teacher Area</a> -</li>
-                    <li>Attendance</li>
-                </ul>
+<div class="student-dashboard-wrapper">
+    <div id="bg-particles"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+
+        {{-- Breadcrumbs Navigation --}}
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+            <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
+            <span style="margin: 0 5px;">/</span>
+            <span style="color: var(--primary);">Courses</span>
+            <span style="margin: 0 5px;">/</span>
+            <strong>{{ $group_info->name }}</strong>
+            <span style="margin: 0 5px;">/</span>
+            <span>Attendance</span>
+        </div>
+
+        {{-- Page Header --}}
+        <div class="page-header-block d-flex justify-content-between align-items-center">
+            <div>
+                <p class="page-title m-0"><i class="fa fa-calendar-check-o"></i> Attendance Sheet</p>
+                <p class="page-subtitle m-0">Group: <strong>{{ $group_info->name }}</strong></p>
+            </div>
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 13px;" onclick="window.print()">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 13px;">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
             </div>
         </div>
-    </div>
-    <div class="section-space accent-bg">
-        <div class="container">
-            <div class="row">
-                @include('frontend.layouts.error')
-                <div class="profile-details tab-content">
-                    <div class="" id="Courses">
-                        <h3 class="title-section title-bar-high mb-40">Attendance <a id="go-back" href="/teacher"
-                                class="btn btn-success btn-sm"> back
-                                <i class="bi bi-skip-backward-fill"></i></a></h3>
-                        <div class="orders-info">
-                            <form class="form-horizontal" action="{{ route('post.group.attendance', $group_info->id) }}"
-                                id="checkout-form" method="post" enctype="multipart/form-data">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-responsive">
-                                        <thead>
-                                            <tr>
-                                                <th><input type="checkbox" class="check" id="check-all" style="display: inline-block;"> Check All </th>
-                                                <th>Student Name</th>
-                                                <th>Attendance</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php
-                                                $i = 1;
-                                            @endphp
-                                            @foreach ($data as $group)
-                                                <tr>
-                                                    <td>{{ $i++ }}
-                                                        <input hidden name="student_id[{{$group->student_id }}]" value="{{$group->student_id }}">
-                                                    </td>
-                                                    <td>
-                                                        {{ $group->student ? $group->student->name:'-' }}
 
-                                                    </td>
-                                                    <td>
-                                                        <input type="checkbox" name="attendance[{{ $group->student_id }}]"
-                                                          id="check"  class="check" value="1" style="display: inline-block;">
-                                                    </td>
+        @include('frontend.layouts.error')
 
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                    <div class="save-tbl-btn" style=" text-align: center;view-all-accent-btn">
-                                        <button class="view-all-accent-btn" id="add-attendance" type="submit"
-                                            value="save" style="display:inline-block">Save</button>
-                                    </div>
-                                </div>
+        <div class="marks-table-wrapper">
+            <form action="{{ route('post.group.attendance', $group_info->id) }}" method="post" id="attendance-form">
+                {{ csrf_field() }}
 
-                                {{ csrf_field() }}
-                            </form>
-                        </div>
-                    </div>
+                {{-- Select All Bar --}}
+                <div style="padding: 14px 16px; background: var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <span style="color: white; font-size: 14px; font-weight: 700;"><i class="fa fa-users" style="color: var(--accent);"></i> Student Roster</span>
+                    <label class="attendance-label" for="check-all" style="color: white;">
+                        <input type="checkbox" id="check-all" class="attendance-checkbox"> Select All Present
+                    </label>
                 </div>
-            </div>
+
+                <div class="table-responsive">
+                    <table class="marks-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="text-align:left; padding-left:16px;">Student Name</th>
+                                <th>Attendance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($data as $index => $group)
+                                <tr>
+                                    <td style="color: var(--light-text); font-weight: 600;">{{ $index + 1 }}</td>
+                                    <td style="text-align:left; padding-left:16px;">
+                                        <div class="student-mini-profile">
+                                            <img src="{{ $group->student && $group->student->image ? url($group->student->image) : url('assets/oxford/img/students/avatar.png') }}" alt="">
+                                            <div>
+                                                <div class="name">{{ $group->student ? $group->student->name : 'N/A' }}</div>
+                                                <input type="hidden" name="student_id[{{$group->student_id}}]" value="{{$group->student_id}}">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" name="attendance[{{ $group->student_id }}]" class="check attendance-checkbox" value="1" id="att_{{ $group->student_id }}">
+                                    </td>
+                                    <td>
+                                        <span class="mark-chip no-mark att-status-{{ $group->student_id }}">Absent</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #edf2f7; text-align: center;">
+                    <button type="submit" id="save-att-btn" class="btn-modern btn-modern-accent" style="min-width: 220px; justify-content: center;">
+                        <i class="fa fa-save"></i> Save Attendance
+                    </button>
+                </div>
+            </form>
         </div>
+
+        <div class="mt-30" style="background: rgba(245,197,24,.05); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 13px; color: var(--light-text);">
+            <i class="fa fa-info-circle" style="color: var(--accent);"></i>
+            <strong style="color: var(--primary);">Note:</strong> Attendance can only be submitted once per session.
+        </div>
+
     </div>
+</div>
 @stop
+
 @section('js')
-
-    <script>
-        $(document).ready(function() {
-            $('#check-all').click(function() {
-                $('.check').prop('checked', this.checked);
-            });
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('bg-particles', {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color:  { value: ['#f5c518', '#3182ce', '#ffffff'] },
+                shape:  { type: 'circle' },
+                opacity: { value: 0.3, random: true },
+                size:    { value: 3, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'bubble' }, onclick: { enable: true, mode: 'push' } },
+                modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
         });
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('#add-attendance').submit(function() {
-                const submitButton = document.getElementById('add-attendance');
-                submitButton.style.display = 'none !important';
-                $('#add-attendance-btn').attr('disabled', true);
-                
-            });
+    }
+});
 
-            setTimeout(function() {
-                $('#add-attendance-btn').removeAttr('disabled');
-                  submitButton.style.display = 'inline-block';
-            }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
-            
+    $(document).ready(function () {
+        // Select all
+        $('#check-all').click(function () {
+            $('.check').prop('checked', this.checked);
+            updateStatuses();
         });
-    </script>
 
+        // Individual checkbox update
+        $(document).on('change', '.check', function () {
+            updateStatuses();
+            if (!this.checked) $('#check-all').prop('checked', false);
+        });
 
+        function updateStatuses() {
+            $('.check').each(function () {
+                var sid = $(this).attr('name').match(/\[(\d+)\]/)[1];
+                var badge = $('.att-status-' + sid);
+                if (this.checked) {
+                    badge.removeClass('no-mark').addClass('final').text('Present');
+                } else {
+                    badge.removeClass('final').addClass('no-mark').text('Absent');
+                }
+            });
+        }
 
+        // Disable button after submit
+        $('#attendance-form').submit(function () {
+            $('#save-att-btn').html('<i class="fa fa-spinner fa-spin"></i> Saving...').attr('disabled', true);
+        });
+    });
+</script>
 @stop

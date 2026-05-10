@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\GroupStudents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\flash;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Cache;
 //use Twitter;
 use Illuminate\Support\Facades\Artisan;
 use Intervention\Image\Facades\Image;
+use App\Models\Categories;
+use App\Models\Students;
+use App\Models\News as Certificates;
 use Mpdf\Mpdf;
 class CertificatesController extends AdminController {
 
@@ -187,7 +191,7 @@ class CertificatesController extends AdminController {
         ]);
 //////////////////////////////////////////////////////////
         if ($validator->fails()) {
-            $request->session()->flash('danger', $validator->messages());
+            session()->flash('danger', $validator->messages());
             return redirect(route('certificates.add'))->withInput();
         } else {
             $image_explode = explode('/', $image);
@@ -205,21 +209,21 @@ class CertificatesController extends AdminController {
                     $this->clearCache($category_id);
                 }
 ///////////////////////////////////////////////////////////////////
-                $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
+                session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('certificates.view'));
             } else {
-                $request->session()->flash('danger', self::EXECUTION_ERROR);
+                session()->flash('danger', self::EXECUTION_ERROR);
                 return redirect(route('certificates.add'))->withInput();
             }
         }
     }
 
 //////////////////////////////////////////////
-    public function getEdit(Request $request, $id) {
+    public function getEdit(Request $request, string $id) {
         try {
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('certificates.view'));
         }
 //////////////////////////////////////////////
@@ -231,18 +235,18 @@ class CertificatesController extends AdminController {
             parent::$data['info'] = $info;
             return view('admin.certificates.edit', parent::$data);
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('certificates.view'));
         }
     }
 
 //////////////////////////////////////////////
-    public function postEdit(Request $request, $id) {
+    public function postEdit(Request $request, string $id) {
         try {
             $encrypted_id = $id;
             $id = Crypt::decrypt($id);
         } catch (DecryptException $e) {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('certificates.view'));
         }
 /////////////////////////////////////////
@@ -279,7 +283,7 @@ class CertificatesController extends AdminController {
             ]);
 //////////////////////////////////////////////////////////
             if ($validator->fails()) {
-                $request->session()->flash('danger', $validator->messages());
+                session()->flash('danger', $validator->messages());
                 return redirect(route('certificates.edit', ['id' => $encrypted_id]))->withInput();
             } else {
                 $image_explode = explode('/', $image);
@@ -300,15 +304,15 @@ class CertificatesController extends AdminController {
                         //$this->getTwitter($update);
                     }
 ///////////////////////////////////////////////////////////
-                    $request->session()->flash('success', self::UPDATE_SUCCESS);
+                    session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('certificates.view'));
                 } else {
-                    $request->session()->flash('danger', self::EXECUTION_ERROR);
+                    session()->flash('danger', self::EXECUTION_ERROR);
                     return redirect(route('certificates.edit', ['id' => $encrypted_id]))->withInput();
                 }
             }
         } else {
-            $request->session()->flash('danger', self::NOT_FOUND);
+            session()->flash('danger', self::NOT_FOUND);
             return redirect(route('certificates.view'));
         }
     }
@@ -416,7 +420,7 @@ class CertificatesController extends AdminController {
         }
     }
 
-    function formatName($name)
+    function formatName(string $name)
     {
         // Split the name into parts
         $parts = explode(' ', $name);
@@ -442,7 +446,7 @@ class CertificatesController extends AdminController {
         return $name;
     }
 
-    public function generat_pdf(Request $request, $id)
+    public function generat_pdf(Request $request, string $id)
     {
         try {
             $id = Crypt::decrypt($id);
@@ -451,15 +455,23 @@ class CertificatesController extends AdminController {
         }
 
         $customData = GroupStudents::find($id);
-        $name = $customData->group->name;
-        $studentname =  $customData->student->name;
+        if (!$customData) {
+            return response()->json(['status' => 'error', 'message' => 'Data not found']);
+        }
+        $name = $customData->group->name ?? '---';
+        $studentname =  $customData->student->name ?? '---';
         $formattedName = $this->formatName($studentname);
         $parts = explode('.', $name);
-        $firstPart = $parts[0];
+        $firstPart = $parts[0] ?? '---';
+        $imagePath = str_replace('\\', '/', public_path('Admin_Certifcate/levels_Admin.png'));
+
+        $imagePath = str_replace('\\', '/', public_path('Admin_Certifcate/levels_student.png'));
+
         $data = [
             'customData' => $customData,
             'firstPart' => $firstPart,
             'formattedName' => $formattedName,
+            'imagePath' => $imagePath,
         ];
 
         
@@ -471,14 +483,22 @@ class CertificatesController extends AdminController {
         $ee = $defaultFontConfig->getDefaults();
         $fontData = $ee['fontdata'];
 
-        // Configure mPDF with custom fonts
-        $mpdfConfig = [
-            'fontDir' => $fontDirs,
+        $mpdf = new Mpdf([
             'mode' => 'utf-8',
-            'format' => 'A4', 
-        ];
-
-        $mpdf = new Mpdf($mpdfConfig);
+            'format' => 'A4',
+            'tempDir' => storage_path('app/mpdf'),
+            'curlAllowSelfSigned' => true,
+            'allow_local_file_access' => true,
+            'fontDir' => array_merge($fontDirs, [
+                public_path()
+            ]),
+            'fontdata' => $fontData + [
+                'aguafinascript' => [
+                    'R' => 'AguafinaScript-Regular.ttf',
+                ]
+            ],
+            'default_font' => 'sans-serif'
+        ]);
 
         // HTML content with custom font styling
         $html = view('admin.certificates.levels', $data)->render();
@@ -496,7 +516,7 @@ class CertificatesController extends AdminController {
         return redirect(route('certificates.view'));
     }
 
-    public function clearCache($category_id) {
+    public function clearCache(int $category_id) {
         $certificates = new Certificates();
 ///////////// Inner Category Page///////////////
         Cache::forget('category_certificates_' . $category_id);

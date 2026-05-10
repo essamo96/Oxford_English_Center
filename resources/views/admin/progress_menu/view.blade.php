@@ -202,7 +202,7 @@
     }
 
     function showProgramModal(id) {
-        fetchModalContent('{{ route('programs.details') }}', { id: id });
+        fetchModalContent('{{ route('programs.details.post') }}', { id: id });
     }
 
     function fetchModalContent(url, data) {

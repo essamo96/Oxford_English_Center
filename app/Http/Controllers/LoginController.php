@@ -20,11 +20,23 @@ class LoginController extends Controller {
 
     ///////////////////////////////
     public function getIndex() {
+        if (Auth::guard('students')->check()) {
+            return redirect('/student');
+        } elseif (Auth::guard('teachers')->check()) {
+            return redirect('/teacher');
+        }
+        
         parent::$data['login_type']= 0;
         return view('frontend.login.view', parent::$data);
     }
     ///////////////////////////////
     public function getTeachrIndex() {
+        if (Auth::guard('teachers')->check()) {
+            return redirect('/teacher');
+        } elseif (Auth::guard('students')->check()) {
+            return redirect('/student');
+        }
+
         parent::$data['login_type']= 1;
         return view('frontend.login.view', parent::$data);
     }

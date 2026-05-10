@@ -97,6 +97,15 @@ class DashboardController extends AdminController
         parent::$data['weekly_schedule'] = $weeklySchedule;
         parent::$data['all_active_groups'] = $allActiveGroups;
 
+        // Course Progress Data (Top Programs)
+        parent::$data['course_progress'] = \App\Models\Programs::withCount(['grope as active_groups_count' => function($q) {
+            $q->where('status', 1);
+        }])
+        ->where('status', 1)
+        ->orderBy('active_groups_count', 'desc')
+        ->take(6)
+        ->get();
+
         return view('admin.dashboard.view', parent::$data);
 
     }

@@ -133,10 +133,48 @@
 
 @section('modal')
     @include('admin.layout.masterLayouts.modal')
+
+    <!-- Modern Details Modal -->
+    <div class="modal fade" id="details_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-800px">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-0 justify-content-end">
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body scroll-y pt-0 pb-15" id="modal_content">
+                    <div class="text-center py-10">
+                        <span class="spinner-border w-50px h-50px" role="status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('js')
 <script>
+    function showStudentModal(id) {
+        fetchModalContent('{{ route('students.details') }}', { id: id });
+    }
+
+    function fetchModalContent(url, data) {
+        $('#modal_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px" role="status"></span></div>');
+        $('#details_modal').modal('show');
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: { ...data, _token: '{{ csrf_token() }}' },
+            success: function(response) {
+                $('#modal_content').html(response);
+            },
+            error: function() {
+                $('#modal_content').html('<div class="alert alert-danger">حدث خطأ أثناء تحميل البيانات</div>');
+            }
+        });
+    }
+
     var table;
     var tableId = 'kt_table';
     var customAjaxUrl = '{{ route("membership.list") }}';
@@ -173,11 +211,21 @@
         // Show All Button
         $('#showAllBtn').on('click', function(e) {
             e.preventDefault();
-            $('#is_today').val('');
-            $('#date_from').val('2020-01-01');
-            $('#date_to').val('2030-12-31');
+            $('#filter_form')[0].reset();
+            $('#filter_form select').val('').trigger('change');
+            $('#is_today').val('all');
             table.draw();
         });
+
+        // Reset Filter
+        $('#resetFilter').on('click', function(e) {
+            e.preventDefault();
+            $('#filter_form')[0].reset();
+            $('#filter_form select').val('').trigger('change');
+            $('#is_today').val(''); 
+            table.draw();
+        });
+
 
         // Single student Reply email
         $(document).on('click', '.Reply', function() {

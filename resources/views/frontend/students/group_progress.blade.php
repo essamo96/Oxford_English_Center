@@ -1,80 +1,53 @@
- <div class="tab-pane fade active in" id="Progress2">
-     <div class="courses-page-area3">
-         <div class="container">
-             <div class="row">
-                 <div class="col-xl-9 col-lg-9 col-md-8 col-sm-12">
-                     <div class="row">
-                         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                             <div class="section-divider"></div>
-                             <div class="course-details-inner">
-                                 <div class="course-details-comments">
+<div class="info-card animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-20">
+        <h3 class="m-0"><i class="fa fa-line-chart"></i> Learning Progress</h3>
+    </div>
 
-                                     <h3 class="sidebar-title">Student Progress
-                                         <button href="#" class="btn btn-success btn-sm" id="go-back"
-                                             onclick="location.reload()"> back <i
-                                                 class="bi bi-skip-backward-fill"></i></button>
-                                     </h3>
-                                     <div class="orders-info">
-                                         <div class="table-responsive">
-                                             <table class="table table-bordered table-responsive">
-                                                 <thead>
-                                                     <tr>
-                                                         <th style="width: 120px;">Grope Name</th>
-                                                         <th>Progress</th>
-                                                         <th>Units</th>
-                                                     </tr>
-                                                 </thead>
-                                                 <tbody>
-                                                     @foreach ($data as $group)
-                                                         <tr>
-                                                             <td> <?= $group->group->name !== null ? $group->group->name : '<span style="color:red" class="bi bi-exclamation-circle"></span>' ?>
-                                                             </td>
-                                                             <td>
-                                                                 @if ($group->progress == null)
-                                                                         <div class="progress"  style="color: orange ;height: 16px;">
-                                                                             <div class="progress-bar"
-                                                                                 role="progressbar" style="width: 0% ;background-color: orange; height: 16px;"
-                                                                                 aria-valuenow="0" aria-valuemin="0"
-                                                                                 aria-valuemax="100">0%</div>
-                                                                         </div>
-                                                                         @else
-                                                                           <div class="progress"  style="color: orange ;height: 16px;">
-                                                                             <div class="progress-bar"
-                                                                                 role="progressbar" style="width: {{ $group->progress }}% ;background-color: orange; height: 16px;"
-                                                                                 aria-valuenow="{{ $group->progress }}" aria-valuemin="0"
-                                                                                 aria-valuemax="100">{{ $group->progress }}%</div>
-                                                                         </div>
-                                                                 @endif
-
-                                                             </td>
-
-                                                             <td>
-                                                                 @if ($group->progress == 30 || $group->progress == null)
-                                                                     Units 1 to 3
-                                                                 @elseif ($group->progress == 60)
-                                                                     Units 4 to 6
-                                                                 @elseif ($group->progress == 90)
-                                                                     Units 7 to 9
-                                                                 @else
-                                                                     Units 10
-                                                                 @endif
-                                                             </td>
-
-                                                         </tr>
-                                                     @endforeach
-                                                 </tbody>
-                                             </table>
-                                         </div>
-                                     </div>
-
-                                 </div>
-                             </div>
-                             <div class="section-divider"></div>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </div>
- </div>
- </div>
+    <div class="table-responsive">
+        @if($data->count() > 0)
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Group Name</th>
+                        <th style="width: 45%;">Progress</th>
+                        <th style="width: 25%;" class="text-center">Current Units</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data as $group)
+                        <tr>
+                            <td><strong>{{ $group->group->name ?? 'N/A' }}</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="custom-progress flex-grow-1 mr-15">
+                                        <div class="progress-fill" style="width: {{ $group->progress ?: 0 }}%"></div>
+                                    </div>
+                                    <span class="small font-weight-bold">{{ $group->progress ?: 0 }}%</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge status-active">
+                                    @if ($group->progress <= 30 || $group->progress == null)
+                                        Units 1-3
+                                    @elseif ($group->progress <= 60)
+                                        Units 4-6
+                                    @elseif ($group->progress <= 90)
+                                        Units 7-9
+                                    @else
+                                        Units 10-12
+                                    @endif
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @else
+            <div class="text-center p-50">
+                <i class="fa fa-bar-chart fa-5x text-muted mb-20" style="display: block;"></i>
+                <h4 class="text-muted">No progress data found.</h4>
+                <p>Stay tuned! Your course progress will be updated here soon.</p>
+            </div>
+        @endif
+    </div>
+</div>

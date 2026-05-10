@@ -53,12 +53,12 @@ class SendMailToStudents extends Mailable
         $fromAddress = config('mail.from.address') ?: 'info@oxford.com';
         $fromName    = config('mail.from.name') ?: 'Oxford English Centre';
 
-        // Handle Logo Embedding (CID) for guaranteed visibility
+        // Handle Logo URL for email (using public URL instead of embed() which is not available in Mailable)
         $logoCid = null;
         if (isset($mysettings->logo) && $mysettings->logo && file_exists(public_path($mysettings->logo))) {
-             $logoCid = $this->embed(public_path($mysettings->logo));
+             $logoCid = asset($mysettings->logo);
         } elseif (file_exists(public_path('OXFORD-LOGO.jpg'))) {
-             $logoCid = $this->embed(public_path('OXFORD-LOGO.jpg'));
+             $logoCid = asset('OXFORD-LOGO.jpg');
         } else {
              $logoCid = 'https://ui-avatars.com/api/?name=Oxford&background=002147&color=fff&size=120&font-size=0.33';
         }
