@@ -11,10 +11,20 @@ class FileManagerController extends Controller
     public function index(Request $request)
     {
         $type = $request->get('type', 'file'); // image, file, document
-        $baseFolder = ($type == 'image' ? 'images' : 'files/shares');
+        $baseFolder = ($type == 'image' ? 'image' : 'files/shares');
         
         $currentFolder = $request->get('folder', $baseFolder);
         
+        // Normalize folder path if it contains 'uploads/' prefix (compatibility with old links)
+        if (str_starts_with($currentFolder, 'uploads/')) {
+            $currentFolder = substr($currentFolder, 8);
+        }
+
+        // Compatibility: map 'images' to 'image' if plural was used
+        if ($currentFolder == 'images') {
+            $currentFolder = 'image';
+        }
+
         $disk = \Illuminate\Support\Facades\Storage::disk('uploads');
         if (!$disk->exists($currentFolder)) {
             $disk->makeDirectory($currentFolder);
@@ -63,6 +73,9 @@ class FileManagerController extends Controller
         ]);
 
         $folder = $request->post('folder');
+        if (str_starts_with($folder, 'uploads/')) {
+            $folder = substr($folder, 8);
+        }
 
         $file = $request->file('file');
         
@@ -76,11 +89,11 @@ class FileManagerController extends Controller
         // Store file with original string representation or generate clean name
         $cleanName = preg_replace('/[\/\\\\\?%*:|"<>]/', '_', $file->getClientOriginalName());
         $name = time() . '_' . $cleanName;
-        $path = $file->storeAs($folder, $name, 'public');
+        $path = $file->storeAs($folder, $name, 'uploads');
 
         return response()->json([
             'success' => true,
-            'url' => asset('storage/' . $path),
+            'url' => asset('uploads/' . $path),
             'path' => $path,
             'name' => $name
         ]);
@@ -89,6 +102,9 @@ class FileManagerController extends Controller
     public function createFolder(Request $request)
     {
         $folder = $request->post('folder');
+        if (str_starts_with($folder, 'uploads/')) {
+            $folder = substr($folder, 8);
+        }
         $name = $request->post('name');
         
         $cleanName = preg_replace('/[\/\\\\\?%*:|"<>]/', '_', $name);
@@ -100,6 +116,9 @@ class FileManagerController extends Controller
     public function rename(Request $request)
     {
         $path = $request->post('path');
+        if (str_starts_with($path, 'uploads/')) {
+            $path = substr($path, 8);
+        }
         $newName = $request->post('name');
         $type = $request->post('type'); // file or folder
 
@@ -122,6 +141,9 @@ class FileManagerController extends Controller
     public function delete(Request $request)
     {
         $path = $request->post('path');
+        if (str_starts_with($path, 'uploads/')) {
+            $path = substr($path, 8);
+        }
         $type = $request->post('type'); // file or folder
 
         $disk = \Illuminate\Support\Facades\Storage::disk('uploads');
