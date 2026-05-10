@@ -1,0 +1,65 @@
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .certificate {
+            position: relative;
+            width: 850px;
+            height: 1200px;
+            margin: 0 auto;
+            background-image: url('/Admin_Certifcate/levels_Admin.png');
+            background-size: cover;
+            text-align: center;
+        }
+
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .title {
+            position: relative;
+            min-width: 2086px;
+            color: #010101;
+            font-family: 'Aguafina Script', handwriting;
+            font-size: 3rem;
+            font-style: normal;
+            font-weight: normal;
+            letter-spacing: 0;
+            text-decoration: none;
+            margin-bottom: 48px;
+            top: 25px;
+        }
+
+        .name {
+            font-family: 'Maven Pro', sans-serif;
+            justify-content: center;
+            display: flex;
+            font-size: 16px;
+            left: 71px;
+            position: relative;
+            top: 34px;
+            margin-inline: 10px;
+        }
+
+        .name2 {
+            position: relative;
+            top: 724px;
+            left: 25rem;
+            text-align: justify;
+            margin-bottom: 4px;
+        }
+
+        .levels {
+            margin-right: 10px;
+            color: #bd1e20;
+            FONT-STYLE: italic;
+        }
+
+        .description {
+            font-size: 18px;
+        }

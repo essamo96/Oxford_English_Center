@@ -14,8 +14,11 @@ yarn-error.log
 /nbproject/private/
 /storage/logs
 /storage/framework
+/public/uploads
+/public/File
 /public/storage
-/public
+/public/Admin_Certifcate
+/public/assets
 *.zip
 *.rar
 *.mp4

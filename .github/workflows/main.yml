@@ -31,6 +31,10 @@ jobs:
             **/vendor/**
             **/tests/**
             **/storage/*.key
+            **/public/uploads/**
+            **/public/assets/**
+            **/public/File/**
+            **/public/Admin_Certifcate/**
             .env
             .env.example
             phpunit.xml

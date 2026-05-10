@@ -138,7 +138,7 @@ return [
             'icon-class' => 'fa fa-file-image-o'
         ],
         'file' => [
-            'type' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar',
+            'type' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar|mp3|mp4',
             'icon-class' => 'fa fa-file'
         ]
     ],
