@@ -10,17 +10,12 @@ class FileManagerController extends Controller
 {
     public function index(Request $request)
     {
-        $type = $request->get('type', 'image'); // image, file, document
-        $baseFolder = 'uploads/' . ($type == 'image' ? 'images' : 'documents');
+        $type = $request->get('type', 'file'); // image, file, document
+        $baseFolder = ($type == 'image' ? 'images' : 'files/shares');
         
         $currentFolder = $request->get('folder', $baseFolder);
         
-        // Ensure within bounds constraint for security
-        if (!str_starts_with($currentFolder, 'uploads')) {
-            $currentFolder = $baseFolder;
-        }
-
-        $disk = Storage::disk('public');
+        $disk = \Illuminate\Support\Facades\Storage::disk('uploads');
         if (!$disk->exists($currentFolder)) {
             $disk->makeDirectory($currentFolder);
         }
@@ -38,7 +33,7 @@ class FileManagerController extends Controller
             return [
                 'name' => basename($file),
                 'path' => $file,
-                'url' => asset('storage/' . $file),
+                'url' => asset('uploads/' . $file),
                 'size' => $this->formatSizeUnits($disk->size($file)),
                 'last_modified' => date('Y-m-d H:i', $disk->lastModified($file)),
                 'extension' => pathinfo($file, PATHINFO_EXTENSION)
@@ -68,15 +63,12 @@ class FileManagerController extends Controller
         ]);
 
         $folder = $request->post('folder');
-        if (!str_starts_with($folder, 'uploads')) {
-            return response()->json(['error' => 'Invalid folder path'], 403);
-        }
 
         $file = $request->file('file');
         
         // Security check
         $extension = strtolower($file->getClientOriginalExtension());
-        $allowed = ['jpg','jpeg','png','webp','pdf','docx','doc','xls','xlsx','zip','rar'];
+        $allowed = ['jpg','jpeg','png','webp','pdf','docx','doc','xls','xlsx','zip','rar','mp3','mp4','wav'];
         if (!in_array($extension, $allowed)) {
             return response()->json(['error' => 'File type not allowed! Security validation failed.'], 403);
         }
@@ -99,12 +91,8 @@ class FileManagerController extends Controller
         $folder = $request->post('folder');
         $name = $request->post('name');
         
-        if (!str_starts_with($folder, 'uploads')) {
-             return response()->json(['success' => false, 'message' => 'Invalid folder path']);
-        }
-        
         $cleanName = preg_replace('/[\/\\\\\?%*:|"<>]/', '_', $name);
-        Storage::disk('public')->makeDirectory($folder . '/' . $cleanName);
+        Storage::disk('uploads')->makeDirectory($folder . '/' . $cleanName);
         
         return response()->json(['success' => true, 'message' => 'تم إنشاء المجلد بنجاح']);
     }
@@ -114,10 +102,6 @@ class FileManagerController extends Controller
         $path = $request->post('path');
         $newName = $request->post('name');
         $type = $request->post('type'); // file or folder
-
-        if (!str_starts_with($path, 'uploads')) {
-             return response()->json(['success' => false, 'message' => 'Invalid file path']);
-        }
 
         $directory = dirname($path);
         $cleanName = preg_replace('/[\/\\\\\?%*:|"<>]/', '_', $newName);
@@ -130,7 +114,7 @@ class FileManagerController extends Controller
              }
         }
 
-        Storage::disk('public')->move($path, $directory . '/' . $cleanName);
+        Storage::disk('uploads')->move($path, $directory . '/' . $cleanName);
         
         return response()->json(['success' => true, 'message' => 'تمت إعادة التسمية بنجاح']);
     }
@@ -140,14 +124,11 @@ class FileManagerController extends Controller
         $path = $request->post('path');
         $type = $request->post('type'); // file or folder
 
-        if (!str_starts_with($path, 'uploads')) {
-             return response()->json(['success' => false, 'message' => 'Invalid file path']);
-        }
-
+        $disk = \Illuminate\Support\Facades\Storage::disk('uploads');
         if ($type == 'folder') {
-            Storage::disk('public')->deleteDirectory($path);
+            $disk->deleteDirectory($path);
         } else {
-            Storage::disk('public')->delete($path);
+            $disk->delete($path);
         }
         
         return response()->json(['success' => true, 'message' => 'تم الحذف بنجاح']);
