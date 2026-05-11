@@ -29,26 +29,31 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label fw-bold text-gray-700">تاريخ الاختبار</label>
-                <input type="date" id="filter_test_date" class="form-control">
+                <input type="date" id="test_date" class="form-control">
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold text-gray-700">الوقت</label>
-                <input type="text" id="filter_test_time" class="form-control" placeholder="مثال: 10:00 AM">
+                <label class="form-label fw-bold text-gray-700">الوقت (المجدول)</label>
+                <input type="text" id="test_time" class="form-control" placeholder="مثال: 10:00 AM">
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold text-gray-700">الجنس</label>
-                <select id="filter_gender" class="form-select">
+                <label class="form-label fw-bold text-gray-700">الأيام المفضلة</label>
+                <select id="preferred_days" class="form-select">
                     <option value="">الكل</option>
-                    <option value="male">ذكر</option>
-                    <option value="female">أنثى</option>
+                    <option value="SAT-MON-WED">سبت - اثنين - أربعاء</option>
+                    <option value="SUN-TUE-THU">أحد - ثلاثاء - خميس</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="button" class="btn btn-info w-100" onclick="table.ajax.reload()">
-                    <i class="ki-duotone ki-magnifier fs-4 me-1"></i> بحث
-                </button>
-                <button type="button" class="btn btn-light w-100" onclick="resetFilters()">
-                    إعادة ضبط
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">الوقت المفضل</label>
+                <select id="preferred_time" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="Morning">صباحي (Before 12:00 PM)</option>
+                    <option value="Noon">مسائي (After 12:00 PM)</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()">
+                    <i class="ki-duotone ki-trash fs-4"></i>
                 </button>
             </div>
         </div>
@@ -191,6 +196,8 @@
 <script>
     var table;
     var tableId = 'placement_tests_table';
+    var filterFields = ['#search_text', '#test_date', '#test_time', '#preferred_days', '#preferred_time'];
+    
     var columns = [
         { 
             data: "id", 
@@ -213,29 +220,11 @@
     ];
 
     function resetFilters() {
-        $('#search_text, #filter_test_date, #filter_test_time, #filter_gender').val('');
-        table.ajax.reload();
+        $(filterFields.join(',')).val('');
+        table.draw();
     }
 
     $(document).ready(function() {
-        // Initialize DataTable with filters
-        table = $('#' + tableId).DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '{{ route("placement_tests.list") }}',
-                data: function(d) {
-                    d.search_text = $('#search_text').val();
-                    d.test_date = $('#filter_test_date').val();
-                    d.test_time = $('#filter_test_time').val();
-                    d.gender = $('#filter_gender').val();
-                }
-            },
-            columns: columns,
-            order: [[2, 'desc']],
-            language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json" }
-        });
-
         $(document).on('click', '.confirm-payment-btn', function() {
             var id = $(this).data('id');
             Swal.fire({

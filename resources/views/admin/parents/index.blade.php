@@ -29,7 +29,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-bold text-gray-700">صلة القرابة</label>
-                <select id="filter_relationship" class="form-select">
+                <select id="relationship" name="relationship" class="form-select">
                     <option value="">الكل</option>
                     <option value="father">أب (Father)</option>
                     <option value="mother">أم (Mother)</option>
@@ -39,11 +39,8 @@
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="button" class="btn btn-info w-100" onclick="table.ajax.reload()">
-                    <i class="ki-duotone ki-magnifier fs-4 me-1"></i> بحث
-                </button>
-                <button type="button" class="btn btn-light w-100" onclick="resetFilters()">
-                    إعادة ضبط
+                <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()">
+                    <i class="ki-duotone ki-trash fs-4 me-1"></i> مسح الفلاتر
                 </button>
             </div>
         </div>
@@ -112,6 +109,8 @@
 <script>
     var table;
     var tableId = 'parents_table';
+    var filterFields = ['#search_text', '#relationship'];
+
     var columns = [
         { data: "id", name: "id", orderable: false, searchable: false, render: function(data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "name", name: "name", orderable: true },
@@ -124,25 +123,11 @@
     ];
 
     function resetFilters() {
-        $('#search_text, #filter_relationship').val('');
-        table.ajax.reload();
+        $(filterFields.join(',')).val('');
+        table.draw();
     }
 
     $(document).ready(function() {
-        table = $('#' + tableId).DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '{{ route("parents.list") }}',
-                data: function(d) {
-                    d.search_text = $('#search_text').val();
-                    d.relationship = $('#filter_relationship').val();
-                }
-            },
-            columns: columns,
-            language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json" }
-        });
-
         $(document).on('click', '.view-children', function() {
             var id = $(this).data('id');
             $('#children_content').html('<div class="text-center"><span class="spinner-border w-40px h-40px" role="status"></span></div>');
