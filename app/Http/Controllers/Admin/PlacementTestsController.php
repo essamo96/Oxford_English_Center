@@ -32,12 +32,6 @@ class PlacementTestsController extends Controller
         if ($request->has('gender') && $request->gender != '') {
             $tests->where('students.gender', $request->gender);
         }
-        if ($request->has('preferred_days') && $request->preferred_days != '') {
-            $tests->where('students.preferred_days', 'like', '%' . $request->preferred_days . '%');
-        }
-        if ($request->has('preferred_time') && $request->preferred_time != '') {
-            $tests->where('students.preferred_time', $request->preferred_time);
-        }
         if ($request->has('search_text') && $request->search_text != '') {
             $search = $request->search_text;
             $tests->where(function($q) use ($search) {

@@ -32,11 +32,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" width="600" class="content text-center">
                     <tr>
                         <td align="center">
-                            @if(isset($logoCid))
-                                <img src="{{ $logoCid }}" alt="Oxford English Centre" width="140" style="display: block; width: 140px; max-width: 180px; border-radius: 4px;">
-                            @else
-                                <img src="https://ui-avatars.com/api/?name=Oxford&background=002147&color=fff&size=120&font-size=0.33" alt="Oxford English Centre" width="140" style="display: block; width: 140px; border-radius: 4px;">
-                            @endif
+                            <img src="{{ $message->embed(public_path('OXFORD-LOGO.jpg')) }}" alt="Oxford English Centre" width="200" style="display: block; width: 200px; max-width: 250px;">
                             <h1 style="margin-top: 15px; font-size: 24px; color: #002147;">{{ $mysettings->name ?? 'Oxford English Centre' }}</h1>
                         </td>
                     </tr>

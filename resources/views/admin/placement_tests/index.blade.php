@@ -36,24 +36,16 @@
                 <input type="text" id="test_time" class="form-control" placeholder="مثال: 10:00 AM">
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold text-gray-700">الأيام المفضلة</label>
-                <select id="preferred_days" class="form-select">
+                <label class="form-label fw-bold text-gray-700">الجنس</label>
+                <select id="gender" class="form-select">
                     <option value="">الكل</option>
-                    <option value="SAT-MON-WED">سبت - اثنين - أربعاء</option>
-                    <option value="SUN-TUE-THU">أحد - ثلاثاء - خميس</option>
+                    <option value="male">ذكر (Male)</option>
+                    <option value="female">أنثى (Female)</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold text-gray-700">الوقت المفضل</label>
-                <select id="preferred_time" class="form-select">
-                    <option value="">الكل</option>
-                    <option value="Morning">صباحي (Before 12:00 PM)</option>
-                    <option value="Noon">مسائي (After 12:00 PM)</option>
-                </select>
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
+            <div class="col-md-3 d-flex align-items-end">
                 <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()">
-                    <i class="ki-duotone ki-trash fs-4"></i>
+                    <i class="ki-duotone ki-trash fs-4 me-1"></i> مسح الفلاتر
                 </button>
             </div>
         </div>
@@ -196,7 +188,7 @@
 <script>
     var table;
     var tableId = 'placement_tests_table';
-    var filterFields = ['#search_text', '#test_date', '#test_time', '#preferred_days', '#preferred_time'];
+    var filterFields = ['#search_text', '#test_date', '#test_time', '#gender'];
     
     var columns = [
         { 
