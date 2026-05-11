@@ -26,7 +26,7 @@ Route::get('/clear-cache', function () {
 });
 
 Route::get('/run-queue', function () {
-    Artisan::call('queue:work', ['--stop-when-empty' => true]);
+    Artisan::call('queue:work');
     return "Queue worker finished processing all pending jobs!";
 });
 
