@@ -528,6 +528,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('placement_tests/status', ['as' => 'placement_tests.status', 'uses' => 'PlacementTestsController@postStatus']);
     Route::post('placement_tests/confirm-payment/{id}', ['as' => 'placement_tests.confirm_payment', 'uses' => 'PlacementTestsController@confirmPayment']);
     Route::post('placement_tests/score/{id}', ['as' => 'placement_tests.score', 'uses' => 'PlacementTestsController@postScore']);
+    Route::post('placement_tests/send-email', ['as' => 'placement_tests.send_email', 'uses' => 'PlacementTestsController@sendBatchEmail']);
 
     // File Manager
     Route::get('file-manager', ['as' => 'admin.file_manager', 'uses' => 'FileManagerController@index']);

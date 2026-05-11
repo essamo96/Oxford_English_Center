@@ -14,9 +14,22 @@ class ParentsController extends Controller
         return view('admin.parents.index');
     }
 
-    public function getList()
+    public function getList(Request $request)
     {
         $parents = Parents::withCount('students')->select(['id', 'name', 'phone', 'email', 'relationship', 'created_at']);
+
+        // Apply Filters
+        if ($request->has('search_text') && $request->search_text != '') {
+            $search = $request->search_text;
+            $parents->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+        if ($request->has('relationship') && $request->relationship != '') {
+            $parents->where('relationship', $request->relationship);
+        }
 
         return DataTables::of($parents)
             ->addColumn('action', function ($parent) {

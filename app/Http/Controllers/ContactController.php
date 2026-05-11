@@ -7,6 +7,7 @@ use Config;
 use Carbon\Carbon;
 use App\Models\Contacts;
 use App\Models\Students;
+use App\Mail\WelcomeStudentMail;
 use Illuminate\Http\Request;
 use App\Mail\NewStudentEmail;
 use Illuminate\Support\Facades\Log;
@@ -185,6 +186,13 @@ class ContactController extends Controller
                 'gender' => $request->input('gender', 0),
             ]);
             $student->save();
+
+            // Send Welcome Email (Queued)
+            try {
+                Mail::to($student->email)->send(new WelcomeStudentMail($student));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+            }
 
             // 3. Handle Placement Test (if requested)
             if ($validated['take_test'] === 'yes') {

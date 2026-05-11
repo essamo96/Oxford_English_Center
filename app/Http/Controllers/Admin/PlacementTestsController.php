@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PlacementTests;
+use App\Mail\PlacementTestMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
 
 class PlacementTestsController extends Controller
@@ -14,9 +16,30 @@ class PlacementTestsController extends Controller
         return view('admin.placement_tests.index');
     }
 
-    public function getList()
+    public function getList(Request $request)
     {
-        $tests = PlacementTests::with(['student', 'paymentMethod'])->select('placement_tests.*');
+        $tests = PlacementTests::with(['student', 'paymentMethod'])
+            ->select('placement_tests.*')
+            ->join('students', 'placement_tests.student_id', '=', 'students.id');
+
+        // Apply Filters
+        if ($request->has('test_date') && $request->test_date != '') {
+            $tests->whereDate('placement_tests.test_date', $request->test_date);
+        }
+        if ($request->has('test_time') && $request->test_time != '') {
+            $tests->where('placement_tests.test_time', 'like', '%' . $request->test_time . '%');
+        }
+        if ($request->has('gender') && $request->gender != '') {
+            $tests->where('students.gender', $request->gender);
+        }
+        if ($request->has('search_text') && $request->search_text != '') {
+            $search = $request->search_text;
+            $tests->where(function($q) use ($search) {
+                $q->where('students.name', 'like', "%$search%")
+                  ->orWhere('students.mobile', 'like', "%$search%")
+                  ->orWhere('students.email', 'like', "%$search%");
+            });
+        }
 
         return DataTables::of($tests)
             ->addColumn('action', function ($test) {
@@ -52,13 +75,7 @@ class PlacementTestsController extends Controller
                 }
                 return 'No Receipt';
             })
-            ->addColumn('record_score', function ($test) {
-                if (in_array($test->status, ['payment_confirmed', 'waiting_for_test'])) {
-                    return '<button class="btn btn-sm btn-success score-btn w-100" data-id="' . $test->id . '" data-name="' . $test->student->name . '"><i class="fa fa-graduation-cap me-1"></i> رصد</button>';
-                }
-                return '<span class="text-muted small">بانتظار الدفع</span>';
-            })
-            ->rawColumns(['action', 'status', 'payment_receipt', 'record_score'])
+            ->rawColumns(['action', 'status', 'payment_receipt'])
             ->make(true);
     }
 
@@ -114,5 +131,32 @@ class PlacementTestsController extends Controller
         $test = PlacementTests::findOrFail($request->id);
         $test->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function sendBatchEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'test_ids' => 'required|array',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+            'test_date' => 'nullable|date',
+            'test_time' => 'nullable|string',
+        ]);
+
+        foreach ($validated['test_ids'] as $id) {
+            $test = PlacementTests::with('student')->findOrFail($id);
+            
+            // Update date/time if provided by admin in the modal
+            if (!empty($validated['test_date'])) $test->test_date = $validated['test_date'];
+            if (!empty($validated['test_time'])) $test->test_time = $validated['test_time'];
+            $test->save();
+
+            // Send Email (Queued)
+            if ($test->student && $test->student->email) {
+                Mail::to($test->student->email)->send(new PlacementTestMail($test, $validated['subject'], $validated['message']));
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Emails sent successfully to selected students.']);
     }
 }

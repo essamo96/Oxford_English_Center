@@ -13,14 +13,59 @@
 @section('page-content')
 @php $active_menu = 'placement_tests'; @endphp
 
+<div class="card shadow-sm mb-8">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <span class="card-label fw-bold fs-3 mb-1 text-info">
+                <i class="ki-duotone ki-filter fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span></i> فلاتر البحث
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-5">
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-gray-700">البحث (الاسم، الجوال، الإيميل)</label>
+                <input type="text" id="search_text" class="form-control" placeholder="ادخل اسم الطالب أو الجوال...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">تاريخ الاختبار</label>
+                <input type="date" id="filter_test_date" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">الوقت</label>
+                <input type="text" id="filter_test_time" class="form-control" placeholder="مثال: 10:00 AM">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">الجنس</label>
+                <select id="filter_gender" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="male">ذكر</option>
+                    <option value="female">أنثى</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="button" class="btn btn-info w-100" onclick="table.ajax.reload()">
+                    <i class="ki-duotone ki-magnifier fs-4 me-1"></i> بحث
+                </button>
+                <button type="button" class="btn btn-light w-100" onclick="resetFilters()">
+                    إعادة ضبط
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
             <span class="card-label fw-bold fs-3 mb-1 text-info">
-                <i class="ki-duotone ki-briefcase fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span></i> إدارة اختبارات تحديد المستوى
+                إدارة اختبارات تحديد المستوى
             </span>
         </div>
         <div class="card-toolbar gap-2">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-send-batch-email">
+                <i class="bi bi-envelope-plus me-1"></i> إرسال إيميل للمحددين
+            </button>
             <a href="{{ url()->previous() }}" class="btn btn-light btn-sm">
                 <i class="bi bi-arrow-right me-1"></i> رجوع
             </a>
@@ -32,7 +77,11 @@
             <table class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center" id="placement_tests_table">
                 <thead>
                     <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                        <th class="w-30px text-start"> # </th>
+                        <th class="w-10px pe-2">
+                            <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
+                                <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#placement_tests_table .form-check-input" value="1" />
+                            </div>
+                        </th>
                         <th class="min-w-150px"> الطالب </th>
                         <th class="min-w-100px"> تاريخ الاختبار </th>
                         <th class="min-w-100px"> الوقت </th>
@@ -40,8 +89,7 @@
                         <th class="min-w-100px"> طريقة الدفع </th>
                         <th class="min-w-120px"> إيصال الدفع </th>
                         <th class="min-w-80px"> العلامة </th>
-                        <th class="min-w-100px"> رصد الدرجة </th>
-                        <th class="text-center min-w-100px pe-4"> العمليات </th>
+                        <th class="text-center min-w-150px pe-4"> العمليات </th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-600 fw-semibold text-center"></tbody>
@@ -85,6 +133,58 @@
         </div>
     </div>
 </div>
+
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إرسال إيميل تأكيد الموعد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="emailForm">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                        <i class="ki-duotone ki-notification-on fs-2hx text-info me-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                        <div class="d-flex flex-column">
+                            <h4 class="mb-1 text-info">تنبيه الموعد</h4>
+                            <span>سيتم إرسال الإيميل للطلاب المحددين في الجدول. يمكنك تعديل التاريخ والوقت إذا لزم الأمر.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-5 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">تاريخ الامتحان</label>
+                            <input type="date" name="test_date" id="modal_test_date" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">وقت الامتحان</label>
+                            <input type="text" name="test_time" id="modal_test_time" class="form-control" placeholder="مثال: 10:00 AM">
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label fw-bold">موضوع الإيميل</label>
+                        <input type="text" name="subject" class="form-control" value="تأكيد موعد اختبار تحديد المستوى - مركز أكسفورد">
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label fw-bold">رسالة الإيميل</label>
+                        <textarea name="message" class="form-control" rows="6">نود إعلامكم بأنه تم تأكيد حجزكم لاختبار تحديد المستوى بنجاح. 
+
+يسعدنا تأكيد الموعد الخاص بكم كما هو موضح أدناه. يرجى التواجد في مقر المركز قبل الموعد بـ 15 دقيقة.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-info" id="send-email-btn">إرسال الآن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @stop
 
 @section('js')
@@ -92,7 +192,16 @@
     var table;
     var tableId = 'placement_tests_table';
     var columns = [
-        { data: "id", name: "id", orderable: false, searchable: false, render: function(data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
+        { 
+            data: "id", 
+            orderable: false, 
+            searchable: false, 
+            render: function(data, type, row) { 
+                return `<div class="form-check form-check-sm form-check-custom form-check-solid">
+                            <input class="form-check-input" type="checkbox" value="${data}" />
+                        </div>`;
+            } 
+        },
         { data: "student.name", name: "student.name", orderable: true },
         { data: "test_date", name: "test_date", orderable: true },
         { data: "test_time", name: "test_time", orderable: true },
@@ -100,11 +209,33 @@
         { data: "payment_method.name", name: "payment_method.name", defaultContent: "N/A" },
         { data: "payment_receipt", name: "payment_receipt", orderable: false, searchable: false },
         { data: "score", name: "score", defaultContent: "-" },
-        { data: "record_score", name: "record_score", orderable: false, searchable: false },
         { data: "action", name: "action", orderable: false, searchable: false }
     ];
 
+    function resetFilters() {
+        $('#search_text, #filter_test_date, #filter_test_time, #filter_gender').val('');
+        table.ajax.reload();
+    }
+
     $(document).ready(function() {
+        // Initialize DataTable with filters
+        table = $('#' + tableId).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("placement_tests.list") }}',
+                data: function(d) {
+                    d.search_text = $('#search_text').val();
+                    d.test_date = $('#filter_test_date').val();
+                    d.test_time = $('#filter_test_time').val();
+                    d.gender = $('#filter_gender').val();
+                }
+            },
+            columns: columns,
+            order: [[2, 'desc']],
+            language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json" }
+        });
+
         $(document).on('click', '.confirm-payment-btn', function() {
             var id = $(this).data('id');
             Swal.fire({
@@ -188,6 +319,53 @@
                             }
                         }
                     });
+                }
+            });
+        });
+
+        // Batch Email Logic
+        $('#btn-send-batch-email').on('click', function() {
+            var selected = [];
+            $('#placement_tests_table tbody input[type="checkbox"]:checked').each(function() {
+                selected.push($(this).val());
+            });
+
+            if (selected.length === 0) {
+                Swal.fire('تنبيه', 'يرجى تحديد طلاب أولاً من الجدول', 'warning');
+                return;
+            }
+
+            $('#emailModal').modal('show');
+        });
+
+        $('#emailForm').on('submit', function(e) {
+            e.preventDefault();
+            var selected = [];
+            $('#placement_tests_table tbody input[type="checkbox"]:checked').each(function() {
+                selected.push($(this).val());
+            });
+
+            var btn = $('#send-email-btn');
+            btn.attr('disabled', true).text('جاري الإرسال...');
+
+            var formData = $(this).serializeArray();
+            selected.forEach(id => formData.push({ name: 'test_ids[]', value: id }));
+
+            $.ajax({
+                url: '{{ route("placement_tests.send_email") }}',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    $('#emailModal').modal('hide');
+                    if (response.success) {
+                        Swal.fire('تم!', response.message, 'success');
+                        table.ajax.reload();
+                    }
+                    btn.attr('disabled', false).text('إرسال الآن');
+                },
+                error: function() {
+                    btn.attr('disabled', false).text('إرسال الآن');
+                    Swal.fire('خطأ!', 'فشل إرسال الإيميلات', 'error');
                 }
             });
         });

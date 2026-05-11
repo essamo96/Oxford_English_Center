@@ -13,6 +13,43 @@
 @section('page-content')
 @php $active_menu = 'parents'; @endphp
 
+<div class="card shadow-sm mb-8">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <span class="card-label fw-bold fs-3 mb-1 text-info">
+                <i class="ki-duotone ki-filter fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span></i> فلاتر البحث
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-5">
+            <div class="col-md-5">
+                <label class="form-label fw-bold text-gray-700">البحث (الاسم، الجوال، الإيميل)</label>
+                <input type="text" id="search_text" class="form-control" placeholder="ادخل اسم ولي الأمر أو الجوال...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-gray-700">صلة القرابة</label>
+                <select id="filter_relationship" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="father">أب (Father)</option>
+                    <option value="mother">أم (Mother)</option>
+                    <option value="brother">أخ (Brother)</option>
+                    <option value="sister">أخت (Sister)</option>
+                    <option value="other">أخرى (Other)</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="button" class="btn btn-info w-100" onclick="table.ajax.reload()">
+                    <i class="ki-duotone ki-magnifier fs-4 me-1"></i> بحث
+                </button>
+                <button type="button" class="btn btn-light w-100" onclick="resetFilters()">
+                    إعادة ضبط
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
@@ -86,7 +123,26 @@
         { data: "action", name: "action", orderable: false, searchable: false }
     ];
 
+    function resetFilters() {
+        $('#search_text, #filter_relationship').val('');
+        table.ajax.reload();
+    }
+
     $(document).ready(function() {
+        table = $('#' + tableId).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("parents.list") }}',
+                data: function(d) {
+                    d.search_text = $('#search_text').val();
+                    d.relationship = $('#filter_relationship').val();
+                }
+            },
+            columns: columns,
+            language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json" }
+        });
+
         $(document).on('click', '.view-children', function() {
             var id = $(this).data('id');
             $('#children_content').html('<div class="text-center"><span class="spinner-border w-40px h-40px" role="status"></span></div>');
