@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,88 +10,96 @@
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; max-width: 100%; }
         table { border-collapse: collapse !important; }
-        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f1f5f9; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
 
-        /* Typography */
-        h1 { color: #002147; font-size: 24px; margin-top: 15px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; }
-        h2 { color: #002147; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
-        p { font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 20px; }
+        /* Professional Typography */
+        h1 { color: #002147; font-size: 24px; margin-top: 15px; font-weight: 700; letter-spacing: -0.5px; }
+        p { font-size: 16px; line-height: 1.6; color: #475569; }
 
-        /* Components */
-        .content-card { background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
-        .accent-bar { background: linear-gradient(90deg, #002147 0%, #003d7a 100%); height: 8px; }
-        .btn { display: inline-block; background-color: #002147; color: #ffffff !important; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px; transition: all 0.3s ease; }
-        
         /* Mobile Styles */
         @media screen and (max-width: 600px) {
-            .container { width: 100% !important; padding: 10px !important; }
-            .content-body { padding: 30px 20px !important; }
-            h1 { font-size: 22px !important; }
+            .content { width: 100% !important; border-radius: 0 !important; }
+            .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+            img { width: 100% !important; height: auto !important; }
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+<body style="margin: 0 !important; padding: 0 !important; background-color: #f8fafc;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <!-- Header Section -->
+        <!-- Header -->
         <tr>
-            <td align="center" style="padding: 40px 0 30px 0;">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container">
+            <td align="center" style="padding: 40px 0 25px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="content text-center">
                     <tr>
                         <td align="center">
-                            <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford English Centre" width="160" style="display: block; width: 160px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
-                            <div style="margin-top: 10px; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">
-                                Oxford English Centre
-                            </div>
+                            @if(isset($logoCid))
+                                <img src="{{ $logoCid }}" alt="Oxford English Centre" width="140" style="display: block; width: 140px; max-width: 180px; border-radius: 4px;">
+                            @else
+                                <img src="https://ui-avatars.com/api/?name=Oxford&background=002147&color=fff&size=120&font-size=0.33" alt="Oxford English Centre" width="140" style="display: block; width: 140px; border-radius: 4px;">
+                            @endif
+                            <h1 style="margin-top: 15px; font-size: 24px; color: #002147;">{{ $mysettings->name ?? 'Oxford English Centre' }}</h1>
                         </td>
                     </tr>
                 </table>
             </td>
         </tr>
         
-        <!-- Main Content -->
+        <!-- Main Content Body -->
         <tr>
             <td align="center" style="padding: 0 0 50px 0;">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container content-card">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="content" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
+                    <!-- Top Accent Border -->
                     <tr>
-                        <td class="accent-bar"></td>
+                        <td style="background: linear-gradient(to right, #002147, #003d7a); height: 6px;"></td>
                     </tr>
+                    
                     <tr>
-                        <td class="content-body" style="padding: 50px;">
+                        <td class="mobile-padding" style="padding: 45px 50px;">
                             @yield('content')
                         </td>
                     </tr>
                     
-                    <!-- Sign-off -->
+                    <!-- Professional Sign-off -->
                     <tr>
-                        <td style="padding: 0 50px 50px 50px;">
-                            <div style="border-top: 1px solid #f1f5f9; padding-top: 30px;">
-                                <p style="font-size: 14px; color: #94a3b8; margin: 0;">Sincerely,</p>
-                                <strong style="color: #002147; font-size: 16px;">The Oxford Administration Team</strong>
-                            </div>
+                        <td class="mobile-padding" style="padding: 0 50px 45px 50px;">
+                            <p style="font-size: 15px; color: #64748b; margin: 0; border-top: 1px solid #f1f5f9; padding-top: 30px;">
+                                Best regards,<br>
+                                <strong style="color: #002147; font-size: 16px;">{{ $mysettings->name ?? 'Oxford English Centre Team' }}</strong>
+                            </p>
                         </td>
                     </tr>
                 </table>
             </td>
         </tr>
         
-        <!-- Footer Section -->
+        <!-- Footer Links & Ownership -->
         <tr>
-            <td align="center" style="padding-bottom: 60px;">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="text-align: center;">
+            <td align="center" style="padding: 0 0 50px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="content" style="text-align: center;">
                     <tr>
                         <td style="padding-bottom: 25px;">
-                            <div style="display: inline-block;">
-                                <a href="https://facebook.com" style="margin: 0 8px;"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" width="20" style="opacity: 0.5;"></a>
-                                <a href="https://instagram.com" style="margin: 0 8px;"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" style="opacity: 0.5;"></a>
-                                <a href="https://twitter.com" style="margin: 0 8px;"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="20" style="opacity: 0.5;"></a>
-                            </div>
+                            @if(isset($social) && count($social) > 0)
+                                @foreach($social as $item)
+                                    @php
+                                        $icon = 'https://cdn-icons-png.flaticon.com/512/733/733547.png';
+                                        if(stripos($item->name, 'twitter') !== false) $icon = 'https://cdn-icons-png.flaticon.com/512/733/733579.png';
+                                        if(stripos($item->name, 'instagram') !== false) $icon = 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png';
+                                        if(stripos($item->name, 'youtube') !== false) $icon = 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png';
+                                        if(stripos($item->name, 'whatsapp') !== false) $icon = 'https://cdn-icons-png.flaticon.com/512/733/733585.png';
+                                    @endphp
+                                    <a href="{{ $item->url }}" style="display: inline-block; margin: 0 10px; text-decoration: none; opacity: 0.8; transition: opacity 0.2s;">
+                                        <img src="{{ $icon }}" alt="{{ $item->name }}" width="22" style="width: 22px; height: 22px; filter: grayscale(100%);">
+                                    </a>
+                                @endforeach
+                            @endif
                         </td>
                     </tr>
                     <tr>
                         <td style="font-size: 13px; color: #94a3b8; line-height: 1.8;">
-                            &copy; {{ date('Y') }} <strong>Oxford English Centre</strong>. All rights reserved.<br>
-                            {{ $mysettings->address ?? 'Palestine, Gaza' }}<br>
-                            <a href="{{ url('/') }}" style="color: #002147; text-decoration: none; font-weight: 600;">Visit our Website</a> | <a href="mailto:{{ $mysettings->contact_email }}" style="color: #002147; text-decoration: none; font-weight: 600;">Support Center</a>
+                            &copy; {{ date('Y') }} {{ $mysettings->name ?? 'Oxford English Centre' }}. All rights reserved.<br>
+                            {{ $mysettings->address ?? '' }} @if(isset($mysettings->phone)) | {{ $mysettings->phone }} @endif
+                            <br>
+                            <span style="font-size: 12px;">You received this email because you are a registered student at our center.</span>
                         </td>
                     </tr>
                 </table>

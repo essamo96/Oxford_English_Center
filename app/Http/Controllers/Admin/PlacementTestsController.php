@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PlacementTests;
 use App\Mail\PlacementTestMail;
-use App\Mail\PaymentConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
@@ -88,20 +87,10 @@ class PlacementTestsController extends Controller
 
     public function confirmPayment($id)
     {
-        $test = PlacementTests::with('student')->findOrFail($id);
+        $test = PlacementTests::findOrFail($id);
         $test->status = 'payment_confirmed';
         $test->save();
-
-        // Send Payment Confirmation Email (Queued)
-        if ($test->student && $test->student->email) {
-            try {
-                Mail::to($test->student->email)->send(new PaymentConfirmationMail($test));
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to send payment email: ' . $e->getMessage());
-            }
-        }
-
-        return response()->json(['success' => true, 'message' => 'Payment confirmed and receipt sent successfully.']);
+        return response()->json(['success' => true, 'message' => 'Payment confirmed successfully.']);
     }
 
     public function postScore(Request $request, $id)

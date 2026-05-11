@@ -2,35 +2,32 @@
 
 @section('content')
 <div style="text-align: center;">
-    <div style="margin-bottom: 25px;">
-        <span style="display: inline-block; padding: 6px 14px; background-color: #eff6ff; border-radius: 50px; font-size: 13px; font-weight: 700; color: #1d4ed8; text-transform: uppercase; letter-spacing: 1px;">
-            Appointment Confirmed
+    <div style="margin-bottom: 30px;">
+        <span style="display: inline-block; padding: 8px 16px; background-color: #e0f2fe; border-radius: 50px; font-size: 14px; font-weight: 600; color: #0369a1;">
+            📅 Appointment Confirmation | تأكيد موعد
         </span>
     </div>
 
-    <h1>Assessment Scheduled</h1>
-    
-    <p style="margin-top: 20px; text-align: left;">
-        Dear {{ $test->student->name }},<br><br>
+    <h1 style="color: #002147; font-size: 24px; margin-bottom: 20px;">Dear {{ $test->student->name }},</h1>
+
+    <div style="color: #475569; font-size: 16px; margin-bottom: 30px; line-height: 1.8; text-align: left;">
         {!! nl2br(e($customMessage)) !!}
-    </p>
+    </div>
 
     <!-- Appointment Box -->
-    <div style="background: linear-gradient(135deg, #002147 0%, #003d7a 100%); border-radius: 15px; padding: 35px; margin: 35px 0; color: #ffffff;">
+    <div style="background-color: #f0f9ff; border: 2px solid #bae6fd; border-radius: 16px; padding: 30px; margin-bottom: 40px;">
         <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-                <td align="center" style="padding-bottom: 20px;">
-                    <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; text-align: center;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/2838/2838779.png" width="30" style="vertical-align: middle; filter: brightness(0) invert(1);">
-                    </div>
+                <td align="center" style="padding-bottom: 15px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2838/2838779.png" width="50" alt="Calendar">
                 </td>
             </tr>
             <tr>
                 <td align="center">
-                    <div style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">
+                    <div style="font-size: 20px; font-weight: 800; color: #002147; margin-bottom: 5px;">
                         {{ \Carbon\Carbon::parse($test->test_date)->format('l, F j, Y') }}
                     </div>
-                    <div style="font-size: 18px; font-weight: 400; opacity: 0.9;">
+                    <div style="font-size: 18px; font-weight: 600; color: #0369a1;">
                         at {{ $test->test_time }}
                     </div>
                 </td>
@@ -38,14 +35,15 @@
         </table>
     </div>
 
-    <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: left;">
-        <p style="color: #92400e; font-size: 14px; margin: 0; line-height: 1.5;">
-            <strong>Pro-tip:</strong> Please arrive at the center at least 15 minutes before your scheduled time for registration. Don't forget to bring your ID.
-        </p>
-    </div>
+    <p style="color: #64748b; font-size: 14px; font-style: italic; margin-bottom: 30px;">
+        Please arrive at the center 15 minutes before your scheduled time.
+        <br>يرجى الحضور إلى المركز قبل 15 دقيقة من الموعد المحدد.
+    </p>
 
-    <div style="margin-top: 40px;">
-        <a href="https://maps.google.com/?q={{ urlencode($mysettings->address ?? 'Oxford English Centre') }}" class="btn">View Center Location</a>
+    <div style="margin: 40px 0;">
+        <a href="https://maps.google.com/?q={{ urlencode($mysettings->address ?? 'Oxford English Centre') }}" style="background-color: #0369a1; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">
+            Get Directions | موقع المركز
+        </a>
     </div>
 </div>
 @endsection

@@ -2,32 +2,58 @@
 
 namespace App\Mail;
 
-use App\Models\PlacementTests;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PaymentConfirmationMail extends Mailable implements ShouldQueue
+class PaymentConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $test;
-
     /**
      * Create a new message instance.
+     *
+     * @return void
      */
-    public function __construct(PlacementTests $test)
+    public function __construct()
     {
-        $this->test = $test;
+        //
     }
 
     /**
-     * Build the message.
+     * Get the message envelope.
+     *
+     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function build()
+    public function envelope()
     {
-        return $this->subject('Payment Received - Oxford English Centre')
-                    ->view('emails.payment_confirmation');
+        return new Envelope(
+            subject: 'Payment Confirmation Mail',
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     *
+     * @return \Illuminate\Mail\Mailables\Content
+     */
+    public function content()
+    {
+        return new Content(
+            view: 'view.name',
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array
+     */
+    public function attachments()
+    {
+        return [];
     }
 }
