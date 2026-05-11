@@ -177,7 +177,7 @@ class ContactController extends Controller
                 'preferred_time' => $request->input('preferred_time'),
                 'job' => $validated['program_type'] === 'adult' ? ($validated['major'] ?? 'Adult') : 'Student (Kid)',
                 'major' => $validated['program_type'] === 'adult' ? ($validated['major'] ?? null) : null,
-                'current_level' => $validated['current_level'],
+                'current_level' => $validated['current_level'] ?? null,
                 'program_type' => $validated['program_type'],
                 'parent_id' => $parentId,
                 'email' => $validated['email'],

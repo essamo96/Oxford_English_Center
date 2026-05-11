@@ -94,10 +94,11 @@ window.selectTestChoice = function(choice) {
     document.getElementById('take_test_hidden').value = choice;
     document.getElementById('test-scheduling-fields').style.display = takeTest ? 'block' : 'none';
     
-    // Toggle level selection only for adults skipping the test
+    // Toggle level selection when skipping the test
     const levelSection = document.getElementById('skip-test-level-selection');
     if (levelSection) {
-        levelSection.style.display = (!takeTest && selectedProgram === 'adult') ? 'block' : 'none';
+        console.log('Test Choice:', choice, 'Program:', selectedProgram);
+        levelSection.style.display = (!takeTest && selectedProgram !== '') ? 'block' : 'none';
     }
 
     document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
@@ -213,8 +214,8 @@ function validateCurrentStep() {
         if (!document.getElementById('take_test_hidden').value) {
             Swal.fire({ icon: 'warning', title: getMsg('testWarning'), customClass: { popup: 'swal-oxford-popup' } });
             isValid = false;
-        } else if (!takeTest && selectedProgram === 'adult') {
-            // Level is mandatory if skipping test for adults
+        } else if (!takeTest && selectedProgram !== '') {
+            // Level is mandatory if skipping test
             if (!$('input[name="current_level"]:checked').val()) {
                 Swal.fire({ icon: 'warning', title: 'Please select your level (يرجى تحديد المستوى)', customClass: { popup: 'swal-oxford-popup' } });
                 isValid = false;
