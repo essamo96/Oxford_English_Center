@@ -1,0 +1,182 @@
+/* 
+   OXFORD ACADEMY - MODERN UI SYSTEM 2026 
+   Core Design Tokens & Global Component Library
+*/
+
+:root {
+    /* ── COLORS ── */
+    --oxford-blue: #002147;
+    --oxford-gold: #FDC800;
+    --oxford-gold-dark: #e0b000;
+    --oxford-gold-soft: rgba(253, 200, 0, 0.1);
+    
+    /* Neutral Palette */
+    --text-main: #1e293b;
+    --text-secondary: #64748b;
+    --bg-main: #f8fafc;
+    --bg-lighter: #ffffff;
+    --border-color: #e2e8f0;
+    
+    /* Semantic Colors */
+    --success: #10b981;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --warning: #f59e0b;
+    
+    /* ── TYPOGRAPHY ── */
+    --font-main: 'Inter', sans-serif;
+    --font-display: 'Sora', 'Outfit', sans-serif;
+    
+    /* ── EFFECTS ── */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0, 33, 71, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 33, 71, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-premium: 0 25px 50px -12px rgba(0, 33, 71, 0.15);
+    --glass: rgba(255, 255, 255, 0.85);
+    --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* ── GLOBAL DEFAULTS ── */
+body {
+    font-family: var(--font-main);
+    color: var(--text-main);
+    background-color: var(--bg-main);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--oxford-blue);
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--oxford-blue);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--oxford-gold-dark);
+}
+
+/* ── LAYOUT UTILITIES ── */
+.ox-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.ox-section {
+    padding: 100px 0;
+}
+
+/* ── PREMIUM COMPONENTS ── */
+
+/* Cards */
+.ox-card {
+    background: var(--bg-lighter);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    padding: 30px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.ox-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+}
+
+/* Buttons */
+.ox-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    gap: 10px;
+    position: relative;
+}
+
+.ox-btn-primary {
+    background: var(--oxford-blue);
+    color: #fff;
+}
+
+.ox-btn-primary:hover {
+    background: #00152e;
+    color: #fff;
+    transform: scale(1.02);
+}
+
+.ox-btn-gold {
+    background: var(--oxford-gold);
+    color: var(--oxford-blue);
+}
+
+.ox-btn-gold:hover {
+    background: var(--oxford-gold-dark);
+    transform: scale(1.02);
+}
+
+/* Form Controls */
+.ox-input {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border-color);
+    background: #f8fafc;
+    transition: var(--transition);
+}
+
+.ox-input:focus {
+    outline: none;
+    border-color: var(--oxford-blue);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 33, 71, 0.1);
+}
+
+/* Badges */
+.ox-badge {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.ox-badge-success { background: #dcfce7; color: #166534; }
+.ox-badge-warning { background: #fef9c3; color: #854d0e; }
+.ox-badge-danger { background: #fee2e2; color: #991b1b; }
+
+/* Navbar Specific */
+.ox-navbar {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.ox-animate-up {
+    animation: slideUp 0.6s ease-out forwards;
+}
