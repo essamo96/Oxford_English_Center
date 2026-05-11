@@ -20,11 +20,16 @@ class Students extends Authenticatable
     protected $table = 'students';
     protected $fillable = [
         'name',
+        'name_en',
         'username',
         'password',
         'mobile',
         'dob',
         'job',
+        'major',
+        'current_level',
+        'program_type',
+        'parent_id',
         'email',
         'join_date',
         'exam_date',
@@ -53,16 +58,31 @@ class Students extends Authenticatable
         return $this->hasMany('App\Models\GroupStudents', 'student_id', 'id');
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(Parents::class, 'parent_id');
+    }
+
+    public function placementTests()
+    {
+        return $this->hasMany(PlacementTests::class, 'student_id');
+    }
+
     //////////////////////////////////////////////
-    function addStudent($name, $username, $password, $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status, $delaying = 0, $gender)
+    function addStudent($name, $name_en, $username, $password, $mobile, $dob, $job, $major, $current_level, $program_type, $parent_id, $email, $join_date, $exam_date, $exam_degree, $status, $delaying = 0, $gender)
     {
         try {
             $this->name = $name;
+            $this->name_en = $name_en;
             $this->username = $username;
             $this->password = $password;
             $this->mobile = $mobile;
             $this->dob = $dob;
             $this->job = $job;
+            $this->major = $major;
+            $this->current_level = $current_level;
+            $this->program_type = $program_type;
+            $this->parent_id = $parent_id;
             $this->delaying = $delaying;
             $this->email = $email;
             $this->join_date = $join_date;

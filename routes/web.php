@@ -503,6 +503,32 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // partners Route
     // require __DIR__ . '/admin/partners.php';
 
+    // Parents Route
+    Route::get('parents', ['as' => 'parents.view', 'uses' => 'ParentsController@getIndex']);
+    Route::get('parents/list', ['as' => 'parents.list', 'uses' => 'ParentsController@getList']);
+    Route::get('parents/children', ['as' => 'parents.children', 'uses' => 'ParentsController@getChildren']);
+    Route::post('parents/delete', ['as' => 'parents.delete', 'uses' => 'ParentsController@postDelete']);
+
+    // Payment Methods Route
+    Route::get('payment_methods', ['as' => 'payment_methods.view', 'uses' => 'PaymentMethodsController@getIndex']);
+    Route::get('payment_methods/list', ['as' => 'payment_methods.list', 'uses' => 'PaymentMethodsController@getList']);
+    Route::get('payment_methods/add', ['as' => 'payment_methods.add', 'uses' => 'PaymentMethodsController@getAdd']);
+    Route::post('payment_methods/add', ['as' => 'payment_methods.add', 'uses' => 'PaymentMethodsController@postAdd']);
+    Route::get('payment_methods/edit/{id}', ['as' => 'payment_methods.edit', 'uses' => 'PaymentMethodsController@getEdit']);
+    Route::post('payment_methods/edit/{id}', ['as' => 'payment_methods.edit', 'uses' => 'PaymentMethodsController@postEdit']);
+    Route::post('payment_methods/delete', ['as' => 'payment_methods.delete', 'uses' => 'PaymentMethodsController@postDelete']);
+    Route::post('payment_methods/status', ['as' => 'payment_methods.status', 'uses' => 'PaymentMethodsController@postStatus']);
+
+    // Placement Tests Route
+    Route::get('placement_tests', ['as' => 'placement_tests.view', 'uses' => 'PlacementTestsController@getIndex']);
+    Route::get('placement_tests/list', ['as' => 'placement_tests.list', 'uses' => 'PlacementTestsController@getList']);
+    Route::get('placement_tests/edit/{id}', ['as' => 'placement_tests.edit', 'uses' => 'PlacementTestsController@getEdit']);
+    Route::post('placement_tests/edit/{id}', ['as' => 'placement_tests.edit', 'uses' => 'PlacementTestsController@postEdit']);
+    Route::post('placement_tests/delete', ['as' => 'placement_tests.delete', 'uses' => 'PlacementTestsController@postDelete']);
+    Route::post('placement_tests/status', ['as' => 'placement_tests.status', 'uses' => 'PlacementTestsController@postStatus']);
+    Route::post('placement_tests/confirm-payment/{id}', ['as' => 'placement_tests.confirm_payment', 'uses' => 'PlacementTestsController@confirmPayment']);
+    Route::post('placement_tests/score/{id}', ['as' => 'placement_tests.score', 'uses' => 'PlacementTestsController@postScore']);
+
     // File Manager
     Route::get('file-manager', ['as' => 'admin.file_manager', 'uses' => 'FileManagerController@index']);
     Route::get('file_manager', ['uses' => 'FileManagerController@index']); // Fallback underscore

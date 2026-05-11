@@ -97,7 +97,7 @@
                                 <div class="text-center mb-11">
                                     <!--begin::Title-->
                                     <h1 class="text-dark fw-bolder mb-3">تسجيل الدخول</h1>
-                                    <div class="text-gray-500 fw-semibold fs-6">لوحة تحكم إدارة أوكسفورد</div>
+                                    <div class="text-gray-500 fw-semibold fs-6">لوحة تحكم إدارة أكسفورد</div>
                                     <!--end::Title-->
                                 </div>
                                 <!--begin::Heading-->
