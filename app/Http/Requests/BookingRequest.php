@@ -27,7 +27,7 @@ class BookingRequest extends FormRequest
             'email' => 'required|email|max:100',
             'dob' => 'required|date',
             'current_level' => 'required_if:take_test,no',
-            'take_test' => 'required_if:program_type,adult|nullable|in:yes,no',
+            'take_test' => 'required|in:yes,no',
             'address' => 'required|string',
             'health_status' => 'required|in:yes,no',
             'health_notes' => 'required_if:health_status,yes',

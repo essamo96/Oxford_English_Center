@@ -1,6 +1,4 @@
 /node_modules
-/public_html/hot
-/public_html/storage
 /storage/*.key
 /vendor
 /.idea
@@ -14,11 +12,6 @@ yarn-error.log
 /nbproject/private/
 /storage/logs
 /storage/framework
-/public/uploads
-/public/File
-/public/storage
-/public/Admin_Certifcate
-/public/assets
 *.zip
 *.rar
 *.mp4
