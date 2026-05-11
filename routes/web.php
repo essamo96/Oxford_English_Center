@@ -24,6 +24,12 @@ Route::get('/clear-cache', function () {
     Artisan::call('view:clear');
     return "Application cache cleared successfully!";
 });
+
+Route::get('/run-queue', function () {
+    Artisan::call('queue:work', ['--stop-when-empty' => true]);
+    return "Queue worker finished processing all pending jobs!";
+});
+
 Route::group(['middleware' => ['web']], function () {
     Route::get('/generate-qr-code', 'HomepageController@generateQRCode');
     Route::get('/', ['as' => 'homepage.view', 'uses' => 'HomepageController@getIndex']);
