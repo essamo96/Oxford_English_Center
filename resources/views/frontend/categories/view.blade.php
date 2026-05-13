@@ -1,13 +1,13 @@
 @extends('frontend.layouts.master')
-@section('title', $category_info->name)
+@section('title', optional($category_info)->name ?? 'Category')
 @section('content')
-<div class="inner-page-banner-area" style="background-image: url('{{ url($category_info->color?$category_info->color:'assets/oxford/img/banner/1.jpg')}}');">
+<div class="inner-page-banner-area" style="background-image: url('{{ url(optional($category_info)->color ? $category_info->color : 'assets/oxford/img/banner/1.jpg')}}');">
     <div class="container">
         <div class="pagination-area">
-            <h1>{{$category_info->name}}</h1>
+            <h1>{{ optional($category_info)->name ?? 'Category' }}</h1>
             <ul>
                 <li><a href="#">Home</a> - </li>
-                <li>{{$category_info->name}}</li>
+                <li>{{ optional($category_info)->name ?? 'Category' }}</li>
             </ul>
         </div>
     </div>
@@ -64,7 +64,7 @@
                     @endforeach
                     @else
                     <div class="content-box text-center">
-                        <h2>Now {{$category_info->name}} Untill Now</h2>
+                        <h2>No entries for {{ optional($category_info)->name ?? 'this category' }} found yet.</h2>
                     </div>
                     @endif
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">

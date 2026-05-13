@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "title": "Oxford English Centre",
+        "description": "POSITIVE ▪ INCLUSIVE ▪ RESULTS FOCUSED",
+        "more_desc": "We are one of the Gaza’s leading providers of quality Communicative English Language Courses.",
+        "logo": "logo_1523901873.png",
+        "tags": "IELTS,ENGLISH,8.5,SCORE 9,TOEFL,TEST,EXAM,SPEAKING,WRITING,READING,UNIVERSITY,SCHOLARSHIPS,SCHOLARSHIP,SAID FOUNDATION,CHEVENING,HESPAL,FULBRIGHT,OXFORD BROOKES,HANI QADDUMI,DAD,ST ANDREWS",
+        "mobile": "97082626119",
+        "address": "304,Third Floor, Mushtaha Tower 6, Jamal Abdelnasr St,Gaza.",
+        "donars": 46800,
+        "clients": 1560,
+        "happy": 23400,
+        "tickects": 2160,
+        "contact_email": "info@oxford.ps",
+        "created_at": "2017-09-03 09:51:52",
+        "updated_at": "2019-08-20 02:58:23",
+        "deleted_at": null
+    }
+]

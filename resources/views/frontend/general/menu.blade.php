@@ -7,8 +7,8 @@
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                         <div class="header-top-left">
                             <ul>
-                                <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Tel:+{{$mysettings->mobile}}"> + {{$mysettings->mobile}} </a></li>
-                                <li><i class="fa fa-envelope" aria-hidden="true"></i><a href="mailto:{{$mysettings->contact_email}}">{{$mysettings->contact_email}}</a></li>
+                                <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Tel:+{{ optional($mysettings)->mobile }}"> + {{ optional($mysettings)->mobile }} </a></li>
+                                <li><i class="fa fa-envelope" aria-hidden="true"></i><a href="mailto:{{ optional($mysettings)->contact_email }}">{{ optional($mysettings)->contact_email }}</a></li>
                             </ul>
                         </div>
                     </div>

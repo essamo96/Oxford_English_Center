@@ -92,7 +92,7 @@ class CategoriesController extends AdminController {
                     'name' => 'required',
                     'sort' => 'required|numeric',
                     'tags' => 'required',
-                    'color' => 'required',
+                    'color' => 'nullable',
                     'status' => 'required|numeric|in:0,1',
                     'in_menu' => 'required|numeric|in:0,1'
         ]);
@@ -169,7 +169,7 @@ class CategoriesController extends AdminController {
                         'name' => 'required',
                         'sort' => 'required|numeric',
                         'tags' => 'required',
-                        'color' => 'required',
+                        'color' => 'nullable',
                         'status' => 'required|numeric|in:0,1',
                         'in_menu' => 'required|numeric|in:0,1',
             ]);

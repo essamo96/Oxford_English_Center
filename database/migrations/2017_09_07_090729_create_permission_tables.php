@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePermissionTables extends Migration
 {
@@ -16,21 +17,25 @@ class CreatePermissionTables extends Migration
         $foreignKeys = config('permission.foreign_keys');
 
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name');
             $table->string('guard_name');
+            $table->string('group_id'); // Added to link with permissions_group
             $table->timestamps();
+            $table->softDeletes(); // Added as per DB
         });
 
         Schema::create($tableNames['roles'], function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name');
             $table->string('guard_name');
+            $table->boolean('status')->default(1); // Added as per DB
             $table->timestamps();
+            $table->softDeletes(); // Added as per DB
         });
 
         Schema::create($tableNames['model_has_permissions'], function (Blueprint $table) use ($tableNames, $foreignKeys) {
-            $table->integer('permission_id')->unsigned();
+            $table->unsignedBigInteger('permission_id')->unsigned();
             $table->morphs('model');
 
             $table->foreign('permission_id')
@@ -42,7 +47,7 @@ class CreatePermissionTables extends Migration
         });
 
         Schema::create($tableNames['model_has_roles'], function (Blueprint $table) use ($tableNames, $foreignKeys) {
-            $table->integer('role_id')->unsigned();
+            $table->unsignedBigInteger('role_id')->unsigned();
             $table->morphs('model');
 
             $table->foreign('role_id')
@@ -54,8 +59,8 @@ class CreatePermissionTables extends Migration
         });
 
         Schema::create($tableNames['role_has_permissions'], function (Blueprint $table) use ($tableNames) {
-            $table->integer('permission_id')->unsigned();
-            $table->integer('role_id')->unsigned();
+            $table->unsignedBigInteger('permission_id')->unsigned();
+            $table->unsignedBigInteger('role_id')->unsigned();
 
             $table->foreign('permission_id')
                 ->references('id')

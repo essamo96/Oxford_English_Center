@@ -1,5 +1,5 @@
 @extends('frontend.layouts.master')
-@section('title', $mysettings->title)
+@section('title', optional($mysettings)->title ?? 'Oxford')
 @section('content')
 <!-- Slider 1 Area Start Here -->
 <div class="slider1-area overlay-default">
@@ -29,13 +29,13 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <h1 class="about-title">{{ $about->title}}</h1>
-                <div class="about-sub-title">{!! $about->details !!}</div>
+                <h1 class="about-title">{{ optional($about)->title ?? 'About Us' }}</h1>
+                <div class="about-sub-title">{!! optional($about)->details ?? '' !!}</div>
             </div>
             <div class="col-md-6">
                 <div class="video-area2 overlay-video bg-common-style" style="background-image: url('{{ url('assets/oxford/img/banner/1.jpg')}}');">
                     <div class="video-content">
-                        <a class="play-btn popup-youtube" href="{{ $about->url}}"><i class="fa fa-play" aria-hidden="true"></i></a>
+                        <a class="play-btn popup-youtube" href="{{ optional($about)->url ?? '#' }}"><i class="fa fa-play" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </div>
@@ -44,7 +44,7 @@
 </div>
 <!-- About 2 Area End Here -->
 <div class="service-bottom-area section-padding">
-    <div class="service-bottom-area-bg" style="background-image: url({{$timetable->banner}})"></div>
+    <div class="service-bottom-area-bg" style="background-image: url({{ optional($timetable)->banner ?? '' }})"></div>
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-lg-6 col-md-offset-6 col-lg-offset-6 col-sm-12 col-xs-12">
@@ -53,46 +53,46 @@
                         <div class="service-icon-hexagon">
                             <div class="hex">
                                 <div class="service-icon">
-                                    <i class="fa {{ $timetable->url}}"></i>
+                                    <i class="fa {{ optional($timetable)->url ?? 'fa-clock-o' }}"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="service-details">
-                            <h4>{{ $timetable->title}}</h4>
-                            {!! $timetable->details !!}
+                            <h4>{{ optional($timetable)->title ?? 'Timetable' }}</h4>
+                            {!! optional($timetable)->details ?? '' !!}
                         </div>
                     </div>
                     <div class="single-service">
                         <div class="service-icon-hexagon">
                             <div class="hex">
-                                <div class="service-icon"><i class="fa {{ $teachers->url}}"></i></div>
+                                <div class="service-icon"><i class="fa {{ optional($teachers)->url ?? 'fa-users' }}"></i></div>
                             </div>
                         </div>
                         <div class="service-details">
-                            <h4>{{ $teachers->title}}</h4>
-                            {!! $teachers->details !!}
+                            <h4>{{ optional($teachers)->title ?? 'Teachers' }}</h4>
+                            {!! optional($teachers)->details ?? '' !!}
                         </div>
                     </div>
                     <div class="single-service">
                         <div class="service-icon-hexagon">
                             <div class="hex">
-                                <div class="service-icon"><i class="fa {{ $value->url}}"></i></div>
+                                <div class="service-icon"><i class="fa {{ optional($value)->url ?? 'fa-line-chart' }}"></i></div>
                             </div>
                         </div>
                         <div class="service-details">
-                            <h4>{{ $value->title}}</h4>
-                            {!! $value->details !!}
+                            <h4>{{ optional($value)->title ?? 'Value' }}</h4>
+                            {!! optional($value)->details ?? '' !!}
                         </div>
                     </div>
                     <div class="single-service">
                         <div class="service-icon-hexagon">
                             <div class="hex">
-                                <div class="service-icon"><i class="fa {{ $students->url}}"></i></div>
+                                <div class="service-icon"><i class="fa {{ optional($students)->url ?? 'fa-smile-o' }}"></i></div>
                             </div>
                         </div>
                         <div class="service-details">
-                            <h4>{{ $students->title}}</h4>
-                            {!! $students->details !!}
+                            <h4>{{ optional($students)->title ?? 'Students' }}</h4>
+                            {!! optional($students)->details ?? '' !!}
                         </div>
                     </div>
                 </div>
@@ -137,15 +137,15 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".20s">
-                <h2 class="about-counter title-bar-counter" data-num="{{$mysettings->donars}}">{{$mysettings->donars}}</h2>
+                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->donars ?? 0 }}">{{ optional($mysettings)->donars ?? 0 }}</h2>
                 <p>Total Training Hours</p>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".40s">
-                <h2 class="about-counter title-bar-counter" data-num="{{$mysettings->clients}}">{{$mysettings->clients}}</h2>
+                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->clients ?? 0 }}">{{ optional($mysettings)->clients ?? 0 }}</h2>
                 <p>Total Number of Courses</p>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".60s">
-                <h2 class="about-counter title-bar-counter" data-num="{{$mysettings->happy}}">{{$mysettings->happy}}</h2>
+                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->happy ?? 0 }}">{{ optional($mysettings)->happy ?? 0 }}</h2>
                 <p>Total Number of Students</p>
             </div>
             <!--            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".80s">

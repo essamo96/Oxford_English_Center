@@ -380,6 +380,7 @@ class Students extends Authenticatable
 
             $query = self::query()
                 ->where('status', 0)
+                ->whereNull('deleted_at')
                 ->select(
                     'id',
                     'name',
@@ -436,12 +437,6 @@ class Students extends Authenticatable
                 }
                 if ($dateTo) {
                     $query->whereDate('created_at', '<=', $dateTo);
-                }
-
-                // If no date filters and not explicitly "Show All", default to Today
-                // Note: We use 'all' or empty string to distinguish "Show All" 
-                if (!$dateFrom && !$dateTo && $isToday !== 'all') {
-                    $query->whereDate('created_at', Carbon::today());
                 }
             }
 

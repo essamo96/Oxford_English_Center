@@ -32,136 +32,65 @@ use App\Models\GroupStudents;
 use App\Models\Teachers;
 use App\Models\Socials;
 
-// class AdminController extends BaseController
-// {
-//     public static $data = [];
 
-//     use AuthorizesRequests,
-//         DispatchesJobs,
-//         ValidatesRequests;
+class AdminController extends BaseController
+{
+    public static $data = [];
 
-//     public function __construct()
-//     {
-//         if (Cache::get('lang') !== null) {
-//             App::setLocale(Cache::get('lang'));
-//         } else {
-//             Cache::forever('lang', 'en');
-//             App::setLocale(Cache::get('lang'));
-//         }
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-//         $permission_group = new PermissionsGroup();
-//         self::$data['sidebar'] = $permission_group->getAllParentPermissionGroup();
-//         //    dd(self::$data['sidebar']);
-//         self::$data['settings'] = Settings::where('id', 1)->first();
-//         $route_name = Route::currentRouteName();
-//         // dd($route_name);
-//         $route_data = explode('.', $route_name);
-//         $current_route = $route_data[0];
-//         $init_obj = new \stdClass();
-//         $init_obj->name = '';
-//         $init_obj->parent_id = '';
-//         self::$data['current_route'] = $init_obj;
-//         foreach (self::$data['sidebar'] as $menu_item) {
-//             if ($current_route == $menu_item->name) {
-//                 self::$data['current_route'] = $menu_item;
-//             }
-//             foreach ($menu_item->mychild as $child_item) {
-//                 if ($current_route == $child_item->name) {
-//                     self::$data['current_route'] = $child_item;
-//                     break;
-//                 }
-//             }
-//         }
-//         self::$data['minutes'] = 60 * 24;
-//         self::$data['mysettings'] = Cache::rememberForever('mysettings', function () {
-//             $settings = new Settings();
-//             return $settings->getSetting(1);
-//         });
-//         self::$data['social'] = Cache::remember('social', self::$data['minutes'], function () {
-//             $social = new Socials();
-//             return $social->getAllSocialActive();
-//         });
-        // self::$data['holiday_count'] = Holiday::where('status', 0)->where('seen', 0)->count();
-        // $latestHoliday = Holiday::where('status', 0)->latest('created_at')->first();
-        // self::$data['holiday_created_at'] = $latestHoliday ? $latestHoliday->created_at->diffForHumans() : '';
+    public function __construct()
+    {
+        self::$data['component_style'] = 1;
+        self::$data['color'] = "grey";
+        self::$data['fixed_sidebar'] = 0;
+        self::$data['form_class'] = "dark";
+        self::$data['btn_class'] = "dark";
+        self::$data['per_page'] = 20;
+        $count_disabled_students = MembershipsController::getCountOfStudentMembershipRequests();
+        $obj = new Students_Admin_Messages();
+        $obj2 = new Teachers_Admin_Messages();
+        $obj3 = new Students();
+        $Unread_measges_student = $obj->getAllUnreadStudentsMessages();
+        $Unread_measges_teacher = $obj2->getAllUnreadTeachersMessages();
+        $BirthdaysCount = $obj3->getAllStudentsHaveBirthdaysCount();
+        self::$data['count_disabled_students'] =  $count_disabled_students;
+        self::$data['Unread_measges_student'] =  $Unread_measges_student;
+        self::$data['Unread_measges_teacher'] =  $Unread_measges_teacher;
+        self::$data['BirthdaysCount'] =  $BirthdaysCount;
+        self::$data['Closed_Classes_count'] =  Closed_Classes::where('seen', 0)->whereNull('deleted_at')->count();
+        self::$data['Unseen_Students_Count'] = Students::where('seen', 0)->where('status', 0)->whereNull('deleted_at')->count();
 
-        // self::$data['loan_count'] = Financial_Loan::where('loan_status', 0)->where('seen', 0)->count();
-        // $latestLoan = Financial_Loan::where('loan_status', 0)->latest('created_at')->first();
-        // self::$data['loan_created_at'] = $latestLoan ? $latestLoan->created_at->diffForHumans() : '';
+        // Calculate grand total for header bell
+        self::$data['total_notify_count'] = self::$data['Closed_Classes_count'] +
+            self::$data['Unseen_Students_Count'] +
+            self::$data['Unread_measges_student'] +
+            self::$data['Unread_measges_teacher'];
 
-        // self::$data['notify_count'] = self::$data['holiday_count'] + self::$data['loan_count'];
-        // // dd(Auth::guard('admin')->user()->id);
-        // self::$data['employees'] = Employee::all();
-        // self::$data['incentive'] = Incentive_Management::whereNull('deleted_at')->get();
-        // self::$data['allowance'] = Emp_Allowance::whereNull('deleted_at')->get();
-        // self::$data['Section'] = Section::whereNull('deleted_at')->get();
-        // self::$data['Salary'] = Salary::whereNull('deleted_at')->get();
+        self::$data['total_teachers_students_measge'] =  $Unread_measges_teacher + $Unread_measges_student;
+        self::$data['minutes'] = 60 * 24;
+        //////////////////////////////////////
+        self::$data['home'] = 0;
+        self::$data['mysettings'] = Cache::rememberForever('mysettings', function () {
+            $settings = new Settings();
+            return $settings->getSetting(1);
+        });
+        self::$data['social'] = Cache::remember('social', self::$data['minutes'], function () {
+            $social = new Socials();
+            return $social->getAllSocialActive();
+        });
+        self::$data['notify_closed_clases'] = Closed_Classes::with(['Teacher', 'Groups'])->where('seen', 0)->latest()->take(5)->get();
 
-        // self::$data['Financial_Loan'] = Financial_Loan::whereNull('deleted_at')->get();
+        self::$data['notify_students'] = Students::where('seen', 0)->where('status', 0)->latest()->take(5)->get();
+        self::$data['notify_Students_Admin_Messages'] = Students_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
+        self::$data['notify_Teachers_Admin_Messages'] = Teachers_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
+        self::$data['notify_Groups'] = Groups::where('seen_progress', 0)->where('progress', '!=', 0)->latest()->take(5)->get();
 
-        // self::$data['Holiday'] = Holiday::whereNull('deleted_at')->get();
-        // $currentDate = Carbon::now()->toDateString();
-        // self::$data['Attachments'] = Emp_Attachments::whereDate('Issue_date', '<=', $currentDate)->whereNull('deleted_at')->get();
-        // self::$data['Circulars'] = Circulars::whereNull('deleted_at')->get();
-    //  }
-        class AdminController extends BaseController
-        {
-        public static $data = [];
-
-        use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
-        public function __construct()
-        {
-            self::$data['component_style'] = 1;
-            self::$data['color'] = "grey";
-            self::$data['fixed_sidebar'] = 0;
-            self::$data['form_class'] = "dark";
-            self::$data['btn_class'] = "dark";
-            self::$data['per_page'] = 20;
-            $count_disabled_students=MembershipsController::getCountOfStudentMembershipRequests();
-            $obj = new Students_Admin_Messages();
-            $obj2 = new Teachers_Admin_Messages();
-            $obj3 = new Students();
-            $Unread_measges_student = $obj->getAllUnreadStudentsMessages();
-            $Unread_measges_teacher = $obj2->getAllUnreadTeachersMessages();
-            $BirthdaysCount = $obj3->getAllStudentsHaveBirthdaysCount();
-            self::$data['count_disabled_students'] =  $count_disabled_students;
-            self::$data['Unread_measges_student'] =  $Unread_measges_student;
-            self::$data['Unread_measges_teacher'] =  $Unread_measges_teacher;
-            self::$data['BirthdaysCount'] =  $BirthdaysCount;
-            self::$data['Closed_Classes_count'] =  Closed_Classes::where('seen', 0)->whereNull('deleted_at')->count();
-            self::$data['Unseen_Students_Count'] = Students::where('seen', 0)->where('status', 0)->whereNull('deleted_at')->count();
-            
-            // Calculate grand total for header bell
-            self::$data['total_notify_count'] = self::$data['Closed_Classes_count'] + 
-                                               self::$data['Unseen_Students_Count'] + 
-                                               self::$data['Unread_measges_student'] + 
-                                               self::$data['Unread_measges_teacher'];
-
-            self::$data['total_teachers_students_measge'] =  $Unread_measges_teacher + $Unread_measges_student;
-            self::$data['minutes'] = 60 * 24;
-            //////////////////////////////////////
-            self::$data['home'] = 0;
-            self::$data['mysettings'] = Cache::rememberForever('mysettings', function () {
-                $settings = new Settings();
-                return $settings->getSetting(1);
-            });
-            self::$data['social'] = Cache::remember('social', self::$data['minutes'], function () {
-                $social = new Socials();
-                return $social->getAllSocialActive();
-            });      
-            self::$data['notify_closed_clases'] = Closed_Classes::with(['Teacher', 'Groups'])->where('seen', 0)->latest()->take(5)->get() ;
-
-            self::$data['notify_students'] = Students::where('seen', 0)->where('status',0)->latest()->take(5)->get() ;
-            self::$data['notify_Students_Admin_Messages'] = Students_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
-            self::$data['notify_Teachers_Admin_Messages'] = Teachers_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
-            self::$data['notify_Groups'] = Groups::where('seen_progress', 0)->where('progress','!=' ,0)->latest()->take(5)->get() ;
-
-            // Original list variables (standardized names)
-            self::$data['Programs'] = Programs::whereNull('deleted_at')->get() ;
-            self::$data['Groups'] = Groups::whereNull('deleted_at')->get();
-            self::$data['teachers'] = Teachers::whereNull('deleted_at')->get();
-            self::$data['Students'] = Students::whereNull('deleted_at')->get();
-            self::$data['GroupStudents'] = GroupStudents::distinct('group_id')->whereNull('deleted_at')->get();
-        }
+        // Original list variables (standardized names)
+        self::$data['Programs'] = Programs::whereNull('deleted_at')->get();
+        self::$data['Groups'] = Groups::whereNull('deleted_at')->get();
+        self::$data['teachers'] = Teachers::whereNull('deleted_at')->get();
+        self::$data['Students'] = Students::whereNull('deleted_at')->get();
+        self::$data['GroupStudents'] = GroupStudents::distinct('group_id')->whereNull('deleted_at')->get();
+    }
 }

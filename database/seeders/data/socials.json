@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "YouTube",
+        "link": "https:\/\/www.youtube.com\/channel\/UCaRC9zLhzkdKU3p5vRl7fAQ",
+        "icon": "fa-youtube",
+        "status": 1,
+        "created_at": "2019-07-29 15:52:58",
+        "updated_at": "2019-07-29 23:52:58",
+        "deleted_at": null
+    },
+    {
+        "id": 2,
+        "name": "ًWhatsapp",
+        "link": "http:\/\/whatsapp.com",
+        "icon": "fa-whatsapp",
+        "status": 0,
+        "created_at": "2019-07-25 18:06:47",
+        "updated_at": "2019-07-21 22:59:14",
+        "deleted_at": null
+    },
+    {
+        "id": 3,
+        "name": "Instagram",
+        "link": "https:\/\/www.instagram.com\/oxford.e.c\/",
+        "icon": "fa-instagram",
+        "status": 1,
+        "created_at": "2019-07-29 15:52:58",
+        "updated_at": "2019-07-29 23:52:58",
+        "deleted_at": null
+    },
+    {
+        "id": 4,
+        "name": "Twitter",
+        "link": "https:\/\/twitter.com\/Oxfordgaza",
+        "icon": "fa-twitter",
+        "status": 1,
+        "created_at": "2019-08-18 14:52:09",
+        "updated_at": "2019-08-18 22:52:09",
+        "deleted_at": null
+    },
+    {
+        "id": 5,
+        "name": "Facebook",
+        "link": "https:\/\/www.facebook.com\/oxford.palestine\/",
+        "icon": "fa-facebook",
+        "status": 1,
+        "created_at": "2019-07-29 15:52:58",
+        "updated_at": "2019-07-29 23:52:58",
+        "deleted_at": null
+    },
+    {
+        "id": 6,
+        "name": "Linkedin",
+        "link": "https:\/\/www.linkedin.com\/company\/oxford-english-centre-gaza\/",
+        "icon": "fa-linkedin",
+        "status": 1,
+        "created_at": "2019-07-29 16:01:30",
+        "updated_at": "2019-07-30 00:01:30",
+        "deleted_at": null
+    }
+]

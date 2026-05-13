@@ -36,7 +36,7 @@
             data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-height="auto"
             data-kt-scroll-dependencies="#kt_app_sidebar_logo, #kt_app_sidebar_footer"
             data-kt-scroll-wrappers="#kt_app_sidebar_menu" data-kt-scroll-offset="5px" data-kt-scroll-save-state="true">
-            <div class="menu menu-column menu-rounded menu-sub-indention px-3" id="#kt_app_sidebar_menu"
+            <div class="menu menu-column menu-rounded menu-sub-indention px-3" id="kt_app_sidebar_menu"
                 data-kt-menu="true" data-kt-menu-expand="false">
 
                 <div class="menu-item">
@@ -115,6 +115,39 @@
                                 </a>
                             </div>
                         @endif
+                    </div>
+                </div>
+
+                <div data-kt-menu-trigger="click"
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['parents', 'payment_methods', 'placement_tests']) ? 'here show' : '' }} menu-accordion">
+                    <span class="menu-link">
+                        <span class="menu-icon"><i class="ki-duotone ki-briefcase fs-1 text-info"><span
+                                     class="path1"></span><span class="path2"></span></i></span>
+                        <span class="menu-title">ادارة التسجيل</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'placement_tests' ? 'active' : '' }}"
+                                href="{{ route('placement_tests.view') }}">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">اختبارات تحديد المستوى</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'parents' ? 'active' : '' }}"
+                                href="{{ route('parents.view') }}">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">أولياء الأمور</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'payment_methods' ? 'active' : '' }}"
+                                href="{{ route('payment_methods.view') }}">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">طرق الدفع</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -325,38 +358,7 @@
                     </div>
                 </div>
 
-                <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['parents', 'payment_methods', 'placement_tests']) ? 'here show' : '' }} menu-accordion">
-                    <span class="menu-link">
-                        <span class="menu-icon"><i class="ki-duotone ki-briefcase fs-1 text-info"><span
-                                     class="path1"></span><span class="path2"></span></i></span>
-                        <span class="menu-title">ادارة التسجيل</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'placement_tests' ? 'active' : '' }}"
-                                href="{{ route('placement_tests.view') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">اختبارات تحديد المستوى</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'parents' ? 'active' : '' }}"
-                                href="{{ route('parents.view') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">أولياء الأمور</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'payment_methods' ? 'active' : '' }}"
-                                href="{{ route('payment_methods.view') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">طرق الدفع</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div data-kt-menu-trigger="click"
                     class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['programs', 'groups', 'students', 'times', 'fees', 'evaluations', 'teachers']) ? 'here show' : '' }} menu-accordion">

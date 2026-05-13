@@ -14,7 +14,7 @@
                 <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                     <div class="footer-box">
                         <div class="footer-about">
-                            <p>{{$mysettings->more_desc}}</p>
+                            <p>{{ optional($mysettings)->more_desc }}</p>
                         </div>
                         <ul class="footer-social">
                             @foreach($social as $row)
@@ -57,9 +57,9 @@
                     <div class="footer-box">
                         <h3>Information</h3>
                         <ul class="corporate-address">
-                            <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Phone:+{{$mysettings->mobile}}"> +{{$mysettings->mobile}} </a></li>
-                            <li><i class="fa fa-envelope-o" aria-hidden="true"></i>{{$mysettings->contact_email}}</li>
-                            <li><i class="fa fa-map-marker" aria-hidden="true"></i>{{$mysettings->address}}</li>
+                            <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Phone:+{{ optional($mysettings)->mobile }}"> +{{ optional($mysettings)->mobile }} </a></li>
+                            <li><i class="fa fa-envelope-o" aria-hidden="true"></i>{{ optional($mysettings)->contact_email }}</li>
+                            <li><i class="fa fa-map-marker" aria-hidden="true"></i>{{ optional($mysettings)->address }}</li>
                         </ul>
                     </div>
                 </div>

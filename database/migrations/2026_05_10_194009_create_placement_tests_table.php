@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('placement_tests', function (Blueprint $table) {
             $table->id();
-            $table->integer('student_id'); // Signed integer to match students.id
+            $table->unsignedBigInteger('student_id'); // Signed integer to match students.id
             $table->date('test_date');
             $table->string('test_time');
             $table->enum('status', ['pending', 'payment_confirmed', 'waiting_for_test', 'completed'])->default('pending');
