@@ -21,7 +21,7 @@
     position: relative;
     flex: 1;
     min-height: 450px;
-    background: url('../img/banner/1.jpg');
+    background: url('../baneer_book.jfif');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -1516,4 +1516,111 @@ textarea[name="address"], .health-textarea {
 [dir="rtl"] .flex-align-force input[type="checkbox"] {
     margin-right: 0 !important;
     margin-left: 15px !important;
+}
+
+/* Enrollment Type Cards */
+.enrollment-type-wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    justify-content: center;
+    gap: 30px;
+}
+
+.enroll-type-card {
+    background: var(--white);
+    border: 2px solid #eef0f2;
+    border-radius: 24px;
+    padding: 40px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    flex: 1 1 0;
+    min-width: 260px;
+    max-width: 360px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.enroll-type-card:hover {
+    transform: translateY(-15px);
+    border-color: var(--secondary-color);
+    box-shadow: 0 20px 45px rgba(255, 204, 0, 0.15);
+}
+
+.enroll-type-card.active {
+    border-color: var(--secondary-color);
+    background: #fffdf5;
+    box-shadow: 0 20px 50px rgba(255, 204, 0, 0.2);
+}
+
+.enroll-type-card .type-icon {
+    width: 80px;
+    height: 80px;
+    background: #f8f9fa;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    transition: var(--transition-smooth);
+}
+
+.enroll-type-card:hover .type-icon {
+    background: var(--secondary-color);
+    color: var(--white);
+    transform: rotate(10deg);
+}
+
+.enroll-type-card h4 {
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.enroll-type-card p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.type-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.type-badge.secondary {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+/* Responsive: stack enrollment cards on mobile */
+@media (max-width: 640px) {
+    .enrollment-type-wrapper {
+        flex-direction: column !important;
+        align-items: center;
+        gap: 40px;
+    }
+    .enroll-type-card {
+        min-width: 280px;
+        max-width: 100%;
+        width: 100%;
+    }
 }

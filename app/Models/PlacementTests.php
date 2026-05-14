@@ -15,11 +15,16 @@ class PlacementTests extends Model
         'student_id',
         'test_date',
         'test_time',
+        'preferred_days',
+        'preferred_time',
         'status',
         'score',
         'assigned_level',
         'payment_receipt',
         'paid_amount',
+        'total_amount',
+        'remaining_amount',
+        'payment_status',
         'payment_method_id',
     ];
 

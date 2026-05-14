@@ -16,11 +16,158 @@
             position: relative;
             z-index: 1;
         }
+
+        /* Premium Payment Styles */
+        .fee-info-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .fee-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        }
+        .btn-outline-primary, .btn-outline-warning {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            transform: scale(1.02);
+        }
+        .btn-outline-warning:hover {
+            background-color: var(--secondary-color) !important;
+            color: var(--primary-color) !important;
+            transform: scale(1.02);
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .payment-details-card {
+            border-radius: 1.25rem;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .level-radio-item label { border-radius: 12px; font-weight: 600; padding: 12px; transition: all 0.3s ease; }
+        .btn-check:checked + label { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; color: white !important; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        /* Global Icon Spacing Fix */
+        .form-label i, .step-heading i, .interaction-card label i { 
+            margin-right: 1rem !important; 
+            font-size: 1.2em;
+            vertical-align: middle;
+            color: var(--primary-color);
+        }
+        [dir="rtl"] .form-label i, [dir="rtl"] .step-heading i, [dir="rtl"] .interaction-card label i {
+            margin-right: 0 !important;
+            margin-left: 1rem !important;
+        }
+
+        /* Payment Method Cards Refined */
+        .payment-methods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; }
+        .payment-method-card { 
+            border: 2px solid #f0f0f0; 
+            border-radius: 20px; 
+            padding: 2rem 1.5rem; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+            background: #fff; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .payment-method-card:hover { 
+            border-color: var(--primary-color); 
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08); 
+        }
+        .payment-method-card.active { 
+            border-color: var(--secondary-color) !important; 
+            background: linear-gradient(145deg, #ffffff, #fffef0);
+            box-shadow: 0 10px 20px rgba(255, 204, 0, 0.1);
+        }
+        .payment-method-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 20px;
+            border: 2px solid var(--secondary-color);
+        }
+        .payment-method-card.active::after { 
+            content: '\F272'; 
+            font-family: 'bootstrap-icons'; 
+            position: absolute; 
+            top: 12px; 
+            right: 12px; 
+            background: var(--secondary-color);
+            color: var(--primary-color); 
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem; 
+            font-weight: bold;
+        }
+        .payment-method-card i { 
+            font-size: 3rem; 
+            color: #bdc3c7; 
+            margin-bottom: 1rem; 
+            transition: all 0.3s; 
+        }
+        .payment-method-card.active i { color: var(--secondary-color); transform: scale(1.1); }
+        .payment-method-card img.payment-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 12px;
+            padding: 5px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        .payment-method-card.active img.payment-logo {
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 8px 15px rgba(255, 204, 0, 0.2);
+        }
+        .payment-method-card span { font-weight: 800; color: #2c3e50; font-size: 1rem; }
+        
+        .credentials-container {
+            margin: 2.5rem 0;
+            padding: 2rem 1rem;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .credentials-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .credential-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #edf2f7;
+            transition: transform 0.2s;
+        }
+        .credential-item:hover { transform: translateX(5px); border-color: var(--primary-color); }
+        .credential-label { color: #718096; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .credential-value { color: var(--primary-color); font-weight: 700; font-size: 1.1rem; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('js/particles-hero.js') }}"></script>
-    <script src="{{ asset('js/book-course.js') }}"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <div class="registration-page-wrapper">
         <div class="entry-screen">
@@ -38,9 +185,9 @@
                     <!-- Adult Program -->
                     <div class="program-option animate-slide-right" onclick="handleProgramSelection('adult')">
                         <div class="program-card">
-                            <img src="{{ asset('assets/oxford/img/banner/Gemini.png') }}" alt="Adult Program">
+                            <img src="{{ asset('assets/oxford/program2.jfif') }}" alt="Adult Program">
                             <div class="overlay-info">
-                                <h3 class="program-name">ADULT PROGRAM</h3>
+                                <h3 class="program-name">English For Adults</h3>
                                 <div class="qr-circle" onclick="showProgramQRCode('adult', event)"><i class="bi bi-qr-code-scan"></i></div>
                             </div>
                         </div>
@@ -52,14 +199,36 @@
                             <img src="{{ asset('assets/oxford/img/banner/WhatsApp Image 2026-05-08 at 10.54.15 PM.jpeg') }}"
                                 alt="Kids Program">
                             <div class="overlay-info">
-                                <h3 class="program-name">KIDS PROGRAM</h3>
+                                <h3 class="program-name">English For Young Learners</h3>
                                 <div class="qr-circle" onclick="showProgramQRCode('kids', event)"><i class="bi bi-qr-code-scan"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Enrollment Type Choice (Course vs Test) -->
+            <div id="enrollment-type-container" style="display: none;" class="mt-5">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="fw-bold text-primary">How would you like to start?</h2>
+                    <p class="text-muted">Choose your preferred enrollment path</p>
+                </div>
+                <div class="enrollment-type-wrapper d-flex justify-content-center gap-4">
+                    <div class="enroll-type-card" onclick="selectEnrollmentType('course', this)">
+                        <div class="type-icon"><i class="bi bi-book"></i></div>
+                        <h4>Direct Enrollment</h4>
+                        <p>I know my level and want to join a program.</p>
+                        <span class="type-badge">Recommended</span>
+                    </div>
+                    <div class="enroll-type-card" onclick="selectEnrollmentType('test', this)">
+                        <div class="type-icon"><i class="bi bi-pencil-square"></i></div>
+                        <h4>Placement Test</h4>
+                        <p>I want a professional evaluation of my level.</p>
+                        <span class="type-badge secondary">Expert Choice</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
 
         <!-- Wizard Card (Hidden initially) -->
         <div class="wizard-main-card" id="wizard-card">
@@ -90,41 +259,42 @@
             <form id="registration-wizard-form" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="program_type" id="program_type_hidden">
+                <input type="hidden" name="enrollment_type" id="enrollment_type_hidden">
 
                 <div class="wizard-body">
                     <!-- Step 1: Basic Information -->
                     <div class="step-pane active" id="pane-1">
                         <h4 class="mb-4 step-heading">
                             <i class="bi bi-person-circle me-3"></i>
-                            Step 1: Personal Information
+                            Step 1: Personal Information & Health
                         </h4>
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Full Name (Arabic) (الاسم الرباعي بالعربية) *</label>
+                                <label class="form-label"><i class="bi bi-person-badge me-2"></i>Full Name (Arabic) (الاسم الرباعي بالعربية) *</label>
                                 <input type="text" name="name" class="form-control" placeholder="الاسم الرباعي بالعربية"
                                     required pattern="[\u0600-\u06FF\s]+" title="Please enter name in Arabic only">
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Full Name (English) (الاسم الرباعي بالإنجليزية) *</label>
+                                <label class="form-label"><i class="bi bi-alphabet-uppercase me-2"></i>Full Name (English) (الاسم الرباعي بالإنجليزية) *</label>
                                 <input type="text" name="name_en" class="form-control" placeholder="English Quad Name"
                                     required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Phone Number (رقم الجوال) *</label>
+                                <label class="form-label"><i class="bi bi-phone me-2"></i>Phone Number (رقم الجوال) *</label>
                                 <input type="text" name="mobile" class="form-control" placeholder="05x xxxx xxx"
                                     required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Email Address (البريد الإلكتروني) *</label>
+                                <label class="form-label"><i class="bi bi-envelope me-2"></i>Email Address (البريد الإلكتروني) *</label>
                                 <input type="email" name="email" class="form-control" placeholder="example@gmail.com"
                                     required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Date of Birth (تاريخ الميلاد) *</label>
+                                <label class="form-label"><i class="bi bi-calendar-event me-2"></i>Date of Birth (تاريخ الميلاد) *</label>
                                 <input type="date" name="dob" class="form-control" required>
                             </div>
                             <div class="col-md-6 mb-4" id="gender-group">
-                                <label class="form-label">Gender (الجنس) *</label>
+                                <label class="form-label"><i class="bi bi-gender-ambiguous me-2"></i>Gender (الجنس) *</label>
                                 <select name="gender" class="form-control" required>
                                     <option value="">Select Gender</option>
                                     <option value="1">Male</option>
@@ -132,8 +302,32 @@
                                 </select>
                             </div>
                             <div class="col-md-12 mb-4">
-                                <label class="form-label">Address (العنوان) *</label>
+                                <label class="form-label"><i class="bi bi-geo-alt me-2"></i>Address (العنوان) *</label>
                                 <textarea name="address" class="form-control" rows="2" placeholder="Full Address Details" required></textarea>
+                            </div>
+
+                            <!-- Moved Health Status Section here -->
+                            <div class="col-md-12">
+                                <div class="interaction-card shadow-sm border-0 bg-light p-4 rounded-4 mb-4">
+                                    <div class="header-flex-force border-bottom pb-3 mb-3">
+                                        <h5 class="fw-bold mb-0">Health Information (المعلومات الصحية)</h5>
+                                    </div>
+                                    <p class="text-muted mb-3 small">Does the applicant have any health problems? (هل يعاني المتقدم من مشاكل صحية؟)</p>
+                                    <div class="d-flex gap-4 mb-3">
+                                        <label class="custom-radio-pill">
+                                            <input type="radio" name="health_status" value="no" checked onchange="toggleHealthNotes(false)">
+                                            <span>No (لا يوجد)</span>
+                                        </label>
+                                        <label class="custom-radio-pill">
+                                            <input type="radio" name="health_status" value="yes" onchange="toggleHealthNotes(true)">
+                                            <span>Yes (نعم يوجد)</span>
+                                        </label>
+                                    </div>
+                                    <div id="health-notes-wrapper" style="display: none;">
+                                        <label class="form-label small text-muted fw-bold">Health condition details (يرجى وصف الحالة الصحية)</label>
+                                        <textarea name="health_notes" id="health_notes" class="form-control health-textarea" rows="2" placeholder="Describe here..."></textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -146,82 +340,104 @@
                                 Step 2: Educational Information
                             </h4>
                             <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Major of Study (التخصص الدراسي) *</label>
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label"><i class="bi bi-mortarboard me-2"></i>Major/Profession (التخصص/المهنة) *</label>
                                     <input type="text" name="major" class="form-control"
-                                        placeholder="e.g. English Literature">
-                                </div>
+                                        placeholder="e.g. Engineering, Student">
                                 </div>
                             </div>
+                        </div>
 
-                            <div id="kids-fields" style="display: none;">
-                                <h4 class="mb-4 step-heading">
-                                    <i class="bi bi-people me-3"></i>
-                                    Step 2: Parent / Guardian Information
-                                </h4>
+                        <div id="kids-fields" style="display: none;">
+                            <h4 class="mb-4 step-heading">
+                                <i class="bi bi-people me-3"></i>
+                                Step 2: Parent / Guardian Information
+                            </h4>
                             <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Parent Full Name (اسم ولي الأمر) *</label>
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label"><i class="bi bi-journal-text me-2"></i>Parent Name (اسم ولي الأمر) *</label>
                                     <input type="text" name="parent_name" class="form-control"
-                                        placeholder="Full Name">
+                                        placeholder="Parent Full Name">
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label class="form-label">Parent Phone (رقم جوال ولي الأمر) *</label>
+                                    <label class="form-label"><i class="bi bi-telephone-plus me-2"></i>Parent Phone (رقم جوال ولي الأمر) *</label>
                                     <input type="text" name="parent_phone" class="form-control"
-                                        placeholder="Parent Contact Number">
+                                        placeholder="05x xxxx xxx">
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label class="form-label">Parent Email (البريد الإلكتروني لولي الأمر)</label>
+                                    <label class="form-label"><i class="bi bi-people me-2"></i>Relationship (صلة القرابة) *</label>
+                                    <input type="text" name="parent_relationship" class="form-control" placeholder="e.g. Father, Mother">
+                                </div>
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label"><i class="bi bi-envelope-at me-2"></i>Parent Email (البريد الإلكتروني لولي الأمر)</label>
                                     <input type="email" name="parent_email" class="form-control"
                                         placeholder="Parent Email">
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Relationship (صلة القرابة) *</label>
-                                    <input type="text" name="parent_relationship" class="form-control" placeholder="e.g. Father, Mother">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Step 3: Placement Test Scheduling -->
+                    <!-- Step 3: Placement & Program Selection -->
                     <div class="step-pane" id="pane-3">
                         <div class="text-center mb-5">
                             <h3 class="fw-bold step-heading justify-content-center">
                                 <i class="bi bi-calendar-check me-3"></i>
-                                Step 3: Placement Test
+                                Step 3: Placement & Program
                             </h3>
-                            <p class="text-muted">Determining your current level helps us place you in the right group.
-                            </p>
-                        </div>
-
-                        <div class="test-options-grid mb-5">
-                            <div class="test-btn" id="test-yes" onclick="selectTestChoice('yes')">
-                                <i class="fa fa-calendar-check"></i>
-                                <h5>Yes, I need a test</h5>
-                                <small>Fee: 100 ILS</small>
-                            </div>
-                            <div class="test-btn" id="test-no" onclick="selectTestChoice('no')">
-                                <i class="fa fa-times-circle"></i>
-                                <h5>No, skip test</h5>
-                                <small>Start from Beginner level</small>
-                            </div>
+                            <p class="text-muted">Select your target program and placement options.</p>
                         </div>
 
                         <input type="hidden" name="take_test" id="take_test_hidden">
+                        <div id="test-options-container" style="display: none;"></div>
 
-                        <div id="skip-test-level-selection" class="mt-5" style="display: none;">
-                            <div class="alert alert-info shadow-sm mb-4 border-0">
-                                <i class="fa fa-info-circle me-2"></i>
-                                Please select your current English level since you are skipping the test.
-                                (يرجى تحديد مستواك الحالي في اللغة الإنجليزية بما أنك تتخطى الامتحان)
-                            </div>
-                            <div class="level-radio-group">
-                                @foreach(['A0', 'A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'C1'] as $lvl)
-                                <div class="level-radio-item">
-                                    <input type="radio" name="current_level" value="{{ $lvl }}" id="lvl-{{ $lvl }}" class="btn-check">
-                                    <label class="btn btn-outline-primary w-100" for="lvl-{{ $lvl }}">{{ $lvl }}</label>
+                        <!-- Target Program & Level Selection -->
+                        <div class="interaction-card shadow-sm border-0 bg-white p-5 rounded-4 mb-5 border-start border-primary border-5">
+                            <div class="row align-items-center">
+                                <div class="col-lg-6 border-end-lg pe-lg-5">
+                                    <label class="form-label fw-bold fs-5 mb-3"><i class="bi bi-mortarboard-fill me-3 text-primary"></i>Target Program (البرنامج المستهدف) *</label>
+                                    <select name="program_id" id="program_id_select" class="form-control form-control-lg select2 shadow-none border-2" onchange="handleProgramChange()">
+                                        <option value="">Choose your program...</option>
+                                        @foreach($programs as $p)
+                                            @php
+                                                $title = strtolower($p->title);
+                                                $isKids = str_contains($title, 'kids') || str_contains($p->title, 'أطفال');
+                                                $isAdult = str_contains($title, 'adult') || str_contains($p->title, 'كبار');
+                                                // If it's a general program like "Levels", show it for both
+                                                $isGeneral = str_contains($title, 'مستويات') || str_contains($title, 'level');
+                                                
+                                                $type = 'Both';
+                                                if ($isKids && !$isAdult) $type = 'Kids';
+                                                elseif ($isAdult && !$isKids) $type = 'Adults';
+                                                elseif ($isGeneral) $type = 'Both';
+                                            @endphp
+                                            <option value="{{ $p->id }}" data-type="{{ $type }}">
+                                                {{ $p->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div id="program-info-preview" class="mt-3 small text-muted p-2 bg-light rounded" style="display: none;">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span id="program-preview-text"></span>
+                                    </div>
                                 </div>
-                                @endforeach
+                                
+                                <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
+                                    <div id="skip-test-level-selection" style="display: none;">
+                                        <label class="form-label fw-bold fs-5 mb-3 text-info"><i class="bi bi-graph-up-arrow me-3"></i>Current Level (المستوى الحالي) *</label>
+                                        <div class="level-radio-group d-flex flex-wrap gap-2">
+                                            @foreach(['A0', 'A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'C1'] as $lvl)
+                                            <div class="level-radio-item" style="flex: 1 1 60px;">
+                                                <input type="radio" name="current_level" value="{{ $lvl }}" id="lvl-{{ $lvl }}" class="btn-check">
+                                                <label class="btn btn-outline-primary w-100 py-2 px-1" for="lvl-{{ $lvl }}">{{ $lvl }}</label>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div id="test-info-placeholder" class="text-center p-4 border rounded-4 border-dashed bg-light text-muted">
+                                        <i class="bi bi-clipboard-data fs-2 mb-2 d-block"></i>
+                                        Select a program to see level options or scheduling
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -230,8 +446,7 @@
                             <div class="alert shadow-sm mb-4 border-0"
                                 style="background: #fff9e6; border-left: 5px solid var(--secondary-color) !important; color: #856404;">
                                 <i class="fa fa-info-circle me-2" style="color: var(--secondary-color);"></i>
-                                <strong>Important:</strong> Placement test fee is 100 ILS. Please choose your preferred
-                                slot.
+                                <strong>Important:</strong> Placement test fee is 100 ILS. Please choose your preferred slot.
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-4">
@@ -242,7 +457,6 @@
                                 <div class="col-md-12 mb-4">
                                     <div class="scheduling-card p-4 bg-white rounded-4 border shadow-sm">
                                         <div class="row g-0">
-                                            <!-- Days Section -->
                                             <div class="col-md-6 pe-md-4 border-end position-relative">
                                                 <div class="d-flex align-items-center mb-4 scheduling-sub-header justify-content-end">
                                                     <span class="fs-4 fw-bold text-primary">DAYS</span>
@@ -261,8 +475,6 @@
                                                     </label>
                                                 </div>
                                             </div>
-
-                                            <!-- Time Section -->
                                             <div class="col-md-6 ps-md-4">
                                                 <div class="d-flex align-items-center mb-4 scheduling-sub-header justify-content-start">
                                                     <i class="bi bi-clock me-3 fs-3 text-primary"></i>
@@ -288,150 +500,147 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Payment Methods -->
+                    <!-- Step 4: Secure Payment -->
                     <div class="step-pane" id="pane-4">
                         <div class="text-center mb-5">
-                            <img src="{{ asset('assets/media/illustrations/misc/credit-card.png') }}" alt="Payment"
-                                class="mb-3"
-                                style="max-height: 120px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));">
                             <h3 class="fw-bold step-heading justify-content-center">
-                                <i class="bi bi-credit-card me-3"></i>
-                                Step 4: Secure Payment
+                                <i class="bi bi-credit-card-2-back me-3"></i>
+                                Step 4: Payment Summary
                             </h3>
-                            <p class="text-muted">Choose your preferred payment method and upload the receipt.</p>
+                            <p class="text-muted">Review fees and finalize your payment.</p>
                         </div>
 
-                        <div class="payment-grid mb-5">
-                            @foreach ($payment_methods as $method)
-                                <div class="payment-card"
-                                    onclick="handlePaymentSelection('{{ $method->id }}', '{{ addslashes(json_encode($method->credentials)) }}')">
-                                    <div class="icon-box shadow-sm">
-                                        @if ($method->image)
-                                            <img src="{{ asset('uploads/' . $method->image) }}"
-                                                alt="{{ $method->name }}">
-                                        @else
-                                            <i class="fa fa-university fs-2 text-primary"></i>
-                                        @endif
-                                    </div>
-                                    <h6 class="mb-0 fw-bold">{{ $method->name }}</h6>
-                                    <div class="check-icon" style="display: none;"><i class="bi bi-check-circle-fill"></i></div>
-                                </div>
-                            @endforeach
-                        </div>
-                        <input type="hidden" name="payment_method_id" id="payment_method_hidden">
-
-                            <div id="method-details" class="payment-details-card payment-instructions-wrapper" style="display: none;">
-                                <div class="details-header">
-                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                    Payment Instructions
-                                </div>
-                                <div id="credentials-list" class="p-4 bg-white rounded-bottom-4 shadow-sm border border-top-0"></div>
+                        <!-- Fees Breakdown -->
+                        <div class="mb-5">
+                            <label class="form-label fw-bold mb-4 d-block">
+                                <i class="bi bi-list-check me-3 text-primary"></i>
+                                Fees Breakdown (تفاصيل الرسوم)
+                            </label>
+                            <div class="bg-white rounded-4 shadow-sm overflow-hidden border">
+                                <table class="table table-hover mb-0">
+                                    <tbody id="fees-breakdown-body">
+                                        <!-- Dynamic rows here -->
+                                    </tbody>
+                                    <tfoot class="bg-light border-top">
+                                        <tr>
+                                            <td class="ps-4 py-3 fw-bold">Total Amount Due (إجمالي المستحق)</td>
+                                            <td class="pe-4 py-3 text-end fw-bold fs-5 text-primary">
+                                                <span id="display-total-due">0.00</span> ILS
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
+                        </div>
 
-                            <div class="upload-receipt-label">
-                                <label class="form-label fw-bold mb-3"><i class="bi bi-upload"></i>Upload Payment Receipt (رفع إيصال الدفع) *</label>
-                                <div class="file-upload-container" id="receipt-dropzone">
-                                    <input type="file" name="payment_receipt" id="receipt_input" accept="image/*,.pdf"
-                                        onchange="updateFileName(this)">
-                                    <div class="upload-content text-center">
-                                        <div class="upload-icon-wrapper mb-3">
-                                            <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="row g-4">
+                            <div class="col-md-12 mb-2">
+                                <label class="form-label fw-bold mb-3 d-block"><i class="bi bi-wallet2 me-2 text-primary"></i>Payment Method (طريقة الدفع) *</label>
+                                <div class="payment-methods-grid">
+                                    @foreach ($payment_methods as $method)
+                                        <div class="payment-method-card" 
+                                             onclick="selectPaymentMethod('{{ $method->id }}', this)" 
+                                             data-creds="{{ json_encode($method->credentials) }}">
+                                            @if($method->image)
+                                                <img src="{{ asset('uploads/' . $method->image) }}" class="payment-logo" alt="{{ $method->name }}">
+                                            @else
+                                                <i class="{{ $method->icon ?: 'bi bi-cash-coin' }}"></i>
+                                            @endif
+                                            <span>{{ $method->name }}</span>
                                         </div>
-                                        <h5>Drop your receipt here</h5>
-                                        <div id="file-name-preview" class="mt-3"></div>
-                                    </div>
+                                    @endforeach
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 5: Final Review & Terms -->
-                        <div class="step-pane" id="pane-5">
-                            <h4 class="mb-4 step-heading">
-                                <i class="bi bi-patch-check-fill me-3"></i>
-                                Step 5: Finalize Registration
-                            </h4>
-                            <p class="text-muted mb-5">Please review your health status and agree to the terms to complete your registration.</p>
-
-                            <!-- Health Status Section -->
-                            <div class="interaction-card shadow-sm border-0 bg-white p-4 rounded-4 mb-4">
-                                <div class="header-flex-force border-bottom pb-3">
-                                    <div class="icon-box-final bg-light-primary rounded-3 p-2">
-                                        <i class="bi bi-heart-pulse-fill fs-3 text-primary"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Health Information (المعلومات الصحية)</h5>
-                                </div>
+                                <input type="hidden" name="payment_method_id" id="payment_method_id_hidden">
                                 
-                                <div class="px-2">
-                                    <p class="text-muted mb-4">Does the applicant have any health problems? (هل يعاني المتقدم من مشاكل صحية؟)</p>
-                                    
-                                    <div class="d-flex gap-4 mb-4">
-                                        <label class="custom-radio-pill">
-                                            <input type="radio" name="health_status" value="no" checked onchange="toggleHealthNotes(false)">
-                                            <span>No (لا يوجد)</span>
+                                <!-- Payment Credentials Display (Simplified Style) -->
+                                <div id="method-details-area" class="mt-5 mb-5" style="display: none;">
+                                    <div class="credentials-container px-2">
+                                        <label class="form-label fw-bold mb-4 d-block">
+                                            <i class="bi bi-shield-lock-fill me-3 text-primary"></i>
+                                            Payment Credentials (بيانات الدفع)
                                         </label>
-                                        <label class="custom-radio-pill">
-                                            <input type="radio" name="health_status" value="yes" onchange="toggleHealthNotes(true)">
-                                            <span>Yes (نعم يوجد)</span>
-                                        </label>
-                                    </div>
-                                    
-                                    <div id="health-notes-wrapper" style="display: none;">
-                                        <label class="form-label small text-muted fw-bold">Health condition details (يرجى وصف الحالة الصحية)</label>
-                                        <textarea name="health_notes" id="health_notes" class="form-control health-textarea" rows="3" placeholder="Describe here..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Terms & Conditions Section -->
-                            <div class="interaction-card shadow-sm border-0 bg-white p-4 rounded-4 mb-4">
-                                <div class="header-flex-force border-bottom pb-3">
-                                    <div class="icon-box-final bg-light-warning rounded-3 p-2">
-                                        <i class="bi bi-file-earmark-text-fill fs-3 text-warning"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Terms & Conditions (الشروط والأحكام)</h5>
-                                </div>
-
-                                <div class="px-2">
-                                    <div class="registration-notes-alert p-3 rounded-4 mb-4 border-start border-5 border-warning bg-light">
-                                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                                            <i class="bi bi-exclamation-circle-fill text-warning"></i>
-                                            Important Notes (ملاحظات هامة)
-                                        </h6>
-                                        <ul class="mb-0 small text-dark opacity-75 lh-lg">
-                                            <li>Ensure your phone number is correct for WhatsApp communication.</li>
-                                            <li>Placement test fees are non-refundable after scheduling.</li>
-                                            <li>Registration activates within 24 hours of verification.</li>
-                                        </ul>
-                                    </div>
-
-                                    <div class="agreement-box flex-align-force p-3 rounded-4 border bg-light-soft cursor-pointer" 
-                                         onclick="if(event.target.id !== 'agree-terms') document.getElementById('agree-terms').click()">
-                                        <input type="checkbox" id="agree-terms" required class="form-check-input form-check-input-custom">
-                                        <div class="agreement-text">
-                                            <span class="fw-bold d-block text-dark">I agree to the Terms & Privacy Policy</span>
-                                            <span class="small text-muted">أوافق على جميع الشروط والأحكام الخاصة بالمركز</span>
+                                        <div id="credentials-list" class="d-flex flex-column gap-3"></div>
+                                        <div class="mt-4 text-center p-3 bg-light rounded-4">
+                                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Please transfer the exact amount and upload the screenshot below.</small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold"><i class="bi bi-cash-stack me-2"></i>Paid Amount (المبلغ المدفوع) *</label>
+                                <input type="number" name="student_fee_paid" class="form-control form-control-lg border-2" placeholder="0.00" required oninput="updateRemainingDue()">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold"><i class="bi bi-calculator me-2"></i>Remaining Balance (المتبقي)</label>
+                                <div class="p-3 bg-light border-2 rounded-3 d-flex justify-content-between align-items-center h-50px" style="border: 2px solid #eee; height: 53px;">
+                                    <span class="fw-bold text-muted small">TOTAL LEFT:</span>
+                                    <span class="fw-bold text-danger"><span id="display-amount-due">0.00</span> ILS</span>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Upload Payment Receipt (رفع إيصال الدفع) *</label>
+                                <div class="file-upload-container p-4 border-2 border-dashed rounded-4 text-center cursor-pointer" id="receipt-dropzone" onclick="document.getElementById('receipt_input').click()">
+                                    <input type="file" name="payment_receipt" id="receipt_input" accept="image/*,.pdf" style="display: none;" onchange="updateFileName(this)" required>
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2"></i>
+                                    <p class="mb-0 text-muted">Click to upload or drag and drop receipt</p>
+                                    <div id="file-name-preview" class="mt-2 fw-bold text-success"></div>
+                                </div>
+                            </div>
                         </div>
+
+
+                        <input type="hidden" name="total_due_amount" id="total_due_hidden" value="0">
+                    </div>
+
+                    <!-- Step 5: Final Step -->
+                    <div class="step-pane" id="pane-5">
+                        <div class="text-center mb-5">
+                            <i class="bi bi-check2-circle text-success" style="font-size: 4rem;"></i>
+                            <h3 class="fw-bold mt-3">Finalize Registration</h3>
+                            <p class="text-muted">Review notes and confirm your agreement.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3 d-block"><i class="bi bi-journal-text me-3 text-primary"></i>General Notes (ملاحظات عامة)</label>
+                            <textarea name="general_notes" class="form-control shadow-sm border-2" rows="3" placeholder="Add any extra notes here..."></textarea>
+                        </div>
+
+                        <div class="mb-4 p-4 rounded-4 bg-light border-start border-warning border-4 shadow-sm">
+                            <label class="form-label fw-bold mb-3 d-block text-warning"><i class="bi bi-shield-lock-fill me-3"></i>Terms & Privacy</label>
+                            <div class="agreement-box d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
+                                <input type="checkbox" id="agree-terms" required class="form-check-input m-0" style="width: 28px; height: 28px; cursor: pointer;">
+                                <label for="agree-terms" class="agreement-text m-0 cursor-pointer">
+                                    <span class="fw-bold d-block fs-6">I agree to the Terms & Privacy Policy</span>
+                                    <p class="small text-muted mb-0">أوافق على جميع الشروط والأحكام الخاصة بالأكاديمية وسياسة الخصوصية.</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Footer Navigation -->
                 <div class="wizard-footer">
                     <button type="button" class="btn-wizard btn-prev" id="btn-prev" style="display: none;"
                         onclick="changeStep(-1)">Back</button>
-                    <button type="button" class="btn-wizard btn-next" id="btn-next" onclick="changeStep(1)">Next
-                        Step</button>
+                    <button type="button" class="btn-wizard btn-next" id="btn-next" onclick="changeStep(1)">Next Step</button>
                 </div>
             </form>
         </div>
     </div>
     </div>
 
+
+@endsection
+
+@section('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/particles-hero.js') }}"></script>
     <script src="{{ asset('assets/oxford/js/wizard.js') }}"></script>
     <script>
-        window.registrationRoute = '{{ route('contact.book') }}';
+        window.registrationRoute = '{{ route('contact.book.post') }}';
+
 
         document.addEventListener('DOMContentLoaded', function() {
             // Delay Program Selection Reveal
@@ -565,5 +774,4 @@
             }
         };
     </script>
-
 @endsection

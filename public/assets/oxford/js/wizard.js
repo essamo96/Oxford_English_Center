@@ -1,20 +1,23 @@
 /**
  * Oxford Academy Registration Wizard JS
- * Modern, clean logic for the phased enrollment process.
+ * Overhauled logic for reordered steps and dynamic fee calculations.
  */
 
 let currentStep = 1;
-let selectedProgram = '';
+let selectedProgramType = ''; // adult or kids
+let enrollmentPath = ''; // course or test
 let takeTest = false;
 
 // Bilingual messages
 const wizardMessages = {
     en: {
         successTitle: 'Registration Submitted!',
-        successText: 'Your booking request has been submitted successfully. Our team will verify your data and contact you shortly.',
+        successText: 'Your request has been submitted successfully. Our team will verify your data and contact you shortly.',
         errorTitle: 'Submission Error',
         retry: 'Retry',
-        ok: 'Great!',
+        ok: 'Submit Registration',
+        next: 'Next Step',
+        back: 'Back',
         testWarning: 'Please choose if you want a placement test.',
         paymentWarning: 'Please select a payment method.',
         receiptWarning: 'Please upload your payment receipt.',
@@ -27,7 +30,9 @@ const wizardMessages = {
         successText: 'تم إرسال طلبك بنجاح. سيقوم فريقنا بمراجعة البيانات والتواصل معك قريباً.',
         errorTitle: 'خطأ في الإرسال',
         retry: 'إعادة المحاولة',
-        ok: 'موافق',
+        ok: 'إتمام التسجيل',
+        next: 'الخطوة التالية',
+        back: 'العودة',
         testWarning: 'يرجى تحديد ما إذا كنت ترغب في إجراء امتحان مستوى.',
         paymentWarning: 'يرجى اختيار طريقة الدفع.',
         receiptWarning: 'يرجى رفع إيصال الدفع.',
@@ -36,6 +41,17 @@ const wizardMessages = {
         creatingProfile: 'نقوم بإنشاء ملفك الشخصي الآن.'
     }
 };
+
+// Global Event Listeners
+if (typeof jQuery !== 'undefined') {
+    $(document).ready(function() {
+    // Level selection change (for direct enrollment)
+    $(document).on('change', 'input[name="current_level"]', function() {
+        const programId = $('#program_id_select').val();
+        if (programId) fetchFees(programId);
+    });
+});
+}
 
 const getMsg = (key) => {
     const lang = document.documentElement.lang || 'en';
@@ -54,25 +70,28 @@ function playSound(type) {
     }
 }
 
+// STEP 0: Program Choice (Adult/Kids)
 window.handleProgramSelection = function(type) {
-    if (selectedProgram && selectedProgram !== type) {
-        document.getElementById('registration-wizard-form').reset();
-        currentStep = 1;
-        document.querySelectorAll('.step-pane').forEach(p => p.classList.remove('active'));
-        document.getElementById('pane-1').classList.add('active');
-        document.querySelectorAll('.step-indicator').forEach(s => s.classList.remove('active', 'completed'));
-        document.querySelector('[data-step-nav="1"]').classList.add('active');
-        document.getElementById('btn-prev').style.display = 'none';
-        document.getElementById('btn-next').innerHTML = 'Next Step';
-    }
-
     playSound('click');
-    selectedProgram = type;
+    selectedProgramType = type;
     document.getElementById('program_type_hidden').value = type;
 
-    document.querySelectorAll('.program-option').forEach(opt => opt.classList.remove('active'));
-    const activeOption = document.querySelector(`.program-option[onclick*="'${type}'"]`);
-    if (activeOption) activeOption.classList.add('active');
+    // Filter program dropdown in Step 3 based on type
+    const select = document.getElementById('program_id_select');
+    $(select).find('option').each(function() {
+        const optType = $(this).data('type'); // "Kids", "Adults", or "Both"
+        const matches = !optType || optType === 'Both' || optType.toLowerCase().startsWith(type.toLowerCase());
+        
+        if (matches) {
+            $(this).show().prop('disabled', false);
+        } else {
+            $(this).hide().prop('disabled', true);
+        }
+    });
+    // Reset selection if hidden
+    if ($(select).find('option:selected').is(':hidden')) {
+        $(select).val('');
+    }
 
     if (type === 'adult') {
         document.getElementById('adult-fields').style.display = 'block';
@@ -82,110 +101,268 @@ window.handleProgramSelection = function(type) {
         document.getElementById('kids-fields').style.display = 'block';
     }
 
+    document.getElementById('program-selection-container').style.display = 'none';
+    const enrollTypeContainer = document.getElementById('enrollment-type-container');
+    enrollTypeContainer.style.display = 'block';
+    enrollTypeContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+// STEP 0.5: Enrollment Path (Direct/Test)
+window.selectEnrollmentType = function(type, el) {
+    playSound('click');
+    enrollmentPath = type;
+    document.getElementById('enrollment_type_hidden').value = type;
+
+    document.querySelectorAll('.enroll-type-card').forEach(c => c.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    if (type === 'test') {
+        selectTestChoice('yes');
+        const container = document.getElementById('test-options-container');
+        if (container) container.style.display = 'none';
+    } else {
+        const container = document.getElementById('test-options-container');
+        if (container) container.style.display = 'none';
+        selectTestChoice('no');
+    }
+
     const card = document.getElementById('wizard-card');
     card.style.display = 'block';
     setTimeout(() => card.classList.add('visible'), 50);
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
+// STEP 1: Health Toggle
+window.toggleHealthNotes = function(show) {
+    if (show) $('#health-notes-wrapper').slideDown();
+    else {
+        $('#health-notes-wrapper').slideUp();
+        $('#health_notes').val('');
+    }
+};
+
+// STEP 3: Program Change & Fee Loading
+window.handleProgramChange = function() {
+    const select = document.getElementById('program_id_select');
+    const programId = select.value;
+    const preview = document.getElementById('program-info-preview');
+    const text = document.getElementById('program-preview-text');
+    const placeholder = document.getElementById('test-info-placeholder');
+
+    if (programId) {
+        const selectedText = select.options[select.selectedIndex].text;
+        text.innerText = "Targeting: " + selectedText;
+        $(preview).fadeIn();
+        if (placeholder) placeholder.style.display = 'none';
+        fetchFees(programId);
+    } else {
+        $(preview).fadeOut();
+        if (placeholder) placeholder.style.display = 'block';
+        resetFees();
+    }
+};
+
+function fetchFees(programId) {
+    const level = $('input[name="current_level"]:checked').val();
+    let url = `/api/get-fee?program_id=${programId}`;
+    if (level) url += `&level_name=${level}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.fees) {
+                renderFeesBreakdown(data.fees);
+            }
+        });
+}
+
+function renderFeesBreakdown(fees) {
+    const tbody = document.getElementById('fees-breakdown-body');
+    let total = 0;
+    let rows = '';
+    
+    // Filter fees based on enrollment path
+    // If path is 'test', we only want 'placement_test' fees.
+    // If path is 'course', we want all others.
+    const filteredFees = fees.filter(fee => {
+        if (enrollmentPath === 'test') {
+            return fee.type === 'placement_test';
+        } else {
+            return fee.type !== 'placement_test';
+        }
+    });
+
+    if (filteredFees.length === 0 && enrollmentPath === 'test') {
+        // Fallback for placement test if no fee is defined in DB
+        total = 100;
+        rows = `
+            <tr class="border-bottom">
+                <td class="ps-4 py-3">
+                    <div class="fw-bold">Placement Test Fee</div>
+                    <small class="text-muted">Standard evaluation fee</small>
+                </td>
+                <td class="pe-4 py-3 text-end fw-bold">100.00 ILS</td>
+            </tr>
+        `;
+    } else {
+        filteredFees.forEach(fee => {
+            const amount = parseFloat(fee.amount);
+            total += amount;
+            
+            // Format type name (e.g., 'course' -> 'Course Enrollment')
+            const typeLabel = fee.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            rows += `
+                <tr class="border-bottom">
+                    <td class="ps-4 py-3">
+                        <div class="fw-bold">${typeLabel}</div>
+                        <small class="text-muted">${fee.level_name ? 'Level: ' + fee.level_name : 'Program general fee'}</small>
+                    </td>
+                    <td class="pe-4 py-3 text-end fw-bold">${amount.toFixed(2)} ILS</td>
+                </tr>
+            `;
+        });
+    }
+    
+    tbody.innerHTML = rows || '<tr><td colspan="2" class="text-center py-3 text-muted">No fees found for this selection</td></tr>';
+    document.getElementById('display-total-due').innerText = total.toFixed(2);
+    document.getElementById('total_due_hidden').value = total;
+    updateRemainingDue();
+}
+
+function resetFees() {
+    document.getElementById('fees-breakdown-body').innerHTML = '';
+    document.getElementById('display-total-due').innerText = '0.00';
+    document.getElementById('total_due_hidden').value = 0;
+    updateRemainingDue();
+}
+
 window.selectTestChoice = function(choice) {
     playSound('click');
     takeTest = (choice === 'yes');
-    document.getElementById('take_test_hidden').value = choice;
-    document.getElementById('test-scheduling-fields').style.display = takeTest ? 'block' : 'none';
+    const hiddenInput = document.getElementById('take_test_hidden');
+    if (hiddenInput) hiddenInput.value = choice;
     
-    // Toggle level selection when skipping the test
-    const levelSection = document.getElementById('skip-test-level-selection');
-    if (levelSection) {
-        console.log('Test Choice:', choice, 'Program:', selectedProgram);
-        levelSection.style.display = (!takeTest && selectedProgram !== '') ? 'block' : 'none';
-    }
+    // Toggle fields
+    const scheduling = document.getElementById('test-scheduling-fields');
+    const levelSelect = document.getElementById('skip-test-level-selection');
+    const placeholder = document.getElementById('test-info-placeholder');
+
+    if (scheduling) scheduling.style.display = takeTest ? 'block' : 'none';
+    if (levelSelect) levelSelect.style.display = !takeTest ? 'block' : 'none';
+    if (placeholder) placeholder.style.display = 'none'; // Hide placeholder once we have a choice
 
     document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('test-' + choice).classList.add('active');
+    const btn = document.getElementById('test-' + choice);
+    if (btn) btn.classList.add('active');
+
+    if (enrollmentPath === 'test') {
+        renderFeesBreakdown([{ type: 'placement_test', amount: 100, level_name: null }]);
+    } else {
+        handleProgramChange(); // Re-fetch program fees for direct enrollment
+    }
 };
 
-window.handlePaymentSelection = function(id, credsJson) {
+// STEP 4: Payment Logic
+window.selectPaymentMethod = function(id, el) {
     playSound('click');
-    document.getElementById('payment_method_hidden').value = id;
-    const creds = JSON.parse(credsJson);
+    document.getElementById('payment_method_id_hidden').value = id;
+    
+    // UI update
+    document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Handle credentials
+    const credsRaw = el.getAttribute('data-creds');
+    const area = document.getElementById('method-details-area');
     const list = document.getElementById('credentials-list');
-    list.innerHTML = '';
 
-    for (const [key, value] of Object.entries(creds)) {
-        if (value) {
-            list.innerHTML += `
-                <div class="credential-item bg-white p-3 rounded-4 shadow-sm mb-3 border d-flex align-items-center gap-3">
-                    <div class="credential-icon-box flex-shrink-0">
-                        <i class="bi bi-shield-check text-primary"></i>
-                    </div>
-                    <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        <span class="review-label mb-0" style="min-width: 80px;">${key.replace(/_/g, ' ')}</span>
-                        <span class="review-value mb-0">${value}</span>
-                    </div>
-                    <button type="button" class="copy-btn flex-shrink-0" onclick="copyToClipboard('${value}', this)">
-                        <i class="bi bi-clipboard-plus me-1"></i> Copy
-                    </button>
-                </div>
-            `;
-        }
+    if (credsRaw) {
+        try {
+            const creds = JSON.parse(credsRaw);
+            list.innerHTML = '';
+            for (const [key, value] of Object.entries(creds)) {
+                if (value) {
+                    let icon = 'bi-info-square';
+                    if (key.includes('iban') || key.includes('bank')) icon = 'bi-bank';
+                    if (key.includes('account')) icon = 'bi-hash';
+                    if (key.includes('wallet') || key.includes('phone')) icon = 'bi-phone';
+                    
+                    list.innerHTML += `
+                        <div class="credential-item border-0 shadow-none px-0 mb-3" style="background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <i class="bi ${icon} text-primary me-3 fs-4"></i>
+                                <div>
+                                    <div class="credential-label text-muted small fw-bold">${key.replace(/_/g, ' ')}</div>
+                                    <div class="credential-value fw-bold fs-5" id="cred-${key}">${value}</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary border-0 rounded-circle" 
+                                    onclick="copyToClipboard('${value}', this)" title="Copy">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            $(area).slideDown();
+        } catch(e) { console.error("Invalid credentials JSON", e); }
+    } else {
+        $(area).slideUp();
     }
-
-    document.getElementById('method-details').style.display = 'block';
-    document.querySelectorAll('.payment-card').forEach(c => {
-        c.classList.remove('active');
-        c.querySelector('.check-icon').style.display = 'none';
-    });
-
-    const card = event.currentTarget;
-    card.classList.add('active');
-    card.querySelector('.check-icon').style.display = 'block';
 };
 
 window.copyToClipboard = function(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.remove('copied');
-        }, 2000);
+        const icon = btn.querySelector('i');
+        const oldClass = icon.className;
+        icon.className = 'bi bi-check2 text-success';
+        setTimeout(() => icon.className = oldClass, 2000);
     });
 };
 
+window.updateRemainingDue = function() {
+    const total = parseFloat(document.getElementById('total_due_hidden').value) || 0;
+    const paidInput = document.getElementsByName('student_fee_paid')[0];
+    const paid = parseFloat(paidInput.value) || 0;
+    const remaining = Math.max(0, total - paid);
+    document.getElementById('display-amount-due').innerText = remaining.toFixed(2);
+};
+
+window.updateFileName = function(input) {
+    const preview = document.getElementById('file-name-preview');
+    if (input.files && input.files[0]) {
+        preview.innerHTML = `<i class="bi bi-file-earmark-check me-2"></i>Selected: ${input.files[0].name}`;
+        document.getElementById('receipt-dropzone').classList.add('border-success');
+    }
+};
+
+// NAVIGATION
 window.changeStep = function(direction) {
     if (direction > 0 && !validateCurrentStep()) return;
-    playSound('whoosh');
-
-    let nextStep = currentStep + direction;
     
-    // Skip payment (Step 4) only if they chose NOT to take the test
-    if (nextStep === 4 && !takeTest && direction > 0) nextStep = 5;
-    else if (nextStep === 4 && !takeTest && direction < 0) nextStep = 3;
-
+    playSound('whoosh');
     document.getElementById(`pane-${currentStep}`).classList.remove('active');
-    document.querySelectorAll(`[data-step-nav="${currentStep}"]`).forEach(el => el.classList.remove('active'));
-    if (direction > 0) document.querySelectorAll(`[data-step-nav="${currentStep}"]`).forEach(el => el.classList.add('completed'));
+    document.querySelector(`[data-step-nav="${currentStep}"]`).classList.remove('active');
+    if (direction > 0) document.querySelector(`[data-step-nav="${currentStep}"]`).classList.add('completed');
 
-    currentStep = nextStep;
+    currentStep += direction;
+
     if (currentStep > 5) {
         submitFinalForm();
         currentStep = 5;
         return;
     }
 
-    if (currentStep === 5) prepareReview();
-
     document.getElementById(`pane-${currentStep}`).classList.add('active');
-    document.querySelectorAll(`[data-step-nav="${currentStep}"]`).forEach(el => el.classList.add('active'));
+    document.querySelector(`[data-step-nav="${currentStep}"]`).classList.add('active');
 
     document.getElementById('btn-prev').style.display = currentStep === 1 ? 'none' : 'block';
     const nextBtn = document.getElementById('btn-next');
-    nextBtn.innerHTML = currentStep === 5 ? getMsg('ok') : 'Next Step';
+    nextBtn.innerText = currentStep === 5 ? getMsg('ok') : getMsg('next');
     
-    if (currentStep === 5) nextBtn.classList.replace('btn-next', 'btn-submit');
-    else nextBtn.classList.replace('btn-submit', 'btn-next');
+    if (currentStep === 5) nextBtn.classList.add('btn-success');
+    else nextBtn.classList.remove('btn-success');
 };
 
 function validateCurrentStep() {
@@ -194,61 +371,39 @@ function validateCurrentStep() {
     let isValid = true;
 
     if (currentStep === 1) {
-        ['name', 'name_en', 'mobile', 'email', 'dob', 'gender'].forEach(f => {
+        ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address'].forEach(f => {
             const el = $(`[name="${f}"]`);
-            if (!el.val()) {
-                el.addClass('is-invalid').after('<span class="error-message">Required</span>');
-                isValid = false;
-            }
+            if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
         });
-    } else if (currentStep === 2) {
-        const fields = selectedProgram === 'adult' ? ['major'] : ['parent_name', 'parent_phone', 'parent_relationship'];
-        fields.forEach(f => {
-            const el = $(`[name="${f}"]`);
-            if (!el.val()) {
-                el.addClass('is-invalid').after('<span class="error-message">Required</span>');
-                isValid = false;
-            }
-        });
-    } else if (currentStep === 3) {
-        if (!document.getElementById('take_test_hidden').value) {
-            Swal.fire({ icon: 'warning', title: getMsg('testWarning'), customClass: { popup: 'swal-oxford-popup' } });
-            isValid = false;
-        } else if (!takeTest && selectedProgram !== '') {
-            // Level is mandatory if skipping test
-            if (!$('input[name="current_level"]:checked').val()) {
-                Swal.fire({ icon: 'warning', title: 'Please select your level (يرجى تحديد المستوى)', customClass: { popup: 'swal-oxford-popup' } });
-                isValid = false;
-            }
-        } else if (takeTest) {
-            ['test_date', 'preferred_days', 'preferred_time'].forEach(f => {
-                const el = $(`[name="${f}"]`);
-                if (el.attr('type') === 'radio') {
-                    if (!$(`input[name="${f}"]:checked`).val()) {
-                        isValid = false;
-                        $(`input[name="${f}"]`).closest('.scheduling-card').addClass('border-danger');
-                    } else {
-                        $(`input[name="${f}"]`).closest('.scheduling-card').removeClass('border-danger');
-                    }
-                } else {
-                    if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
-                }
-            });
-        }
-    } else if (currentStep === 4 && takeTest) {
-        if (!document.getElementById('payment_method_hidden').value) {
-            Swal.fire({ icon: 'warning', title: getMsg('paymentWarning'), customClass: { popup: 'swal-oxford-popup' } });
-            isValid = false;
-        }
-        if (!document.getElementById('receipt_input').value) {
-            Swal.fire({ icon: 'warning', title: getMsg('receiptWarning'), customClass: { popup: 'swal-oxford-popup' } });
-            isValid = false;
-        }
-    } else if (currentStep === 5) {
         if ($('input[name="health_status"]:checked').val() === 'yes' && !$('#health_notes').val()) {
             $('#health_notes').addClass('is-invalid');
             isValid = false;
         }
+    } else if (currentStep === 2) {
+        const fields = selectedProgramType === 'adult' ? ['major'] : ['parent_name', 'parent_phone', 'parent_relationship'];
+        fields.forEach(f => {
+            const el = $(`[name="${f}"]`);
+            if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
+        });
+    } else if (currentStep === 3) {
+        if (!$('#program_id_select').val()) {
+            Swal.fire({ icon: 'warning', title: 'Please select a Target Program.', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        } else if (takeTest) {
+            ['test_date', 'preferred_days', 'preferred_time'].forEach(f => {
+                if (!$(`[name="${f}"]:checked`).val() && !$(`input[name="${f}"]`).val()) isValid = false;
+            });
+            if (!isValid) Swal.fire({ icon: 'warning', title: 'Please complete placement scheduling.', customClass: { popup: 'swal-oxford-popup' } });
+        } else if (!takeTest && !$('input[name="current_level"]:checked').val()) {
+            Swal.fire({ icon: 'warning', title: 'Please select your current level.', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        }
+    } else if (currentStep === 4) {
+        if (!$('#payment_method_id_hidden').val() || !$('input[name="student_fee_paid"]').val() || !document.getElementById('receipt_input').value) {
+            Swal.fire({ icon: 'warning', title: 'Please complete all payment fields and upload receipt.', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        }
+    } else if (currentStep === 5) {
         if (!$('#agree-terms').is(':checked')) {
             Swal.fire({ icon: 'warning', title: getMsg('termsWarning'), customClass: { popup: 'swal-oxford-popup' } });
             isValid = false;
@@ -257,16 +412,7 @@ function validateCurrentStep() {
     return isValid;
 }
 
-function prepareReview() {
-    // Summary removed per user request
-}
-
 window.submitFinalForm = function() {
-    if (!document.getElementById('agree-terms').checked) {
-        Swal.fire({ icon: 'warning', title: getMsg('termsWarning'), customClass: { popup: 'swal-oxford-popup' } });
-        return;
-    }
-
     Swal.fire({
         title: getMsg('processing'),
         text: getMsg('creatingProfile'),
@@ -276,9 +422,7 @@ window.submitFinalForm = function() {
     });
 
     const formData = new FormData(document.getElementById('registration-wizard-form'));
-    const url = window.registrationRoute || '/contact/book';
-
-    fetch(url, {
+    fetch(window.registrationRoute || '/contact/book', {
         method: 'POST',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -286,50 +430,17 @@ window.submitFinalForm = function() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            Swal.fire({
-                title: getMsg('successTitle'),
-                text: getMsg('successText'),
-                icon: 'success',
-                confirmButtonText: getMsg('ok'),
-                customClass: {
-                    popup: 'swal-oxford-popup',
-                    confirmButton: 'swal-oxford-confirm'
-                },
-                buttonsStyling: false
-            }).then(() => window.location.href = '/');
+            Swal.fire({ title: getMsg('successTitle'), text: getMsg('successText'), icon: 'success', confirmButtonText: getMsg('ok'), customClass: { popup: 'swal-oxford-popup' }})
+            .then(() => window.location.href = '/');
         } else {
-            Swal.fire({
-                title: getMsg('errorTitle'),
-                text: data.message,
-                icon: 'error',
-                confirmButtonText: getMsg('retry'),
-                customClass: {
-                    popup: 'swal-oxford-popup',
-                    confirmButton: 'swal-oxford-confirm'
-                },
-                buttonsStyling: false
-            });
+            Swal.fire({ title: getMsg('errorTitle'), text: data.message, icon: 'error', customClass: { popup: 'swal-oxford-popup' }});
         }
     })
-    .catch(() => {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'An unexpected error occurred.', customClass: { popup: 'swal-oxford-popup' } });
+    .catch(err => {
+        Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection.', customClass: { popup: 'swal-oxford-popup' }});
     });
 };
-window.updateFileName = function(input) {
-    const preview = document.getElementById('file-name-preview');
-    const container = document.getElementById('receipt-dropzone');
-    if (input.files && input.files[0]) {
-        preview.innerHTML = `
-            <div class="alert alert-success d-inline-flex align-items-center py-2 px-3 m-0 rounded-pill" style="font-size: 0.85rem;">
-                <i class="bi bi-file-earmark-check-fill me-2"></i>
-                ${input.files[0].name}
-            </div>
-        `;
-        if (container) container.style.borderColor = '#50cd89';
-    }
-};
 
-// Enforce Arabic only for Arabic Name field
 document.addEventListener('DOMContentLoaded', function() {
     const arabicNameInput = document.querySelector('input[name="name"]');
     if (arabicNameInput) {
@@ -338,26 +449,9 @@ document.addEventListener('DOMContentLoaded', function() {
             let value = e.target.value;
             let filteredValue = '';
             for (let i = 0; i < value.length; i++) {
-                if (arabicRegex.test(value[i])) {
-                    filteredValue += value[i];
-                }
+                if (arabicRegex.test(value[i])) filteredValue += value[i];
             }
-            if (value !== filteredValue) {
-                e.target.value = filteredValue;
-            }
+            if (value !== filteredValue) e.target.value = filteredValue;
         });
     }
 });
-
-function toggleHealthNotes(show) {
-    const wrapper = document.getElementById('health-notes-wrapper');
-    const notesInput = document.getElementById('health_notes');
-    if (show) {
-        $(wrapper).slideDown();
-        notesInput.setAttribute('required', 'required');
-    } else {
-        $(wrapper).slideUp();
-        notesInput.removeAttribute('required');
-        notesInput.value = '';
-    }
-}

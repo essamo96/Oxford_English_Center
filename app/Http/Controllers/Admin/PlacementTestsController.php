@@ -33,6 +33,9 @@ class PlacementTestsController extends Controller
         if ($request->has('gender') && $request->gender != '') {
             $tests->where('students.gender', $request->gender);
         }
+        if ($request->has('program_type') && $request->program_type != '') {
+            $tests->where('students.program_type', $request->program_type);
+        }
         if ($request->has('search_text') && $request->search_text != '') {
             $search = $request->search_text;
             $tests->where(function($q) use ($search) {
@@ -56,10 +59,21 @@ class PlacementTestsController extends Controller
                     $btns .= '<button class="btn btn-sm btn-success score-btn" data-id="' . $test->id . '" data-name="' . $test->student->name . '" title="Record Score"><i class="fa fa-graduation-cap"></i></button>';
                 }
 
+                $btns .= '<button onclick="showStudentModal('.$test->student_id.')" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="عرض التفاصيل">
+                            <i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                          </button>';
+                
                 $btns .= '<a href="' . route('placement_tests.edit', $test->id) . '" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>';
                 $btns .= '<button class="btn btn-sm btn-danger delete-btn" data-id="' . $test->id . '"><i class="fa fa-trash"></i></button>';
                 $btns .= '</div>';
                 return $btns;
+            })
+            ->editColumn('student.name', function ($row) {
+                if (!$row->student) return 'N/A';
+                $pType = $row->student->program_type == 'kids' 
+                    ? '<span class="badge badge-light-success fs-8 fw-bold ms-2">KIDS</span>'
+                    : '<span class="badge badge-light-primary fs-8 fw-bold ms-2">ADULT</span>';
+                return $row->student->name . $pType;
             })
             ->editColumn('status', function ($test) {
                 $class = [
@@ -76,7 +90,7 @@ class PlacementTestsController extends Controller
                 }
                 return 'No Receipt';
             })
-            ->rawColumns(['action', 'status', 'payment_receipt'])
+            ->rawColumns(['action', 'status', 'payment_receipt', 'student.name'])
             ->make(true);
     }
 

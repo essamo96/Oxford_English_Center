@@ -53,7 +53,7 @@
                                             <label class="form-check form-check-custom form-check-solid">
                                                 <input class="form-check-input" id="permissions[]" name="permissions[]" type="checkbox" value="{{ $item->id }}" {{ in_array($item->id, array_column($role_permissions, 'permission_id')) ? 'checked' : '' }} />
                                                 <span class="form-check-label fw-semibold text-gray-700">
-                                                    {{ trans('permissions.'.$item->name) }}
+                                                    {{ \Illuminate\Support\Facades\Lang::has('permissions.'.$item->name) ? trans('permissions.'.$item->name) : $item->name }}
                                                 </span>
                                             </label>
                                         </div>

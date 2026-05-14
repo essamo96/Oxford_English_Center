@@ -42,9 +42,11 @@ class Students extends Authenticatable
         'url',
         'user_id',
         'ask_update',
-        'image',
-        'note',
-        'delay_cusess'
+        'is_verified',
+        'address',
+        'health_conditions',
+        'delay_cusess',
+        'note'
     ];
     protected $hidden = [
         'password'

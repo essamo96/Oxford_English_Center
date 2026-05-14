@@ -584,6 +584,37 @@
             </li>
             @endif
 
+            {{-- ===== الإدارة المالية ===== --}}
+            @if (auth()->user()->can('admin.financial.view') ||
+                auth()->user()->can('admin.financial.verify') ||
+                auth()->user()->can('admin.financial.refund'))
+            <li class="nav-item {{ in_array($active_menu, ['financial', 'financial_fees']) ? 'active' : '' }}">
+                <a href="javascript:void(0);" class="nav-link nav-toggle">
+                    <i class="bi bi-cash-stack"></i>
+                    <span class="title">الإدارة المالية</span>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    @can('admin.financial.view')
+                    <li class="nav-item {{ $active_menu == 'financial' ? 'active' : '' }}">
+                        <a href="{{ route('admin.financial.pending') }}" class="nav-link nav-toggle">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span class="title">الطلبات المالية المعلقة</span>
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item {{ $active_menu == 'financial_fees' ? 'active' : '' }}">
+                        <a href="{{ route('admin.financial.fees') }}" class="nav-link nav-toggle">
+                            <i class="bi bi-sliders"></i>
+                            <span class="title">إعدادات أنواع الرسوم</span>
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
+            </li>
+            @endif
+
         </ul>
         <!-- END SIDEBAR MENU -->
     </div>

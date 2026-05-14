@@ -36,6 +36,14 @@
                 <input type="text" id="test_time" class="form-control" placeholder="مثال: 10:00 AM">
             </div>
             <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">نوع البرنامج</label>
+                <select id="program_type" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="adult">الكبار (Adult)</option>
+                    <option value="kids">الأطفال (Kids)</option>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label fw-bold text-gray-700">الجنس</label>
                 <select id="gender" class="form-select">
                     <option value="">الكل</option>
@@ -184,11 +192,51 @@
 
 @stop
 
+@section('modal')
+    <!-- Modern Details Modal -->
+    <div class="modal fade" id="details_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-800px">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-0 justify-content-end">
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body scroll-y pt-0 pb-15" id="modal_content">
+                    <div class="text-center py-10">
+                        <span class="spinner-border w-50px h-50px" role="status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
 @section('js')
 <script>
+    // Global functions for student details
+    window.showStudentModal = function(id) {
+        fetchModalContent('{{ route('students.details') }}', { id: id });
+    }
+
+    function fetchModalContent(url, data) {
+        $('#modal_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px" role="status"></span></div>');
+        $('#details_modal').modal('show');
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: { ...data, _token: '{{ csrf_token() }}' },
+            success: function(response) {
+                $('#modal_content').html(response);
+            },
+            error: function() {
+                $('#modal_content').html('<div class="alert alert-danger">حدث خطأ أثناء تحميل البيانات</div>');
+            }
+        });
+    }
     var table;
     var tableId = 'placement_tests_table';
-    var filterFields = ['#search_text', '#test_date', '#test_time', '#gender'];
+    var filterFields = ['#search_text', '#test_date', '#test_time', '#program_type', '#gender'];
     
     var columns = [
         { 
@@ -201,7 +249,7 @@
                         </div>`;
             } 
         },
-        { data: "student.name", name: "student.name", orderable: true },
+        { data: "student.name", name: "students.name", orderable: true },
         { data: "test_date", name: "test_date", orderable: true },
         { data: "test_time", name: "test_time", orderable: true },
         { data: "status", name: "status", orderable: true },

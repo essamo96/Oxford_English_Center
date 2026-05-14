@@ -1,4 +1,5 @@
 @php
+    $active_menu = $active_menu ?? '';
     $hasStatusColumn = false;
 
     if (!empty($columns) && is_array($columns)) {
@@ -43,7 +44,7 @@ $(document).ready(function() {
         bFilter: false,
         serverSide: true,
         ajax: {
-            url: (typeof customAjaxUrl !== 'undefined' && customAjaxUrl) ? customAjaxUrl : '{{ route($active_menu . '.list') }}',
+            url: '{!! isset($customAjaxUrl) ? $customAjaxUrl : (Route::has($active_menu . ".list") ? route($active_menu . ".list") : "#") !!}',
             data: function(d) {
                 if (typeof filterFields !== 'undefined') {
                     filterFields.forEach(function(field) {

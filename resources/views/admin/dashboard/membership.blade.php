@@ -64,6 +64,14 @@
                         <option value="female">أنثى</option>
                     </select>
                 </div>
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label fw-semibold">نوع البرنامج</label>
+                    <select id="program_type" name="program_type" class="form-select form-select-solid" data-control="select2" data-placeholder="-- الكل --">
+                        <option value=""></option>
+                        <option value="adult">الكبار (Adult)</option>
+                        <option value="kids">الأطفال (Kids)</option>
+                    </select>
+                </div>
                 <div class="col-lg-3 col-md-6">
                     <label class="form-label fw-semibold">من تاريخ</label>
                     <input type="text" id="date_from" name="date_from" class="form-control form-control-solid date-picker" placeholder="اختر ...">
@@ -188,7 +196,7 @@
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center align-middle" }
     ];
 
-    var filterFields = ['#search', '#gender', '#date_from', '#date_to', '#is_today'];
+    var filterFields = ['#search', '#gender', '#program_type', '#date_from', '#date_to', '#is_today'];
 
     $(document).ready(function() {
         // Initialize flatpickr

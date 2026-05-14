@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+        $this->call(FeeTypeSeeder::class);
         // 1. Create Admin Role
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'admin']);
 
@@ -282,7 +283,15 @@ class DatabaseSeeder extends Seeder
     'name_ar' => 'لوحة التحكم الرئيسية',
     'name_en' => 'Main Dashboard',
   ),
+  36 => 
+  array (
+    'id' => 40,
+    'name' => 'financial',
+    'name_ar' => 'الإدارة المالية',
+    'name_en' => 'Financial Management',
+  ),
 );
+
 
         foreach ($groups as $group) {
             DB::table('permissions_group')->updateOrInsert(['id' => $group['id']], [
@@ -977,25 +986,36 @@ class DatabaseSeeder extends Seeder
   ),
   136 => 
   array (
-    'name' => 'view_email_campaigns',
-    'group_id' => '',
+    'name' => 'admin.email_campaigns.send',
+    'group_id' => '36',
   ),
   137 => 
   array (
-    'name' => 'send_emails',
-    'group_id' => '',
+    'name' => 'admin.email_campaigns.manage',
+    'group_id' => '36',
   ),
   138 => 
-  array (
-    'name' => 'manage_email_campaigns',
-    'group_id' => '',
-  ),
-  139 => 
   array (
     'name' => 'admin.email_campaigns.view',
     'group_id' => '36',
   ),
+  140 => 
+  array (
+    'name' => 'admin.financial.view',
+    'group_id' => '40',
+  ),
+  141 => 
+  array (
+    'name' => 'admin.financial.verify',
+    'group_id' => '40',
+  ),
+  142 => 
+  array (
+    'name' => 'admin.financial.refund',
+    'group_id' => '40',
+  ),
 );
+
 
         $allPermissionNames = [];
         foreach ($permissions as $p) {
@@ -1025,6 +1045,7 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         foreach ($tables as $table) {
             $file = $dataDir . "/{$table}.json";
             if (\Illuminate\Support\Facades\File::exists($file)) {
@@ -1042,5 +1063,6 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

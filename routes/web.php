@@ -41,8 +41,10 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('certificates/student', ['as' => 'certificates.student', 'uses' => 'CertificatesController@postIndex']);
     Route::get('exam', ['as' => 'contact.exam', 'uses' => 'ContactController@getExam']);
     Route::post('exam', ['as' => 'contact.exam', 'uses' => 'ContactController@postExam']);
-    Route::get('book', ['as' => 'contact.book', 'uses' => 'ContactController@getBook']);
-    Route::post('book', ['as' => 'contact.book', 'uses' => 'ContactController@postBook']);
+    Route::get('book/{type?}', ['as' => 'contact.book', 'uses' => 'RegistrationController@showRegistrationForm']);
+    Route::post('book', ['as' => 'contact.book.post', 'uses' => 'RegistrationController@postRegister']);
+    Route::get('api/get-program-fee/{id}', 'RegistrationController@getProgramFee');
+    Route::get('api/get-fee', 'Admin\FinancialController@getFee');
     Route::get('jobs', ['as' => 'contact.job', 'uses' => 'ContactController@getJob']);
     Route::post('jobs', ['as' => 'contact.job', 'uses' => 'ContactController@postJob']);
     Route::get('page/{title}', ['as' => 'page.view', 'uses' => 'PageController@getPage']);
@@ -61,7 +63,12 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('login', ['as' => 'web.login', 'uses' => 'LoginController@postIndex']);
     Route::get('logout', ['as' => 'web.logout', 'uses' => 'LoginController@getLogout']);
     Route::post('grope/code/check', ['as' => 'groups.code.check', 'uses' => 'GroupsController@checkGropeCodeForStudent']);
+    
+    // New Registration Routes
+    Route::get('register/{type}', ['as' => 'web.register', 'uses' => 'RegistrationController@showRegistrationForm']);
+    Route::post('register', ['as' => 'web.register.post', 'uses' => 'RegistrationController@postRegister']);
 });
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Route::group(['middleware' => ['auth:teachers']], function () {
@@ -547,4 +554,28 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('file_manager/rename', ['uses' => 'FileManagerController@rename']); // Fallback underscore
     Route::post('file-manager/delete', ['as' => 'admin.file_manager.delete', 'uses' => 'FileManagerController@delete']);
     Route::post('file_manager/delete', ['uses' => 'FileManagerController@delete']); // Fallback underscore
+
+    // Financial Routes
+    Route::get('financial/pending', ['as' => 'admin.financial.pending', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@pendingOrders']);
+    Route::get('financial/pending/list', ['as' => 'admin.financial.pending.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingList']);
+    // Financial Ledger (Invoices)
+    Route::get('financial/invoices', ['as' => 'admin.financial.invoices', 'uses' => 'FinancialController@invoicesLedger']);
+    Route::get('financial/invoices/list', ['as' => 'admin.financial.invoices.list', 'uses' => 'FinancialController@getInvoicesLedgerList']);
+    Route::get('financial/groups/{programId}', ['as' => 'admin.financial.groups_by_program', 'uses' => 'FinancialController@getActualGroupsByProgram']);
+
+    Route::get('financial/ledger/{studentId}/{groupId}', ['as' => 'admin.financial.ledger', 'uses' => 'FinancialController@ledger']);
+    Route::post('financial/record-payment', ['as' => 'admin.financial.record_payment', 'uses' => 'FinancialController@postRecordPayment']);
+    Route::post('financial/verify', ['as' => 'admin.financial.verify', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'FinancialController@verifyPayment']);
+    Route::post('financial/refund', ['as' => 'admin.financial.refund', 'middleware' => ['permission:admin.financial.refund'], 'uses' => 'FinancialController@refundPayment']);
+
+    Route::get('financial/fees', ['as' => 'admin.financial.fees', 'uses' => 'FinancialController@feeSettings']);
+    Route::post('financial/fees/update', ['as' => 'admin.financial.fees.update', 'uses' => 'FinancialController@updateFeeSetting']);
+    Route::delete('financial/fees/delete/{id}', ['as' => 'admin.financial.fees.delete', 'uses' => 'FinancialController@deleteFeeSetting']);
+    Route::get('financial/fees/groups/{programId}', ['as' => 'admin.financial.fees.groups', 'uses' => 'FinancialController@getGroupsByProgram']);
+    
+    // Fee Types Management
+    Route::get('financial/fee-types', ['as' => 'admin.financial.fee_types.list', 'uses' => 'FinancialController@getFeeTypes']);
+    Route::post('financial/fee-types/store', ['as' => 'admin.financial.fee_types.store', 'uses' => 'FinancialController@storeFeeType']);
+    Route::delete('financial/fee-types/delete/{id}', ['as' => 'admin.financial.fee_types.delete', 'uses' => 'FinancialController@deleteFeeType']);
+
 });

@@ -427,6 +427,45 @@
                     </div>
                 </div>
 
+                <div data-kt-menu-trigger="click"
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['financial', 'financial_fees']) ? 'here show' : '' }} menu-accordion">
+                    <span class="menu-link">
+                        <span class="menu-icon"><i class="ki-duotone ki-financial-schedule fs-1 text-info"><span
+                                    class="path1"></span><span class="path2"></span><span
+                                    class="path3"></span><span class="path4"></span></i></span>
+                        <span class="menu-title">الإدارة المالية</span>
+                        <span class="arrow"></span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        @if (auth()->user()->can('admin.financial.view') ||
+                                auth()->user()->can('admin.financial.verify') ||
+                                auth()->user()->can('admin.financial.refund'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.pending') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">الطلبات المالية المعلقة</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_invoices' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.invoices') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">كشف حساب الطلاب</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_fees' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.fees') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">إعدادات أنواع الرسوم</span>
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
                 @if (auth()->user()->can('admin.students_report.view'))
                     <div class="menu-item">
                         <a class="menu-link {{ Route::currentRouteName() == 'students_report.view' ? 'active' : '' }}"

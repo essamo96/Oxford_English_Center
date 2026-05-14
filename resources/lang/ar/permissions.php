@@ -183,4 +183,9 @@ return array (
   'admin.evaluations.permissions' => 'الصلاحيات',
   'admin.evaluations.password' => 'تغيير كلمة المرور',
   'admin.evaluations.reply' => 'رد',
+  'admin.financial.view' => 'عرض الإدارة المالية',
+  'admin.financial.verify' => 'تأكيد الدفع',
+  'admin.financial.refund' => 'رفض/استرداد الدفع',
+  'admin.email_campaigns.send' => 'إرسال الحملات',
+  'admin.email_campaigns.manage' => 'إدارة الحملات',
 );

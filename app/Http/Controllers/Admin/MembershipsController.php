@@ -250,11 +250,16 @@ class MembershipsController extends AdminController
             'date_from'  => $request->get('date_from'),
             'date_to'    => $request->get('date_to'),
             'gender'     => $request->get('gender'),
+            'program_type' => $request->get('program_type'),
             'is_today'   => $request->get('is_today'),
         ];
 
         // Custom logic for today filter if provided
         $query = Students::askJoinQuery($filters);
+        
+        if ($filters['program_type']) {
+            $query->where('students.program_type', $filters['program_type']);
+        }
         
         if ($filters['is_today'] == 1) {
             $query->whereDate('created_at', \Carbon\Carbon::today());
@@ -282,6 +287,11 @@ class MembershipsController extends AdminController
                 $genderIcon = '<i class="bi bi-gender-female text-danger fs-4 ms-2" title="أنثى"></i>';
             }
 
+            // Program Type badge
+            $pType = $row->program_type == 'kids' 
+                ? '<span class="badge badge-light-success fs-8 fw-bold">KIDS</span>'
+                : '<span class="badge badge-light-primary fs-8 fw-bold">ADULT</span>';
+
             return '
                 <div class="d-flex align-items-center">
                     <div class="symbol symbol-50px me-3 cursor-pointer" onclick="showStudentModal('.$row->id.')">
@@ -292,6 +302,7 @@ class MembershipsController extends AdminController
                             <a href="javascript:;" onclick="showStudentModal('.$row->id.')" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
 
                             '.$genderIcon.'
+                            <span class="ms-2">'.$pType.'</span>
                         </div>
                         <span class="text-gray-400 fw-semibold d-block fs-7">'.$email.'</span>
                     </div>
