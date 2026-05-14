@@ -167,6 +167,10 @@
         fetchModalContent('{{ route('students.details') }}', { id: id });
     }
 
+    function showStudentFinancials(id) {
+        fetchModalContent('{{ route('membership.student_financials') }}', { id: id });
+    }
+
     function fetchModalContent(url, data) {
         $('#modal_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px" role="status"></span></div>');
         $('#details_modal').modal('show');

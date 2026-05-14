@@ -178,6 +178,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     //Memberships  Route //dd member
     Route::get('home/membership', ['as' => 'dashboard.view.membership', 'middleware' => ['permission:admin.groups.student.view|admin.groups.student.add|admin.groups.student.edit|admin.groups.student.delete|admin.groups.student.status'], 'uses' => 'MembershipsController@getIndex']);
     Route::get('membership/list', ['as' => 'membership.list', 'uses' => 'MembershipsController@getmembershiplist']);
+    Route::post('membership/student-financials', ['as' => 'membership.student_financials', 'uses' => 'MembershipsController@getStudentFinancials']);
     Route::get('home/askcourses', ['as' => 'dashboard.view.askcourses', 'middleware' => ['permission:admin.groups.student.view|admin.groups.student.add|admin.groups.student.edit|admin.groups.student.delete|admin.groups.student.status'], 'uses' => 'MembershipsController@viewaskcourses']);
     Route::get('askcourses/list', ['as' => 'askcourses.list', 'uses' => 'MembershipsController@askcourseslist']);
     Route::post('students/status/membership', ['as' => 'students.status.membership', 'middleware' => ['permission:admin.students.status'], 'uses' => 'MembershipsController@postStatus']);

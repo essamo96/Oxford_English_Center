@@ -26,6 +26,8 @@ use App\Models\Students_Admin_Messages;
 use App\Models\Teachers_Admin_Messages;
 use App\Models\Teachers;
 use App\Models\Pending_Data;
+use App\Models\GroupStudentsFees;
+use App\Services\FinancialService;
 use App\Mail\NewStudentEmail;
 use Illuminate\Support\Facades\Mail;
 
@@ -37,6 +39,8 @@ class MembershipsController extends AdminController
     public $social;
     /** @var string */
     public $path;
+    /** @var FinancialService */
+    protected $financialService;
 
 
     const INSERT_SUCCESS_MESSAGE = "نجاح، تم الإضافة بتجاح";
@@ -49,9 +53,10 @@ class MembershipsController extends AdminController
     const DISABLE_SUCCESS = "نجاح، تم التعطيل بنجاح";
 
     //////////////////////////////////////////////
-    public function __construct()
+    public function __construct(FinancialService $financialService)
     {
         parent::__construct();
+        $this->financialService = $financialService;
         $count_disabled_students = MembershipsController::getCountOfStudentMembershipRequests();
         $this->mysettings = parent::$data['mysettings'];
         $this->social = parent::$data['social'];
@@ -689,6 +694,31 @@ class MembershipsController extends AdminController
                 'initial' => mb_substr($teacher->name, 0, 1)
             ],
             'history' => $history
+        ]);
+    }
+
+    public function getStudentFinancials(Request $request)
+    {
+        $id = $request->get('id');
+        $student = Students::findOrFail($id);
+        
+        // Fetch all fee records for this student
+        $fees = GroupStudentsFees::with(['group.program', 'paymentMethod'])
+            ->where('student_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        // We can also get a summarized ledger if they have any group assignment
+        $ledgers = [];
+        $groupEnrollments = \App\Models\GroupStudents::where('student_id', $id)->get();
+        foreach($groupEnrollments as $enrollment) {
+            $ledgers[] = $this->financialService->getStudentLedger($id, $enrollment->group_id);
+        }
+
+        return view('admin.dashboard.parts.financial_details', [
+            'student' => $student,
+            'fees' => $fees,
+            'ledgers' => $ledgers
         ]);
     }
 }

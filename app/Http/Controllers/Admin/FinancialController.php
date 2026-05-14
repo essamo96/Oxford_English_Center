@@ -94,12 +94,7 @@ class FinancialController extends AdminController
     
             $student = Students::find($fee->student_id);
             if ($student) {
-                // 1. Update program if changed
-                if ($request->program_id) {
-                    $student->program_id = $request->program_id;
-                }
-    
-                // 2. Assign to group if provided
+                // 1. Assign to group if provided
                 if ($request->group_id) {
                     // Check if already in group
                     $exists = \App\Models\GroupStudents::where('student_id', $student->id)

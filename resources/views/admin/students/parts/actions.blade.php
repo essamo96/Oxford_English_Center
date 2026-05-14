@@ -34,6 +34,13 @@
         <div class="separator my-2 opacity-75"></div>
         
         <div class="menu-item px-3">
+            <a href="javascript:;" onclick="showStudentFinancials({{ $id }})" class="menu-link px-3">
+                <span class="menu-icon"><i class="ki-duotone ki-dollar fs-3 text-success"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
+                <span class="menu-title">البيانات المالية</span>
+            </a>
+        </div>
+
+        <div class="menu-item px-3">
             <a href="{{ route('students.password', ['id' => Crypt::encrypt($id)]) }}" class="menu-link px-3">
                 <span class="menu-icon"><i class="ki-duotone ki-key fs-3 text-dark"><span class="path1"></span><span class="path2"></span></i></span>
                 <span class="menu-title">كلمة المرور</span>
