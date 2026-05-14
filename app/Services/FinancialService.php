@@ -64,18 +64,43 @@ class FinancialService
      */
     public function getGlobalStats()
     {
-        $totalCollected = GroupStudentsFees::confirmed()->where('transaction_type', 'payment')->sum('transaction_amount')
-                        - GroupStudentsFees::confirmed()->where('transaction_type', 'refund')->sum(DB::raw('ABS(transaction_amount)'));
+        // 1. Total Collected (Verified payments - verified refunds)
+        $totalCollected = GroupStudentsFees::confirmed()
+            ->where('transaction_type', 'payment')
+            ->sum('transaction_amount')
+            - GroupStudentsFees::confirmed()
+            ->where('transaction_type', 'refund')
+            ->sum(DB::raw('ABS(transaction_amount)'));
 
-        $pendingAmount = GroupStudentsFees::where('audit_status', 'pending')->sum('transaction_amount');
+        // 2. Pending Amount (Student submitted but not yet verified)
+        // For pending records, transaction_amount is usually 0 until admin verifies it.
+        $pendingAmount = GroupStudentsFees::where('audit_status', 'pending')
+            ->sum('student_fee_paid');
 
-        // Remaining is harder globally without joining group_students
-        $totalFees = GroupStudents::sum('student_fee_total');
-        $totalRemaining = $totalFees - $totalCollected;
+        // 3. Total Remaining (What students still owe)
+        // We calculate this by taking the total fees from groups and adding any other 
+        // independent fees (like placement tests) that haven't been fully paid.
+        $groupFees = GroupStudents::sum('student_fee_total');
+        
+        // Sum of all verified payments that were specifically for groups
+        $groupCollected = GroupStudentsFees::confirmed()
+            ->whereNotNull('group_id')
+            ->where('transaction_type', 'payment')
+            ->sum('transaction_amount');
+            
+        // For independent fees (like Placement Tests not tied to a group yet)
+        $independentRemaining = GroupStudentsFees::whereNull('group_id')
+            ->where('audit_status', '!=', 'rejected')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('student_id') // Simplification: get latest for each student
+            ->sum('remaining_amount');
+
+        $totalRemaining = ($groupFees - $groupCollected) + $independentRemaining;
 
         return [
             'total_collected' => $totalCollected,
-            'total_remaining' => $totalRemaining,
+            'total_remaining' => max(0, $totalRemaining),
             'pending_amount' => $pendingAmount,
         ];
     }

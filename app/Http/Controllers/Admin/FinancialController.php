@@ -101,9 +101,16 @@ class FinancialController extends AdminController
                         ->where('group_id', $request->group_id)
                         ->exists();
                     if (!$exists) {
+                        // Fetch program fee for this group
+                        $group = \App\Models\Groups::find($request->group_id);
+                        $programFee = \App\Models\FeeSettings::where('program_id', $group->program_id)
+                            ->where('type', 'course_fee')
+                            ->value('amount') ?: $fee->total_due_amount;
+
                         \App\Models\GroupStudents::create([
                             'student_id' => $student->id,
                             'group_id' => $request->group_id,
+                            'student_fee_total' => $programFee,
                             'status' => 1
                         ]);
                     }
