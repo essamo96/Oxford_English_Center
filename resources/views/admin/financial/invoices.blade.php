@@ -64,16 +64,32 @@
 <div class="card shadow-sm">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
-            <div class="d-flex align-items-center position-relative my-1 me-5">
-                <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5"><span class="path1"></span><span class="path2"></span></i>
-                <input type="text" id="invoice_search" class="form-control form-control-solid w-250px ps-13" placeholder="بحث عن طالب أو فاتورة..." />
-            </div>
-            <div class="d-flex align-items-center position-relative my-1">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="d-flex align-items-center position-relative">
+                    <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5"><span class="path1"></span><span class="path2"></span></i>
+                    <input type="text" id="invoice_search" class="form-control form-control-solid w-220px ps-13" placeholder="بحث: اسم/جوال/إيميل..." />
+                </div>
                 <select id="invoice_program_type" class="form-select form-select-solid w-150px">
-                    <option value="">نوع البرنامج (الكل)</option>
-                    <option value="adult">الكبار (Adult)</option>
-                    <option value="kids">الأطفال (Kids)</option>
+                    <option value="">نوع البرنامج</option>
+                    <option value="adult">الكبار</option>
+                    <option value="kids">الأطفال</option>
                 </select>
+                <select id="invoice_program_id" class="form-select form-select-solid w-180px">
+                    <option value="">البرنامج (الكل)</option>
+                    @foreach($programs_filter ?? [] as $p)
+                        <option value="{{ $p->id }}">{{ $p->title }}</option>
+                    @endforeach
+                </select>
+                <select id="invoice_level" class="form-select form-select-solid w-130px">
+                    <option value="">المستوى (الكل)</option>
+                    @foreach($levels_filter ?? [] as $lv)
+                        <option value="{{ $lv }}">{{ $lv }}</option>
+                    @endforeach
+                </select>
+                <label class="form-check form-switch form-check-custom form-check-solid bg-light-danger px-3 py-2 rounded border border-danger border-dashed">
+                    <input class="form-check-input" type="checkbox" id="invoice_only_outstanding" value="1">
+                    <span class="ms-2 fw-bold text-danger fs-7"><i class="bi bi-exclamation-circle me-1"></i> مستحقات فقط</span>
+                </label>
             </div>
         </div>
         <div class="card-toolbar">
@@ -180,8 +196,11 @@
             ajax: {
                 url: "{{ route('admin.financial.invoices.list') }}",
                 data: function(d) {
-                    d.program_type = $('#invoice_program_type').val();
-                    d.search_text = $('#invoice_search').val();
+                    d.program_type     = $('#invoice_program_type').val();
+                    d.program_id       = $('#invoice_program_id').val();
+                    d.level            = $('#invoice_level').val();
+                    d.only_outstanding = $('#invoice_only_outstanding').is(':checked') ? 1 : 0;
+                    d.search_text      = $('#invoice_search').val();
                 }
             },
             columns: [
@@ -205,9 +224,8 @@
             table.draw();
         });
 
-        $('#invoice_program_type').on('change', function() {
-            table.draw();
-        });
+        $('#invoice_program_type, #invoice_program_id, #invoice_level').on('change', function() { table.draw(); });
+        $('#invoice_only_outstanding').on('change', function() { table.draw(); });
 
         // Record Payment Logic
         window.recordPayment = function(id, remaining) {

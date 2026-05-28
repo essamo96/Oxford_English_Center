@@ -41,6 +41,21 @@ class FinancialController extends AdminController
             ->where('audit_status', 'pending')
             ->orderBy('created_at', 'desc');
 
+        // NEW: filter — only show students who took the placement test AND were graded
+        if ($request->placement_graded == 1) {
+            $query->whereHas('student.placementTests', function ($q) {
+                $q->where(function ($q2) {
+                    $q2->whereNotNull('score')
+                       ->orWhere('status', 'completed');
+                });
+            });
+        }
+
+        // NEW: filter — only placement-test fee rows
+        if ($request->placement_test_only == 1) {
+            $query->where('student_paid_type', 'like', '%Placement Test%');
+        }
+
         return DataTables::of($query)
             ->addColumn('student', function ($row) {
                 return $row->student ? $row->student->name : 'N/A';
@@ -135,76 +150,143 @@ class FinancialController extends AdminController
     public function verifyPayment(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:group_students_fees,id',
-            'verified_amount' => 'required|numeric|min:0',
-            'group_id' => 'nullable|exists:groups,id',
-            'program_id' => 'nullable|exists:programs,id',
+            'id'                   => 'required|exists:group_students_fees,id',
+            'verified_amount'      => 'required|numeric|min:0',
+            'group_id'             => 'nullable|exists:groups,id',
+            'program_id'           => 'nullable|exists:programs,id',
+            // Optional: admin changing the student's chosen program
+            'change_program_to'    => 'nullable|exists:programs,id',
         ]);
-    
+
         DB::beginTransaction();
         try {
             $fee = GroupStudentsFees::find($request->id);
+
+            // Detect placement-test fee (independent of course enrollment)
+            $isPlacementTestFee = (bool) preg_match('/Placement\s*Test/i', (string) $fee->student_paid_type)
+                || str_contains((string) $fee->student_paid_type, 'اختبار');
+
+            $student = Students::find($fee->student_id);
+
+            // -------- OPTIONAL: change-program flow --------
+            // Admin chose a different program than what student originally picked.
+            // Recompute total_due from FeeSettings of the new program and credit the
+            // verified_amount toward it (so remaining = new_total - verified).
+            $newTotal = (float) $fee->total_due_amount;
+            if ($request->change_program_to && !$isPlacementTestFee) {
+                $newProgramFee = (float) \App\Models\FeeSettings::where('program_id', $request->change_program_to)
+                    ->whereIn('type', ['course', 'course_fee'])
+                    ->sum('amount');
+                if ($newProgramFee > 0) {
+                    $newTotal = $newProgramFee;
+                    $fee->total_due_amount = $newTotal;
+                    $fee->notes = trim(($fee->notes ?? '') . ' | تغيير البرنامج بواسطة الأدمن إلى program_id='.$request->change_program_to);
+                }
+            }
+
             $fee->admin_verified_amount = $request->verified_amount;
-            $fee->transaction_amount = $request->verified_amount;
-            $fee->transaction_type = 'payment';
-            $fee->remaining_amount = $fee->total_due_amount - $request->verified_amount;
-            $fee->status = 'confirmed';
-            $fee->audit_status = 'verified';
+            $fee->transaction_amount    = $request->verified_amount;
+            $fee->transaction_type      = 'payment';
+            $fee->remaining_amount      = max(0, $newTotal - (float) $request->verified_amount);
+            $fee->status                = 'confirmed';
+            $fee->audit_status          = 'verified';
             if ($request->group_id) {
                 $fee->group_id = $request->group_id;
             }
             $fee->save();
-    
-            $student = Students::find($fee->student_id);
+
+            $emailReports = [];
+
             if ($student) {
-                // 1. Assign to group if provided
-                if ($request->group_id) {
-                    // Check if already in group
+                // Assignment to group only when not placement-test
+                if ($request->group_id && !$isPlacementTestFee) {
                     $exists = \App\Models\GroupStudents::where('student_id', $student->id)
                         ->where('group_id', $request->group_id)
-                        ->exists();
+                        ->whereNull('deleted_at')->exists();
                     if (!$exists) {
-                        // Fetch program fee for this group
                         $group = \App\Models\Groups::find($request->group_id);
-                        $programFee = \App\Models\FeeSettings::where('program_id', $group->program_id)
-                            ->where('type', 'course_fee')
-                            ->value('amount') ?: $fee->total_due_amount;
+                        $programFee = (float) \App\Models\FeeSettings::where('program_id', $group->program_id)
+                            ->whereIn('type', ['course', 'course_fee'])
+                            ->sum('amount') ?: (float) $fee->total_due_amount;
 
                         \App\Models\GroupStudents::create([
-                            'student_id' => $student->id,
-                            'group_id' => $request->group_id,
+                            'student_id'        => $student->id,
+                            'group_id'          => $request->group_id,
                             'student_fee_total' => $programFee,
-                            'status' => 1
+                            'status'            => 1,
                         ]);
                     }
-                    
-                    // Activate student only if assigned to a group
-                    $student->is_verified = 1;
-                    $student->status = 1; 
-                } else {
-                    // If no group assigned, just mark as verified but maybe keep inactive?
-                    // User said: "Don't activate student directly... allow specifying group"
-                    $student->is_verified = 1;
                 }
-                $student->save();
+
+                // --------- ACTIVATION + EMAILS ---------
+                // Rule:
+                //   Placement-test path → confirm payment only, NEVER activate.
+                //   All other paths → activate + send 2 emails (activation + payment confirmation).
+                if ($isPlacementTestFee) {
+                    // Mark fee verified but keep status=0 (not active)
+                    $student->is_verified = 1;
+                    $student->save();
+
+                    // Single email: payment confirmation only
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($student->email)
+                            ->send(new \App\Mail\PaymentVerifiedMail($student, $fee));
+                        $emailReports[] = 'تم إرسال تأكيد الدفع';
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Payment confirmation email failed: ' . $e->getMessage());
+                    }
+                } else {
+                    // Activate the account
+                    $student->is_verified = 1;
+                    $student->status      = 1;
+                    $student->save();
+
+                    // Email 1: payment confirmation
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($student->email)
+                            ->send(new \App\Mail\PaymentVerifiedMail($student, $fee));
+                        $emailReports[] = 'تم إرسال تأكيد الدفع';
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Payment confirmation email failed: ' . $e->getMessage());
+                    }
+                    // Email 2: account activation (Welcome / activation notice)
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($student->email)
+                            ->send(new \App\Mail\WelcomeStudentMail($student));
+                        $emailReports[] = 'تم إرسال إشعار تفعيل الحساب';
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Activation email failed: ' . $e->getMessage());
+                    }
+                }
             }
-    
-            // 3. Sync placement tests if applicable
-            if (str_contains($fee->student_paid_type, 'Test')) {
+
+            // Sync placement_tests record when relevant
+            if ($isPlacementTestFee || str_contains((string) $fee->student_paid_type, 'Test')) {
                 $test = \App\Models\PlacementTests::where('student_id', $fee->student_id)
                     ->where('status', 'pending')
                     ->first();
                 if ($test) {
-                    $test->paid_amount = $request->verified_amount;
-                    $test->remaining_amount = $test->total_amount - $request->verified_amount;
-                    $test->status = 'payment_confirmed';
-                    $test->payment_status = ($test->remaining_amount <= 0) ? 'paid' : 'partially_paid';
+                    $test->paid_amount        = $request->verified_amount;
+                    $test->remaining_amount   = max(0, $test->total_amount - $request->verified_amount);
+                    $test->status             = 'payment_confirmed';
+                    $test->payment_status     = ($test->remaining_amount <= 0) ? 'paid' : 'partially_paid';
                     $test->save();
                 }
             }
-    
+
             DB::commit();
-            return response()->json(['status' => 'success', 'message' => 'تم تأكيد الدفعة بنجاح. ' . ($request->group_id ? 'تم تفعيل الطالب وتسكينه في المجموعة.' : 'تم تأكيد الدفعة (انتظار التسكين).')]);
+
+            // Compose user-facing success message
+            $msg = $isPlacementTestFee
+                ? 'تم تأكيد دفعة اختبار تحديد المستوى. لم يُفعَّل حساب الطالب (الاختبار لا يُفعّل الحساب).'
+                : ($request->group_id
+                    ? 'تم تأكيد الدفعة وتفعيل الحساب وتسكين الطالب في المجموعة.'
+                    : 'تم تأكيد الدفعة وتفعيل الحساب (لم يُسكَّن في مجموعة بعد).');
+            if (!empty($emailReports)) {
+                $msg .= ' (' . implode(' · ', $emailReports) . ')';
+            }
+
+            return response()->json(['status' => 'success', 'message' => $msg]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'حدث خطأ أثناء المعالجة: ' . $e->getMessage()]);
@@ -307,12 +389,19 @@ class FinancialController extends AdminController
     public function invoicesLedger()
     {
         parent::$data['active_menu'] = 'financial_invoices';
-        
+
         $stats = $this->financialService->getGlobalStats();
-        
+
         parent::$data['total_collected'] = $stats['total_collected'];
         parent::$data['total_remaining'] = $stats['total_remaining'];
         parent::$data['pending_amount']  = $stats['pending_amount'];
+
+        // For the filter UI
+        parent::$data['programs_filter'] = \App\Models\Programs::where('status', 1)
+            ->orderBy('title')->get(['id', 'title']);
+        parent::$data['levels_filter']   = \App\Models\FeeSettings::whereNotNull('level_name')
+            ->where('level_name', '!=', '')->distinct()->orderBy('level_name')
+            ->pluck('level_name');
 
         return view('admin.financial.invoices', parent::$data);
     }
@@ -328,13 +417,14 @@ class FinancialController extends AdminController
             ->leftJoin('group_students', function($join) {
                 $join->on('group_students.student_id', '=', 'group_students_fees.student_id')
                      ->on('group_students.group_id', '=', 'group_students_fees.group_id');
-            });
+            })
+            ->leftJoin('groups as fg', 'fg.id', '=', 'group_students_fees.group_id');
             
-        // Apply Filters
+        // Apply Filters (all combined with AND)
         if ($request->program_type) {
             $query->where('students.program_type', $request->program_type);
         }
-        
+
         if ($request->search_text) {
             $search = $request->search_text;
             $query->where(function($q) use ($search) {
@@ -342,6 +432,21 @@ class FinancialController extends AdminController
                   ->orWhere('students.mobile', 'like', "%$search%")
                   ->orWhere('students.email', 'like', "%$search%");
             });
+        }
+
+        // NEW: Has-outstanding filter (remaining_amount > 0)
+        if ($request->only_outstanding == 1) {
+            $query->where('group_students_fees.remaining_amount', '>', 0);
+        }
+
+        // NEW: filter by specific program (joins through fg → program)
+        if ($request->program_id) {
+            $query->where('fg.program_id', $request->program_id);
+        }
+
+        // NEW: filter by level (current_level)
+        if ($request->level) {
+            $query->where('students.current_level', $request->level);
         }
 
         return DataTables::of($query)

@@ -41,12 +41,26 @@ class RegistrationController extends Controller
                 return false;
             })
             ->values();
-        self::$data['programs']        = Programs::where('status', 1)->get();
+        // Only show ACTIVE programs that actually have at least one fee row defined
+        // (so the public can't pick a program with no pricing yet).
+        self::$data['programs'] = Programs::where('status', 1)
+            ->whereExists(function ($q) {
+                $q->select(\DB::raw(1))
+                  ->from('fee_settings')
+                  ->whereColumn('fee_settings.program_id', 'programs.id')
+                  ->where('fee_settings.amount', '>', 0);
+            })
+            ->get();
         self::$data['groups']          = Groups::where('status', 1)->get();
         self::$data['placement_times'] = Times::where('status', 1)
             ->where('is_placement_test', 1)
             ->orderBy('id', 'asc')
             ->get();
+
+        // Representative placement-test fee (used in the registration form notice).
+        // Pulled from FeeSettings (avg across programs). Falls back to 100 ILS.
+        self::$data['placement_test_fee'] = (float) FeeSettings::where('type', 'placement_test')
+                                                                ->avg('amount') ?: 100.0;
 
         return view('frontend.contact.book', self::$data);
     }

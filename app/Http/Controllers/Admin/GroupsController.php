@@ -88,6 +88,8 @@ class GroupsController extends AdminController
     {
         $search       = trim((string) $request->get('search', ''));
         $programType  = $request->get('program_type');
+        $programId    = $request->get('program_id');   // NEW
+        $level        = $request->get('level');        // NEW
         $excludeIds   = array_filter(array_map('intval', explode(',', (string) $request->get('exclude_ids', ''))));
         $limit        = (int) $request->get('limit', 200);
         $limit        = max(1, min(500, $limit));
@@ -154,6 +156,42 @@ class GroupsController extends AdminController
         if ($programType) {
             $query->where('students.program_type', $programType);
         }
+
+        // NEW: Restrict by a specific program (AND).
+        // Eligibility for a program means: student has at least one verified fee row
+        // tied to that program (or its FeeSettings), OR their previously-deleted
+        // membership was in that program — we approximate via fee_settings.program_id
+        // and group.program_id.
+        if ($programId) {
+            $query->where(function ($q) use ($programId) {
+                $q->whereExists(function ($s) use ($programId) {
+                    $s->select(\DB::raw(1))
+                      ->from('group_students_fees as gsf')
+                      ->leftJoin('groups as g', 'g.id', '=', 'gsf.group_id')
+                      ->whereColumn('gsf.student_id', 'students.id')
+                      ->whereNull('gsf.deleted_at')
+                      ->where(function ($w) use ($programId) {
+                          $w->where('g.program_id', $programId);
+                      });
+                })
+                // Or never been in any group yet (group_id null) — match by any signal
+                ->orWhere(function ($q2) use ($programId) {
+                    $q2->whereExists(function ($s2) use ($programId) {
+                        $s2->select(\DB::raw(1))
+                           ->from('group_students_fees as gsf2')
+                           ->whereColumn('gsf2.student_id', 'students.id')
+                           ->whereNull('gsf2.deleted_at')
+                           ->whereNull('gsf2.group_id');
+                    });
+                });
+            });
+        }
+
+        // NEW: Restrict by level (AND on students.current_level)
+        if ($level) {
+            $query->where('students.current_level', $level);
+        }
+
         if (!empty($excludeIds)) {
             $query->whereNotIn('students.id', $excludeIds);
         }
@@ -526,6 +564,59 @@ class GroupsController extends AdminController
             'eligible' => empty($reasons),
             'reasons'  => $reasons,
         ]);
+    }
+
+    /**
+     * AJAX: return distinct levels (group names) registered under a program.
+     * Used by the bulk-assign filter dropdown.
+     */
+    public function getProgramLevels($programId)
+    {
+        $levels = collect();
+
+        // Pull levels from FeeSettings.level_name
+        $fromFees = \App\Models\FeeSettings::where('program_id', $programId)
+            ->whereNotNull('level_name')->where('level_name', '!=', '')
+            ->pluck('level_name')->unique()->values();
+
+        // And from active groups (their `name` is the level/section)
+        $fromGroups = Groups::where('program_id', $programId)
+            ->whereNull('deleted_at')
+            ->pluck('name')->unique()->values();
+
+        $levels = $fromFees->merge($fromGroups)->unique()->sort()->values();
+
+        return response()->json(['success' => true, 'levels' => $levels]);
+    }
+
+    /**
+     * AJAX: return all groups (active + closed) a student was ever part of,
+     * including the teacher and the membership status.
+     */
+    public function getStudentGroupsHistory($studentId)
+    {
+        // Pull both active and soft-deleted memberships
+        $rows = \DB::table('group_students')
+            ->leftJoin('groups',   'groups.id',   '=', 'group_students.group_id')
+            ->leftJoin('teachers', 'teachers.id', '=', 'groups.teacher_id')
+            ->leftJoin('programs', 'programs.id', '=', 'groups.program_id')
+            ->where('group_students.student_id', $studentId)
+            ->orderBy('group_students.id', 'desc')
+            ->get([
+                'group_students.id          as membership_id',
+                'group_students.deleted_at  as left_at',
+                'group_students.created_at  as joined_at',
+                'groups.id                  as group_id',
+                'groups.name                as group_name',
+                'groups.status              as group_status',
+                'groups.start_date',
+                'groups.end_date',
+                'programs.title             as program_title',
+                'teachers.name              as teacher_name',
+                'teachers.id                as teacher_id',
+            ]);
+
+        return response()->json(['success' => true, 'history' => $rows]);
     }
 
     /**

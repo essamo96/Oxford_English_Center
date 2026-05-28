@@ -20,6 +20,18 @@
         <div class="card-title">
             <h3 class="fw-bold">مراجعة طلبات التسجيل والمدفوعات</h3>
         </div>
+        <div class="card-toolbar">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <label class="form-check form-switch form-check-custom form-check-solid bg-light-info px-3 py-2 rounded border border-info border-dashed">
+                    <input class="form-check-input" type="checkbox" id="filter_placement_only" name="placement_test_only" value="1">
+                    <span class="ms-2 fw-bold text-info fs-7"><i class="bi bi-clipboard-check me-1"></i> اختبار تحديد المستوى فقط</span>
+                </label>
+                <label class="form-check form-switch form-check-custom form-check-solid bg-light-success px-3 py-2 rounded border border-success border-dashed">
+                    <input class="form-check-input" type="checkbox" id="filter_placement_graded" name="placement_graded" value="1">
+                    <span class="ms-2 fw-bold text-success fs-7"><i class="bi bi-award me-1"></i> تم رصد العلامة</span>
+                </label>
+            </div>
+        </div>
     </div>
     <div class="card-body py-4">
         @include('admin.layout.masterLayouts.error')
@@ -86,22 +98,35 @@
                         <input type="number" name="verified_amount" id="verified_amount" class="form-control border-success fs-4 fw-bold" required>
                     </div>
 
-                    {{-- Receipt preview inside modal --}}
+                    {{-- Receipt preview — toggleable via button --}}
+                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                        <span class="fw-bold text-dark"><i class="bi bi-receipt me-1 text-info"></i> إيصال الدفع</span>
+                        <button type="button" id="toggle_receipt_btn" class="btn btn-sm btn-light-info" style="display:none;">
+                            <i class="bi bi-eye-fill me-1"></i> <span id="toggle_receipt_label">معاينة الإيصال</span>
+                        </button>
+                    </div>
                     <div id="receipt_preview_box" class="mb-4 text-center" style="display:none;">
-                        <label class="form-label fw-bold d-block mb-2"><i class="bi bi-receipt me-1"></i> إيصال الدفع</label>
                         <div id="receipt_preview_content" class="p-3 rounded border bg-light"></div>
                     </div>
 
                     <div id="program_group_box">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">البرنامج الدراسي (Program):</label>
-                                <select name="program_id" id="verify_program_id" class="form-select border-info" onchange="loadGroups(this.value)">
+                                <label class="form-label d-flex align-items-center justify-content-between">
+                                    <span>البرنامج الدراسي <small class="text-muted">(Program)</small></span>
+                                    <span id="default_program_badge" class="badge badge-light-success fs-9 fw-bold" style="display:none;"><i class="bi bi-check-circle me-1"></i> اختيار الطالب</span>
+                                </label>
+                                <select name="program_id" id="verify_program_id" class="form-select border-info" onchange="loadGroups(this.value); maybeShowChangeProgramNotice();">
                                     <option value="">-- اختر البرنامج --</option>
                                     @foreach($Programs as $p)
                                         <option value="{{ $p->id }}">{{ $p->title }}</option>
                                     @endforeach
                                 </select>
+                                <div id="change_program_notice" class="form-text text-warning fw-bold mt-2" style="display:none;">
+                                    <i class="bi bi-arrow-repeat me-1"></i>
+                                    لقد غيّرت برنامج الطالب — سيُحدَّث إجمالي المستحق حسب رسوم البرنامج الجديد.
+                                </div>
+                                <input type="hidden" name="change_program_to" id="change_program_to_input">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">المجموعة / المستوى (Group):</label>
@@ -137,6 +162,12 @@
 <script>
     var table;
     var tableId = 'pending_financial_table';
+    var filterFields = ['#filter_placement_only', '#filter_placement_graded'];
+    // map: front id → backend param
+    var filterParamMap = {
+        'filter_placement_only': 'placement_test_only',
+        'filter_placement_graded': 'placement_graded',
+    };
     var columns = [
         { data: 'id', name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "student", name: "student.name" },
@@ -149,6 +180,11 @@
     ];
 
     $(document).ready(function() {
+        // State for change-program tracking + receipt preview
+        let originalProgramId = null;
+        let receiptUrl = null;
+        let receiptShown = false;
+
         // Function to open verification modal
         window.verifyPayment = function(id, claimed, total, programId, studentId, paidType) {
             paidType = paidType || '';
@@ -157,11 +193,17 @@
             $('#claimed_amount').val(claimed + ' ILS');
             $('#verified_amount').val(claimed);
 
-            // Reset boxes
+            // Reset boxes + state
             $('#applicant_details_box').hide();
             $('#guardian_box').hide();
             $('#receipt_preview_box').hide();
             $('#receipt_preview_content').empty();
+            $('#toggle_receipt_btn').hide();
+            $('#change_program_notice').hide();
+            $('#change_program_to_input').val('');
+            $('#default_program_badge').hide();
+            receiptShown = false;
+            receiptUrl = null;
 
             // Placement Test → no program/group assignment needed
             const isPlacementTest = /Placement\s*Test/i.test(paidType) || /اختبار/.test(paidType);
@@ -170,11 +212,14 @@
                 $('#placement_test_notice').show();
                 $('#verify_program_id').val('');
                 $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
+                originalProgramId = null;
             } else {
                 $('#program_group_box').show();
                 $('#placement_test_notice').hide();
+                originalProgramId = programId ? String(programId) : null;
                 if (programId) {
                     $('#verify_program_id').val(programId);
+                    $('#default_program_badge').show();
                     loadGroups(programId);
                 } else {
                     $('#verify_program_id').val('');
@@ -182,21 +227,15 @@
                 }
             }
 
-            // Pull the receipt link from the row and embed inline
+            // Pull the receipt link from the row — keep hidden behind a button
             try {
-                const row = $('button[onclick*="verifyPayment(' + id + ',"]').closest('tr');
+                const row = $('.btn-verify[data-id="' + id + '"]').closest('tr');
                 const link = row.find('a[href*="uploads/"]').first();
                 if (link.length) {
-                    const href = link.attr('href');
-                    const lower = (href || '').toLowerCase();
-                    if (/\.(jpe?g|png|gif|webp)(\?|$)/.test(lower)) {
-                        $('#receipt_preview_content').html('<img src="' + href + '" alt="receipt" style="max-width:100%;max-height:380px;border-radius:8px;">');
-                    } else if (/\.pdf(\?|$)/.test(lower)) {
-                        $('#receipt_preview_content').html('<embed src="' + href + '" type="application/pdf" width="100%" height="420" style="border-radius:8px;">');
-                    } else {
-                        $('#receipt_preview_content').html('<a href="' + href + '" target="_blank" class="btn btn-light-info"><i class="bi bi-box-arrow-up-right me-1"></i> فتح الإيصال</a>');
-                    }
-                    $('#receipt_preview_box').show();
+                    receiptUrl = link.attr('href');
+                    $('#toggle_receipt_btn').show();
+                    $('#toggle_receipt_label').text('معاينة الإيصال');
+                    $('#toggle_receipt_btn').find('i').removeClass('bi-eye-slash-fill').addClass('bi-eye-fill');
                 }
             } catch (e) { /* ignore */ }
 
@@ -222,6 +261,51 @@
 
             $('#verifyModal').modal('show');
             updateBalancePreview(claimed, total);
+        };
+
+        // Toggle inline receipt preview
+        $(document).on('click', '#toggle_receipt_btn', function () {
+            if (!receiptUrl) return;
+            if (!receiptShown) {
+                const lower = (receiptUrl || '').toLowerCase();
+                let html = '';
+                if (/\.(jpe?g|png|gif|webp)(\?|$)/.test(lower)) {
+                    html = '<img src="' + receiptUrl + '" alt="receipt" style="max-width:100%;max-height:420px;border-radius:8px;">';
+                } else if (/\.pdf(\?|$)/.test(lower)) {
+                    html = '<embed src="' + receiptUrl + '" type="application/pdf" width="100%" height="450" style="border-radius:8px;">';
+                } else {
+                    html = '<a href="' + receiptUrl + '" target="_blank" class="btn btn-light-info"><i class="bi bi-box-arrow-up-right me-1"></i> فتح الإيصال في تبويب جديد</a>';
+                }
+                $('#receipt_preview_content').html(html);
+                $('#receipt_preview_box').slideDown(180);
+                $('#toggle_receipt_label').text('إخفاء المعاينة');
+                $('#toggle_receipt_btn').find('i').removeClass('bi-eye-fill').addClass('bi-eye-slash-fill');
+                receiptShown = true;
+            } else {
+                $('#receipt_preview_box').slideUp(180);
+                $('#toggle_receipt_label').text('معاينة الإيصال');
+                $('#toggle_receipt_btn').find('i').removeClass('bi-eye-slash-fill').addClass('bi-eye-fill');
+                receiptShown = false;
+            }
+        });
+
+        // Detect program change and reflect in the hidden input + notice
+        window.maybeShowChangeProgramNotice = function () {
+            const chosen = $('#verify_program_id').val();
+            if (!originalProgramId || !chosen) {
+                $('#change_program_notice').hide();
+                $('#change_program_to_input').val('');
+                return;
+            }
+            if (String(chosen) !== String(originalProgramId)) {
+                $('#change_program_notice').show();
+                $('#change_program_to_input').val(chosen);
+                $('#default_program_badge').hide();
+            } else {
+                $('#change_program_notice').hide();
+                $('#change_program_to_input').val('');
+                $('#default_program_badge').show();
+            }
         };
 
         // Delegated click handler for verify buttons (uses data-attributes to avoid inline JS escaping)

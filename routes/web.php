@@ -16,6 +16,13 @@ use Illuminate\Support\Facades\Route;
   |
   */
 
+// =================== QR Code (public scan + admin/teacher generate) ===================
+Route::get('/qr/join/{token}', ['as' => 'qr.join', 'uses' => 'GroupQrController@join']);
+Route::group(['middleware' => 'web'], function () {
+    Route::post('admin/groups/qr/generate', ['as' => 'groups.qr.generate', 'uses' => 'GroupQrController@generate']);
+    Route::post('admin/groups/qr/deactivate/{id}', ['as' => 'groups.qr.deactivate', 'uses' => 'GroupQrController@deactivate']);
+});
+
 Route::get('/clear-cache', function () {
 
     Artisan::call('cache:clear');
@@ -380,6 +387,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // Bulk assignment + promotion
     Route::get('groups/eligible-students', ['as' => 'groups.eligible_students', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getEligibleStudents']);
     Route::get('groups/eligibility/diagnose', ['as' => 'groups.eligibility_diagnose', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@diagnoseStudentEligibility']);
+    Route::get('groups/program-levels/{programId}', ['as' => 'groups.program_levels', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getProgramLevels']);
+    Route::get('groups/student-history/{studentId}', ['as' => 'groups.student_history', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getStudentGroupsHistory']);
     Route::get('groups/roster/{groupId}', ['as' => 'groups.roster', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getGroupRoster']);
     Route::post('groups/bulk-assign', ['as' => 'groups.bulk_assign', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkAssign']);
     Route::post('groups/bulk-promote', ['as' => 'groups.bulk_promote', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkPromote']);

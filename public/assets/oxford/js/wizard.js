@@ -390,17 +390,12 @@ function renderFeesBreakdown(fees) {
     const byFix = !isNaN(fixed) ? fixed               : 0;
     minPaymentDue = Math.min(Math.max(byPct, byFix), total);
 
-    // Update min-payment hint
+    // Keep the always-visible hint hidden — we only surface a notice when the
+    // user actually enters a sub-minimum amount (handled in updateRemainingDue).
     const hint = document.getElementById('min-payment-hint');
     const minValEl = document.getElementById('min-payment-value');
-    if (hint && minValEl) {
-        if (minPaymentDue > 0) {
-            minValEl.innerText = minPaymentDue.toFixed(2);
-            hint.style.display = 'block';
-        } else {
-            hint.style.display = 'none';
-        }
-    }
+    if (hint) hint.style.display = 'none';
+    if (minValEl) minValEl.innerText = (minPaymentDue || 0).toFixed(2);
 
     // Default the Paid Amount to the full total (user may change it down to the minimum)
     const paidInput = document.getElementsByName('student_fee_paid')[0];
@@ -527,14 +522,16 @@ window.updateRemainingDue = function() {
     document.getElementById('display-amount-due').innerText = remaining.toFixed(2);
 
     // Live minimum check (don't block typing, just flag visually)
-    const errEl = document.getElementById('min-payment-error');
-    const errText = document.getElementById('min-payment-error-text');
+    const errEl    = document.getElementById('min-payment-error');
+    const errText  = document.getElementById('min-payment-error-text');
+    const errMinEl = document.getElementById('min-payment-error-amount');
     if (paid > 0 && minPaymentDue > 0 && paid < minPaymentDue) {
         paidInput.classList.add('is-invalid');
+        if (errMinEl) errMinEl.innerText = minPaymentDue.toFixed(2);
         if (errText) {
-            errText.innerText = 'المبلغ المُدخَل (' + paid.toFixed(2) + ' ILS) أقل من الحد الأدنى المطلوب (' + minPaymentDue.toFixed(2) + ' ILS). يرجى رفع المبلغ ليتمكن من إتمام التسجيل.';
+            errText.innerText = 'المبلغ الذي أدخلته (' + paid.toFixed(2) + ' ILS) أقل من الحد الأدنى المسموح. يرجى رفع المبلغ لإتمام التسجيل.';
         }
-        if (errEl) errEl.style.display = 'flex';
+        if (errEl) errEl.style.display = 'grid';
     } else {
         paidInput.classList.remove('is-invalid');
         if (errEl) errEl.style.display = 'none';
@@ -629,12 +626,38 @@ function validateCurrentStep() {
 
     if (currentStep === 1) {
         const fieldsStep1 = ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address'];
-        // Major lives in step 1 for all adult registrations
         if (selectedProgramType === 'adult') fieldsStep1.push('major');
         fieldsStep1.forEach(f => {
             const el = $(`[name="${f}"]`);
             if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
         });
+        // English-only check for name_en
+        const nameEn = ($('input[name="name_en"]').val() || '').trim();
+        if (nameEn && !/^[A-Za-z][A-Za-z\s'\-]{2,}$/.test(nameEn)) {
+            $('input[name="name_en"]').addClass('is-invalid');
+            isValid = false;
+            Swal.fire({
+                icon: 'warning',
+                title: 'الاسم الإنجليزي غير صحيح',
+                text: 'يجب أن يحتوي على حروف إنجليزية فقط (لا يقبل العربية ولا الأرقام).',
+                customClass: { popup: 'swal-oxford-popup', confirmButton: 'swal-oxford-confirm' },
+                buttonsStyling: false,
+            });
+        }
+        // Mobile: digits only, 9–15 length
+        const mobileVal = ($('input[name="mobile"]').val() || '').trim();
+        if (mobileVal && !/^[0-9]{9,15}$/.test(mobileVal)) {
+            $('input[name="mobile"]').addClass('is-invalid');
+            isValid = false;
+            if (isValid !== false /* deduped */) {} // no-op, message below
+            Swal.fire({
+                icon: 'warning',
+                title: 'رقم الجوال غير صحيح',
+                text: 'يجب إدخال أرقام فقط (٩ إلى ١٥ رقم) — بدون مسافات أو رموز أو حروف.',
+                customClass: { popup: 'swal-oxford-popup', confirmButton: 'swal-oxford-confirm' },
+                buttonsStyling: false,
+            });
+        }
         if ($('input[name="health_status"]:checked').val() === 'yes' && !$('#health_notes').val()) {
             $('#health_notes').addClass('is-invalid');
             isValid = false;
@@ -838,6 +861,19 @@ window.submitFinalForm = function() {
     });
 };
 
+// Realtime input filters (also exposed globally for inline oninput= attributes)
+window.filterEnglishOnly = function(el) {
+    // Allow: A-Z, a-z, space, apostrophe, hyphen
+    const filtered = (el.value || '').replace(/[^A-Za-z\s'\-]/g, '');
+    if (el.value !== filtered) el.value = filtered;
+};
+
+window.filterPhoneDigits = function(el) {
+    // Strip everything except digits
+    const filtered = (el.value || '').replace(/\D/g, '');
+    if (el.value !== filtered) el.value = filtered;
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const arabicNameInput = document.querySelector('input[name="name"]');
     if (arabicNameInput) {
@@ -849,6 +885,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (arabicRegex.test(value[i])) filteredValue += value[i];
             }
             if (value !== filteredValue) e.target.value = filteredValue;
+        });
+    }
+
+    // Belt-and-suspenders: re-bind English & phone filters
+    const en = document.querySelector('input[name="name_en"]');
+    if (en) en.addEventListener('input', () => window.filterEnglishOnly(en));
+    const mob = document.querySelector('input[name="mobile"]');
+    if (mob) {
+        mob.addEventListener('input', () => window.filterPhoneDigits(mob));
+        // Block paste of non-digit content
+        mob.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = text.replace(/\D/g, '');
+            const start = mob.selectionStart, end = mob.selectionEnd;
+            mob.value = (mob.value.slice(0, start) + digits + mob.value.slice(end)).slice(0, 15);
         });
     }
 });

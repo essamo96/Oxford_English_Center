@@ -57,6 +57,13 @@
                         <span class="menu-title">عرض التفاصيل</span>
                     </a>
                 </div>
+                <div class="menu-item px-3">
+                    <a class="menu-link px-3" style="cursor:pointer;"
+                        onclick="openQrGenModal({{ $id }}, 'admin')">
+                        <span class="menu-icon"><i class="bi bi-qr-code-scan fs-4 text-warning"></i></span>
+                        <span class="menu-title">إنشاء QR للتشعيب</span>
+                    </a>
+                </div>
 
             @endcan
             @can('admin.groups.delete')

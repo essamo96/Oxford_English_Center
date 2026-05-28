@@ -384,6 +384,24 @@
         .shuttle-item .tag.kids   { background: var(--sh-tag-kids-bg);  color: var(--sh-tag-kids-fg); }
         .shuttle-item .tag.adult  { background: var(--sh-tag-adult-bg); color: var(--sh-tag-adult-fg); }
         .shuttle-item .tag.level  { background: var(--sh-tag-level-bg); color: var(--sh-tag-level-fg); }
+
+        /* Per-row history button */
+        .shuttle-history-btn {
+            background: transparent;
+            border: 1px solid var(--sh-border);
+            color: var(--sh-muted);
+            border-radius: 7px;
+            padding: 3px 7px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        .shuttle-history-btn:hover {
+            background: #003366;
+            color: #ffcc00;
+            border-color: #003366;
+        }
         .shuttle-item .tag.exists { background: var(--sh-count-bg);     color: var(--sh-count-fg); }
         .shuttle-item .tag.new    { background: var(--sh-count-ok-bg);  color: var(--sh-count-ok-fg); }
 
@@ -512,10 +530,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    {{-- Compact tools row --}}
+                    {{-- Compact tools row — two lines for breathing room --}}
                     <div class="shuttle-tools-row">
-                        <div class="row g-2 align-items-end">
-                            <div class="col-md-6">
+                        <div class="row g-2 align-items-end mb-2">
+                            <div class="col-md-7">
                                 <label class="form-label">المجموعة المُستهدفة *</label>
                                 <select id="bulkTargetGroup" class="form-select form-select-solid"
                                         data-control="select2" data-placeholder="🔍 ابحث واختر المجموعة...">
@@ -527,7 +545,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">برنامج الطلاب</label>
                                 <select id="bulkProgramTypeFilter" class="form-select form-select-solid"
                                         data-control="select2" data-placeholder="-- الكل --" data-minimum-results-for-search="-1">
@@ -540,6 +558,28 @@
                                 <button type="button" id="bulkRefreshBtn" class="btn btn-light-primary w-100" style="height:38px;">
                                     <i class="bi bi-arrow-clockwise"></i> تحديث
                                 </button>
+                            </div>
+                        </div>
+                        {{-- AND-filters: specific program + level --}}
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-funnel-fill text-warning me-1"></i> فلتر: البرنامج المُسجَّل (AND)</label>
+                                <select id="bulkProgramIdFilter" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="— كل البرامج —">
+                                    <option value=""></option>
+                                    @foreach($active_groups_for_picker->pluck('program')->filter()->unique('id') ?? [] as $p)
+                                        <option value="{{ $p->id }}">{{ $p->title }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted d-block mt-1" id="basketHint">⤵ حدد البرنامج</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-funnel-fill text-warning me-1"></i> فلتر: المستوى (AND)</label>
+                                <select id="bulkLevelFilter" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="— كل المستويات —">
+                                    <option value=""></option>
+                                </select>
+                                <small class="text-muted fs-8 d-block mt-1">المستويات تُحمَّل تلقائياً بعد اختيار البرنامج</small>
                             </div>
                         </div>
                     </div>
@@ -592,6 +632,72 @@
                     <button type="button" class="btn btn-warning" id="bulkAssignSubmit">
                         <i class="bi bi-check2-circle me-1"></i> تشعيب المحددين
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- =========================================================
+         QR GENERATION MODAL
+         ========================================================= --}}
+    <div class="modal fade" id="qrGenModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-600px">
+            <div class="modal-content">
+                <div class="modal-header py-3">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-qr-code-scan text-warning me-2"></i>إنشاء QR Code للتشعيب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="qrGenGroupId">
+                    <input type="hidden" id="qrGenCreatedByType" value="admin">
+                    <div id="qrGenForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">صالح حتى (تاريخ + وقت) *</label>
+                                <input type="datetime-local" id="qrExpiresAt" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">الاستخدامات الأقصى <small class="text-muted">(اختياري)</small></label>
+                                <input type="number" id="qrMaxUses" min="1" class="form-control" placeholder="غير محدد">
+                            </div>
+                        </div>
+                        <button type="button" id="qrGenSubmit" class="btn btn-warning w-100"><i class="bi bi-magic me-1"></i> توليد الـ QR</button>
+                    </div>
+                    <div id="qrGenResult" class="text-center mt-4" style="display:none;">
+                        <div class="p-3 bg-light rounded mb-3 d-inline-block" style="position:relative;">
+                            <canvas id="qrGenCanvas" width="480" height="480" style="max-width:280px; width:100%; display:block;"></canvas>
+                            <div id="qrGenSpinner" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.85);">
+                                <div class="spinner-border text-warning"></div>
+                            </div>
+                        </div>
+                        <div class="alert alert-light-info text-start small mb-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            صالح حتى: <strong id="qrGenExpires">—</strong><br>
+                            رابط المسح: <a id="qrGenUrl" href="#" target="_blank" class="text-break"></a>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <a id="qrGenDownload" href="#" download="oxford_qr.png" class="btn btn-sm btn-light-primary"><i class="bi bi-download me-1"></i> تحميل</a>
+                            <a id="qrGenWhatsapp" href="#" target="_blank" class="btn btn-sm btn-light-success"><i class="bi bi-whatsapp me-1"></i> مشاركة عبر واتساب</a>
+                            <button id="qrGenRegenerate" class="btn btn-sm btn-light-warning"><i class="bi bi-arrow-clockwise me-1"></i> توليد جديد</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- =========================================================
+         STUDENT HISTORY MODAL (stacked above bulk-assign modal)
+         ========================================================= --}}
+    <div class="modal fade" id="studentHistoryModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mw-700px">
+            <div class="modal-content">
+                <div class="modal-header py-3">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-clock-history text-warning me-2"></i>تاريخ المجموعات: <span id="historyStudentName" class="text-info"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="historyContent">
+                    <div class="text-center py-5"><div class="spinner-border text-warning"></div></div>
                 </div>
             </div>
         </div>
@@ -1026,7 +1132,6 @@
             const mob   = s.mobile ? escapeHtml(s.mobile) : '';
             const paid  = (typeof s.total_paid === 'number' && s.total_paid > 0)
                           ? ` · 💰 ${s.total_paid.toFixed(0)}` : '';
-            // Status tag — only inside the basket
             let statusTag = '';
             if (opts.inBasket) {
                 statusTag = s.existing
@@ -1035,6 +1140,7 @@
             }
             const locked = s.existing ? 'locked' : '';
             const lockedAttr = s.existing ? 'data-locked="1"' : '';
+            const historyBtn = `<button type="button" class="shuttle-history-btn" data-history-id="${s.id}" data-history-name="${escapeHtml(s.name)}" title="عرض كل المجموعات السابقة"><i class="bi bi-clock-history"></i></button>`;
             return `
                 <li class="shuttle-item ${locked}" data-id="${s.id}" ${lockedAttr}>
                     <i class="bi bi-grip-vertical grip"></i>
@@ -1044,6 +1150,7 @@
                         <div class="sub">${mob}${paid}</div>
                     </div>
                     <div class="tags">${statusTag}${pTag}${lvl}</div>
+                    ${historyBtn}
                 </li>`;
         }
         function emptyHTML(msg) { return `<li class="shuttle-empty">${msg}</li>`; }
@@ -1220,6 +1327,8 @@
             $.get(URL_ELIGIBLE, {
                 search:       $('#poolSearch').val() || '',
                 program_type: $('#bulkProgramTypeFilter').val() || '',
+                program_id:   $('#bulkProgramIdFilter').val() || '',
+                level:        $('#bulkLevelFilter').val() || '',
                 exclude_ids:  bulk.getBasketIds().join(','),
             }, function (res) {
                 if (res.success) {
@@ -1334,6 +1443,193 @@
         $('#bulkTargetGroup').on('change', loadGroupRosterForBasket);
         $('#bulkRefreshBtn').on('click', loadEligible);
         $('#bulkProgramTypeFilter').on('change', loadEligible);
+
+        // Specific program filter → fetch levels for that program + reload pool
+        $('#bulkProgramIdFilter').on('change', function () {
+            const pid = $(this).val();
+            const $lvl = $('#bulkLevelFilter');
+            $lvl.html('<option value=""></option>').val('').trigger('change.select2');
+            if (pid) {
+                $.get('{{ url("admin/groups/program-levels") }}/' + pid, function (res) {
+                    if (!res.success) return;
+                    let opts = '<option value="">— كل المستويات —</option>';
+                    res.levels.forEach(l => { opts += `<option value="${l}">${l}</option>`; });
+                    $lvl.html(opts);
+                    if ($lvl.hasClass('select2-hidden-accessible')) $lvl.trigger('change.select2');
+                });
+            }
+            loadEligible();
+        });
+        $('#bulkLevelFilter').on('change', loadEligible);
+
+        // ============== QR generation ==============
+        window.openQrGenModal = function (groupId, createdByType) {
+            $('#qrGenGroupId').val(groupId);
+            $('#qrGenCreatedByType').val(createdByType || 'admin');
+            $('#qrGenForm').show();
+            $('#qrGenResult').hide();
+            $('#qrExpiresAt').val('');
+            $('#qrMaxUses').val('');
+            // Default expiry = 24h from now
+            const def = new Date(Date.now() + 24*60*60*1000);
+            const pad = n => String(n).padStart(2,'0');
+            $('#qrExpiresAt').val(`${def.getFullYear()}-${pad(def.getMonth()+1)}-${pad(def.getDate())}T${pad(def.getHours())}:${pad(def.getMinutes())}`);
+            $('#qrGenModal').modal('show');
+        };
+        // Compose the QR + Oxford logo on a single canvas.
+        // QR is generated with ECC=H (30% redundancy) so a small centered logo
+        // doesn't break the scan as long as it covers ≤ ~20% of QR area.
+        function composeQrWithLogo(qrUrl, logoUrl) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.getElementById('qrGenCanvas');
+                const ctx = canvas.getContext('2d');
+                const size = 480;
+                canvas.width = size; canvas.height = size;
+                ctx.clearRect(0, 0, size, size);
+
+                const qrImg = new Image();
+                qrImg.crossOrigin = 'anonymous';
+                qrImg.onload = () => {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, size, size);
+                    ctx.drawImage(qrImg, 0, 0, size, size);
+
+                    const logoImg = new Image();
+                    // Same origin → no CORS issue
+                    logoImg.onload = () => {
+                        const logoBoxRatio = 0.20;   // 20% of QR side — safe under ECC=H
+                        const padRatio     = 0.04;   // outer white padding around the logo
+                        const radiusRatio  = 0.12;   // rounded-corner radius (% of logoBox)
+
+                        const logoBox = size * logoBoxRatio;
+                        const pad     = size * padRatio;
+                        const boxSize = logoBox + pad * 2;
+                        const x = (size - boxSize) / 2;
+                        const y = (size - boxSize) / 2;
+                        const r = boxSize * radiusRatio;
+
+                        // White rounded-rect background behind the logo
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + boxSize - r, y);
+                        ctx.quadraticCurveTo(x + boxSize, y, x + boxSize, y + r);
+                        ctx.lineTo(x + boxSize, y + boxSize - r);
+                        ctx.quadraticCurveTo(x + boxSize, y + boxSize, x + boxSize - r, y + boxSize);
+                        ctx.lineTo(x + r, y + boxSize);
+                        ctx.quadraticCurveTo(x, y + boxSize, x, y + boxSize - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                        ctx.closePath();
+                        ctx.fill();
+                        // Thin navy border for branded feel
+                        ctx.strokeStyle = '#003366';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        // Logo (preserve aspect ratio, fit inside logoBox)
+                        const ratio = logoImg.width / logoImg.height;
+                        let lw = logoBox, lh = logoBox;
+                        if (ratio > 1) { lh = logoBox / ratio; } else { lw = logoBox * ratio; }
+                        const lx = (size - lw) / 2;
+                        const ly = (size - lh) / 2;
+                        ctx.drawImage(logoImg, lx, ly, lw, lh);
+
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    logoImg.onerror = () => resolve(canvas.toDataURL('image/png')); // QR-only fallback
+                    logoImg.src = logoUrl;
+                };
+                qrImg.onerror = () => reject(new Error('فشل تحميل صورة QR'));
+                qrImg.src = qrUrl;
+            });
+        }
+
+        $('#qrGenSubmit, #qrGenRegenerate').on('click', function () {
+            const groupId = $('#qrGenGroupId').val();
+            const expires = $('#qrExpiresAt').val();
+            const maxUses = $('#qrMaxUses').val();
+            if (!expires) { Swal.fire({icon:'warning', title:'حدد تاريخ ووقت انتهاء الصلاحية'}); return; }
+            const btn = $('#qrGenSubmit'); btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> جاري التوليد...');
+            $.post('{{ route("groups.qr.generate") }}', {
+                _token: CSRF,
+                group_id: groupId,
+                expires_at: expires.replace('T',' ') + ':00',
+                max_uses:  maxUses || null,
+                created_by_type: $('#qrGenCreatedByType').val(),
+            }, function (res) {
+                if (res.status !== 'success') {
+                    Swal.fire({icon:'error', title:'خطأ', text: res.message || 'فشل التوليد'});
+                    return;
+                }
+                // Show result frame + spinner while canvas paints
+                $('#qrGenForm').hide();
+                $('#qrGenResult').show();
+                $('#qrGenSpinner').show();
+                $('#qrGenUrl').attr('href', res.qr_url).text(res.qr_url);
+                $('#qrGenExpires').text(res.expires);
+
+                composeQrWithLogo(res.qr_image, res.logo_url)
+                    .then(dataUrl => {
+                        $('#qrGenSpinner').hide();
+                        $('#qrGenDownload').attr('href', dataUrl);
+                        const waText = encodeURIComponent('انضم لمجموعة ' + (res.group.name||'') + ' عبر هذا الرمز:\n' + res.qr_url);
+                        $('#qrGenWhatsapp').attr('href', 'https://wa.me/?text=' + waText);
+                    })
+                    .catch(err => {
+                        $('#qrGenSpinner').hide();
+                        Swal.fire({icon:'warning', title:'تنبيه', text: 'تم توليد الرمز لكن تعذّر تركيب الشعار: ' + err.message});
+                    });
+            }).fail(xhr => Swal.fire({icon:'error', title:'خطأ', text: xhr.responseJSON?.message || 'حدث خطأ'}))
+              .always(() => btn.prop('disabled', false).html('<i class="bi bi-magic me-1"></i> توليد الـ QR'));
+        });
+
+        // History button on each student row
+        $(document).on('click', '.shuttle-history-btn', function (e) {
+            e.stopPropagation(); // don't fire the row click handler
+            const sid  = +$(this).data('history-id');
+            const name = $(this).data('history-name') || 'الطالب';
+            $('#historyStudentName').text(name);
+            $('#historyContent').html('<div class="text-center py-5"><div class="spinner-border text-warning"></div></div>');
+            $('#studentHistoryModal').modal('show');
+            $.get('{{ url("admin/groups/student-history") }}/' + sid, function (res) {
+                if (!res.success) {
+                    $('#historyContent').html('<div class="alert alert-danger">تعذّر جلب التاريخ</div>');
+                    return;
+                }
+                if (!res.history.length) {
+                    $('#historyContent').html('<div class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-2"></i> لم ينضم لأي مجموعة بعد</div>');
+                    return;
+                }
+                let html = '<div class="table-responsive"><table class="table table-row-bordered fs-7 align-middle">';
+                html += '<thead class="bg-light"><tr class="fw-bold text-muted"><th>المجموعة / البرنامج</th><th>المدرس</th><th>المدة</th><th class="text-center">الحالة</th></tr></thead><tbody>';
+                res.history.forEach(h => {
+                    const groupActive = (h.group_status == 1);
+                    const stillIn = h.left_at === null;
+                    const statusBadge = !stillIn
+                        ? '<span class="badge badge-light-danger fw-bold"><i class="bi bi-box-arrow-right me-1"></i>غادر</span>'
+                        : (groupActive
+                            ? '<span class="badge badge-light-success fw-bold"><i class="bi bi-check-circle me-1"></i>عضو فعّال</span>'
+                            : '<span class="badge badge-light-secondary fw-bold"><i class="bi bi-archive me-1"></i>مجموعة مغلقة</span>');
+                    const joined = h.joined_at ? new Date(h.joined_at).toLocaleDateString() : '—';
+                    const left   = h.left_at   ? new Date(h.left_at).toLocaleDateString()   : '—';
+                    html += `<tr>
+                        <td>
+                            <div class="fw-bold text-dark">${escapeHtml(h.group_name || '—')}</div>
+                            <div class="text-muted fs-8">${escapeHtml(h.program_title || '')}</div>
+                        </td>
+                        <td><i class="bi bi-person-badge me-1 text-info"></i>${escapeHtml(h.teacher_name || '—')}</td>
+                        <td class="fs-8">
+                            <div><i class="bi bi-arrow-down-circle text-success"></i> ${joined}</div>
+                            <div><i class="bi bi-arrow-up-circle text-danger"></i> ${left}</div>
+                        </td>
+                        <td class="text-center">${statusBadge}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                $('#historyContent').html(html);
+            }).fail(() => $('#historyContent').html('<div class="alert alert-danger">تعذّر الاتصال بالخادم</div>'));
+        });
         $('#poolSearch').on('input', () => bulk.searchUpdated());
         // "Clear" clears only NEW picks (keep locked existing members)
         $('#clearBasketBtn').on('click', () => {

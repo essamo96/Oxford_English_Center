@@ -795,83 +795,99 @@
         }
         [dir="rtl"] .payment-mode-option.active::after { right: auto; left: 10px; }
 
-        /* ============ Payment notes / hints ============ */
+        /* ============ Payment notes — appears only on error, generous breathing room ============ */
         .payment-note {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 16px 18px;
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            column-gap: 20px;            /* clear breathing room — icon ↔ text not touching */
+            align-items: center;
+            padding: 16px 22px;
             background: linear-gradient(135deg, var(--gold-soft) 0%, var(--paper) 100%);
-            border: 1.5px solid var(--gold);
-            border-left-width: 5px;
+            border: 1px solid var(--rule);
+            border-left: 4px solid var(--gold);
             border-radius: var(--r-md);
             box-shadow: var(--sh-1);
+            margin-top: 14px;
+            animation: payment-note-slide 0.32s ease-out;
+        }
+        @keyframes payment-note-slide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         .payment-note-icon {
-            flex-shrink: 0;
+            grid-row: 1 / span 3;        /* keeps icon vertically centered through all text rows */
+            align-self: center;
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: var(--gold);
+            background: var(--paper);
+            border: 1.5px solid var(--gold);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             color: var(--ink);
-            font-size: 1.35rem;
-            box-shadow: 0 4px 10px rgba(255, 204, 0, 0.35);
+            font-size: 1.15rem;
+            box-shadow: 0 2px 6px rgba(0, 51, 102, 0.05);
         }
-        .payment-note-body { flex: 1; min-width: 0; }
+        .payment-note-body {
+            min-width: 0;
+            display: contents;            /* hoist children into the grid so column-gap applies */
+        }
         .payment-note-title {
-            font-family: var(--font-display);
-            font-style: italic;
-            font-weight: 600;
-            font-size: 1.1rem;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.78rem;
             color: var(--ink);
-            line-height: 1.3;
-            margin-bottom: 4px;
+            line-height: 1.25;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
         .payment-note-amount {
             font-family: var(--font-display);
             font-style: italic;
-            font-weight: 700;
-            font-size: 1.6rem;
+            font-weight: 600;
+            font-size: 1.55rem;
             color: var(--ink);
-            line-height: 1.1;
-            letter-spacing: -0.01em;
-            margin-bottom: 6px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            margin: 4px 0 6px;
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
         }
         .payment-note-amount small {
             font-family: var(--font-body);
             font-style: normal;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.72rem;
             color: var(--ink-soft);
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            margin-left: 4px;
         }
         .payment-note-desc {
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             color: var(--ink-soft);
-            line-height: 1.6;
+            line-height: 1.55;
+            margin: 0;
         }
         .payment-note-danger {
-            background: linear-gradient(135deg, #fef0f0 0%, var(--paper) 100%);
-            border-color: var(--danger);
+            background: linear-gradient(135deg, #fff5f5 0%, var(--paper) 100%);
+            border-left-color: var(--danger);
         }
         .payment-note-danger .payment-note-icon {
-            background: var(--danger);
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(217, 48, 37, 0.35);
+            background: var(--paper);
+            border-color: var(--danger);
+            color: var(--danger);
         }
         .payment-note-danger .payment-note-title { color: var(--danger); }
         @media (max-width: 576px) {
-            .payment-note { padding: 14px 14px; gap: 12px; }
-            .payment-note-icon { width: 38px; height: 38px; font-size: 1.15rem; }
-            .payment-note-title { font-size: 1rem; }
-            .payment-note-amount { font-size: 1.35rem; }
-            .payment-note-desc { font-size: 0.88rem; }
+            .payment-note { padding: 14px 16px; grid-template-columns: 38px 1fr; column-gap: 14px; }
+            .payment-note-icon { width: 38px; height: 38px; font-size: 1rem; }
+            .payment-note-title { font-size: 0.72rem; }
+            .payment-note-amount { font-size: 1.3rem; }
+            .payment-note-desc { font-size: 0.82rem; }
         }
 
         /* ============ Remaining Balance display ============ */
@@ -1451,13 +1467,23 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="form-label"><i class="bi bi-alphabet-uppercase"></i>Full Name (English) (الاسم الرباعي بالإنجليزية) *</label>
-                                <input type="text" name="name_en" class="form-control" placeholder="English Quad Name"
-                                    required>
+                                <input type="text" name="name_en" class="form-control" placeholder="Full English Name"
+                                       required
+                                       pattern="[A-Za-z][A-Za-z\s\-']{2,}"
+                                       maxlength="80"
+                                       title="Please enter your full name in English letters only (no Arabic)"
+                                       oninput="filterEnglishOnly(this)">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="form-label"><i class="bi bi-phone"></i>Phone Number (رقم الجوال) *</label>
-                                <input type="text" name="mobile" class="form-control" placeholder="05x xxxx xxx"
-                                    required>
+                                <input type="tel" name="mobile" class="form-control" placeholder="05x xxx xxxx"
+                                       required
+                                       inputmode="numeric"
+                                       pattern="[0-9]{9,15}"
+                                       maxlength="15"
+                                       minlength="9"
+                                       title="Please enter digits only (9–15 digits)"
+                                       oninput="filterPhoneDigits(this)">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="form-label"><i class="bi bi-envelope"></i>Email Address (البريد الإلكتروني) *</label>
@@ -1636,7 +1662,7 @@
                                     <strong style="font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.05rem; margin: 0;">Important</strong>
                                 </div>
                                 <div style="margin-top:6px;">
-                                    <span style="font-size: var(--t-sm); color: var(--ink-soft);">Placement test fee is <strong style="color: var(--ink);">100 ILS</strong>. Please choose your preferred slot. (رسوم اختبار تحديد المستوى)</span>
+                                    <span style="font-size: var(--t-sm); color: var(--ink-soft);">Placement test fee is <strong style="color: var(--ink);">{{ number_format($placement_test_fee ?? 100, 0) }} ILS</strong>. Please choose your preferred slot. (رسوم اختبار تحديد المستوى)</span>
                                     <div class="mt-2" style="font-size:0.95rem; color:var(--ink-soft);">
                                         <i class="bi bi-exclamation-circle me-1"></i>
                                         <em>Note: Choosing a preferred slot does not guarantee your test time — the center will allocate slots to suit all students.</em>
@@ -1777,18 +1803,21 @@
                             </div>
 
                             <div class="col-md-12">
-                                <div id="min-payment-hint" class="payment-note" style="display:none;">
-                                    <div class="payment-note-icon"><i class="bi bi-info-circle-fill"></i></div>
-                                    <div class="payment-note-body">
-                                        <div class="payment-note-title">الحد الأدنى المطلوب للدفع</div>
-                                        <div class="payment-note-amount"><span id="min-payment-value">0.00</span> <small>ILS</small></div>
-                                        <div class="payment-note-desc">هذه القيمة مُحدَّدة من إدارة الأكاديمية على مستوى البرنامج، ولا يمكن إتمام التسجيل بمبلغ أقل منها.</div>
-                                    </div>
+                                {{-- Silent hint container — kept for legacy refs, never visually displayed --}}
+                                <div id="min-payment-hint" style="display:none;">
+                                    <span id="min-payment-value">0.00</span>
                                 </div>
-                                <div id="min-payment-error" class="payment-note payment-note-danger mt-3" style="display:none;">
+
+                                {{-- Shown ONLY when the typed amount is below the minimum --}}
+                                <div id="min-payment-error" class="payment-note payment-note-danger" style="display:none;">
                                     <div class="payment-note-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
                                     <div class="payment-note-body">
                                         <div class="payment-note-title">المبلغ المُدخَل غير كافٍ</div>
+                                        <div class="payment-note-amount">
+                                            <small>الحد الأدنى</small>
+                                            <span id="min-payment-error-amount">0.00</span>
+                                            <small>ILS</small>
+                                        </div>
                                         <div class="payment-note-desc" id="min-payment-error-text"></div>
                                     </div>
                                 </div>
@@ -1827,11 +1856,11 @@
 
                         <div class="mb-4 p-4" style="background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--gold); border-radius: var(--r-md);">
                             <label class="form-label mb-3 d-block" style="color: var(--ink);"><i class="bi bi-shield-lock-fill"></i>Terms & Privacy</label>
-                            <div class="agreement-box d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
-                                <input type="checkbox" id="agree-terms" required class="form-check-input m-0" style="width: 28px; height: 28px; cursor: pointer;">
-                                <label for="agree-terms" class="agreement-text m-0 cursor-pointer">
-                                    <span class="fw-bold d-block fs-6">I agree to the Terms & Privacy Policy</span>
-                                    <p class="small text-muted mb-0">أوافق على جميع الشروط والأحكام الخاصة بالأكاديمية وسياسة الخصوصية.</p>
+                            <div class="agreement-box d-flex align-items-start p-4 bg-white rounded-3 border" style="gap: 18px;">
+                                <input type="checkbox" id="agree-terms" required class="form-check-input m-0 flex-shrink-0" style="width: 26px; height: 26px; margin-top: 4px !important; cursor: pointer; accent-color: var(--ink);">
+                                <label for="agree-terms" class="agreement-text m-0 cursor-pointer" style="line-height: 1.55;">
+                                    <span class="fw-bold d-block" style="font-size: 1rem; color: var(--ink); margin-bottom: 6px;">I agree to the Terms &amp; Privacy Policy</span>
+                                    <p class="mb-0" style="font-size: 0.88rem; color: var(--ink-soft); line-height: 1.6;">أوافق على جميع الشروط والأحكام الخاصة بالأكاديمية وسياسة الخصوصية.</p>
                                 </label>
                             </div>
                         </div>
