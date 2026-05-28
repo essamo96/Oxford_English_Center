@@ -29,6 +29,8 @@ class Students extends Authenticatable
         'major',
         'current_level',
         'program_type',
+        'requested_program_type',
+        'enrollment_type',
         'parent_id',
         'email',
         'join_date',
@@ -386,12 +388,19 @@ class Students extends Authenticatable
                 ->select(
                     'id',
                     'name',
+                    'name_en',
                     'mobile',
                     'dob',
                     'job',
                     'email',
                     'status',
                     'gender',
+                    'program_type',
+                    'requested_program_type',
+                    'enrollment_type',
+                    'join_date',
+                    'parent_id',
+                    'image',
                     'created_at'
                 )
                 ->orderByDesc('id');

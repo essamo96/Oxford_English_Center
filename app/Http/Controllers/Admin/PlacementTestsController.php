@@ -21,7 +21,8 @@ class PlacementTestsController extends Controller
     {
         $tests = PlacementTests::with(['student', 'paymentMethod'])
             ->select('placement_tests.*')
-            ->join('students', 'placement_tests.student_id', '=', 'students.id');
+            ->join('students', 'placement_tests.student_id', '=', 'students.id')
+            ->whereNull('students.deleted_at');
 
         // Apply Filters
         if ($request->has('test_date') && $request->test_date != '') {
@@ -45,6 +46,26 @@ class PlacementTestsController extends Controller
             });
         }
 
+        // Age-group filter (kid ≤15  /  adult >15)
+        // Uses DOB so it stays accurate regardless of stored program_type.
+        if ($request->has('age_group') && $request->age_group != '') {
+            $cutoffKidsDob = \Carbon\Carbon::today()->subYears(15)->toDateString();
+            if ($request->age_group === 'kids') {
+                // Born after cutoff → age ≤ 15
+                $tests->whereNotNull('students.dob')
+                      ->where('students.dob', '>=', $cutoffKidsDob);
+            } elseif ($request->age_group === 'adult') {
+                // Born on/before cutoff → age > 15 (or DOB missing & program_type adult)
+                $tests->where(function ($q) use ($cutoffKidsDob) {
+                    $q->where('students.dob', '<', $cutoffKidsDob)
+                      ->orWhere(function ($q2) {
+                          $q2->whereNull('students.dob')
+                             ->where('students.program_type', 'adult');
+                      });
+                });
+            }
+        }
+
         return DataTables::of($tests)
             ->addColumn('action', function ($test) {
                 $btns = '<div class="btn-group">';
@@ -56,7 +77,8 @@ class PlacementTestsController extends Controller
 
                 // Score Button (Only if payment confirmed)
                 if (in_array($test->status, ['payment_confirmed', 'waiting_for_test'])) {
-                    $btns .= '<button class="btn btn-sm btn-success score-btn" data-id="' . $test->id . '" data-name="' . $test->student->name . '" title="Record Score"><i class="fa fa-graduation-cap"></i></button>';
+                    $studentName = $test->student ? addslashes($test->student->name) : '';
+                    $btns .= '<button class="btn btn-sm btn-success score-btn" data-id="' . $test->id . '" data-name="' . e($studentName) . '" title="Record Score"><i class="fa fa-graduation-cap"></i></button>';
                 }
 
                 $btns .= '<button onclick="showStudentModal('.$test->student_id.')" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="عرض التفاصيل">

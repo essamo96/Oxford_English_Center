@@ -22,6 +22,23 @@
         justify-content: center;
         align-items: center;
     }
+    /* Actions dropdown — float above the card and avoid table clipping */
+    .actions-dropdown { position: static; }
+    .actions-dropdown-menu {
+        z-index: 1080 !important;
+        position: absolute;
+    }
+    /* Allow the table wrapper to render the dropdown above without inner scroll-clipping */
+    #kt_table_wrapper .dataTables_scrollBody,
+    #kt_table_wrapper .table-responsive {
+        overflow: visible !important;
+    }
+    .dataTables_wrapper { overflow: visible !important; }
+    /* Make the filter row a single line: shorter search + inline date pickers */
+    #filter_form .filter-search-col { max-width: 22%; }
+    @media (max-width: 991px) {
+        #filter_form .filter-search-col { max-width: 100%; }
+    }
 </style>
 @stop
 
@@ -36,7 +53,7 @@
                 </span>
             </div>
             <div class="card-toolbar">
-                <div class="d-flex justify-content-end gap-2 text-nowrap">
+                <div class="d-flex flex-wrap justify-content-end gap-2 text-nowrap">
                     <button type="button" id="todayBtn" class="btn btn-sm btn-light-success">
                         <i class="ki-duotone ki-calendar fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> طلاب اليوم
                     </button>
@@ -46,47 +63,60 @@
                     <button type="reset" id="resetFilter" class="btn btn-sm btn-light-danger">
                         <i class="ki-duotone ki-arrows-loop fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> تصفية
                     </button>
+                    <button type="button" class="btn btn-sm btn-success BulkActivate">
+                        <i class="ki-duotone ki-user-tick fs-4 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> تفعيل وإرسال
+                    </button>
+                    <button type="button" class="btn btn-sm btn-warning CEmail">
+                        <i class="ki-duotone ki-sms fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> بريد مخصص
+                    </button>
                 </div>
             </div>
         </div>
         <div class="card-body py-4">
-            <form id="filter_form" class="row g-5">
+            <form id="filter_form" class="row g-3 align-items-end">
                 <input type="hidden" id="is_today" name="is_today" value="">
-                <div class="col-lg-4 col-md-6">
-                    <label class="form-label fw-semibold">الاسم / رقم الجوال / الإيميل</label>
-                    <input type="text" id="search" name="search" class="form-control form-control-solid" placeholder="بحث باسم أو رقم جوال أو إيميل">
+                <div class="col-lg-3 col-md-6 filter-search-col">
+                    <label class="form-label fw-semibold fs-7">الاسم / الجوال / الإيميل</label>
+                    <input type="text" id="search" name="search" class="form-control form-control-solid form-control-sm" placeholder="بحث ...">
                 </div>
                 <div class="col-lg-2 col-md-3">
-                    <label class="form-label fw-semibold">الجنس</label>
-                    <select id="gender" name="gender" class="form-select form-select-solid" data-control="select2" data-placeholder="-- الكل --">
+                    <label class="form-label fw-semibold fs-7">الجنس</label>
+                    <select id="gender" name="gender" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- الكل --">
                         <option value=""></option>
                         <option value="male">ذكر</option>
                         <option value="female">أنثى</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-3">
-                    <label class="form-label fw-semibold">نوع البرنامج</label>
-                    <select id="program_type" name="program_type" class="form-select form-select-solid" data-control="select2" data-placeholder="-- الكل --">
+                    <label class="form-label fw-semibold fs-7">نوع البرنامج</label>
+                    <select id="program_type" name="program_type" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- الكل --">
                         <option value=""></option>
                         <option value="adult">الكبار (Adult)</option>
                         <option value="kids">الأطفال (Kids)</option>
                     </select>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <label class="form-label fw-semibold">من تاريخ</label>
-                    <input type="text" id="date_from" name="date_from" class="form-control form-control-solid date-picker" placeholder="اختر ...">
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label fw-semibold fs-7">نوع التسجيل</label>
+                    <select id="enrollment_type" name="enrollment_type" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- الكل --">
+                        <option value=""></option>
+                        <option value="test">اختبار تحديد المستوى (Placement Test)</option>
+                        <option value="course">تسجيل مباشر (Direct Enrollment)</option>
+                    </select>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <label class="form-label fw-semibold">إلى تاريخ</label>
-                    <input type="text" id="date_to" name="date_to" class="form-control form-control-solid date-picker" placeholder="اختر ...">
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label fw-semibold fs-7"><i class="bi bi-exclamation-triangle-fill text-danger"></i> حالات شاذة</label>
+                    <select id="anomaly" name="anomaly" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- لا تصفية --">
+                        <option value=""></option>
+                        <option value="underage_adult">حاول التسجيل ككبار وعمره ≤ 15</option>
+                    </select>
                 </div>
-                <div class="col-12 d-flex justify-content-end mt-2 gap-2">
-                    <button type="button" class="btn btn-success BulkActivate">
-                        <i class="ki-duotone ki-user-tick fs-4 me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> تفعيل وإرسال البيانات للمحددين
-                    </button>
-                    <button type="button" class="btn btn-warning CEmail">
-                        <i class="ki-duotone ki-sms fs-4 me-2"><span class="path1"></span><span class="path2"></span></i> إرسال بريد مخصص
-                    </button>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold fs-7">من تاريخ</label>
+                    <input type="text" id="date_from" name="date_from" class="form-control form-control-solid form-control-sm date-picker" placeholder="اختر ...">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold fs-7">إلى تاريخ</label>
+                    <input type="text" id="date_to" name="date_to" class="form-control form-control-solid form-control-sm date-picker" placeholder="اختر ...">
                 </div>
             </form>
         </div>
@@ -127,7 +157,8 @@
                             </th>
                             <th class="min-w-250px text-start align-middle"> الطالب </th>
                             <th class="min-w-125px text-center align-middle"> الجوال </th>
-                            <th class="min-w-125px text-center align-middle"> تاريخ الميلاد </th>
+                            <th class="min-w-140px text-center align-middle"> تاريخ الميلاد / العمر </th>
+                            <th class="min-w-140px text-center align-middle"> تاريخ الانضمام </th>
                             <th class="min-w-100px text-center align-middle"> الحالة </th>
                             <th class="text-center min-w-125px align-middle"> العمليات </th>
                         </tr>
@@ -196,11 +227,12 @@
         { data: "name", name: "name", className: "text-start align-middle" },
         { data: "mobile", name: "mobile", className: "text-center align-middle" },
         { data: "dob", name: "dob", className: "text-center align-middle" },
+        { data: "join_date_fmt", name: "join_date_fmt", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "status", name: "status", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center align-middle" }
     ];
 
-    var filterFields = ['#search', '#gender', '#program_type', '#date_from', '#date_to', '#is_today'];
+    var filterFields = ['#search', '#gender', '#program_type', '#enrollment_type', '#anomaly', '#date_from', '#date_to', '#is_today'];
 
     $(document).ready(function() {
         // Initialize flatpickr

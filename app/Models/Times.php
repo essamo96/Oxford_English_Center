@@ -12,27 +12,33 @@ class Times extends Model {
 
     protected $table = 'times';
     protected $fillable = [
-        'title', 'img', 'url', 'status', 'user_id'
+        'days', 'times', 'status', 'is_placement_test'
+    ];
+
+    protected $casts = [
+        'is_placement_test' => 'boolean',
     ];
     protected $hidden = [
         '',
     ];
 
     //////////////////////////////////////////////
-    function addTime($days, $times, $status) {
+    function addTime($days, $times, $status, $is_placement_test = false) {
         $this->days = $days;
         $this->times = $times;
         $this->status = $status;
+        $this->is_placement_test = (bool) $is_placement_test;
 
         $this->save();
         return $this;
     }
 
     //////////////////////////////////////////////
-    function updateTime($obj, $days, $times, $status) {
+    function updateTime($obj, $days, $times, $status, $is_placement_test = false) {
         $obj->days = $days;
         $obj->times = $times;
         $obj->status = $status;
+        $obj->is_placement_test = (bool) $is_placement_test;
 
         $obj->save();
         return $obj;
@@ -63,10 +69,16 @@ class Times extends Model {
     }
 
 //////////////////////////////////////////////
-    function getSearchTimes($title) {
+    function getSearchTimes($title, $is_placement_test = null) {
         return $this->where(function($query) use ($title) {
                             if ($title != "") {
-                                $query->where('days', 'LIKE', '%' . $title . '%');
+                                $query->where('days', 'LIKE', '%' . $title . '%')
+                                      ->orWhere('times', 'LIKE', '%' . $title . '%');
+                            }
+                        })
+                        ->where(function($query) use ($is_placement_test) {
+                            if ($is_placement_test !== null && $is_placement_test !== '') {
+                                $query->where('is_placement_test', (int) $is_placement_test);
                             }
                         })
                         ->orderBy('id', 'desc')

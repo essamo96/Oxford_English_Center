@@ -9,34 +9,138 @@ use Illuminate\Support\Facades\DB;
 class FinancialService
 {
     /**
-     * Get the student's financial ledger for a specific group/level.
+     * Get the student's financial ledger.
+     * Handles BOTH:
+     *   - group-based ledger (course enrollment in a group)
+     *   - non-group ledger (placement test, or course paid before group assignment)
+     *
+     * Pass $groupId=null to read the non-group ledger.
      */
-    public function getStudentLedger($studentId, $groupId)
+    public function getStudentLedger($studentId, $groupId = null)
     {
-        if (!$studentId || !$groupId) {
+        if (!$studentId) {
             return null;
         }
 
-        $groupStudent = GroupStudents::where('student_id', $studentId)
-            ->where('group_id', $groupId)
-            ->first();
+        // ---------- Group-based ledger ----------
+        if ($groupId) {
+            $groupStudent = GroupStudents::where('student_id', $studentId)
+                ->where('group_id', $groupId)
+                ->first();
 
+            $transactions = GroupStudentsFees::with('paymentMethod')
+                ->where('student_id', $studentId)
+                ->where('group_id', $groupId)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $totalFee = $groupStudent ? (float) $groupStudent->student_fee_total : 0.0;
+            // Fallback: if group_students row missing, use largest total_due on the rows
+            if ($totalFee <= 0) {
+                $totalFee = (float) ($transactions->max('total_due_amount') ?: 0);
+            }
+            $confirmedPaid    = (float) $transactions->where('audit_status', 'verified')
+                                                      ->where('transaction_type', '!=', 'refund')
+                                                      ->sum('transaction_amount');
+            $refunded         = (float) $transactions->where('audit_status', 'verified')
+                                                      ->where('transaction_type', 'refund')
+                                                      ->sum(\DB::raw('ABS(transaction_amount)'));
+            $netPaid          = $confirmedPaid - $refunded;
+            $remainingBalance = max(0, $totalFee - $netPaid);
+
+            return [
+                'group_student'     => $groupStudent,
+                'transactions'      => $transactions,
+                'total_fee'         => $totalFee,
+                'total_paid'        => $netPaid,
+                'remaining_balance' => $remainingBalance,
+                'context'           => 'group',
+            ];
+        }
+
+        // ---------- Non-group ledger (placement test / pre-assignment) ----------
         $transactions = GroupStudentsFees::with('paymentMethod')
             ->where('student_id', $studentId)
-            ->where('group_id', $groupId)
+            ->whereNull('group_id')
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $totalFee = $groupStudent ? $groupStudent->student_fee_total : 0;
-        $confirmedPaid = $transactions->where('audit_status', 'verified')->sum('transaction_amount');
-        $remainingBalance = $totalFee - $confirmedPaid;
+        if ($transactions->isEmpty()) {
+            return null;
+        }
+
+        // The total comes from the first (registration) row. Fallback to max.
+        $first    = $transactions->first();
+        $totalFee = (float) ($first->total_due_amount ?: $transactions->max('total_due_amount') ?: 0);
+
+        $confirmedPaid = (float) $transactions->where('audit_status', 'verified')
+                                              ->where('transaction_type', '!=', 'refund')
+                                              ->sum('transaction_amount');
+        $refunded      = (float) $transactions->where('audit_status', 'verified')
+                                              ->where('transaction_type', 'refund')
+                                              ->sum(\DB::raw('ABS(transaction_amount)'));
+        $netPaid       = $confirmedPaid - $refunded;
+        $remainingBalance = max(0, $totalFee - $netPaid);
 
         return [
-            'group_student' => $groupStudent,
-            'transactions' => $transactions,
-            'total_fee' => $totalFee,
-            'total_paid' => $confirmedPaid,
+            'group_student'     => null,
+            'transactions'      => $transactions,
+            'total_fee'         => $totalFee,
+            'total_paid'        => $netPaid,
             'remaining_balance' => $remainingBalance,
+            'context'           => 'placement_or_pre_group',
+        ];
+    }
+
+    /**
+     * Aggregate ALL of a student's invoices across every ledger (groups + non-group).
+     * Used by the per-student "all invoices" modal.
+     */
+    public function getStudentAllInvoices($studentId)
+    {
+        if (!$studentId) return null;
+
+        $rows = GroupStudentsFees::with(['paymentMethod', 'group.program'])
+            ->where('student_id', $studentId)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Per-context summaries (group_id NULL counts as one bucket)
+        $buckets = $rows->groupBy(fn($r) => $r->group_id ?: 'pre_group');
+        $summary = [];
+        foreach ($buckets as $key => $bucketRows) {
+            $groupId   = $key === 'pre_group' ? null : (int) $key;
+            $first     = $bucketRows->first();
+            $totalFee  = (float) ($first->total_due_amount ?: $bucketRows->max('total_due_amount') ?: 0);
+            if ($groupId) {
+                $gs = GroupStudents::where('student_id', $studentId)->where('group_id', $groupId)->first();
+                if ($gs && $gs->student_fee_total > 0) $totalFee = (float) $gs->student_fee_total;
+            }
+            $paid = (float) $bucketRows->where('audit_status', 'verified')
+                                       ->where('transaction_type', '!=', 'refund')
+                                       ->sum('transaction_amount');
+            $refunded = (float) $bucketRows->where('audit_status', 'verified')
+                                           ->where('transaction_type', 'refund')
+                                           ->sum(\DB::raw('ABS(transaction_amount)'));
+            $net = $paid - $refunded;
+            $summary[] = [
+                'group_id'   => $groupId,
+                'label'      => $groupId
+                                ? (($first->group && $first->group->program ? $first->group->program->title . ' — ' : '') . ($first->group ? $first->group->name : 'Group'))
+                                : ($first->student_paid_type ?: 'رسوم خارج المجموعة'),
+                'total_fee'  => $totalFee,
+                'paid'       => $net,
+                'remaining'  => max(0, $totalFee - $net),
+                'rows'       => $bucketRows,
+            ];
+        }
+
+        return [
+            'rows'      => $rows,
+            'summary'   => $summary,
+            'grand_total_due'  => array_sum(array_column($summary, 'total_fee')),
+            'grand_total_paid' => array_sum(array_column($summary, 'paid')),
+            'grand_total_left' => array_sum(array_column($summary, 'remaining')),
         ];
     }
 

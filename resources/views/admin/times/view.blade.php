@@ -24,9 +24,17 @@
     <div class="card-body py-4">
         <form role="form" class="form">
             <div class="row gx-5">
-                <div class="col-lg-6 col-md-8 mb-4">
+                <div class="col-lg-5 col-md-7 mb-4">
                     <label class="form-label fw-semibold">اسم اليوم أو الوقت</label>
                     <input type="text" name="title" id="title" class="form-control form-control-solid searchable" placeholder="البحث بالاسم...">
+                </div>
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <label class="form-label fw-semibold">نوع الموعد</label>
+                    <select name="is_placement_test" id="is_placement_test" class="form-select form-select-solid searchable">
+                        <option value="">— الكل —</option>
+                        <option value="1">اختبار تحديد المستوى</option>
+                        <option value="0">عام / غير اختبار</option>
+                    </select>
                 </div>
                 <div class="col-lg-1 col-md-2 mb-4 d-flex align-items-end">
                     <button type="reset" id="reset_button" class="btn btn-light-danger btn-icon w-40px h-40px shadow-sm" title="إعادة تعيين البحث">
@@ -65,6 +73,7 @@
                         <th class="w-50px text-center"> # </th>
                         <th class="min-w-150px text-center"> الأيام </th>
                         <th class="min-w-150px text-center"> الوقت </th>
+                        <th class="min-w-150px text-center"> نوع الموعد </th>
                         <th class="min-w-100px text-center"> الحالة </th>
                         <th class="text-center min-w-100px"> العمليات </th>
                     </tr>
@@ -89,11 +98,12 @@
         { data: "id", name: "id", orderable: false, searchable: false, render: function(data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "days", name: "days", className: "text-center fw-bold text-dark" },
         { data: "times", name: "times", className: "text-center fw-bold text-primary" },
+        { data: "is_placement_test", name: "is_placement_test", orderable: true, searchable: false, className: "text-center" },
         { data: "status", name: "status", orderable: true, searchable: false, className: "text-center" },
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center" }
     ];
 
-    var filterFields = ['#title'];
+    var filterFields = ['#title', '#is_placement_test'];
 
     $(document).ready(function() {
         // Status toggle logic is integrated in datatableMaster AJAX handlers or via .status class

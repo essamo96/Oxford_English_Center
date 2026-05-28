@@ -251,21 +251,58 @@ class MembershipsController extends AdminController
     {
 
         $filters = [
-            'search'     => $request->get('search'),
-            'date_from'  => $request->get('date_from'),
-            'date_to'    => $request->get('date_to'),
-            'gender'     => $request->get('gender'),
-            'program_type' => $request->get('program_type'),
-            'is_today'   => $request->get('is_today'),
+            'search'          => $request->get('search'),
+            'date_from'       => $request->get('date_from'),
+            'date_to'         => $request->get('date_to'),
+            'gender'          => $request->get('gender'),
+            'program_type'    => $request->get('program_type'),
+            'enrollment_type' => $request->get('enrollment_type'), // 'test' | 'course'
+            'anomaly'         => $request->get('anomaly'),         // 'underage_adult'
+            'is_today'        => $request->get('is_today'),
         ];
 
         // Custom logic for today filter if provided
         $query = Students::askJoinQuery($filters);
-        
+
+        // Program-type filter: combine stored value with age-based truth so
+        // mis-stored records (e.g. a child saved as adult) still filter correctly.
         if ($filters['program_type']) {
-            $query->where('students.program_type', $filters['program_type']);
+            $cutoffKidsDob = \Carbon\Carbon::today()->subYears(15)->toDateString(); // born after this date → ≤15 (kids)
+            if ($filters['program_type'] === 'kids') {
+                $query->where(function ($q) use ($cutoffKidsDob) {
+                    $q->where('students.program_type', 'kids')
+                      ->orWhere(function ($q2) use ($cutoffKidsDob) {
+                          $q2->whereNotNull('students.dob')
+                             ->where('students.dob', '>=', $cutoffKidsDob);
+                      });
+                });
+            } elseif ($filters['program_type'] === 'adult') {
+                $query->where(function ($q) use ($cutoffKidsDob) {
+                    $q->where(function ($q2) use ($cutoffKidsDob) {
+                        $q2->where('students.program_type', 'adult')
+                           ->where(function ($q3) use ($cutoffKidsDob) {
+                               $q3->whereNull('students.dob')
+                                  ->orWhere('students.dob', '<', $cutoffKidsDob);
+                           });
+                    });
+                });
+            }
         }
-        
+
+        // Enrollment type filter (Placement Test vs Direct Enrollment)
+        if (!empty($filters['enrollment_type'])) {
+            $query->where('students.enrollment_type', $filters['enrollment_type']);
+        }
+
+        // Anomaly filter: applicants who picked Adult on the form but are ≤15
+        // (auto-routed to kids internally but original intent was adult)
+        if (($filters['anomaly'] ?? '') === 'underage_adult') {
+            $cutoffKidsDob = \Carbon\Carbon::today()->subYears(15)->toDateString();
+            $query->where('students.requested_program_type', 'adult')
+                  ->whereNotNull('students.dob')
+                  ->where('students.dob', '>=', $cutoffKidsDob);
+        }
+
         if ($filters['is_today'] == 1) {
             $query->whereDate('created_at', \Carbon\Carbon::today());
         }
@@ -292,10 +329,37 @@ class MembershipsController extends AdminController
                 $genderIcon = '<i class="bi bi-gender-female text-danger fs-4 ms-2" title="أنثى"></i>';
             }
 
-            // Program Type badge
-            $pType = $row->program_type == 'kids' 
-                ? '<span class="badge badge-light-success fs-8 fw-bold">KIDS</span>'
-                : '<span class="badge badge-light-primary fs-8 fw-bold">ADULT</span>';
+            // Program Type badge — derive from actual age so it stays correct
+            // even if program_type wasn't set or was set incorrectly during storage.
+            $age = null;
+            if (!empty($row->dob)) {
+                try { $age = \Carbon\Carbon::parse($row->dob)->age; } catch (\Exception $e) {}
+            }
+            $effectiveType = $row->program_type;
+            if (!is_null($age)) {
+                $effectiveType = ($age <= 15) ? 'kids' : 'adult';
+            }
+            // Heal stored value if it diverges from age-based reality
+            if (!is_null($age) && $effectiveType !== $row->program_type) {
+                \App\Models\Students::where('id', $row->id)->update(['program_type' => $effectiveType]);
+            }
+            $pType = $effectiveType === 'kids'
+                ? '<span class="badge badge-light-success fs-8 fw-bold"><i class="bi bi-emoji-smile me-1"></i>KIDS</span>'
+                : '<span class="badge badge-light-primary fs-8 fw-bold"><i class="bi bi-person-fill me-1"></i>ADULT</span>';
+
+            // Enrollment-type badge (Placement Test vs Direct Enrollment)
+            $eType = '';
+            if ($row->enrollment_type === 'test') {
+                $eType = '<span class="badge badge-light-warning fs-8 fw-bold ms-1" title="اختبار تحديد المستوى"><i class="bi bi-clipboard-check me-1"></i>Placement</span>';
+            } elseif ($row->enrollment_type === 'course') {
+                $eType = '<span class="badge badge-light-info fs-8 fw-bold ms-1" title="تسجيل مباشر"><i class="bi bi-mortarboard-fill me-1"></i>Direct</span>';
+            }
+
+            // Anomaly flag: applicant picked "adult" on the form but is ≤15
+            $anomaly = '';
+            if ($row->requested_program_type === 'adult' && !is_null($age) && $age <= 15) {
+                $anomaly = '<span class="badge badge-light-danger fs-8 fw-bold ms-1" title="حاول التسجيل ككبار وعمره ≤ 15 — تم إعادة توجيهه للأطفال تلقائياً"><i class="bi bi-exclamation-triangle-fill me-1"></i>Under-15 → Adult</span>';
+            }
 
             return '
                 <div class="d-flex align-items-center">
@@ -303,22 +367,52 @@ class MembershipsController extends AdminController
                         <img src="'.$avatar.'" alt="'.$row->name.'">
                     </div>
                     <div class="d-flex justify-content-start flex-column">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center flex-wrap gap-1">
                             <a href="javascript:;" onclick="showStudentModal('.$row->id.')" class="text-gray-800 fw-bold text-hover-primary mb-1 fs-6">'.$row->name.'</a>
-
                             '.$genderIcon.'
                             <span class="ms-2">'.$pType.'</span>
+                            '.$eType.'
+                            '.$anomaly.'
                         </div>
                         <span class="text-gray-400 fw-semibold d-block fs-7">'.$email.'</span>
                     </div>
                 </div>';
         });
 
-        // Format DOB column
+        // Format DOB column — show date + computed age badge
         $datatable->editColumn('dob', function ($row) {
-            return !empty($row->dob)
-                ? '<span class="fw-bold"><i class="bi bi-calendar-event me-1"></i>' . $row->dob . '</span>'
-                : '<span class="badge badge-light-warning">غير محدد</span>';
+            if (empty($row->dob)) {
+                return '<span class="badge badge-light-warning">غير محدد</span>';
+            }
+            $age = null;
+            try { $age = \Carbon\Carbon::parse($row->dob)->age; } catch (\Exception $e) {}
+            $dobDisplay = '<div class="d-flex flex-column align-items-center gap-1">';
+            $dobDisplay .= '<span class="fw-bold text-dark fs-7"><i class="bi bi-calendar-event text-info me-1"></i>' . $row->dob . '</span>';
+            if (!is_null($age)) {
+                $ageClass = $age <= 15 ? 'badge-light-success' : 'badge-light-primary';
+                $dobDisplay .= '<span class="badge ' . $ageClass . ' fw-bold fs-8"><i class="bi bi-stopwatch me-1"></i>' . $age . ' سنة</span>';
+            }
+            $dobDisplay .= '</div>';
+            return $dobDisplay;
+        });
+
+        // Format join_date column
+        $datatable->addColumn('join_date_fmt', function ($row) {
+            $join = $row->join_date ?: ($row->created_at ? $row->created_at->format('Y-m-d') : null);
+            if (!$join) {
+                return '<span class="badge badge-light-warning">غير محدد</span>';
+            }
+            try {
+                $c = \Carbon\Carbon::parse($join);
+                $date = $c->format('Y-m-d');
+                $human = $c->locale('ar')->diffForHumans();
+                return '<div class="d-flex flex-column align-items-center gap-1">
+                            <span class="fw-bold text-dark fs-7"><i class="bi bi-calendar-check text-success me-1"></i>' . $date . '</span>
+                            <span class="text-muted fs-8 fst-italic">' . $human . '</span>
+                        </div>';
+            } catch (\Exception $e) {
+                return '<span class="fw-bold">' . $join . '</span>';
+            }
         });
 
         $datatable->editColumn('status', function ($row) {
@@ -351,7 +445,7 @@ class MembershipsController extends AdminController
             return '';
         });
 
-        $datatable->rawColumns(['name', 'status', 'actions', 'checkbox', 'dob']);
+        $datatable->rawColumns(['name', 'status', 'actions', 'checkbox', 'dob', 'join_date_fmt']);
 
         return $datatable->make(true);
     }

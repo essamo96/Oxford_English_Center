@@ -12,8 +12,22 @@ class Programs extends Model {
 
     protected $table = 'programs';
     protected $fillable = [
-        'title', 'short', 'exam', 'status', 'image'
+        'title', 'short', 'exam', 'status', 'image',
+        'min_payment_percent', 'min_payment_fixed',
     ];
+
+    /**
+     * Compute the minimum acceptable first payment for this program against a given total.
+     * Uses the higher of (total * percent / 100) and the fixed amount; capped at total.
+     */
+    public function computeMinimumDue(float $totalDue): float
+    {
+        $pct   = $this->min_payment_percent !== null ? (float) $this->min_payment_percent : 0.0;
+        $fixed = $this->min_payment_fixed   !== null ? (float) $this->min_payment_fixed   : 0.0;
+        $byPct = $pct > 0 ? ($totalDue * $pct / 100.0) : 0.0;
+        $min   = max($byPct, $fixed);
+        return min($min, $totalDue);
+    }
     protected $hidden = [
         '',
     ];

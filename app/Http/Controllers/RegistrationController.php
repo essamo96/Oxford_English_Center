@@ -11,6 +11,7 @@ use App\Models\Programs;
 use App\Models\FeeSettings;
 use App\Models\PlacementTests;
 use App\Models\PaymentMethods;
+use App\Models\Times;
 use App\Models\Contacts;
 use App\Mail\WelcomeStudentMail;
 use Illuminate\Http\Request;
@@ -29,11 +30,47 @@ class RegistrationController extends Controller
     public function showRegistrationForm($type = 'adults')
     {
         self::$data['type']            = $type;
-        self::$data['payment_methods'] = PaymentMethods::where('is_active', 1)->get();
+        self::$data['payment_methods'] = PaymentMethods::where('is_active', 1)
+            ->get()
+            ->filter(function ($m) {
+                // Hide methods without any credential value, even if active
+                if (empty($m->credentials) || !is_array($m->credentials)) return false;
+                foreach ($m->credentials as $v) {
+                    if (!is_null($v) && trim((string) $v) !== '') return true;
+                }
+                return false;
+            })
+            ->values();
         self::$data['programs']        = Programs::where('status', 1)->get();
         self::$data['groups']          = Groups::where('status', 1)->get();
+        self::$data['placement_times'] = Times::where('status', 1)
+            ->where('is_placement_test', 1)
+            ->orderBy('id', 'asc')
+            ->get();
 
         return view('frontend.contact.book', self::$data);
+    }
+
+    /**
+     * AJAX: check if email exists in students table
+     */
+    public function checkEmail(Request $request)
+    {
+        $email = $request->query('email');
+        if (!$email) return response()->json(['exists' => false]);
+        $exists = Students::where('email', $email)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    /**
+     * AJAX: check if mobile exists in students table
+     */
+    public function checkMobile(Request $request)
+    {
+        $mobile = $request->query('mobile');
+        if (!$mobile) return response()->json(['exists' => false]);
+        $exists = Students::where('mobile', $mobile)->exists();
+        return response()->json(['exists' => $exists]);
     }
 
     /**
@@ -70,7 +107,26 @@ class RegistrationController extends Controller
             $rules['current_level'] = 'required';
         }
 
-        if ($request->program_type == 'kids') {
+        // Compute age from DOB to enforce guardian + program-type routing
+        $age = null;
+        if ($request->dob) {
+            try {
+                $age = \Carbon\Carbon::parse($request->dob)->age;
+            } catch (\Exception $e) { $age = null; }
+        }
+
+        // Auto-route to the correct program based on age:
+        // age <= 15  → kids program (even if applicant picked adult)
+        // age >  15  → adult program (even if applicant picked kids by mistake)
+        $effectiveProgramType = $request->program_type;
+        if ($age !== null) {
+            $effectiveProgramType = ($age <= 15) ? 'kids' : 'adult';
+        }
+
+        $requiresGuardian = ($effectiveProgramType === 'kids')
+            || ($age !== null && $age <= 15);
+
+        if ($requiresGuardian) {
             $rules['parent_name'] = 'required|string|max:255';
             $rules['parent_phone'] = 'required|string|max:20';
             $rules['parent_relationship'] = 'required|string';
@@ -87,7 +143,7 @@ class RegistrationController extends Controller
 
             $plainPassword = substr($request->mobile, -7);
 
-            // 1. Create Student Record
+            // 1. Create Student Record ($effectiveProgramType already age-corrected above)
             $student = Students::create([
                 'name' => $request->name,
                 'name_en' => $request->name_en,
@@ -98,22 +154,41 @@ class RegistrationController extends Controller
                 'address' => $request->address,
                 'major' => $request->major,
                 'current_level' => $request->current_level,
-                'program_type' => $request->program_type,
+                'program_type' => $effectiveProgramType,
+                'requested_program_type' => $request->program_type, // original applicant choice (before age-routing)
+                'enrollment_type' => $request->enrollment_type, // 'test' | 'course'
                 'health_conditions' => $request->health_notes,
                 'note' => $request->general_notes,
+                'join_date' => now()->toDateString(),
                 'status' => 0, // Inactive
                 'is_verified' => 0, // Unverified
                 'username' => $request->email,
                 'password' => Hash::make($plainPassword),
             ]);
 
-            // 2. Handle Parent Info (for Kids)
-            if ($request->program_type == 'kids') {
+            // 2. Handle Parent Info (for Kids or underaged adult registrants)
+            if ($requiresGuardian) {
+                // Resolve the relationship label. If the applicant picked the "other"
+                // option from the relationships table, store their free-text description.
+                $relationshipLabel = $request->parent_relationship;
+                $relSlug = $request->parent_relationship;
+                if ($relSlug) {
+                    $relRow = \App\Models\Relationship::where('slug', $relSlug)->first();
+                    if ($relRow) {
+                        if ($relRow->is_other) {
+                            $custom = trim((string) $request->parent_relationship_other);
+                            $relationshipLabel = $custom !== '' ? $custom : $relRow->name_ar;
+                        } else {
+                            $relationshipLabel = $relRow->name_ar;
+                        }
+                    }
+                }
+
                 $parent = Parents::create([
-                    'name' => $request->parent_name,
-                    'phone' => $request->parent_phone,
-                    'email' => $request->parent_email ?: $request->email,
-                    'relationship' => $request->parent_relationship,
+                    'name'         => $request->parent_name,
+                    'phone'        => $request->parent_phone,
+                    'email'        => $request->parent_email ?: $request->email,
+                    'relationship' => $relationshipLabel,
                 ]);
                 $student->update(['parent_id' => $parent->id]);
             }
@@ -132,13 +207,24 @@ class RegistrationController extends Controller
             // 4. Branch Logic based on Enrollment Type
             if ($request->enrollment_type == 'course') {
                 $pId = $request->program_id;
-                
+
                 // Fetch all fees for this program EXCEPT placement tests
                 $allFees = FeeSettings::where('program_id', $pId)
                     ->where('type', '!=', 'placement_test')
                     ->get();
-                
+
                 $totalDue = $allFees->sum('amount');
+
+                // Minimum payment is configured on the PROGRAM (not per fee row)
+                $program = \App\Models\Programs::find($pId);
+                $minDue  = $program ? $program->computeMinimumDue((float) $totalDue) : 0.0;
+                if ($minDue > 0 && (float) $paid < $minDue) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'الحد الأدنى المقبول للدفعة الأولى هو ' . number_format($minDue, 2) . ' ILS.',
+                    ], 422);
+                }
 
                 GroupStudentsFees::create([
                     'student_id' => $student->id,
@@ -162,15 +248,29 @@ class RegistrationController extends Controller
                 
                 $testFees = $testFeeQuery->get();
                 $totalDue = $testFees->count() > 0 ? $testFees->sum('amount') : 100;
+
+                // Min payment for the placement-test path comes from the program (if any)
+                $program = $pId ? \App\Models\Programs::find($pId) : null;
+                $minDue  = $program ? $program->computeMinimumDue((float) $totalDue) : 0.0;
+                if ($minDue > 0 && (float) $paid < $minDue) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'الحد الأدنى المقبول للدفعة الأولى هو ' . number_format($minDue, 2) . ' ILS.',
+                    ], 422);
+                }
                 
                 PlacementTests::create([
                     'student_id' => $student->id,
                     'test_date' => $request->test_date,
+                    'test_time' => $request->preferred_time, // mirror for admin filter
                     'preferred_days' => $request->preferred_days,
                     'preferred_time' => $request->preferred_time,
                     'total_amount' => $totalDue,
                     'paid_amount' => $paid,
                     'remaining_amount' => $totalDue - $paid,
+                    'payment_method_id' => $request->payment_method_id,
+                    'payment_receipt' => $receiptPath,
                     'status' => 'pending',
                     'payment_status' => ($paid >= $totalDue) ? 'paid' : 'partially_paid',
                 ]);

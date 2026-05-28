@@ -37,10 +37,17 @@ class TimesController extends AdminController {
     //////////////////////////////////////////////
     public function getList(Request $request) {
         $title = $request->get('title', NULL);
+        $isPlacement = $request->get('is_placement_test', null);
 
         $times = new Times();
-        $info = $times->getSearchTimes($title);
+        $info = $times->getSearchTimes($title, $isPlacement);
         $datatable = Datatables::of($info);
+
+        $datatable->editColumn('is_placement_test', function ($row) {
+            return $row->is_placement_test
+                ? '<span class="badge badge-light-success fw-bold"><i class="bi bi-clipboard-check me-1"></i>اختبار تحديد المستوى</span>'
+                : '<span class="badge badge-light-info fw-bold"><i class="bi bi-mortarboard me-1"></i>عام</span>';
+        });
 
         $datatable->editColumn('name', function ($row) {
             return (!empty($row->name) ? $row->name : 'N/A');
@@ -89,6 +96,7 @@ class TimesController extends AdminController {
         $days = $request->get('days');
         $times = $request->get('times');
         $status = (int) $request->get('status');
+        $isPlacement = (bool) $request->get('is_placement_test', false);
 
         $validator = Validator::make([
                     'days' => $days,
@@ -105,7 +113,7 @@ class TimesController extends AdminController {
             return redirect(route('times.add'))->withInput();
         } else {
             $time = new Times();
-            $add = $time->addTime($days, $times, $status);
+            $add = $time->addTime($days, $times, $status, $isPlacement);
             if ($add) {
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('times.view'));
@@ -152,6 +160,7 @@ class TimesController extends AdminController {
             $days = $request->get('days');
             $times = $request->get('times');
             $status = (int) $request->get('status');
+            $isPlacement = (bool) $request->get('is_placement_test', false);
 
             $validator = Validator::make([
                         'days' => $days,
@@ -167,7 +176,7 @@ class TimesController extends AdminController {
                 $request->session()->flash('danger', $validator->messages());
                 return redirect(route('times.edit', ['id' => $encrypted_id]))->withInput();
             } else {
-                $update = $time->updateTime($info, $days, $times, $status);
+                $update = $time->updateTime($info, $days, $times, $status, $isPlacement);
                 if ($update) {
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('times.view'));

@@ -130,6 +130,15 @@
                         إرسال SMS للمحددين
                     </button>
 
+                    @can('admin.groups.edit')
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                            <i class="bi bi-people-fill me-1"></i> تشعيب طلاب
+                        </button>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#promoteModal">
+                            <i class="bi bi-arrow-up-right-square-fill me-1"></i> تصعيد طلاب
+                        </button>
+                    @endcan
+
                     @can('admin.groups.add')
                         <a href="{{ route('groups.add') }}" class="btn btn-primary">
                             <i class="ki-duotone ki-plus fs-2"></i> إضافة مجموعة
@@ -192,6 +201,488 @@
                     <div class="text-center py-10">
                         <span class="spinner-border w-50px h-50px" role="status"></span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== Shuttle UI styles — theme-aware (Light + Dark) ===== --}}
+    <style>
+        /* ---------- Theme tokens (Light defaults) ---------- */
+        .shuttle-modal {
+            --sh-surface:       #ffffff;
+            --sh-surface-2:     #fafbfd;
+            --sh-surface-3:     #f8fafc;
+            --sh-border:        #e5e9f0;
+            --sh-border-2:      #eef0f5;
+            --sh-border-hover:  #cfd6e2;
+            --sh-text:          #1f2937;
+            --sh-muted:         #6b7280;
+            --sh-faint:         #9aa3b3;
+            --sh-label:         #374151;
+            --sh-grip:          #b8c0cf;
+            --sh-count-bg:      #eef2f7;
+            --sh-count-fg:      #475569;
+            --sh-item-hover:    #f7fafc;
+            --sh-shadow:        0 6px 18px rgba(0,0,0,0.12);
+
+            /* Highlight tints for header strips */
+            --sh-warn-tint:     #fef9e7;
+            --sh-success-tint:  #ecfdf5;
+
+            /* Tag pills */
+            --sh-tag-kids-bg:   #d1fae5;  --sh-tag-kids-fg:   #065f46;
+            --sh-tag-adult-bg:  #dbeafe;  --sh-tag-adult-fg:  #1e3a8a;
+            --sh-tag-level-bg:  #fef3c7;  --sh-tag-level-fg:  #92400e;
+            --sh-count-warn-bg: #fde68a;  --sh-count-warn-fg: #92400e;
+            --sh-count-ok-bg:   #a7f3d0;  --sh-count-ok-fg:   #065f46;
+
+            /* Ghost (dragged) */
+            --sh-ghost-bg:      #fffbeb;
+            --sh-droptarget-bg: #f0f9ff;
+            --sh-droptarget-bd: #3b82f6;
+        }
+
+        /* ---------- Dark mode overrides ----------
+           Supports all common selectors: Bootstrap 5.3 native, Metronic, and class-based */
+        [data-bs-theme="dark"] .shuttle-modal,
+        [data-theme-mode="dark"] .shuttle-modal,
+        .dark-mode .shuttle-modal,
+        html.dark .shuttle-modal {
+            --sh-surface:       #1c1d2b;
+            --sh-surface-2:     #15161f;
+            --sh-surface-3:     #1f2030;
+            --sh-border:        #2b2d3c;
+            --sh-border-2:      #262737;
+            --sh-border-hover:  #3b3d52;
+            --sh-text:          #e7e9ef;
+            --sh-muted:         #9aa0b4;
+            --sh-faint:         #6b708a;
+            --sh-label:         #c7cbdb;
+            --sh-grip:          #5a5f76;
+            --sh-count-bg:      #2a2c3c;
+            --sh-count-fg:      #b6bcd0;
+            --sh-item-hover:    #23253a;
+            --sh-shadow:        0 8px 22px rgba(0,0,0,0.55);
+
+            --sh-warn-tint:     #2a2618;
+            --sh-success-tint:  #16241f;
+
+            --sh-tag-kids-bg:   #133929;  --sh-tag-kids-fg:   #4ade80;
+            --sh-tag-adult-bg:  #16264b;  --sh-tag-adult-fg:  #93c5fd;
+            --sh-tag-level-bg:  #3a2c10;  --sh-tag-level-fg:  #fbbf24;
+            --sh-count-warn-bg: #3a2c10;  --sh-count-warn-fg: #fbbf24;
+            --sh-count-ok-bg:   #133929;  --sh-count-ok-fg:   #4ade80;
+
+            --sh-ghost-bg:      #2a2618;
+            --sh-droptarget-bg: #122036;
+            --sh-droptarget-bd: #60a5fa;
+        }
+
+        /* ---------- Layout ---------- */
+        .shuttle-modal .modal-dialog       { max-width: 980px; }
+        .shuttle-modal .modal-content      {
+            border-radius: 16px; overflow: hidden;
+            background: var(--sh-surface);
+            color: var(--sh-text);
+            border: 1px solid var(--sh-border);
+        }
+        .shuttle-modal .modal-body         { padding: 18px 22px; background: var(--sh-surface); }
+        .shuttle-modal .modal-header       {
+            padding: 14px 22px; border-bottom: 1px solid var(--sh-border-2);
+            background: var(--sh-surface-2);
+        }
+        .shuttle-modal .modal-footer       {
+            padding: 12px 22px; border-top: 1px solid var(--sh-border-2);
+            background: var(--sh-surface-2);
+        }
+        .shuttle-modal .modal-header .btn-close {
+            filter: var(--sh-close-filter, none);
+        }
+        [data-bs-theme="dark"] .shuttle-modal .modal-header .btn-close,
+        [data-theme-mode="dark"] .shuttle-modal .modal-header .btn-close,
+        .dark-mode .shuttle-modal .modal-header .btn-close,
+        html.dark .shuttle-modal .modal-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(1.2);
+        }
+
+        .shuttle-column {
+            background: var(--sh-surface);
+            border: 1.5px solid var(--sh-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .shuttle-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--sh-border-2);
+            background: var(--sh-surface-2);
+            border-radius: 12px 12px 0 0;
+        }
+        .shuttle-head .ttl { font-weight: 700; font-size: 0.92rem; margin: 0; color: var(--sh-text); }
+        .shuttle-head input[type="text"] {
+            height: 36px; font-size: 0.88rem; margin-top: 8px;
+            background: var(--sh-surface);
+            color: var(--sh-text);
+            border: 1px solid var(--sh-border);
+        }
+        .shuttle-head input[type="text"]::placeholder { color: var(--sh-faint); }
+
+        /* Override header tint for "basket" sides without hard-coded colors */
+        .shuttle-modal .shuttle-head.tint-warn    { background: var(--sh-warn-tint); }
+        .shuttle-modal .shuttle-head.tint-success { background: var(--sh-success-tint); }
+
+        .shuttle-list {
+            list-style: none;
+            margin: 0;
+            padding: 6px;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            min-height: 320px;
+            max-height: 360px;
+            background: var(--sh-surface);
+        }
+        .shuttle-empty {
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--sh-faint);
+            font-style: italic;
+            font-size: 0.88rem;
+        }
+
+        .shuttle-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            background: var(--sh-surface);
+            border: 1px solid var(--sh-border-2);
+            border-radius: 8px;
+            cursor: grab;
+            transition: background-color .15s ease, border-color .15s ease, transform .12s ease;
+            color: var(--sh-text);
+        }
+        .shuttle-item:hover { background: var(--sh-item-hover); border-color: var(--sh-border-hover); }
+        .shuttle-item:active { cursor: grabbing; transform: scale(0.99); }
+        .shuttle-item .grip {
+            color: var(--sh-grip); font-size: 0.95rem; flex-shrink: 0;
+        }
+        .shuttle-item .avatar {
+            width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+            border: 1px solid var(--sh-border-2); flex-shrink: 0;
+        }
+        .shuttle-item .meta { flex: 1; min-width: 0; }
+        .shuttle-item .name { font-weight: 600; font-size: 0.88rem; color: var(--sh-text); line-height: 1.2; }
+        .shuttle-item .sub  { font-size: 0.72rem; color: var(--sh-muted); margin-top: 2px; }
+        .shuttle-item .tags { display: flex; gap: 4px; flex-shrink: 0; }
+        .shuttle-item .tag  {
+            font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.02em;
+        }
+        .shuttle-item .tag.kids   { background: var(--sh-tag-kids-bg);  color: var(--sh-tag-kids-fg); }
+        .shuttle-item .tag.adult  { background: var(--sh-tag-adult-bg); color: var(--sh-tag-adult-fg); }
+        .shuttle-item .tag.level  { background: var(--sh-tag-level-bg); color: var(--sh-tag-level-fg); }
+        .shuttle-item .tag.exists { background: var(--sh-count-bg);     color: var(--sh-count-fg); }
+        .shuttle-item .tag.new    { background: var(--sh-count-ok-bg);  color: var(--sh-count-ok-fg); }
+
+        /* Locked (existing-member) row — visible but not interactive */
+        .shuttle-item.locked       { cursor: not-allowed; opacity: 0.72; background: var(--sh-surface-2); }
+        .shuttle-item.locked:hover { background: var(--sh-surface-2); border-color: var(--sh-border-2); transform: none; }
+        .shuttle-item.locked .grip { color: transparent; }
+        .shuttle-item.locked .grip::before {
+            content: '\F47A'; /* bi-lock-fill */
+            font-family: 'bootstrap-icons';
+            color: var(--sh-faint);
+        }
+        /* Unlocked state — applied to all locked items when admin clicks unlock toggle */
+        .shuttle-list.unlock-mode .shuttle-item.locked       { cursor: grab; opacity: 1; background: var(--sh-surface); border-color: #fbbf24; }
+        .shuttle-list.unlock-mode .shuttle-item.locked:hover { background: var(--sh-item-hover); border-color: #f59e0b; }
+        .shuttle-list.unlock-mode .shuttle-item.locked .grip::before { content: '\F47B'; color: #f59e0b; } /* bi-unlock-fill */
+        .shuttle-list.unlock-mode .shuttle-item.locked .tag.exists   {
+            background: #fed7aa; color: #9a3412;
+        }
+        /* Toggle button active visual */
+        #unlockToggleBtn.active { background: #fef3c7; color: #92400e; }
+        #unlockToggleBtn.active i::before { content: '\F47B'; } /* bi-unlock-fill */
+
+        /* Pulse the save button when there are pending changes */
+        .btn-pulse { animation: btnPulse 1.8s ease-in-out infinite; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55); }
+        @keyframes btnPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+            70%  { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .btn-pulse .badge { font-size: 0.7rem; padding: 3px 8px; }
+
+        /* ---------- Select2 dark mode overrides (scoped to modal) ---------- */
+        [data-bs-theme="dark"] .shuttle-modal .select2-container--bootstrap5 .select2-selection,
+        [data-theme-mode="dark"] .shuttle-modal .select2-container--bootstrap5 .select2-selection,
+        .dark-mode .shuttle-modal .select2-container--bootstrap5 .select2-selection,
+        html.dark .shuttle-modal .select2-container--bootstrap5 .select2-selection {
+            background: var(--sh-surface) !important;
+            color: var(--sh-text) !important;
+            border-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .shuttle-modal .select2-container--bootstrap5 .select2-selection__rendered,
+        [data-theme-mode="dark"] .shuttle-modal .select2-container--bootstrap5 .select2-selection__rendered,
+        .dark-mode .shuttle-modal .select2-container--bootstrap5 .select2-selection__rendered,
+        html.dark .shuttle-modal .select2-container--bootstrap5 .select2-selection__rendered {
+            color: var(--sh-text) !important;
+        }
+        [data-bs-theme="dark"] .shuttle-modal .select2-search__field,
+        [data-theme-mode="dark"] .shuttle-modal .select2-search__field,
+        .dark-mode .shuttle-modal .select2-search__field,
+        html.dark .shuttle-modal .select2-search__field {
+            background: var(--sh-surface) !important;
+            color: var(--sh-text) !important;
+            border: 1px solid var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .shuttle-modal .select2-dropdown,
+        [data-theme-mode="dark"] .shuttle-modal .select2-dropdown,
+        .dark-mode .shuttle-modal .select2-dropdown,
+        html.dark .shuttle-modal .select2-dropdown {
+            background: var(--sh-surface) !important;
+            border-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .shuttle-modal .select2-results__option,
+        [data-theme-mode="dark"] .shuttle-modal .select2-results__option,
+        .dark-mode .shuttle-modal .select2-results__option,
+        html.dark .shuttle-modal .select2-results__option {
+            color: var(--sh-text) !important;
+        }
+        [data-bs-theme="dark"] .shuttle-modal .select2-results__option--highlighted,
+        [data-theme-mode="dark"] .shuttle-modal .select2-results__option--highlighted,
+        .dark-mode .shuttle-modal .select2-results__option--highlighted,
+        html.dark .shuttle-modal .select2-results__option--highlighted {
+            background: var(--sh-item-hover) !important;
+            color: var(--sh-text) !important;
+        }
+
+        /* SortableJS state classes */
+        .sortable-ghost  { opacity: 0.35; background: var(--sh-ghost-bg) !important; border-style: dashed !important; }
+        .sortable-chosen { box-shadow: var(--sh-shadow); }
+        .sortable-drag   { transform: rotate(-1deg); }
+        .shuttle-list.drop-target {
+            background: var(--sh-droptarget-bg);
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 2px var(--sh-droptarget-bd);
+        }
+
+        .shuttle-count {
+            font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+            background: var(--sh-count-bg); color: var(--sh-count-fg);
+        }
+        .shuttle-count.tint-warn    { background: var(--sh-count-warn-bg); color: var(--sh-count-warn-fg); }
+        .shuttle-count.tint-success { background: var(--sh-count-ok-bg);   color: var(--sh-count-ok-fg); }
+
+        .shuttle-tools-row {
+            background: var(--sh-surface-3);
+            border: 1px solid var(--sh-border);
+            border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 14px;
+        }
+        .shuttle-tools-row .form-label {
+            font-size: 0.78rem; font-weight: 600; margin-bottom: 4px;
+            color: var(--sh-label);
+        }
+        .shuttle-tools-row .form-select,
+        .shuttle-tools-row .form-control {
+            height: 38px; font-size: 0.88rem;
+            background: var(--sh-surface);
+            color: var(--sh-text);
+            border: 1px solid var(--sh-border);
+        }
+        .shuttle-tools-row .form-select option { background: var(--sh-surface); color: var(--sh-text); }
+
+        @media (max-width: 768px) {
+            .shuttle-list { min-height: 240px; max-height: 280px; }
+        }
+    </style>
+
+    {{-- =========================================================
+         BULK ASSIGN MODAL
+         ========================================================= --}}
+    <div class="modal fade shuttle-modal" id="bulkAssignModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-warning"><i class="bi bi-people-fill me-2"></i>تشعيب طلاب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {{-- Compact tools row --}}
+                    <div class="shuttle-tools-row">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label">المجموعة المُستهدفة *</label>
+                                <select id="bulkTargetGroup" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="🔍 ابحث واختر المجموعة...">
+                                    <option></option>
+                                    @foreach($active_groups_for_picker ?? [] as $g)
+                                        <option value="{{ $g->id }}">
+                                            {{ ($g->program->title ?? '—') }} — {{ $g->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">برنامج الطلاب</label>
+                                <select id="bulkProgramTypeFilter" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="-- الكل --" data-minimum-results-for-search="-1">
+                                    <option value="">الكل</option>
+                                    <option value="adult">الكبار</option>
+                                    <option value="kids">الأطفال</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="bulkRefreshBtn" class="btn btn-light-primary w-100" style="height:38px;">
+                                    <i class="bi bi-arrow-clockwise"></i> تحديث
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Two columns --}}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="shuttle-column">
+                                <div class="shuttle-head">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <h6 class="ttl text-primary"><i class="bi bi-person-check me-1"></i>المؤهلون</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="shuttle-count" id="poolCount">0</span>
+                                            <button type="button" id="selectAllPoolBtn" class="btn btn-sm btn-light-primary py-1 px-2" title="إضافة كل الطلاب الظاهرين للسلة">
+                                                <i class="bi bi-check2-all"></i> اختر الكل
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="poolSearch" class="form-control" placeholder="🔍 ابحث بالاسم أو الجوال...">
+                                </div>
+                                <ul class="shuttle-list" id="poolList">
+                                    <li class="shuttle-empty">جاري التحميل...</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="shuttle-column">
+                                <div class="shuttle-head tint-warn">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="ttl text-warning"><i class="bi bi-cart-check-fill me-1"></i>للتشعيب</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="shuttle-count tint-warn" id="basketCount">0</span>
+                                            <button type="button" id="unlockToggleBtn" class="btn btn-sm btn-icon btn-light-info" title="فتح القفل لإزالة أعضاء حاليين">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </button>
+                                            <button type="button" id="clearBasketBtn" class="btn btn-sm btn-icon btn-light-danger" title="إفراغ"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" id="basketHint">⤵ اسحب أو انقر لإضافة</small>
+                                </div>
+                                <ul class="shuttle-list" id="basketList">
+                                    <li class="shuttle-empty">اسحب أو انقر اسماً من اليسار</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-warning" id="bulkAssignSubmit">
+                        <i class="bi bi-check2-circle me-1"></i> تشعيب المحددين
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- =========================================================
+         PROMOTE MODAL
+         ========================================================= --}}
+    <div class="modal fade shuttle-modal" id="promoteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-info"><i class="bi bi-arrow-up-right-square-fill me-2"></i>تصعيد طلاب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="shuttle-tools-row">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label">من مجموعة *</label>
+                                <select id="promoteSourceGroup" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="🔍 ابحث واختر المصدر...">
+                                    <option></option>
+                                    @foreach($active_groups_for_picker ?? [] as $g)
+                                        <option value="{{ $g->id }}">{{ ($g->program->title ?? '—') }} — {{ $g->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">إلى مجموعة *</label>
+                                <select id="promoteTargetGroup" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="🔍 ابحث واختر الهدف...">
+                                    <option></option>
+                                    @foreach($active_groups_for_picker ?? [] as $g)
+                                        <option value="{{ $g->id }}">{{ ($g->program->title ?? '—') }} — {{ $g->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" id="carryFeesToggle" checked>
+                                    <label class="form-check-label fw-bold fs-8" for="carryFeesToggle">ترصيد المتبقي</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="shuttle-column">
+                                <div class="shuttle-head">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <h6 class="ttl text-info"><i class="bi bi-people me-1"></i>المجموعة المصدر</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="shuttle-count" id="rosterCount">0</span>
+                                            <button type="button" id="selectAllRosterBtn" class="btn btn-sm btn-light-info py-1 px-2" title="إضافة كل الطلاب للتصعيد">
+                                                <i class="bi bi-check2-all"></i> اختر الكل
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="rosterSearch" class="form-control" placeholder="🔍 ابحث ضمن المجموعة...">
+                                </div>
+                                <ul class="shuttle-list" id="rosterList">
+                                    <li class="shuttle-empty">اختر المجموعة المصدر أولاً</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="shuttle-column">
+                                <div class="shuttle-head tint-success">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="ttl text-success"><i class="bi bi-arrow-up-right me-1"></i>للتصعيد</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="shuttle-count tint-success" id="promoteBasketCount">0</span>
+                                            <button type="button" id="clearPromoteBasketBtn" class="btn btn-sm btn-icon btn-light-danger" title="إفراغ"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">⤵ اسحب أو انقر لإضافة</small>
+                                </div>
+                                <ul class="shuttle-list" id="promoteBasketList">
+                                    <li class="shuttle-empty">اسحب أو انقر طالباً لإضافته</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-info" id="promoteSubmit">
+                        <i class="bi bi-arrow-up-right-square-fill me-1"></i> تصعيد المحددين
+                    </button>
                 </div>
             </div>
         </div>
@@ -509,6 +1000,480 @@
             });
         }
     </script>
+
+    {{-- SortableJS (lightweight ~25KB) — enables drag & drop between lists --}}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+    {{-- =========================================================
+         BULK ASSIGN  +  PROMOTE — shuttle logic (click + drag&drop)
+         ========================================================= --}}
+    <script>
+    (function() {
+        const CSRF         = '{{ csrf_token() }}';
+        const URL_ELIGIBLE = '{{ route("groups.eligible_students") }}';
+        const URL_ROSTER   = '{{ url("admin/groups/roster") }}';
+        const URL_ASSIGN   = '{{ route("groups.bulk_assign") }}';
+        const URL_PROMOTE  = '{{ route("groups.bulk_promote") }}';
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        // Compact shuttle card markup
+        function itemHTML(s, opts = {}) {
+            const pTag  = s.program_type === 'kids' ? '<span class="tag kids">KIDS</span>' : '<span class="tag adult">ADULT</span>';
+            const lvl   = s.level ? `<span class="tag level">${escapeHtml(s.level)}</span>` : '';
+            const mob   = s.mobile ? escapeHtml(s.mobile) : '';
+            const paid  = (typeof s.total_paid === 'number' && s.total_paid > 0)
+                          ? ` · 💰 ${s.total_paid.toFixed(0)}` : '';
+            // Status tag — only inside the basket
+            let statusTag = '';
+            if (opts.inBasket) {
+                statusTag = s.existing
+                    ? '<span class="tag exists" title="موجود مسبقاً في المجموعة"><i class="bi bi-check-lg"></i> موجود</span>'
+                    : '<span class="tag new">جديد</span>';
+            }
+            const locked = s.existing ? 'locked' : '';
+            const lockedAttr = s.existing ? 'data-locked="1"' : '';
+            return `
+                <li class="shuttle-item ${locked}" data-id="${s.id}" ${lockedAttr}>
+                    <i class="bi bi-grip-vertical grip"></i>
+                    <img src="${s.avatar}" class="avatar">
+                    <div class="meta">
+                        <div class="name">${escapeHtml(s.name)}</div>
+                        <div class="sub">${mob}${paid}</div>
+                    </div>
+                    <div class="tags">${statusTag}${pTag}${lvl}</div>
+                </li>`;
+        }
+        function emptyHTML(msg) { return `<li class="shuttle-empty">${msg}</li>`; }
+
+        // Generic shuttle controller — reused for both modals
+        function makeShuttle(opts) {
+            const state = { pool: [], basket: [] };
+            const $pool   = $(opts.poolSel);
+            const $basket = $(opts.basketSel);
+            const $poolCount   = $(opts.poolCountSel);
+            const $basketCount = $(opts.basketCountSel);
+            // Lock enforcement is dynamic — caller provides a getter (default: always enforced)
+            const isLocked = () => (typeof opts.isLockEnforced === 'function' ? opts.isLockEnforced() : true);
+
+            function filtered(list, exclude, q) {
+                q = (q || '').trim().toLowerCase();
+                return list.filter(s => {
+                    if (exclude.some(x => x.id === s.id)) return false;
+                    if (!q) return true;
+                    return (s.name||'').toLowerCase().includes(q)
+                        || (s.mobile||'').toLowerCase().includes(q)
+                        || (s.email||'').toLowerCase().includes(q);
+                });
+            }
+
+            function renderPool() {
+                const q = $(opts.searchSel).val() || '';
+                const rows = filtered(state.pool, state.basket, q);
+                $poolCount.text(rows.length);
+                $pool.html(rows.length
+                    ? rows.map(s => itemHTML(s)).join('')
+                    : emptyHTML(opts.emptyPoolMsg || 'لا يوجد طلاب مطابقون'));
+            }
+            function renderBasket() {
+                const newCount   = state.basket.filter(s => !s.existing).length;
+                const existCount = state.basket.length - newCount;
+                $basketCount.text(existCount > 0 ? `+${newCount} / ${state.basket.length}` : state.basket.length);
+                $basketCount.attr('title', existCount > 0
+                    ? `${newCount} طالب جديد · ${existCount} موجود مسبقاً`
+                    : `${state.basket.length} طالب محدد`);
+                $basket.html(state.basket.length
+                    ? state.basket.map(s => itemHTML(s, { inBasket: true })).join('')
+                    : emptyHTML(opts.emptyBasketMsg || 'اسحب أو انقر لإضافة طالب'));
+                applyUnlockAttrs();
+            }
+
+            // Toggle data-locked on rendered items based on current enforcement
+            function applyUnlockAttrs() {
+                if (isLocked()) {
+                    $basket.find('.shuttle-item.locked').attr('data-locked', '1');
+                } else {
+                    $basket.find('.shuttle-item.locked').removeAttr('data-locked');
+                }
+            }
+
+            // ----- Click handlers (both lists) -----
+            $pool.on('click', '.shuttle-item', function () {
+                const id = +$(this).data('id');
+                const s  = state.pool.find(x => x.id === id);
+                if (s && !state.basket.some(b => b.id === id)) {
+                    state.basket.push(s);
+                    renderBasket(); renderPool();
+                }
+            });
+            $basket.on('click', '.shuttle-item', function () {
+                const id = +$(this).data('id');
+                const item = state.basket.find(x => x.id === id);
+                if (!item) return;
+                // Locked existing members: only allow removal when lock is OFF
+                if (item.existing && isLocked()) return;
+
+                state.basket = state.basket.filter(x => x.id !== id);
+                if (item.existing) {
+                    // Re-inject into pool so admin sees them available
+                    state.pool.unshift({ ...item, existing: false });
+                    if (typeof opts.onUnassignExisting === 'function') opts.onUnassignExisting(id);
+                }
+                renderBasket(); renderPool();
+            });
+
+            // ----- SortableJS (drag & drop) -----
+            const sharedGroup = 'shuttle-' + Math.random().toString(36).slice(2, 8);
+
+            const poolSort = Sortable.create($pool[0], {
+                group: { name: sharedGroup, pull: true, put: true },
+                sort: false,
+                animation: 160,
+                // filter is dynamic — checked per drag attempt
+                filter(evt, item) { return isLocked() && item.dataset.locked === '1'; },
+                preventOnFilter: true,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                onAdd(evt) {
+                    const id   = +$(evt.item).data('id');
+                    const item = state.basket.find(x => x.id === id);
+                    if (!item) { renderBasket(); renderPool(); return; }
+                    // Dropping a locked item into pool is only allowed when lock is OFF
+                    if (item.existing && isLocked()) { renderBasket(); renderPool(); return; }
+
+                    state.basket = state.basket.filter(x => x.id !== id);
+                    if (item.existing) {
+                        state.pool.unshift({ ...item, existing: false });
+                        if (typeof opts.onUnassignExisting === 'function') opts.onUnassignExisting(id);
+                    }
+                    renderBasket(); renderPool();
+                },
+            });
+
+            const basketSort = Sortable.create($basket[0], {
+                group: { name: sharedGroup, pull: true, put: true },
+                sort: true,
+                animation: 160,
+                filter(evt, item) { return isLocked() && item.dataset.locked === '1'; },
+                preventOnFilter: true,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                onMove(evt) {
+                    if (isLocked() && $(evt.dragged).data('locked')) return false;
+                },
+                onAdd(evt) {
+                    const id = +$(evt.item).data('id');
+                    const s  = state.pool.find(x => x.id === id);
+                    if (s && !state.basket.some(b => b.id === id)) state.basket.push(s);
+                    renderBasket(); renderPool();
+                },
+            });
+
+            // Public surface
+            return {
+                state,
+                setPool(arr)         { state.pool = arr; renderPool(); },
+                resetBasket()        { state.basket = []; renderBasket(); renderPool(); },
+                preloadExisting(arr) {
+                    state.basket = arr.map(s => ({ ...s, existing: true }));
+                    renderBasket(); renderPool();
+                },
+                /** Push all currently-visible pool rows into the basket */
+                selectAllVisible() {
+                    const q = $(opts.searchSel).val() || '';
+                    const rows = filtered(state.pool, state.basket, q);
+                    rows.forEach(s => { if (!state.basket.some(b => b.id === s.id)) state.basket.push(s); });
+                    renderBasket(); renderPool();
+                },
+                /** Force re-evaluation of lock visuals (no full re-render) */
+                syncLockState()      { applyUnlockAttrs(); },
+                getNewIds()          { return state.basket.filter(s => !s.existing).map(s => s.id); },
+                getBasketIds()       { return state.basket.map(s => s.id); },
+                getExistingIds()     { return state.basket.filter(s =>  s.existing).map(s => s.id); },
+                refresh()            { renderPool(); renderBasket(); },
+                searchUpdated()      { renderPool(); },
+            };
+        }
+
+        /* -------------------- BULK ASSIGN -------------------- */
+        let unlockMode      = false;     // declared early so closures below capture it
+        let removedExisting = [];
+
+        const bulk = makeShuttle({
+            poolSel: '#poolList', basketSel: '#basketList',
+            poolCountSel: '#poolCount', basketCountSel: '#basketCount',
+            searchSel: '#poolSearch',
+            emptyPoolMsg: 'لا يوجد طلاب مؤهلون مطابقون',
+            emptyBasketMsg: 'اسحب أو انقر لإضافة طالب',
+            isLockEnforced: () => !unlockMode,    // dynamic lock state
+            onUnassignExisting: (id) => {
+                if (!removedExisting.includes(id)) removedExisting.push(id);
+            },
+        });
+
+        function loadEligible() {
+            $('#poolList').html('<li class="shuttle-empty"><div class="spinner-border spinner-border-sm text-primary"></div> جاري التحميل...</li>');
+            $.get(URL_ELIGIBLE, {
+                search:       $('#poolSearch').val() || '',
+                program_type: $('#bulkProgramTypeFilter').val() || '',
+                exclude_ids:  bulk.getBasketIds().join(','),
+            }, function (res) {
+                if (res.success) {
+                    bulk.setPool(res.students);
+                    // If pool is empty after load, show a helpful diagnostic prompt
+                    if (!res.students || !res.students.length) {
+                        $('#poolList').append('<li class="shuttle-empty mt-0 pt-0"><a href="#" class="btn btn-sm btn-light-info mt-3" onclick="window.showEligibilityDiagnostic(); return false;"><i class="bi bi-question-circle me-1"></i> لماذا لا يظهر طلاب؟</a></li>');
+                    }
+                }
+            }).fail(() => $('#poolList').html('<li class="shuttle-empty text-danger">تعذّر تحميل القائمة</li>'));
+        }
+
+        // Show a stats popup explaining why students might be excluded
+        window.showEligibilityDiagnostic = function() {
+            $.get('{{ route("groups.eligibility_diagnose") }}', function(res) {
+                if (!res.success) return;
+                const s = res.stats;
+                const html = `
+                    <div class="text-start" dir="rtl">
+                        <p class="text-muted mb-3">القائمة تعرض فقط الطلاب الذين يحققون <b>كل</b> الشروط التالية. هذه إحصائية بمن يُستبعد ولماذا:</p>
+                        <ul class="list-group list-group-flush text-end">
+                            <li class="list-group-item d-flex justify-content-between"><span><i class="bi bi-person-x text-danger me-1"></i> طلاب غير مفعّلين (status≠1)</span><span class="badge bg-secondary">${s.inactive}</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span><i class="bi bi-people-fill text-info me-1"></i> طلاب مشعّبون حالياً في مجموعات فعّالة</span><span class="badge bg-info">${s.in_active_group}</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span><i class="bi bi-hourglass-split text-warning me-1"></i> طلاب لديهم دفعات قيد التدقيق</span><span class="badge bg-warning text-dark">${s.has_pending_fees}</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span><i class="bi bi-clipboard-x text-danger me-1"></i> اختبار تحديد مستوى غير مُقيَّم</span><span class="badge bg-danger">${s.ungraded_placement}</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span><i class="bi bi-cash-coin text-danger me-1"></i> بدون دفعة مؤكدة</span><span class="badge bg-danger">${s.no_verified_payment}</span></li>
+                        </ul>
+                        <div class="alert alert-info mt-3 mb-0 small">
+                            <i class="bi bi-lightbulb me-1"></i>
+                            تذكّر: لو أزلت طالباً من السلة بـ 🔓 ولم تضغط <b>"تشعيب المحددين"</b>، فالإزالة لم تُحفظ بعد.
+                        </div>
+                    </div>`;
+                Swal.fire({ title: 'لماذا الطلاب مستبعدون؟', html, width: 600, confirmButtonText: 'فهمت' });
+            });
+        };
+
+        // When target group changes, preload its current roster as locked basket items
+        function loadGroupRosterForBasket() {
+            const gid = $('#bulkTargetGroup').val();
+            if (!gid) { bulk.resetBasket(); loadEligible(); return; }
+            // Mark loading state on basket
+            $('#basketList').html('<li class="shuttle-empty"><div class="spinner-border spinner-border-sm text-warning"></div> تحميل أعضاء المجموعة...</li>');
+            $.get(URL_ROSTER + '/' + gid, function (res) {
+                if (res.success) {
+                    bulk.preloadExisting(res.students || []);
+                } else {
+                    bulk.resetBasket();
+                }
+                loadEligible();
+            }).fail(() => {
+                bulk.resetBasket();
+                loadEligible();
+            });
+        }
+
+        // Init Select2 inside the modal (with dropdown anchored to modal so it doesn't escape)
+        function initShuttleSelects($modal) {
+            $modal.find('select[data-control="select2"]').each(function () {
+                const $el = $(this);
+                if ($el.hasClass('select2-hidden-accessible')) $el.select2('destroy');
+                $el.select2({
+                    dropdownParent: $modal,
+                    placeholder: $el.data('placeholder') || '— اختر —',
+                    allowClear: true,
+                    width: '100%',
+                    language: { noResults: () => 'لا توجد نتائج', searching: () => 'جاري البحث...' },
+                    minimumResultsForSearch: $el.data('minimum-results-for-search') ?? 0,
+                });
+            });
+        }
+
+        $('#bulkAssignModal').on('shown.bs.modal', function () {
+            initShuttleSelects($(this));
+            unlockMode = false;
+            removedExisting = [];
+            reflectUnlockUI();
+            bulk.resetBasket();
+            const gid = $('#bulkTargetGroup').val();
+            if (gid) loadGroupRosterForBasket(); else loadEligible();
+        });
+
+        // Warn before closing if there are unsaved changes
+        let allowBulkClose = false;
+        $('#bulkAssignModal').on('hide.bs.modal', function (e) {
+            if (allowBulkClose) return; // programmatic close (e.g. after save)
+            const hasChanges = bulk.getNewIds().length > 0 || removedExisting.length > 0;
+            if (!hasChanges) return;
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'لديك تغييرات لم تُحفظ',
+                html: 'هل تريد إغلاق المودال وفقدان التغييرات؟<br><small class="text-muted">انقر "تشعيب المحددين" أولاً لتثبيت الإضافات والإزالات.</small>',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، أغلق وافقد التغييرات',
+                cancelButtonText: 'لا، عُد للمودال',
+                confirmButtonColor: '#dc3545',
+            }).then(res => {
+                if (res.isConfirmed) {
+                    allowBulkClose = true;
+                    $('#bulkAssignModal').modal('hide');
+                }
+            });
+        });
+        // After successful submit, allow programmatic close
+        function bulkCloseProgrammatic() {
+            allowBulkClose = true;
+            $('#bulkAssignModal').modal('hide');
+            setTimeout(() => { allowBulkClose = false; }, 500);
+        }
+
+        // Select2 fires change properly so this still works
+        $('#bulkTargetGroup').on('change', loadGroupRosterForBasket);
+        $('#bulkRefreshBtn').on('click', loadEligible);
+        $('#bulkProgramTypeFilter').on('change', loadEligible);
+        $('#poolSearch').on('input', () => bulk.searchUpdated());
+        // "Clear" clears only NEW picks (keep locked existing members)
+        $('#clearBasketBtn').on('click', () => {
+            const keepExisting = bulk.state.basket.filter(s => s.existing);
+            bulk.state.basket = keepExisting;
+            bulk.refresh();
+        });
+
+        /* -------- Unlock toggle + pending-changes indicator -------- */
+        function reflectUnlockUI() {
+            $('#unlockToggleBtn').toggleClass('active', unlockMode);
+            $('#basketList').toggleClass('unlock-mode', unlockMode);
+            $('#basketHint').text(unlockMode
+                ? '🔓 يمكنك نقل أو إزالة الأعضاء الحاليين الآن — احفظ لتثبيت التغييرات'
+                : '⤵ اسحب أو انقر لإضافة');
+            bulk.syncLockState();
+            updateSaveLabel();
+        }
+
+        // Dynamic save button label: shows +N (additions) and -M (removals)
+        function updateSaveLabel() {
+            const adds    = bulk.getNewIds().length;
+            const removes = removedExisting.length;
+            const $btn = $('#bulkAssignSubmit');
+            let label = '<i class="bi bi-check2-circle me-1"></i> ';
+            if (!adds && !removes) {
+                label += 'تشعيب المحددين';
+                $btn.removeClass('btn-pulse');
+            } else {
+                const parts = [];
+                if (adds)    parts.push(`+${adds}`);
+                if (removes) parts.push(`-${removes}`);
+                label += `تشعيب المحددين <span class="badge bg-light text-dark ms-1">${parts.join(' · ')}</span>`;
+                $btn.addClass('btn-pulse');
+            }
+            $btn.html(label);
+        }
+        // Hook updateSaveLabel into every basket mutation
+        new MutationObserver(updateSaveLabel).observe(document.getElementById('basketList'), { childList: true });
+        $('#unlockToggleBtn').on('click', function () {
+            unlockMode = !unlockMode;
+            reflectUnlockUI();
+        });
+
+        /* -------- Select All -------- */
+        $('#selectAllPoolBtn').on('click', () => bulk.selectAllVisible());
+
+        /* -------- Reset removals when target group changes -------- */
+        $('#bulkTargetGroup').on('change', function () {
+            removedExisting = [];
+            unlockMode = false;
+            reflectUnlockUI();
+        });
+
+        $('#bulkAssignSubmit').on('click', function () {
+            const groupId = $('#bulkTargetGroup').val();
+            const newIds  = bulk.getNewIds();
+            if (!groupId) return Swal.fire({icon:'warning', title:'اختر المجموعة المستهدفة أولاً'});
+            if (!newIds.length && !removedExisting.length) {
+                return Swal.fire({icon:'warning', title:'لا توجد تغييرات', text:'لم تضف طلاباً جدد ولم تُزل أحداً.'});
+            }
+
+            const btn = $(this);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> جاري الحفظ...');
+            $.post(URL_ASSIGN, {
+                _token: CSRF,
+                group_id: groupId,
+                student_ids: newIds,
+                remove_ids: removedExisting,
+            }, function (res) {
+                if (res.status === 'success') {
+                    Swal.fire({icon:'success', title:'تم!', text: res.message}).then(() => {
+                        bulkCloseProgrammatic();
+                        if (typeof table !== 'undefined' && table.ajax) table.ajax.reload();
+                    });
+                } else {
+                    Swal.fire({icon:'error', title:'خطأ', text: res.message || 'فشل التشعيب'});
+                }
+            }).fail(xhr => Swal.fire({icon:'error', title:'خطأ', text: xhr.responseJSON?.message || 'حدث خطأ في الخادم'}))
+              .always(() => { btn.prop('disabled', false); updateSaveLabel(); });
+        });
+
+        /* -------------------- PROMOTE -------------------- */
+        const prom = makeShuttle({
+            poolSel: '#rosterList', basketSel: '#promoteBasketList',
+            poolCountSel: '#rosterCount', basketCountSel: '#promoteBasketCount',
+            searchSel: '#rosterSearch',
+            emptyPoolMsg: 'لا يوجد طلاب مطابقون',
+            emptyBasketMsg: 'اسحب أو انقر طالباً لإضافته',
+        });
+        $('#selectAllRosterBtn').on('click', () => prom.selectAllVisible());
+
+        function loadRoster() {
+            const gid = $('#promoteSourceGroup').val();
+            if (!gid) { prom.setPool([]); return; }
+            $('#rosterList').html('<li class="shuttle-empty"><div class="spinner-border spinner-border-sm text-info"></div> جاري التحميل...</li>');
+            $.get(URL_ROSTER + '/' + gid, function (res) {
+                if (res.success) prom.setPool(res.students);
+            }).fail(() => $('#rosterList').html('<li class="shuttle-empty text-danger">تعذّر تحميل الطلاب</li>'));
+        }
+
+        $('#promoteModal').on('shown.bs.modal', function () {
+            initShuttleSelects($(this));
+            prom.resetBasket(); prom.setPool([]);
+        });
+        $('#promoteSourceGroup').on('change', function () { prom.resetBasket(); loadRoster(); });
+        $('#rosterSearch').on('input', () => prom.searchUpdated());
+        $('#clearPromoteBasketBtn').on('click', () => prom.resetBasket());
+
+        $('#promoteSubmit').on('click', function () {
+            const src = $('#promoteSourceGroup').val();
+            const tgt = $('#promoteTargetGroup').val();
+            const ids = prom.getBasketIds();
+            if (!src || !tgt) return Swal.fire({icon:'warning', title:'اختر المجموعة المصدر والمجموعة الهدف'});
+            if (src === tgt)   return Swal.fire({icon:'warning', title:'المجموعتان متطابقتان'});
+            if (!ids.length)   return Swal.fire({icon:'warning', title:'لم تحدد أي طالب للتصعيد'});
+
+            const btn = $(this);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> جاري التصعيد...');
+            $.post(URL_PROMOTE, {
+                _token: CSRF,
+                source_group_id: src,
+                target_group_id: tgt,
+                carry_fees: $('#carryFeesToggle').is(':checked') ? 1 : 0,
+                student_ids: ids,
+            }, function (res) {
+                if (res.status === 'success') {
+                    Swal.fire({icon:'success', title:'تم!', text: res.message}).then(() => {
+                        $('#promoteModal').modal('hide');
+                        if (typeof table !== 'undefined' && table.ajax) table.ajax.reload();
+                    });
+                } else {
+                    Swal.fire({icon:'error', title:'خطأ', text: res.message || 'فشل التصعيد'});
+                }
+            }).fail(xhr => Swal.fire({icon:'error', title:'خطأ', text: xhr.responseJSON?.message || 'حدث خطأ في الخادم'}))
+              .always(() => btn.prop('disabled', false).html('<i class="bi bi-arrow-up-right-square-fill me-1"></i> تصعيد المحددين'));
+        });
+    })();
+    </script>
+
     @include('admin.layout.masterLayouts.datatableMaster', ['active_menu' => 'groups'])
 @stop
 

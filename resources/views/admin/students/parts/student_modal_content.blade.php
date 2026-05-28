@@ -1,21 +1,28 @@
+@php
+    $stAgeCalc = null;
+    if (!empty($student->dob)) {
+        try { $stAgeCalc = \Carbon\Carbon::parse($student->dob)->age; } catch (\Exception $e) {}
+    }
+    $isChildCalc = ($student->program_type === 'kids') || (!is_null($stAgeCalc) && $stAgeCalc <= 15);
+@endphp
 <!-- Student Profile Modal Content -->
 <div class="d-flex flex-column flex-xl-row">
     <!-- Sidebar -->
-    <div class="flex-column flex-lg-row-auto w-100 w-xl-300px mb-10">
+    <div class="flex-column flex-lg-row-auto w-100 w-xl-320px mb-10">
         <div class="card card-flush shadow-none bg-transparent">
             <div class="card-body pt-5 text-center">
                 <!-- Avatar -->
                 <div class="symbol symbol-120px symbol-circle mb-7">
                     @php
-                        $avatar = ($student->image && file_exists(public_path($student->image))) 
-                                  ? asset($student->image) 
-                                  : (($student->img && file_exists(public_path($student->img))) 
-                                     ? asset($student->img) 
+                        $avatar = ($student->image && file_exists(public_path($student->image)))
+                                  ? asset($student->image)
+                                  : (($student->img && file_exists(public_path($student->img)))
+                                     ? asset($student->img)
                                      : asset('assets/media/avatars/blank.png'));
                     @endphp
                     <img src="{{ $avatar }}" alt="image" style="object-fit: cover; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                 </div>
-                
+
                 <!-- Name & Email -->
                 <a href="#" class="fs-3 text-gray-800 text-hover-primary fw-bold mb-1">{{ $student->name }}</a>
                 <div class="fs-7 fw-semibold text-muted mb-6">{{ $student->email ?: 'بدون بريد إلكتروني' }}</div>
@@ -31,6 +38,32 @@
                         <div class="fw-semibold text-muted fs-8">الجنس</div>
                     </div>
                 </div>
+
+                {{-- Guardian information (sidebar — under avatar, only for children) --}}
+                @if($isChildCalc && $student->parent)
+                    <div class="p-4 bg-light-warning rounded text-start mt-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="ki-duotone ki-people fs-2 text-warning me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                            <h6 class="fw-bold mb-0 text-warning">بيانات ولي الأمر</h6>
+                        </div>
+                        <div class="mb-2">
+                            <div class="fs-8 text-muted fw-semibold">الاسم</div>
+                            <div class="fs-7 fw-bold text-gray-800">{{ $student->parent->name ?: '---' }}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="fs-8 text-muted fw-semibold">الجوال</div>
+                            <div class="fs-7 fw-bold text-gray-800">{{ $student->parent->phone ?: '---' }}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="fs-8 text-muted fw-semibold">البريد</div>
+                            <div class="fs-7 fw-bold text-gray-800 text-truncate">{{ $student->parent->email ?: '---' }}</div>
+                        </div>
+                        <div>
+                            <div class="fs-8 text-muted fw-semibold">صلة القرابة</div>
+                            <span class="badge badge-light-warning fw-bold">{{ $student->parent->relationship ?: '---' }}</span>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -64,9 +97,25 @@
                     <div class="col">
                         <div class="fv-row mb-7">
                             <label class="fs-6 fw-semibold mb-2 text-muted">تاريخ الانضمام</label>
-                            <div class="fs-6 fw-bold text-gray-800">{{ $student->created_at->format('Y-m-d') }}</div>
+                            <div class="fs-6 fw-bold text-gray-800">
+                                {{ $student->join_date ?: ($student->created_at ? $student->created_at->format('Y-m-d') : '---') }}
+                            </div>
                         </div>
                     </div>
+                    @php
+                        $stAge = null;
+                        if (!empty($student->dob)) {
+                            try { $stAge = \Carbon\Carbon::parse($student->dob)->age; } catch (\Exception $e) {}
+                        }
+                    @endphp
+                    @if(!is_null($stAge))
+                    <div class="col">
+                        <div class="fv-row mb-7">
+                            <label class="fs-6 fw-semibold mb-2 text-muted">العمر</label>
+                            <div class="fs-6 fw-bold text-gray-800">{{ $stAge }} سنة</div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
                 <h4 class="fw-bold mb-5 text-info">

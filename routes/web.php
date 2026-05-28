@@ -43,8 +43,13 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('exam', ['as' => 'contact.exam', 'uses' => 'ContactController@postExam']);
     Route::get('book/{type?}', ['as' => 'contact.book', 'uses' => 'RegistrationController@showRegistrationForm']);
     Route::post('book', ['as' => 'contact.book.post', 'uses' => 'RegistrationController@postRegister']);
+    // lightweight uniqueness checks for registration form
+    Route::get('api/check-email', ['as' => 'api.check.email', 'uses' => 'RegistrationController@checkEmail']);
+    Route::get('api/check-mobile', ['as' => 'api.check.mobile', 'uses' => 'RegistrationController@checkMobile']);
     Route::get('api/get-program-fee/{id}', 'RegistrationController@getProgramFee');
     Route::get('api/get-fee', 'Admin\FinancialController@getFee');
+    Route::get('api/program-min-payment/{programId}', 'Admin\FinancialController@getProgramMinPayment');
+    Route::get('api/relationships', 'Admin\RelationshipsController@publicList');
     Route::get('jobs', ['as' => 'contact.job', 'uses' => 'ContactController@getJob']);
     Route::post('jobs', ['as' => 'contact.job', 'uses' => 'ContactController@postJob']);
     Route::get('page/{title}', ['as' => 'page.view', 'uses' => 'PageController@getPage']);
@@ -371,6 +376,13 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('groups', ['as' => 'groups.view', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getIndex']);
     Route::get('groups/teacher/students/{id}', ['as' => 'groups.teacher.students', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getTeacherStudents']);
     Route::get('groups/list', ['as' => 'groups.list', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getList']);
+
+    // Bulk assignment + promotion
+    Route::get('groups/eligible-students', ['as' => 'groups.eligible_students', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getEligibleStudents']);
+    Route::get('groups/eligibility/diagnose', ['as' => 'groups.eligibility_diagnose', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@diagnoseStudentEligibility']);
+    Route::get('groups/roster/{groupId}', ['as' => 'groups.roster', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getGroupRoster']);
+    Route::post('groups/bulk-assign', ['as' => 'groups.bulk_assign', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkAssign']);
+    Route::post('groups/bulk-promote', ['as' => 'groups.bulk_promote', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkPromote']);
     Route::get('groups/add', ['as' => 'groups.add', 'middleware' => ['permission:admin.groups.add'], 'uses' => 'GroupsController@getAdd']);
     Route::post('groups/add', ['as' => 'groups.add', 'middleware' => ['permission:admin.groups.add'], 'uses' => 'GroupsController@postAdd']);
     Route::get('groups/edit/{id}', ['as' => 'groups.edit', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@getEdit']);
@@ -478,6 +490,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('teachers/evaluations', ['as' => 'teachers.evaluations', 'middleware' => ['permission:admin.teachers.status'], 'uses' => 'TeacherController@postEvaluations']);
     Route::get('teachers/password/{id}', ['as' => 'teachers.password', 'middleware' => ['permission:admin.teachers.view'], 'uses' => 'TeacherController@getPassword']);
     Route::post('teachers/password/{id}', ['as' => 'teachers.password', 'middleware' => ['permission:admin.teachers.view'], 'uses' => 'TeacherController@postPassword']);
+    Route::get('teachers/check-username', ['as' => 'teachers.check.username', 'middleware' => ['permission:admin.teachers.view'], 'uses' => 'TeacherController@checkUsername']);
 
     //Files Route
     Route::get('files', ['as' => 'files.view', 'middleware' => ['permission:admin.files.view|admin.files.add|admin.files.edit|admin.files.delete|admin.files.status'], 'uses' => 'FilesController@getIndex']);
@@ -523,6 +536,12 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('parents/children', ['as' => 'parents.children', 'uses' => 'ParentsController@getChildren']);
     Route::post('parents/delete', ['as' => 'parents.delete', 'uses' => 'ParentsController@postDelete']);
 
+    // Relationships (صلة القرابة) CRUD
+    Route::get('relationships',                ['as' => 'admin.relationships.index',   'uses' => 'RelationshipsController@index']);
+    Route::post('relationships/store',         ['as' => 'admin.relationships.store',   'uses' => 'RelationshipsController@store']);
+    Route::post('relationships/update/{id}',   ['as' => 'admin.relationships.update',  'uses' => 'RelationshipsController@update']);
+    Route::post('relationships/delete/{id}',   ['as' => 'admin.relationships.destroy', 'uses' => 'RelationshipsController@destroy']);
+
     // Payment Methods Route
     Route::get('payment_methods', ['as' => 'payment_methods.view', 'uses' => 'PaymentMethodsController@getIndex']);
     Route::get('payment_methods/list', ['as' => 'payment_methods.list', 'uses' => 'PaymentMethodsController@getList']);
@@ -559,9 +578,11 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // Financial Routes
     Route::get('financial/pending', ['as' => 'admin.financial.pending', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@pendingOrders']);
     Route::get('financial/pending/list', ['as' => 'admin.financial.pending.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingList']);
+    Route::get('financial/pending/student/{id}', ['as' => 'admin.financial.pending.student', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingStudentDetails']);
     // Financial Ledger (Invoices)
     Route::get('financial/invoices', ['as' => 'admin.financial.invoices', 'uses' => 'FinancialController@invoicesLedger']);
     Route::get('financial/invoices/list', ['as' => 'admin.financial.invoices.list', 'uses' => 'FinancialController@getInvoicesLedgerList']);
+    Route::get('financial/invoices/student/{studentId}', ['as' => 'admin.financial.invoices.student', 'uses' => 'FinancialController@getStudentInvoices']);
     Route::get('financial/groups/{programId}', ['as' => 'admin.financial.groups_by_program', 'uses' => 'FinancialController@getActualGroupsByProgram']);
 
     Route::get('financial/ledger/{studentId}/{groupId}', ['as' => 'admin.financial.ledger', 'uses' => 'FinancialController@ledger']);

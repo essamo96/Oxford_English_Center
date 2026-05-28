@@ -56,7 +56,507 @@ class GroupsController extends AdminController
         parent::$data['teachers'] = $teachers_opj->getAllTeachers();
         $times_opj = new Times();
         parent::$data['times'] = $times_opj->getAllTimes();
+        // For the bulk-assign / promote modals
+        parent::$data['active_groups_for_picker'] = Groups::with('program')
+            ->where('status', 1)->whereNull('deleted_at')
+            ->orderBy('name')
+            ->get(['id', 'name', 'program_id']);
         return view('admin.groups.view', parent::$data);
+    }
+
+    /* ============================================================
+       BULK GROUP ASSIGNMENT  +  STUDENT PROMOTION
+       ============================================================ */
+
+    /**
+     * Return active students eligible for group assignment.
+     *
+     * Eligibility:
+     *   - active (status=1, not soft-deleted)
+     *   - NOT currently a member of any active group
+     *     (members of CLOSED / DELETED groups remain eligible — they finished a class)
+     *   - have AT LEAST ONE verified payment
+     *   - have NO pending payments (everything they paid is admin-confirmed)
+     *
+     * Query params:
+     *   search       — name / mobile / email substring
+     *   program_type — 'adult' | 'kids'
+     *   exclude_ids  — comma-separated student IDs to skip (already on the right pane)
+     *   limit        — default 200
+     */
+    public function getEligibleStudents(Request $request)
+    {
+        $search       = trim((string) $request->get('search', ''));
+        $programType  = $request->get('program_type');
+        $excludeIds   = array_filter(array_map('intval', explode(',', (string) $request->get('exclude_ids', ''))));
+        $limit        = (int) $request->get('limit', 200);
+        $limit        = max(1, min(500, $limit));
+
+        $query = Students::query()
+            ->where('students.status', 1)
+            ->whereNull('students.deleted_at')
+
+            // Not in any active, non-deleted group
+            ->whereNotExists(function ($q) {
+                $q->select(\DB::raw(1))
+                  ->from('group_students')
+                  ->join('groups', 'groups.id', '=', 'group_students.group_id')
+                  ->whereColumn('group_students.student_id', 'students.id')
+                  ->whereNull('group_students.deleted_at')
+                  ->whereNull('groups.deleted_at')
+                  ->where('groups.status', 1);
+            })
+
+            // Has at least one verified payment
+            ->whereExists(function ($q) {
+                $q->select(\DB::raw(1))
+                  ->from('group_students_fees')
+                  ->whereColumn('group_students_fees.student_id', 'students.id')
+                  ->where('group_students_fees.audit_status', 'verified')
+                  ->whereNull('group_students_fees.deleted_at');
+            })
+
+            // No pending payments at all
+            ->whereNotExists(function ($q) {
+                $q->select(\DB::raw(1))
+                  ->from('group_students_fees')
+                  ->whereColumn('group_students_fees.student_id', 'students.id')
+                  ->where('group_students_fees.audit_status', 'pending')
+                  ->whereNull('group_students_fees.deleted_at');
+            })
+
+            // NO ungraded placement test — student must be assessed first.
+            // A test counts as "graded" when EITHER the score is set OR the status is 'completed'
+            // (admins sometimes mark complete without filling a numeric score).
+            ->whereNotExists(function ($q) {
+                $q->select(\DB::raw(1))
+                  ->from('placement_tests')
+                  ->whereColumn('placement_tests.student_id', 'students.id')
+                  ->whereNull('placement_tests.deleted_at')
+                  ->whereNull('placement_tests.score')
+                  ->where(function ($q2) {
+                      $q2->whereNull('placement_tests.status')
+                         ->orWhere('placement_tests.status', '!=', 'completed');
+                  });
+            })
+            ->select('students.id', 'students.name', 'students.email', 'students.mobile',
+                     'students.image', 'students.program_type', 'students.current_level',
+                     'students.dob', 'students.gender')
+            ->orderBy('students.name');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('students.name', 'like', "%$search%")
+                  ->orWhere('students.mobile', 'like', "%$search%")
+                  ->orWhere('students.email', 'like', "%$search%");
+            });
+        }
+        if ($programType) {
+            $query->where('students.program_type', $programType);
+        }
+        if (!empty($excludeIds)) {
+            $query->whereNotIn('students.id', $excludeIds);
+        }
+
+        $rows = $query->limit($limit)->get();
+
+        $financialService = app(\App\Services\FinancialService::class);
+
+        $payload = $rows->map(function ($s) use ($financialService) {
+            $ledger = $financialService->getStudentLedger($s->id, null);
+            $totalPaid = $ledger ? (float) $ledger['total_paid'] : 0.0;
+            $totalDue  = $ledger ? (float) $ledger['total_fee']  : 0.0;
+            $remaining = $ledger ? (float) $ledger['remaining_balance'] : 0.0;
+
+            return [
+                'id'            => $s->id,
+                'name'          => $s->name,
+                'email'         => $s->email,
+                'mobile'        => $s->mobile,
+                'level'         => $s->current_level,
+                'program_type'  => $s->program_type,
+                'avatar'        => ($s->image && file_exists(public_path($s->image)))
+                                   ? asset($s->image) : asset('uploads/default.jpg'),
+                'total_due'     => round($totalDue, 2),
+                'total_paid'    => round($totalPaid, 2),
+                'remaining'     => round($remaining, 2),
+                'fully_paid'    => $remaining <= 0,
+            ];
+        })->values();
+
+        return response()->json(['success' => true, 'students' => $payload]);
+    }
+
+    /**
+     * Bulk-assign selected students to a target group.
+     * Creates a GroupStudents row (with the program's course fee as student_fee_total)
+     * for each student not already a member.
+     */
+    public function postBulkAssign(Request $request)
+    {
+        $request->validate([
+            'group_id'      => 'required|exists:groups,id',
+            'student_ids'   => 'nullable|array',
+            'student_ids.*' => 'integer|exists:students,id',
+            'remove_ids'    => 'nullable|array',
+            'remove_ids.*'  => 'integer|exists:students,id',
+        ]);
+
+        $addIds    = array_values(array_filter($request->student_ids ?? []));
+        $removeIds = array_values(array_filter($request->remove_ids ?? []));
+
+        if (empty($addIds) && empty($removeIds)) {
+            return response()->json(['status' => 'error', 'message' => 'لم تحدد أي طالب للإضافة أو الإزالة.'], 422);
+        }
+
+        $group = Groups::find($request->group_id);
+        if (!$group || $group->status != 1) {
+            return response()->json(['status' => 'error', 'message' => 'لا يمكن التشعيب لمجموعة غير فعّالة.'], 422);
+        }
+
+        // Course fee for THIS program (separate from any placement-test fees)
+        $programCourseFee = (float) \App\Models\FeeSettings::where('program_id', $group->program_id)
+            ->whereIn('type', ['course', 'course_fee'])
+            ->sum('amount');
+
+        $added = 0; $skipped = 0; $removed = 0;
+
+        \DB::beginTransaction();
+        try {
+            /* ---------------- REMOVE: unlocked members being unassigned ---------------- */
+            foreach ($removeIds as $sid) {
+                GroupStudents::where('student_id', $sid)
+                    ->where('group_id', $request->group_id)
+                    ->whereNull('deleted_at')
+                    ->delete(); // soft delete
+
+                // Soft-delete only the course fees tied to this group, NOT placement-test fees
+                \App\Models\GroupStudentsFees::where('student_id', $sid)
+                    ->where('group_id', $request->group_id)
+                    ->where(function ($q) {
+                        $q->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
+                          ->orWhereNull('student_paid_type');
+                    })
+                    ->whereNull('deleted_at')
+                    ->delete();
+
+                $removed++;
+            }
+
+            /* ---------------- ADD: new students ---------------- */
+            foreach ($addIds as $sid) {
+                // Skip if already in this group
+                $exists = GroupStudents::where('student_id', $sid)
+                    ->where('group_id', $request->group_id)
+                    ->whereNull('deleted_at')->exists();
+                if ($exists) { $skipped++; continue; }
+
+                GroupStudents::create([
+                    'student_id'         => $sid,
+                    'group_id'           => $request->group_id,
+                    'student_fee_total'  => $programCourseFee > 0 ? $programCourseFee : 0,
+                    'student_book_total' => 0,
+                    'status'             => 1,
+                ]);
+
+                /* Course-fee carry-over logic:
+                 *
+                 * If the student already has a verified "Course Enrollment" fee row
+                 * (group_id=null from registration), MOVE it to this group so their
+                 * registration payment counts toward this course.
+                 *
+                 * Placement-test fee rows are NEVER moved — they belong to the
+                 * placement-test ledger and stay tied to group_id=null. A fresh
+                 * course-fee row is created so the student's course balance is tracked.
+                 */
+                $courseRegRow = \App\Models\GroupStudentsFees::where('student_id', $sid)
+                    ->whereNull('group_id')
+                    ->whereNull('deleted_at')
+                    ->where(function ($q) {
+                        $q->where('student_paid_type', 'Course Enrollment')
+                          ->orWhere('student_paid_type', 'LIKE', '%Course%');
+                    })
+                    ->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
+                    ->first();
+
+                if ($courseRegRow) {
+                    // Move the registration row to this group (preserves verified payment)
+                    $courseRegRow->group_id = $request->group_id;
+                    if ($programCourseFee > 0 && $programCourseFee != $courseRegRow->total_due_amount) {
+                        $courseRegRow->total_due_amount = $programCourseFee;
+                        $paid = (float) ($courseRegRow->transaction_amount ?: $courseRegRow->student_fee_paid);
+                        $courseRegRow->remaining_amount = max(0, $programCourseFee - $paid);
+                    }
+                    $courseRegRow->save();
+                } else {
+                    // Placement-test path or no prior course row: create a fresh course-fee row
+                    if ($programCourseFee > 0) {
+                        \App\Models\GroupStudentsFees::create([
+                            'student_id'        => $sid,
+                            'group_id'          => $request->group_id,
+                            'total_due_amount'  => $programCourseFee,
+                            'student_fee_paid'  => 0,
+                            'remaining_amount'  => $programCourseFee,
+                            'student_paid_type' => 'Course Enrollment',
+                            'status'            => 'pending',
+                            'audit_status'      => 'pending',
+                            'notes'             => 'رسوم البرنامج عند التشعيب — مستقلة عن رسوم اختبار تحديد المستوى',
+                        ]);
+                    }
+                }
+
+                $added++;
+            }
+
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'فشل التشعيب: ' . $e->getMessage()], 500);
+        }
+
+        $parts = [];
+        if ($added)   $parts[] = "تشعيب {$added}";
+        if ($removed) $parts[] = "إزالة {$removed}";
+        if ($skipped) $parts[] = "تجاهل {$skipped} (موجودون أصلاً)";
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'تم: ' . (implode(' · ', $parts) ?: 'لا تغييرات') . '.',
+            'added'   => $added, 'removed' => $removed, 'skipped' => $skipped,
+        ]);
+    }
+
+    /**
+     * Bulk-promote students from one group to another (program/level change).
+     * - Closes their membership in the source group (soft delete row).
+     * - Opens membership in the target group.
+     * - If any fees are outstanding on the source, they get carried into a NEW
+     *   fee row attached to the target group (audit_status='pending') so the
+     *   admin can verify/refund as needed.
+     */
+    public function postBulkPromote(Request $request)
+    {
+        $request->validate([
+            'source_group_id' => 'required|exists:groups,id',
+            'target_group_id' => 'required|different:source_group_id|exists:groups,id',
+            'student_ids'     => 'required|array|min:1',
+            'student_ids.*'   => 'integer|exists:students,id',
+            'carry_fees'      => 'nullable|boolean',
+        ]);
+
+        $targetGroup = Groups::find($request->target_group_id);
+        if (!$targetGroup || $targetGroup->status != 1) {
+            return response()->json(['status' => 'error', 'message' => 'المجموعة المُستهدفة غير فعّالة.'], 422);
+        }
+
+        $carryFees = (bool) $request->boolean('carry_fees', true);
+        $targetCourseFee = (float) \App\Models\FeeSettings::where('program_id', $targetGroup->program_id)
+            ->whereIn('type', ['course', 'course_fee'])
+            ->sum('amount');
+
+        $financialService = app(\App\Services\FinancialService::class);
+        $moved = 0; $carriedFees = 0.0;
+
+        \DB::beginTransaction();
+        try {
+            foreach ($request->student_ids as $sid) {
+                // 1. End old membership (soft-delete)
+                GroupStudents::where('student_id', $sid)
+                    ->where('group_id', $request->source_group_id)
+                    ->whereNull('deleted_at')
+                    ->delete();
+
+                // 2. Skip if already in target
+                $existsInTarget = GroupStudents::where('student_id', $sid)
+                    ->where('group_id', $request->target_group_id)
+                    ->whereNull('deleted_at')->exists();
+
+                // 3. Compute outstanding on source
+                $sourceLedger = $financialService->getStudentLedger($sid, $request->source_group_id);
+                $sourceRemaining = $sourceLedger ? (float) $sourceLedger['remaining_balance'] : 0.0;
+
+                // 4. New target fee_total = target course fee + any unpaid balance carried over
+                $newTotal = $targetCourseFee;
+                if ($carryFees && $sourceRemaining > 0) {
+                    $newTotal += $sourceRemaining;
+                }
+
+                if (!$existsInTarget) {
+                    GroupStudents::create([
+                        'student_id'         => $sid,
+                        'group_id'           => $request->target_group_id,
+                        'student_fee_total'  => $newTotal,
+                        'student_book_total' => 0,
+                        'status'             => 1,
+                    ]);
+                }
+
+                // 5. Update student's current_level to target group's level (group.name)
+                \App\Models\Students::where('id', $sid)->update([
+                    'current_level' => $targetGroup->name,
+                ]);
+
+                // 6. Record carried-over balance as a pending fee row on the target
+                //    (so it shows up in the financial ledger needing payment)
+                if ($carryFees && $sourceRemaining > 0) {
+                    \App\Models\GroupStudentsFees::create([
+                        'student_id'        => $sid,
+                        'group_id'          => $request->target_group_id,
+                        'total_due_amount'  => $newTotal,
+                        'student_fee_paid'  => 0,
+                        'remaining_amount'  => $newTotal,
+                        'student_paid_type' => 'Promotion Carry-over',
+                        'status'            => 'pending',
+                        'audit_status'      => 'pending',
+                        'notes'             => 'ترصيد رسوم متبقية من مجموعة سابقة عند التصعيد',
+                    ]);
+                    $carriedFees += $sourceRemaining;
+                }
+
+                $moved++;
+            }
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'فشل التصعيد: ' . $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "تم تصعيد {$moved} طالباً إلى " . ($targetGroup->name ?? 'المجموعة الجديدة')
+                       . ($carriedFees > 0 ? ' (تم ترصيد ' . number_format($carriedFees, 2) . ' ILS متبقي)' : '') . '.',
+            'moved'   => $moved,
+        ]);
+    }
+
+    /**
+     * Diagnose why a particular student isn't eligible for group assignment.
+     * Returns a list of all rule violations + how to fix each.
+     */
+    public function diagnoseStudentEligibility(Request $request)
+    {
+        $studentId = $request->get('student_id');
+        if (!$studentId) {
+            // Without a specific student, return aggregate stats on what's blocking
+            $stats = [
+                'inactive'           => Students::where('status', '!=', 1)->whereNull('deleted_at')->count(),
+                'in_active_group'    => \DB::table('students')
+                    ->whereExists(function ($q) {
+                        $q->select(\DB::raw(1))->from('group_students')
+                          ->join('groups', 'groups.id', '=', 'group_students.group_id')
+                          ->whereColumn('group_students.student_id', 'students.id')
+                          ->whereNull('group_students.deleted_at')
+                          ->whereNull('groups.deleted_at')
+                          ->where('groups.status', 1);
+                    })->whereNull('students.deleted_at')->count(),
+                'has_pending_fees'   => Students::whereExists(function ($q) {
+                        $q->from('group_students_fees')
+                          ->whereColumn('group_students_fees.student_id', 'students.id')
+                          ->where('group_students_fees.audit_status', 'pending')
+                          ->whereNull('group_students_fees.deleted_at');
+                    })->whereNull('deleted_at')->count(),
+                'ungraded_placement' => Students::whereExists(function ($q) {
+                        $q->from('placement_tests')
+                          ->whereColumn('placement_tests.student_id', 'students.id')
+                          ->whereNull('placement_tests.deleted_at')
+                          ->whereNull('placement_tests.score')
+                          ->where(function ($q2) {
+                              $q2->whereNull('placement_tests.status')
+                                 ->orWhere('placement_tests.status', '!=', 'completed');
+                          });
+                    })->whereNull('deleted_at')->count(),
+                'no_verified_payment'=> Students::whereDoesntHave('gropes')
+                    ->whereNotExists(function ($q) {
+                        $q->from('group_students_fees')
+                          ->whereColumn('group_students_fees.student_id', 'students.id')
+                          ->where('group_students_fees.audit_status', 'verified')
+                          ->whereNull('group_students_fees.deleted_at');
+                    })->whereNull('deleted_at')->where('status', 1)->count(),
+            ];
+            return response()->json(['success' => true, 'stats' => $stats]);
+        }
+
+        $student = Students::find($studentId);
+        if (!$student) return response()->json(['success' => false, 'message' => 'الطالب غير موجود'], 404);
+
+        $reasons = [];
+
+        if ($student->status != 1) {
+            $reasons[] = ['key' => 'inactive', 'label' => 'الطالب غير مفعّل (status ≠ 1)', 'fix' => 'فعّله من شاشة إدارة الطلاب'];
+        }
+
+        $activeGroup = \DB::table('group_students')
+            ->join('groups', 'groups.id', '=', 'group_students.group_id')
+            ->where('group_students.student_id', $studentId)
+            ->whereNull('group_students.deleted_at')
+            ->whereNull('groups.deleted_at')
+            ->where('groups.status', 1)
+            ->select('groups.id', 'groups.name')
+            ->first();
+        if ($activeGroup) {
+            $reasons[] = ['key' => 'in_active_group', 'label' => 'الطالب مشعّب حالياً في: ' . $activeGroup->name, 'fix' => 'افتح المودال على نفس المجموعة، اضغط 🔓 وأزل الطالب ثم احفظ.'];
+        }
+
+        $hasPending = \App\Models\GroupStudentsFees::where('student_id', $studentId)
+            ->where('audit_status', 'pending')
+            ->whereNull('deleted_at')->exists();
+        if ($hasPending) {
+            $reasons[] = ['key' => 'has_pending', 'label' => 'هناك دفعات قيد التدقيق', 'fix' => 'راجع شاشة "الطلبات المعلقة" وأكّد الدفعات.'];
+        }
+
+        $ungraded = \App\Models\PlacementTests::where('student_id', $studentId)
+            ->whereNull('score')
+            ->whereNull('deleted_at')
+            ->where(function ($q) { $q->whereNull('status')->orWhere('status', '!=', 'completed'); })
+            ->first();
+        if ($ungraded) {
+            $reasons[] = ['key' => 'ungraded_placement', 'label' => 'اختبار تحديد المستوى غير مُقيَّم بعد', 'fix' => 'اذهب لشاشة اختبارات تحديد المستوى وارصد علامة الطالب.'];
+        }
+
+        $hasVerified = \App\Models\GroupStudentsFees::where('student_id', $studentId)
+            ->where('audit_status', 'verified')
+            ->whereNull('deleted_at')->exists();
+        if (!$hasVerified) {
+            $reasons[] = ['key' => 'no_verified', 'label' => 'لا توجد أي دفعة مؤكدة', 'fix' => 'يجب تأكيد دفعة واحدة على الأقل من شاشة المالية.'];
+        }
+
+        return response()->json([
+            'success'  => true,
+            'student'  => ['id' => $student->id, 'name' => $student->name],
+            'eligible' => empty($reasons),
+            'reasons'  => $reasons,
+        ]);
+    }
+
+    /**
+     * AJAX: return the current roster of a group (for the promote modal source pane).
+     */
+    public function getGroupRoster($groupId)
+    {
+        $rows = GroupStudents::with(['student' => function ($q) {
+                $q->select('id', 'name', 'email', 'mobile', 'image', 'current_level', 'program_type');
+            }])
+            ->where('group_id', $groupId)
+            ->whereNull('deleted_at')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $payload = $rows->filter(fn($r) => $r->student)->map(function ($r) {
+            $s = $r->student;
+            return [
+                'id'           => $s->id,
+                'name'         => $s->name,
+                'email'        => $s->email,
+                'mobile'       => $s->mobile,
+                'level'        => $s->current_level,
+                'program_type' => $s->program_type,
+                'avatar'       => ($s->image && file_exists(public_path($s->image)))
+                                  ? asset($s->image) : asset('uploads/default.jpg'),
+                'fee_total'    => (float) $r->student_fee_total,
+            ];
+        })->values();
+
+        return response()->json(['success' => true, 'students' => $payload]);
     }
 
     public function getIndexProgramGrops()

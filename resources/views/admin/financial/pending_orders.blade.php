@@ -43,7 +43,7 @@
 
 <!-- Verification Modal -->
 <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">تأكيد الدفعة المالية وتفعيل الحساب</h5>
@@ -53,6 +53,26 @@
                 @csrf
                 <input type="hidden" name="id" id="verify_id">
                 <div class="modal-body">
+                    {{-- Applicant + Guardian (shown only for kids/underage) --}}
+                    <div id="applicant_details_box" class="mb-4 p-4 rounded border bg-light" style="display:none;">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-vcard me-2"></i>بيانات المتقدم</h6>
+                        <div class="row g-3 fs-7">
+                            <div class="col-md-6"><strong>الاسم:</strong> <span id="ap_name" class="text-dark"></span></div>
+                            <div class="col-md-6"><strong>الجوال:</strong> <span id="ap_mobile" class="text-dark"></span></div>
+                            <div class="col-md-6"><strong>البريد:</strong> <span id="ap_email" class="text-dark"></span></div>
+                            <div class="col-md-6"><strong>العمر:</strong> <span id="ap_age" class="text-dark"></span></div>
+                        </div>
+                        <div id="guardian_box" class="mt-4 pt-3 border-top" style="display:none;">
+                            <h6 class="fw-bold text-warning mb-3"><i class="bi bi-people-fill me-2"></i>بيانات ولي الأمر</h6>
+                            <div class="row g-3 fs-7">
+                                <div class="col-md-6"><strong>الاسم:</strong> <span id="gd_name" class="text-dark"></span></div>
+                                <div class="col-md-6"><strong>الجوال:</strong> <span id="gd_phone" class="text-dark"></span></div>
+                                <div class="col-md-6"><strong>البريد:</strong> <span id="gd_email" class="text-dark"></span></div>
+                                <div class="col-md-6"><strong>صلة القرابة:</strong> <span id="gd_relationship" class="text-dark"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">إجمالي المبلغ المستحق (Total Due):</label>
                         <input type="text" id="total_due_display" class="form-control bg-light fw-bold text-primary" readonly>
@@ -66,23 +86,36 @@
                         <input type="number" name="verified_amount" id="verified_amount" class="form-control border-success fs-4 fw-bold" required>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">البرنامج الدراسي (Program):</label>
-                            <select name="program_id" id="verify_program_id" class="form-select border-info" onchange="loadGroups(this.value)">
-                                <option value="">-- اختر البرنامج --</option>
-                                @foreach($Programs as $p)
-                                    <option value="{{ $p->id }}">{{ $p->title }}</option>
-                                @endforeach
-                            </select>
+                    {{-- Receipt preview inside modal --}}
+                    <div id="receipt_preview_box" class="mb-4 text-center" style="display:none;">
+                        <label class="form-label fw-bold d-block mb-2"><i class="bi bi-receipt me-1"></i> إيصال الدفع</label>
+                        <div id="receipt_preview_content" class="p-3 rounded border bg-light"></div>
+                    </div>
+
+                    <div id="program_group_box">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">البرنامج الدراسي (Program):</label>
+                                <select name="program_id" id="verify_program_id" class="form-select border-info" onchange="loadGroups(this.value)">
+                                    <option value="">-- اختر البرنامج --</option>
+                                    @foreach($Programs as $p)
+                                        <option value="{{ $p->id }}">{{ $p->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المجموعة / المستوى (Group):</label>
+                                <select name="group_id" id="verify_group_id" class="form-select border-info">
+                                    <option value="">-- اختر المجموعة --</option>
+                                </select>
+                                <div class="form-text text-muted">تسكين الطالب في مجموعة يفعل حسابه تلقائياً</div>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">المجموعة / المستوى (Group):</label>
-                            <select name="group_id" id="verify_group_id" class="form-select border-info">
-                                <option value="">-- اختر المجموعة --</option>
-                            </select>
-                            <div class="form-text text-muted">تسكين الطالب في مجموعة يفعل حسابه تلقائياً</div>
-                        </div>
+                    </div>
+
+                    <div id="placement_test_notice" class="alert alert-light-info border border-info border-dashed" style="display:none;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        طلب لـ <strong>اختبار تحديد المستوى</strong> — لا حاجة لتسكين الطالب في برنامج/مجموعة الآن.
                     </div>
 
                     <div id="balance_preview" class="alert alert-light-info d-none">
@@ -117,24 +150,98 @@
 
     $(document).ready(function() {
         // Function to open verification modal
-        window.verifyPayment = function(id, claimed, total, programId) {
+        window.verifyPayment = function(id, claimed, total, programId, studentId, paidType) {
+            paidType = paidType || '';
             $('#verify_id').val(id);
             $('#total_due_display').val(total + ' ILS');
             $('#claimed_amount').val(claimed + ' ILS');
             $('#verified_amount').val(claimed);
-            
-            // Set program and load groups
-            if (programId) {
-                $('#verify_program_id').val(programId);
-                loadGroups(programId);
-            } else {
+
+            // Reset boxes
+            $('#applicant_details_box').hide();
+            $('#guardian_box').hide();
+            $('#receipt_preview_box').hide();
+            $('#receipt_preview_content').empty();
+
+            // Placement Test → no program/group assignment needed
+            const isPlacementTest = /Placement\s*Test/i.test(paidType) || /اختبار/.test(paidType);
+            if (isPlacementTest) {
+                $('#program_group_box').hide();
+                $('#placement_test_notice').show();
                 $('#verify_program_id').val('');
                 $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
+            } else {
+                $('#program_group_box').show();
+                $('#placement_test_notice').hide();
+                if (programId) {
+                    $('#verify_program_id').val(programId);
+                    loadGroups(programId);
+                } else {
+                    $('#verify_program_id').val('');
+                    $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
+                }
+            }
+
+            // Pull the receipt link from the row and embed inline
+            try {
+                const row = $('button[onclick*="verifyPayment(' + id + ',"]').closest('tr');
+                const link = row.find('a[href*="uploads/"]').first();
+                if (link.length) {
+                    const href = link.attr('href');
+                    const lower = (href || '').toLowerCase();
+                    if (/\.(jpe?g|png|gif|webp)(\?|$)/.test(lower)) {
+                        $('#receipt_preview_content').html('<img src="' + href + '" alt="receipt" style="max-width:100%;max-height:380px;border-radius:8px;">');
+                    } else if (/\.pdf(\?|$)/.test(lower)) {
+                        $('#receipt_preview_content').html('<embed src="' + href + '" type="application/pdf" width="100%" height="420" style="border-radius:8px;">');
+                    } else {
+                        $('#receipt_preview_content').html('<a href="' + href + '" target="_blank" class="btn btn-light-info"><i class="bi bi-box-arrow-up-right me-1"></i> فتح الإيصال</a>');
+                    }
+                    $('#receipt_preview_box').show();
+                }
+            } catch (e) { /* ignore */ }
+
+            // Fetch applicant + guardian info
+            if (studentId) {
+                $.get('{{ route("admin.financial.pending.student", ":id") }}'.replace(':id', studentId), function(res) {
+                    if (!res || !res.success) return;
+                    $('#ap_name').text(res.student.name || '-');
+                    $('#ap_mobile').text(res.student.mobile || '-');
+                    $('#ap_email').text(res.student.email || '-');
+                    $('#ap_age').text(res.student.age !== null ? (res.student.age + ' سنة') : '-');
+                    $('#applicant_details_box').show();
+
+                    if (res.student.is_child && res.parent) {
+                        $('#gd_name').text(res.parent.name || '-');
+                        $('#gd_phone').text(res.parent.phone || '-');
+                        $('#gd_email').text(res.parent.email || '-');
+                        $('#gd_relationship').text(res.parent.relationship || '-');
+                        $('#guardian_box').show();
+                    }
+                });
             }
 
             $('#verifyModal').modal('show');
             updateBalancePreview(claimed, total);
         };
+
+        // Delegated click handler for verify buttons (uses data-attributes to avoid inline JS escaping)
+        $(document).on('click', '.btn-verify', function(e) {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const claimed = parseFloat($btn.data('claimed')) || 0;
+            const total = parseFloat($btn.data('total')) || 0;
+            const programId = $btn.data('program') || null;
+            const studentId = $btn.data('student') || null;
+            const paidType = $btn.data('type') || '';
+            // call existing helper
+            window.verifyPayment(id, claimed, total, programId, studentId, paidType);
+        });
+
+        // Delegated click for refund (keeps original refundPayment call behavior)
+        $(document).on('click', '.btn-refund', function(e) {
+            const id = $(this).data('id');
+            if (id) refundPayment(id);
+        });
 
         window.loadGroups = function(programId) {
             if (!programId) {

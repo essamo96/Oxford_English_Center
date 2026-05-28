@@ -51,19 +51,82 @@ class FinancialController extends AdminController
             ->editColumn('receipt', function ($row) {
                 if ($row->payment_receipt) {
                     $url = asset('uploads/' . $row->payment_receipt);
-                    return '<a href="'.$url.'" target="_blank" class="btn btn-sm btn-light-info">عرض الإيصال</a>';
+                    $ext = strtolower(pathinfo($row->payment_receipt, PATHINFO_EXTENSION));
+                    $isImg = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                    if ($isImg) {
+                        return '<a href="'.$url.'" target="_blank" title="فتح بحجم كامل">
+                                    <img src="'.$url.'" alt="receipt" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;box-shadow:0 2px 5px rgba(0,0,0,0.06);cursor:pointer;">
+                                </a>';
+                    }
+                    return '<a href="'.$url.'" target="_blank" class="btn btn-sm btn-light-info"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</a>';
                 }
                 return '<span class="badge badge-light-danger">لا يوجد</span>';
             })
+            ->editColumn('created_at', function ($row) {
+                if (!$row->created_at) return '<span class="text-muted">—</span>';
+                try {
+                    $c = \Carbon\Carbon::parse($row->created_at);
+                    $date = $c->format('Y-m-d');
+                    $time = $c->format('h:i A');
+                    $rel  = $c->locale('ar')->diffForHumans();
+                    return '<div class="d-flex flex-column align-items-center gap-1">
+                                <span class="fw-bold text-dark fs-7"><i class="bi bi-calendar-event text-info me-1"></i>'.$date.'</span>
+                                <span class="text-muted fs-8"><i class="bi bi-clock me-1"></i>'.$time.'</span>
+                                <span class="badge badge-light-info fs-9 fst-italic">'.$rel.'</span>
+                            </div>';
+                } catch (\Exception $e) {
+                    return $row->created_at;
+                }
+            })
             ->addColumn('actions', function ($row) {
                 $pId = $row->student ? $row->student->program_id : 0;
-                return '
-                    <button onclick="verifyPayment('.$row->id.', '.$row->student_fee_paid.', '.$row->total_due_amount.', '.$pId.')" class="btn btn-sm btn-success">تأكيد</button>
-                    <button onclick="refundPayment('.$row->id.')" class="btn btn-sm btn-danger">رفض</button>
-                ';
+                $sId = $row->student ? $row->student->id : 0;
+                $type = (string) $row->student_paid_type;
+                // Use data-attributes and classes to avoid inline JS string-escaping issues
+                return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
+                        <button data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-refund">رفض</button>';
             })
-            ->rawColumns(['receipt', 'actions'])
+            ->rawColumns(['receipt', 'actions', 'created_at'])
             ->make(true);
+    }
+
+    /**
+     * Return basic student + guardian details for the pending-orders verify modal.
+     */
+    public function getPendingStudentDetails($studentId)
+    {
+        $student = \App\Models\Students::with('parent')->find($studentId);
+        if (!$student) {
+            return response()->json(['success' => false], 404);
+        }
+
+        $age = null;
+        if ($student->dob) {
+            try { $age = \Carbon\Carbon::parse($student->dob)->age; } catch (\Exception $e) {}
+        }
+
+        $isChild = ($student->program_type === 'kids') || ($age !== null && $age <= 15);
+
+        return response()->json([
+            'success'    => true,
+            'student'    => [
+                'id'           => $student->id,
+                'name'         => $student->name,
+                'name_en'      => $student->name_en,
+                'mobile'       => $student->mobile,
+                'email'        => $student->email,
+                'dob'          => $student->dob,
+                'age'          => $age,
+                'program_type' => $student->program_type,
+                'is_child'     => $isChild,
+            ],
+            'parent'     => $student->parent ? [
+                'name'         => $student->parent->name,
+                'phone'        => $student->parent->phone,
+                'email'        => $student->parent->email,
+                'relationship' => $student->parent->relationship,
+            ] : null,
+        ]);
     }
 
     /**
@@ -175,36 +238,70 @@ class FinancialController extends AdminController
     public function postRecordPayment(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:group_students_fees,id', // This is a reference to any record in the ledger for this account
+            'id'     => 'required|exists:group_students_fees,id',
             'amount' => 'required|numeric|min:1',
         ]);
 
         try {
             $baseFee = GroupStudentsFees::findOrFail($request->id);
-            $ledger = $this->financialService->getStudentLedger($baseFee->student_id, $baseFee->group_id);
+            // Works for BOTH group-based fees AND placement-test / pre-group fees (group_id null)
+            $ledger  = $this->financialService->getStudentLedger($baseFee->student_id, $baseFee->group_id);
 
             if (!$ledger) {
                 return response()->json(['status' => 'error', 'message' => 'لم يتم العثور على سجل مالي لهذا الطالب!']);
             }
 
-            if ($request->amount > $ledger['remaining_balance']) {
-                return response()->json(['status' => 'error', 'message' => 'المبلغ المدخل أكبر من المتبقي (' . $ledger['remaining_balance'] . ')!']);
+            if ((float) $request->amount > (float) $ledger['remaining_balance'] + 0.001) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'المبلغ المدخل أكبر من المتبقي (' . number_format($ledger['remaining_balance'], 2) . ' ILS)!',
+                ]);
             }
 
             $this->financialService->recordTransaction([
-                'student_id' => $baseFee->student_id,
-                'group_id' => $baseFee->group_id,
-                'amount' => $request->amount,
-                'verified_amount' => $request->amount,
-                'audit_status' => 'verified',
-                'type' => 'payment',
-                'notes' => 'دفعة يدوية من الإدارة',
+                'student_id'        => $baseFee->student_id,
+                'group_id'          => $baseFee->group_id, // may be null — that's fine
+                'amount'            => $request->amount,
+                'verified_amount'   => $request->amount,
+                'audit_status'      => 'verified',
+                'type'              => 'payment',
+                'notes'             => 'دفعة يدوية من الإدارة',
+                'paid_type'         => $baseFee->student_paid_type ?: 'Manual Payment',
+                'payment_method_id' => $request->payment_method_id ?? $baseFee->payment_method_id,
             ]);
+
+            // If this was a placement-test ledger and it's now fully paid, mark the test paid
+            if (!$baseFee->group_id) {
+                $fresh = $this->financialService->getStudentLedger($baseFee->student_id, null);
+                if ($fresh && $fresh['remaining_balance'] <= 0) {
+                    \App\Models\PlacementTests::where('student_id', $baseFee->student_id)
+                        ->where('payment_status', '!=', 'paid')
+                        ->update(['payment_status' => 'paid', 'remaining_amount' => 0]);
+                }
+            }
 
             return response()->json(['status' => 'success', 'message' => 'تم تسجيل الدفعة في السجل المالي بنجاح.']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'حدث خطأ: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Return every invoice/transaction for a student across all ledgers.
+     * Rendered into the "All Invoices" modal on the invoices ledger page.
+     */
+    public function getStudentInvoices($studentId)
+    {
+        $student = Students::find($studentId);
+        if (!$student) {
+            return response('<div class="alert alert-danger m-5">الطالب غير موجود</div>', 404);
+        }
+
+        $data = $this->financialService->getStudentAllInvoices($studentId);
+        return view('admin.financial.parts.student_invoices_modal', [
+            'student' => $student,
+            'data'    => $data,
+        ])->render();
     }
 
     public function invoicesLedger()
@@ -266,9 +363,19 @@ class FinancialController extends AdminController
             })
             ->editColumn('remaining_amount', function ($row) {
                 $ledger = $this->financialService->getStudentLedger($row->student_id, $row->group_id);
-                $rem = $ledger ? $ledger['remaining_balance'] : 0;
+                // Fallbacks: (1) ledger when present, (2) row's stored remaining_amount,
+                // (3) total_due - student_fee_paid for legacy rows.
+                if ($ledger) {
+                    $rem = $ledger['remaining_balance'];
+                } elseif (!is_null($row->remaining_amount)) {
+                    $rem = (float) $row->remaining_amount;
+                } else {
+                    $rem = (float) ($row->total_due_amount ?? 0) - (float) ($row->student_fee_paid ?? 0);
+                }
+                $rem = max(0, $rem);
                 $color = $rem > 0 ? 'danger' : 'success';
-                return '<span class="text-'.$color.' fw-bold">'.number_format($rem, 2) . ' ILS</span>';
+                $iconCls = $rem > 0 ? 'bi-exclamation-circle' : 'bi-check-circle';
+                return '<span class="text-'.$color.' fw-bold"><i class="bi '.$iconCls.' me-1"></i>'.number_format($rem, 2) . ' ILS</span>';
             })
             ->editColumn('audit_status', function ($row) {
                 $statusMap = [
@@ -281,24 +388,35 @@ class FinancialController extends AdminController
             })
             ->addColumn('actions', function ($row) {
                 $btns = '<div class="d-flex justify-content-end gap-2">';
-                
-                // Ledger Button (New)
+
+                // All-invoices modal (works for every student, group or not)
+                $btns .= '<button type="button" onclick="showAllInvoices('.$row->student_id.')" class="btn btn-icon btn-bg-light btn-active-color-warning btn-sm" title="كل فواتير الطالب">
+                            <i class="bi bi-receipt-cutoff fs-3"></i>
+                          </button>';
+
+                // Detailed group ledger (only when a group exists)
                 if ($row->group_id) {
-                    $btns .= '<a href="'.route('admin.financial.ledger', ['studentId' => $row->student_id, 'groupId' => $row->group_id]).'" class="btn btn-icon btn-bg-light btn-active-color-info btn-sm me-1" title="السجل المالي">
+                    $btns .= '<a href="'.route('admin.financial.ledger', ['studentId' => $row->student_id, 'groupId' => $row->group_id]).'" class="btn btn-icon btn-bg-light btn-active-color-info btn-sm" title="السجل المالي للمجموعة">
                                 <i class="ki-duotone ki-book-open fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
                               </a>';
                 }
 
-                $btns .= '<button onclick="showStudentModal('.$row->student_id.')" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="عرض الملف">
+                $btns .= '<button type="button" onclick="showStudentModal('.$row->student_id.')" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm" title="عرض الملف">
                             <i class="ki-duotone ki-user fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                           </button>';
-                
+
+                // Payment button — works for BOTH group ledgers and placement / pre-group ledgers
                 if ($row->audit_status == 'verified') {
-                    $btns .= '<button onclick="recordPayment('.$row->id.', 0)" class="btn btn-icon btn-bg-light btn-active-color-success btn-sm" title="تسديد دفعة">
-                                <i class="ki-duotone ki-dollar fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
-                              </button>';
+                    $ledger    = $this->financialService->getStudentLedger($row->student_id, $row->group_id);
+                    $remaining = $ledger ? (float) $ledger['remaining_balance']
+                                         : max(0, (float) ($row->total_due_amount ?? 0) - (float) ($row->student_fee_paid ?? 0));
+                    if ($remaining > 0) {
+                        $btns .= '<button type="button" onclick="recordPayment('.$row->id.', '.number_format($remaining, 2, '.', '').')" class="btn btn-icon btn-bg-light btn-active-color-success btn-sm" title="تسديد دفعة">
+                                    <i class="ki-duotone ki-dollar fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                  </button>';
+                    }
                 }
-                
+
                 $btns .= '</div>';
                 return $btns;
             })
@@ -330,14 +448,17 @@ class FinancialController extends AdminController
     public function updateFeeSetting(Request $request)
     {
         $typeSlugs = \App\Models\FeeType::pluck('slug')->toArray();
-        
+
         $request->validate([
-            'program_id' => 'required|exists:programs,id',
-            'amount'     => 'required|numeric|min:0',
-            'type'       => 'required|in:' . implode(',', $typeSlugs),
-            'level_name' => 'nullable|string|max:50',
+            'program_id'         => 'required|exists:programs,id',
+            'amount'             => 'required|numeric|min:0',
+            'type'               => 'required|in:' . implode(',', $typeSlugs),
+            'level_name'         => 'nullable|string|max:50',
+            'min_payment_percent'=> 'nullable|numeric|min:0|max:100',
+            'min_payment_fixed'  => 'nullable|numeric|min:0',
         ]);
 
+        // Save the fee row WITHOUT min-payment fields (those live on the program now)
         FeeSettings::updateOrCreate(
             [
                 'program_id' => $request->program_id,
@@ -350,7 +471,30 @@ class FinancialController extends AdminController
             ]
         );
 
+        // Persist min-payment thresholds at the PROGRAM level
+        \App\Models\Programs::where('id', $request->program_id)->update([
+            'min_payment_percent' => $request->filled('min_payment_percent') ? $request->min_payment_percent : null,
+            'min_payment_fixed'   => $request->filled('min_payment_fixed')   ? $request->min_payment_fixed   : null,
+        ]);
+
         return redirect()->back()->with('success', 'تم تحديث إعدادات الرسوم بنجاح.');
+    }
+
+    /**
+     * API: return a program's min-payment settings (used by the admin fees form
+     * to pre-fill the inputs when an admin selects a program).
+     */
+    public function getProgramMinPayment($programId)
+    {
+        $program = \App\Models\Programs::find($programId);
+        if (!$program) {
+            return response()->json(['success' => false], 404);
+        }
+        return response()->json([
+            'success'             => true,
+            'min_payment_percent' => $program->min_payment_percent,
+            'min_payment_fixed'   => $program->min_payment_fixed,
+        ]);
     }
 
     /**
@@ -439,12 +583,15 @@ class FinancialController extends AdminController
         $level     = $request->level_name;
 
         $query = \App\Models\FeeSettings::where('program_id', $programId);
-        
-        $fees = $query->get();
+        $fees  = $query->get();
+
+        $program = \App\Models\Programs::find($programId);
 
         return response()->json([
-            'success' => true,
-            'fees'    => $fees
+            'success'             => true,
+            'fees'                => $fees,
+            'min_payment_percent' => $program ? $program->min_payment_percent : null,
+            'min_payment_fixed'   => $program ? $program->min_payment_fixed   : null,
         ]);
     }
 

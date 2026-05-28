@@ -81,6 +81,7 @@
                         <th class="min-w-200px text-center"> اسم البرنامج </th>
                         <th class="min-w-150px text-center"> المجموعات </th>
                         <th class="min-w-100px text-center"> إجمالي الطلاب </th>
+                        <th class="min-w-160px text-center"> الحد الأدنى للدفع </th>
                         <th class="min-w-100px text-center"> الحالة </th>
                         <th class="text-center min-w-150px"> العمليات </th>
                     </tr>
@@ -131,6 +132,7 @@
         { data: "title", name: "title", orderable: true, className: "text-start" },
         { data: "grope_no", name: "grope_no", className: "text-center" },
         { data: "students_count", name: "students_count", className: "text-center" },
+        { data: "min_payment", name: "min_payment", orderable: false, searchable: false, className: "text-center" },
         { data: "status", name: "status", orderable: true, searchable: false },
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center" }
     ];

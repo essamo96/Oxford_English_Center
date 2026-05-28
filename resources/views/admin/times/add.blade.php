@@ -81,6 +81,15 @@
                             <label class="form-check-label px-2">تفعيل / تعطيل</label>
                         </div>
                     </div>
+                    <div class="col-md-6 fv-row">
+                        <label class="fs-6 fw-semibold mb-2">خاص باختبار تحديد المستوى؟</label>
+                        <div class="form-check form-switch form-check-custom form-check-solid mt-2">
+                            <input class="form-check-input" type="checkbox" value="1" name="is_placement_test"
+                                {{ old('is_placement_test') == 1 ? 'checked' : '' }} />
+                            <label class="form-check-label px-2">نعم — موعد لاختبار تحديد المستوى فقط</label>
+                        </div>
+                        <div class="text-muted fs-7 mt-2">عند التفعيل، يظهر هذا الموعد لطلاب اختبار تحديد المستوى في صفحة التسجيل.</div>
+                    </div>
                 </div>
 
                 <div class="card-footer d-flex justify-content-end py-6 px-9">

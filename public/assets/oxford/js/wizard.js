@@ -7,6 +7,38 @@ let currentStep = 1;
 let selectedProgramType = ''; // adult or kids
 let enrollmentPath = ''; // course or test
 let takeTest = false;
+let isUnderage = false; // applicant age <= 15 (any program)
+let minPaymentDue = 0; // minimum required payment, derived from PROGRAM-level thresholds
+let programMinPct = null;   // program's min_payment_percent (or null)
+let programMinFixed = null; // program's min_payment_fixed (or null)
+let currentTotalDue = 0;    // last computed total
+
+function calculateAge(dobStr) {
+    if (!dobStr) return null;
+    const dob = new Date(dobStr);
+    if (isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+}
+
+window.checkAgeRequirement = function(dobStr) {
+    const age = calculateAge(dobStr);
+    const banner = document.getElementById('underage-banner');
+
+    isUnderage = (age !== null && age <= 15);
+
+    // Show banner only for adult program when applicant is underage
+    // (kids program already implies guardian info — no banner needed)
+    if (banner) {
+        const showBanner = (selectedProgramType === 'adult' && isUnderage);
+        banner.style.display = showBanner ? 'block' : 'none';
+    }
+
+    updateStep2Visibility();
+};
 
 // Bilingual messages
 const wizardMessages = {
@@ -93,12 +125,16 @@ window.handleProgramSelection = function(type) {
         $(select).val('');
     }
 
-    if (type === 'adult') {
-        document.getElementById('adult-fields').style.display = 'block';
-        document.getElementById('kids-fields').style.display = 'none';
+    // show/hide major field inside step 1 (adult-only)
+    const majorStep1 = document.getElementById('major-in-step1');
+    if (majorStep1) majorStep1.style.display = (type === 'adult') ? 'block' : 'none';
+
+    // Re-check age if DOB was already provided (also refreshes step-2 visibility)
+    const dobEl = document.querySelector('input[name="dob"]');
+    if (dobEl && dobEl.value) {
+        checkAgeRequirement(dobEl.value);
     } else {
-        document.getElementById('adult-fields').style.display = 'none';
-        document.getElementById('kids-fields').style.display = 'block';
+        updateStep2Visibility();
     }
 
     document.getElementById('program-selection-container').style.display = 'none';
@@ -110,6 +146,13 @@ window.handleProgramSelection = function(type) {
 // STEP 0.5: Enrollment Path (Direct/Test)
 window.selectEnrollmentType = function(type, el) {
     playSound('click');
+
+    // If switching between Direct Enrollment and Placement Test after starting,
+    // restart the wizard from step 1 with a clean form.
+    if (enrollmentPath && enrollmentPath !== type) {
+        resetWizard();
+    }
+
     enrollmentPath = type;
     document.getElementById('enrollment_type_hidden').value = type;
 
@@ -132,6 +175,93 @@ window.selectEnrollmentType = function(type, el) {
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
+function resetWizard() {
+    // Reset form fields, but preserve the hidden program_type since the user is mid-flow.
+    const form = document.getElementById('registration-wizard-form');
+    if (form) {
+        const programType = document.getElementById('program_type_hidden').value;
+        form.reset();
+        document.getElementById('program_type_hidden').value = programType;
+    }
+
+    // Reset step UI to step 1
+    currentStep = 1;
+    document.querySelectorAll('.step-pane').forEach(p => p.classList.remove('active'));
+    const pane1 = document.getElementById('pane-1');
+    if (pane1) pane1.classList.add('active');
+
+    document.querySelectorAll('.step-indicator').forEach(i => i.classList.remove('active', 'completed'));
+    const ind1 = document.querySelector('[data-step-for="1"]');
+    if (ind1) ind1.classList.add('active');
+
+    const trackFill = document.getElementById('step-track-fill');
+    if (trackFill) trackFill.style.width = '0%';
+
+    // Hide underage banner and reset state
+    isUnderage = false;
+    const banner = document.getElementById('underage-banner');
+    if (banner) banner.style.display = 'none';
+
+    // Hide health notes
+    const healthWrap = document.getElementById('health-notes-wrapper');
+    if (healthWrap) healthWrap.style.display = 'none';
+
+    // Clear validation states
+    document.querySelectorAll('.form-control').forEach(el => {
+        el.classList.remove('is-invalid', 'is-valid');
+    });
+    document.querySelectorAll('.invalid-feedback, .valid-feedback, .input-status-icon').forEach(el => el.remove());
+
+    // Clear fees and payment selection
+    resetFees();
+    document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('active'));
+    const methodArea = document.getElementById('method-details-area');
+    if (methodArea) methodArea.style.display = 'none';
+    const filePreview = document.getElementById('file-name-preview');
+    if (filePreview) filePreview.innerHTML = '';
+
+    // Buttons
+    document.getElementById('btn-prev').style.display = 'none';
+    document.getElementById('btn-next').innerText = getMsg('next');
+    document.getElementById('btn-next').classList.remove('btn-success');
+}
+
+// Load relationships from the API and populate the parent relationship dropdown
+let _relationships = [];
+function loadRelationships() {
+    const select = document.getElementById('parent_relationship_select');
+    if (!select || _relationships.length) return;
+    fetch('/api/relationships', { cache: 'no-store' })
+        .then(r => r.json())
+        .then(data => {
+            if (!data || !data.success || !Array.isArray(data.items)) return;
+            _relationships = data.items;
+            data.items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.slug;
+                opt.dataset.isOther = item.is_other ? '1' : '0';
+                opt.dataset.nameAr = item.name_ar || '';
+                opt.dataset.nameEn = item.name_en || '';
+                opt.textContent = item.name_ar + (item.name_en ? ' (' + item.name_en + ')' : '');
+                select.appendChild(opt);
+            });
+        })
+        .catch(() => {});
+}
+
+window.handleRelationshipChange = function() {
+    const select = document.getElementById('parent_relationship_select');
+    const wrap   = document.getElementById('parent_relationship_other_wrap');
+    const other  = document.getElementById('parent_relationship_other');
+    if (!select || !wrap) return;
+    const opt = select.options[select.selectedIndex];
+    const isOther = opt && opt.dataset.isOther === '1';
+    wrap.style.display = isOther ? 'block' : 'none';
+    if (!isOther && other) other.value = '';
+};
+
+document.addEventListener('DOMContentLoaded', loadRelationships);
+
 // STEP 1: Health Toggle
 window.toggleHealthNotes = function(show) {
     if (show) $('#health-notes-wrapper').slideDown();
@@ -140,6 +270,27 @@ window.toggleHealthNotes = function(show) {
         $('#health_notes').val('');
     }
 };
+
+function updateStep2Visibility() {
+    // Step 2 (Guardian Info) shows when: kids program, OR any program with underage applicant.
+    const stepIndicator = document.querySelector('[data-step-for="2"]');
+    const shouldShow = (selectedProgramType === 'kids') || isUnderage;
+    if (stepIndicator) stepIndicator.style.display = shouldShow ? 'flex' : 'none';
+    refreshStepNavNumbers();
+}
+
+function getIndicatorForStep(step) {
+    return document.querySelector(`[data-step-for="${step}"]`);
+}
+
+function refreshStepNavNumbers() {
+    const indicators = Array.from(document.querySelectorAll('.step-indicator'))
+        .filter(i => getComputedStyle(i).display !== 'none');
+    indicators.forEach((el, idx) => {
+        const numEl = el.querySelector('.step-num-text');
+        if (numEl) numEl.innerText = (idx + 1).toString();
+    });
+}
 
 // STEP 3: Program Change & Fee Loading
 window.handleProgramChange = function() {
@@ -170,8 +321,11 @@ function fetchFees(programId) {
     fetch(url)
         .then(r => r.json())
         .then(data => {
-            if (data.success && data.fees) {
-                renderFeesBreakdown(data.fees);
+            if (data.success) {
+                // Store program-level min-payment thresholds (may be null if admin didn't set them)
+                programMinPct   = (data.min_payment_percent !== undefined) ? data.min_payment_percent : null;
+                programMinFixed = (data.min_payment_fixed   !== undefined) ? data.min_payment_fixed   : null;
+                if (data.fees) renderFeesBreakdown(data.fees);
             }
         });
 }
@@ -227,7 +381,36 @@ function renderFeesBreakdown(fees) {
     tbody.innerHTML = rows || '<tr><td colspan="2" class="text-center py-3 text-muted">No fees found for this selection</td></tr>';
     document.getElementById('display-total-due').innerText = total.toFixed(2);
     document.getElementById('total_due_hidden').value = total;
+    currentTotalDue = total;
+
+    // Program-level minimum payment: higher of (total * pct / 100) and fixed; capped at total
+    const pct   = parseFloat(programMinPct);
+    const fixed = parseFloat(programMinFixed);
+    const byPct = !isNaN(pct)   ? (total * pct / 100) : 0;
+    const byFix = !isNaN(fixed) ? fixed               : 0;
+    minPaymentDue = Math.min(Math.max(byPct, byFix), total);
+
+    // Update min-payment hint
+    const hint = document.getElementById('min-payment-hint');
+    const minValEl = document.getElementById('min-payment-value');
+    if (hint && minValEl) {
+        if (minPaymentDue > 0) {
+            minValEl.innerText = minPaymentDue.toFixed(2);
+            hint.style.display = 'block';
+        } else {
+            hint.style.display = 'none';
+        }
+    }
+
+    // Default the Paid Amount to the full total (user may change it down to the minimum)
+    const paidInput = document.getElementsByName('student_fee_paid')[0];
+    if (paidInput) {
+        paidInput.min = (minPaymentDue || 0).toFixed(2);
+        paidInput.value = total.toFixed(2);
+    }
+
     updateRemainingDue();
+    clearPaidError();
 }
 
 function resetFees() {
@@ -242,14 +425,16 @@ window.selectTestChoice = function(choice) {
     takeTest = (choice === 'yes');
     const hiddenInput = document.getElementById('take_test_hidden');
     if (hiddenInput) hiddenInput.value = choice;
-    
+
     // Toggle fields
     const scheduling = document.getElementById('test-scheduling-fields');
     const levelSelect = document.getElementById('skip-test-level-selection');
     const placeholder = document.getElementById('test-info-placeholder');
+    const dateSlot = document.getElementById('test-date-selection');
 
     if (scheduling) scheduling.style.display = takeTest ? 'block' : 'none';
     if (levelSelect) levelSelect.style.display = !takeTest ? 'block' : 'none';
+    if (dateSlot) dateSlot.style.display = takeTest ? 'block' : 'none';
     if (placeholder) placeholder.style.display = 'none'; // Hide placeholder once we have a choice
 
     document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
@@ -283,22 +468,28 @@ window.selectPaymentMethod = function(id, el) {
             list.innerHTML = '';
             for (const [key, value] of Object.entries(creds)) {
                 if (value) {
-                    let icon = 'bi-info-square';
-                    if (key.includes('iban') || key.includes('bank')) icon = 'bi-bank';
-                    if (key.includes('account')) icon = 'bi-hash';
-                    if (key.includes('wallet') || key.includes('phone')) icon = 'bi-phone';
-                    
+                    const lk = String(key).toLowerCase();
+                    let icon = 'bi-info-circle';
+                    if (lk.includes('iban') || lk.includes('bank')) icon = 'bi-bank';
+                    else if (lk.includes('account') || lk.includes('number')) icon = 'bi-hash';
+                    else if (lk.includes('wallet') || lk.includes('phone') || lk.includes('mobile')) icon = 'bi-phone';
+                    else if (lk.includes('name') || lk.includes('holder') || lk.includes('beneficiary')) icon = 'bi-person-vcard';
+                    else if (lk.includes('email')) icon = 'bi-envelope';
+                    else if (lk.includes('swift') || lk.includes('bic') || lk.includes('code')) icon = 'bi-shield-lock';
+                    else if (lk.includes('branch')) icon = 'bi-geo-alt';
+
+                    const label = String(key).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    const safeValue = String(value).replace(/"/g, '&quot;');
+
                     list.innerHTML += `
-                        <div class="credential-item border-0 shadow-none px-0 mb-3" style="background: transparent;">
-                            <div class="d-flex align-items-center">
-                                <i class="bi ${icon} text-primary me-3 fs-4"></i>
-                                <div>
-                                    <div class="credential-label text-muted small fw-bold">${key.replace(/_/g, ' ')}</div>
-                                    <div class="credential-value fw-bold fs-5" id="cred-${key}">${value}</div>
-                                </div>
+                        <div class="credential-card">
+                            <div class="credential-icon"><i class="bi ${icon}"></i></div>
+                            <div class="credential-body">
+                                <div class="credential-label">${label}</div>
+                                <div class="credential-value" id="cred-${key}">${value}</div>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary border-0 rounded-circle" 
-                                    onclick="copyToClipboard('${value}', this)" title="Copy">
+                            <button type="button" class="credential-copy-btn"
+                                    onclick="copyToClipboard('${safeValue}', this)" title="Copy">
                                 <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
@@ -324,9 +515,48 @@ window.copyToClipboard = function(text, btn) {
 window.updateRemainingDue = function() {
     const total = parseFloat(document.getElementById('total_due_hidden').value) || 0;
     const paidInput = document.getElementsByName('student_fee_paid')[0];
+    if (!paidInput) return;
+
+    // Block negative values immediately
+    if (paidInput.value !== '' && parseFloat(paidInput.value) < 0) {
+        paidInput.value = 0;
+    }
+
     const paid = parseFloat(paidInput.value) || 0;
     const remaining = Math.max(0, total - paid);
     document.getElementById('display-amount-due').innerText = remaining.toFixed(2);
+
+    // Live minimum check (don't block typing, just flag visually)
+    const errEl = document.getElementById('min-payment-error');
+    const errText = document.getElementById('min-payment-error-text');
+    if (paid > 0 && minPaymentDue > 0 && paid < minPaymentDue) {
+        paidInput.classList.add('is-invalid');
+        if (errText) {
+            errText.innerText = 'المبلغ المُدخَل (' + paid.toFixed(2) + ' ILS) أقل من الحد الأدنى المطلوب (' + minPaymentDue.toFixed(2) + ' ILS). يرجى رفع المبلغ ليتمكن من إتمام التسجيل.';
+        }
+        if (errEl) errEl.style.display = 'flex';
+    } else {
+        paidInput.classList.remove('is-invalid');
+        if (errEl) errEl.style.display = 'none';
+    }
+};
+
+function clearPaidError() {
+    const paidInput = document.getElementsByName('student_fee_paid')[0];
+    const errEl = document.getElementById('min-payment-error');
+    if (paidInput) paidInput.classList.remove('is-invalid');
+    if (errEl) errEl.style.display = 'none';
+}
+
+window.enforcePaidMinimum = function() {
+    const paidInput = document.getElementsByName('student_fee_paid')[0];
+    if (!paidInput) return;
+    let paid = parseFloat(paidInput.value);
+    if (isNaN(paid) || paid < 0) {
+        paidInput.value = 0;
+        paid = 0;
+    }
+    updateRemainingDue();
 };
 
 window.updateFileName = function(input) {
@@ -342,11 +572,18 @@ window.changeStep = function(direction) {
     if (direction > 0 && !validateCurrentStep()) return;
     
     playSound('whoosh');
-    document.getElementById(`pane-${currentStep}`).classList.remove('active');
-    document.querySelector(`[data-step-nav="${currentStep}"]`).classList.remove('active');
-    if (direction > 0) document.querySelector(`[data-step-nav="${currentStep}"]`).classList.add('completed');
+    // decide target step, skipping Step 2 when guardian info isn't needed
+    const skipStep2 = !((selectedProgramType === 'kids') || isUnderage);
+    let targetStep = currentStep + direction;
+    if (direction > 0 && targetStep === 2 && skipStep2) targetStep = 3;
+    if (direction < 0 && targetStep === 2 && skipStep2) targetStep = 1;
 
-    currentStep += direction;
+    document.getElementById(`pane-${currentStep}`).classList.remove('active');
+    const oldIndicator = getIndicatorForStep(currentStep);
+    if (oldIndicator) oldIndicator.classList.remove('active');
+    if (direction > 0 && oldIndicator) oldIndicator.classList.add('completed');
+
+    currentStep = targetStep;
 
     if (currentStep > 5) {
         submitFinalForm();
@@ -355,14 +592,34 @@ window.changeStep = function(direction) {
     }
 
     document.getElementById(`pane-${currentStep}`).classList.add('active');
-    document.querySelector(`[data-step-nav="${currentStep}"]`).classList.add('active');
+    const newIndicator = getIndicatorForStep(currentStep);
+    if (newIndicator) newIndicator.classList.add('active');
+
+    // Drive progress track fill based on visible indicators
+    const trackFill = document.getElementById('step-track-fill');
+    if (trackFill) {
+        const visibleIndicators = Array.from(document.querySelectorAll('.step-indicator'))
+            .filter(i => getComputedStyle(i).display !== 'none');
+        const totalSteps = visibleIndicators.length || 1;
+        // find logical index of currentStep among visible indicators
+        const idx = visibleIndicators.findIndex(i => i.getAttribute('data-step-for') == String(currentStep));
+        const position = idx >= 0 ? idx : 0;
+        const pct = (position / Math.max(1, totalSteps - 1)) * 100;
+        trackFill.style.width = pct + '%';
+    }
 
     document.getElementById('btn-prev').style.display = currentStep === 1 ? 'none' : 'block';
     const nextBtn = document.getElementById('btn-next');
-    nextBtn.innerText = currentStep === 5 ? getMsg('ok') : getMsg('next');
-    
-    if (currentStep === 5) nextBtn.classList.add('btn-success');
+    const visibleIndicators = Array.from(document.querySelectorAll('.step-indicator')).filter(i => getComputedStyle(i).display !== 'none');
+    const isLast = visibleIndicators.length && visibleIndicators[visibleIndicators.length - 1].getAttribute('data-step-for') == String(currentStep);
+    nextBtn.innerText = isLast ? getMsg('ok') : getMsg('next');
+
+    if (isLast) nextBtn.classList.add('btn-success');
     else nextBtn.classList.remove('btn-success');
+
+    // Scroll back to the top of the wizard form on each step change
+    const card = document.getElementById('wizard-card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 function validateCurrentStep() {
@@ -371,7 +628,10 @@ function validateCurrentStep() {
     let isValid = true;
 
     if (currentStep === 1) {
-        ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address'].forEach(f => {
+        const fieldsStep1 = ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address'];
+        // Major lives in step 1 for all adult registrations
+        if (selectedProgramType === 'adult') fieldsStep1.push('major');
+        fieldsStep1.forEach(f => {
             const el = $(`[name="${f}"]`);
             if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
         });
@@ -380,8 +640,7 @@ function validateCurrentStep() {
             isValid = false;
         }
     } else if (currentStep === 2) {
-        const fields = selectedProgramType === 'adult' ? ['major'] : ['parent_name', 'parent_phone', 'parent_relationship'];
-        fields.forEach(f => {
+        ['parent_name', 'parent_phone', 'parent_relationship'].forEach(f => {
             const el = $(`[name="${f}"]`);
             if (!el.val()) { el.addClass('is-invalid'); isValid = false; }
         });
@@ -399,8 +658,45 @@ function validateCurrentStep() {
             isValid = false;
         }
     } else if (currentStep === 4) {
-        if (!$('#payment_method_id_hidden').val() || !$('input[name="student_fee_paid"]').val() || !document.getElementById('receipt_input').value) {
-            Swal.fire({ icon: 'warning', title: 'Please complete all payment fields and upload receipt.', customClass: { popup: 'swal-oxford-popup' } });
+        const paidVal = parseFloat($('input[name="student_fee_paid"]').val());
+        const receiptInput = document.getElementById('receipt_input');
+        const hasReceipt = receiptInput && receiptInput.files && receiptInput.files.length > 0;
+
+        if (!$('#payment_method_id_hidden').val()) {
+            Swal.fire({ icon: 'warning', title: 'يرجى اختيار طريقة الدفع', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        } else if (!$('input[name="student_fee_paid"]').val()) {
+            Swal.fire({ icon: 'warning', title: 'يرجى إدخال المبلغ المدفوع', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        } else if (isNaN(paidVal) || paidVal < 0) {
+            Swal.fire({ icon: 'warning', title: 'المبلغ المدفوع غير صالح', text: 'لا يمكن إدخال قيمة سالبة.', customClass: { popup: 'swal-oxford-popup' } });
+            isValid = false;
+        } else if (minPaymentDue > 0 && paidVal < minPaymentDue) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'المبلغ أقل من الحد الأدنى',
+                text: 'الحد الأدنى المطلوب للدفع هو ' + minPaymentDue.toFixed(2) + ' ILS، لا يمكنك المتابعة بمبلغ أقل.',
+                customClass: { popup: 'swal-oxford-popup' }
+            });
+            const paidInput = document.getElementsByName('student_fee_paid')[0];
+            if (paidInput) {
+                paidInput.classList.add('is-invalid');
+                paidInput.focus();
+            }
+            isValid = false;
+        } else if (!hasReceipt) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'يرجى رفع إيصال الدفع',
+                text: 'لا يمكن الانتقال إلى الخطوة الأخيرة قبل رفع صورة/ملف إيصال الدفع لتأكيد تحويل المبلغ.',
+                customClass: { popup: 'swal-oxford-popup' }
+            });
+            const dropzone = document.getElementById('receipt-dropzone');
+            if (dropzone) {
+                dropzone.classList.add('receipt-required-highlight');
+                dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => dropzone.classList.remove('receipt-required-highlight'), 2200);
+            }
             isValid = false;
         }
     } else if (currentStep === 5) {
@@ -410,6 +706,59 @@ function validateCurrentStep() {
         }
     }
     return isValid;
+}
+
+// Friendly Arabic labels for known fields (fallback to the field key if missing)
+const fieldLabelsAr = {
+    name: 'الاسم بالعربية',
+    name_en: 'الاسم بالإنجليزية',
+    email: 'البريد الإلكتروني',
+    mobile: 'رقم الجوال',
+    dob: 'تاريخ الميلاد',
+    gender: 'الجنس',
+    address: 'العنوان',
+    program_type: 'نوع البرنامج',
+    enrollment_type: 'نوع التسجيل',
+    program_id: 'البرنامج المستهدف',
+    current_level: 'المستوى الحالي',
+    test_date: 'تاريخ الاختبار',
+    preferred_days: 'الأيام المفضلة',
+    preferred_time: 'الوقت المفضل',
+    health_status: 'الحالة الصحية',
+    health_notes: 'تفاصيل الحالة الصحية',
+    parent_name: 'اسم ولي الأمر',
+    parent_phone: 'جوال ولي الأمر',
+    parent_relationship: 'صلة القرابة',
+    parent_email: 'بريد ولي الأمر',
+    major: 'التخصص / المهنة',
+    payment_method_id: 'طريقة الدفع',
+    student_fee_paid: 'المبلغ المدفوع',
+    payment_receipt: 'إيصال الدفع',
+    general_notes: 'الملاحظات العامة'
+};
+
+function buildValidationErrorsHTML(errorsObj) {
+    if (!errorsObj || typeof errorsObj !== 'object') return '';
+    const lang = document.documentElement.lang || 'en';
+    const dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    const align = lang === 'ar' ? 'right' : 'left';
+    let html = '<ul style="list-style:none; padding:0; margin:14px 0 0; text-align:'+align+'; direction:'+dir+';">';
+    Object.entries(errorsObj).forEach(([field, msgs]) => {
+        const label = fieldLabelsAr[field] || field;
+        const list = Array.isArray(msgs) ? msgs : [msgs];
+        list.forEach(m => {
+            html += `
+                <li style="display:flex; gap:10px; align-items:flex-start; padding:10px 12px; margin-bottom:8px; background:#fff5f5; border-${align === 'right' ? 'right' : 'left'}:4px solid #e53e3e; border-radius:8px; color:#742a2a; font-size:0.92rem; line-height:1.5;">
+                    <i class="bi bi-exclamation-circle-fill" style="color:#e53e3e; font-size:1.05rem; margin-top:2px;"></i>
+                    <div>
+                        <strong style="display:block; color:#003366; font-size:0.85rem; margin-bottom:2px;">${label}</strong>
+                        <span>${m}</span>
+                    </div>
+                </li>`;
+        });
+    });
+    html += '</ul>';
+    return html;
 }
 
 window.submitFinalForm = function() {
@@ -425,19 +774,67 @@ window.submitFinalForm = function() {
     fetch(window.registrationRoute || '/contact/book', {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({ title: getMsg('successTitle'), text: getMsg('successText'), icon: 'success', confirmButtonText: getMsg('ok'), customClass: { popup: 'swal-oxford-popup' }})
-            .then(() => window.location.href = '/');
-        } else {
-            Swal.fire({ title: getMsg('errorTitle'), text: data.message, icon: 'error', customClass: { popup: 'swal-oxford-popup' }});
+    .then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        return { ok: r.ok, status: r.status, json };
+    })
+    .then(({ ok, status, json }) => {
+        const data = json || {};
+        const lang = document.documentElement.lang || 'en';
+
+        // Success
+        if (ok && data.success) {
+            Swal.fire({
+                title: getMsg('successTitle'),
+                text: getMsg('successText'),
+                icon: 'success',
+                confirmButtonText: getMsg('ok'),
+                customClass: { popup: 'swal-oxford-popup', confirmButton: 'swal-oxford-confirm' },
+                buttonsStyling: false
+            }).then(() => window.location.href = '/');
+            return;
         }
+
+        // Validation errors (Laravel 422 or {status:'error', errors:{...}})
+        const hasFieldErrors = data.errors && typeof data.errors === 'object' && Object.keys(data.errors).length > 0;
+        if (status === 422 || hasFieldErrors) {
+            const html = buildValidationErrorsHTML(data.errors);
+            const count = data.errors ? Object.keys(data.errors).length : 0;
+            Swal.fire({
+                icon: 'error',
+                title: lang === 'ar' ? 'يرجى تصحيح الحقول التالية' : 'Please correct the following',
+                html: html || (lang === 'ar' ? 'حدث خطأ في التحقق من البيانات.' : 'Validation error.'),
+                footer: count ? (lang === 'ar' ? `<small>${count} حقل بحاجة لمراجعة</small>` : `<small>${count} field(s) need attention</small>`) : '',
+                confirmButtonText: lang === 'ar' ? 'حسناً، سأصحح' : 'OK, I will fix',
+                customClass: { popup: 'swal-oxford-popup swal-validation', confirmButton: 'swal-oxford-confirm' },
+                buttonsStyling: false,
+                width: 560
+            });
+            return;
+        }
+
+        // Generic server error with a message
+        Swal.fire({
+            icon: 'error',
+            title: getMsg('errorTitle'),
+            text: data.message || (lang === 'ar' ? 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى.' : 'Unexpected error, please try again.'),
+            confirmButtonText: lang === 'ar' ? 'موافق' : 'OK',
+            customClass: { popup: 'swal-oxford-popup', confirmButton: 'swal-oxford-confirm' },
+            buttonsStyling: false
+        });
     })
     .catch(err => {
-        Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection.', customClass: { popup: 'swal-oxford-popup' }});
+        const lang = document.documentElement.lang || 'en';
+        Swal.fire({
+            icon: 'error',
+            title: lang === 'ar' ? 'خطأ في الاتصال' : 'Network Error',
+            text: lang === 'ar' ? 'تعذّر الاتصال بالخادم، تحقق من الإنترنت.' : 'Could not reach the server. Check your connection.',
+            confirmButtonText: lang === 'ar' ? 'موافق' : 'OK',
+            customClass: { popup: 'swal-oxford-popup', confirmButton: 'swal-oxford-confirm' },
+            buttonsStyling: false
+        });
     });
 };
 

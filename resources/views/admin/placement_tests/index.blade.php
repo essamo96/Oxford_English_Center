@@ -51,9 +51,19 @@
                     <option value="female">أنثى (Female)</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()">
-                    <i class="ki-duotone ki-trash fs-4 me-1"></i> مسح الفلاتر
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">
+                    <i class="bi bi-stopwatch text-warning me-1"></i> الفئة العمرية
+                </label>
+                <select id="age_group" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="kids">أطفال (≤ 15 سنة)</option>
+                    <option value="adult">كبار (&gt; 15 سنة)</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()" title="مسح الفلاتر">
+                    <i class="ki-duotone ki-trash fs-4"></i>
                 </button>
             </div>
         </div>
@@ -236,7 +246,7 @@
     }
     var table;
     var tableId = 'placement_tests_table';
-    var filterFields = ['#search_text', '#test_date', '#test_time', '#program_type', '#gender'];
+    var filterFields = ['#search_text', '#test_date', '#test_time', '#program_type', '#gender', '#age_group'];
     
     var columns = [
         { 

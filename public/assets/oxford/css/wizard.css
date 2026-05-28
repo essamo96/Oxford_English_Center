@@ -214,79 +214,224 @@
     transform: translateY(0);
 }
 
+/* ============================================================
+   Modern Step Indicator — Oxford brand (navy #003366 + gold #ffcc00)
+   Editorial typography, brand-accurate colors, clear states.
+   ============================================================ */
 .wizard-header-steps {
-    background: #f8f9fa;
-    padding: 30px 50px;
+    background: linear-gradient(180deg, #fafbfd 0%, #ffffff 100%);
+    padding: 52px 64px 32px;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #eee;
+    align-items: flex-start;
+    border-bottom: 1px solid #e5e9f0;
+    position: relative;
+}
+
+/* Dashed connector — sits exactly through the circle centers */
+.step-track-line {
+    position: absolute;
+    top: 82px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: repeating-linear-gradient(
+        90deg,
+        #d8dde6 0,
+        #d8dde6 6px,
+        transparent 6px,
+        transparent 12px
+    );
+    z-index: 0;
+    overflow: visible;
+}
+
+.step-track-fill {
+    height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, #003366 0%, #ffcc00 100%);
+    border-radius: 2px;
+    transition: width 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+    position: relative;
+}
+.step-track-fill::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffcc00;
+    box-shadow: 0 0 0 5px rgba(255, 204, 0, 0.22);
 }
 
 .step-indicator {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
     position: relative;
     flex: 1;
-    z-index: 1;
+    z-index: 2;
+    cursor: default;
 }
 
-.step-indicator::after {
-    content: '';
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background: #e0e0e0;
-    z-index: -1;
-}
-
-.step-indicator:last-child::after {
-    display: none;
-}
-
+/* Circular numeral — bigger, more present */
 .step-number {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: var(--white);
-    border: 2px solid #e0e0e0;
+    background: #ffffff;
+    border: 2px solid #e5e9f0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: var(--text-muted);
-    transition: var(--transition-smooth);
+    color: #a1a8b8;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 51, 102, 0.06);
+}
+
+.step-number .step-icon-inner {
+    display: none;
+}
+
+.step-number .step-num-text {
+    position: static;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.55rem;
+    letter-spacing: 0;
+    line-height: 1;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
 }
 
 .step-indicator.active .step-number {
-    background: var(--secondary-color);
-    color: var(--white);
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 5px rgba(255, 204, 0, 0.2);
+    background: #003366;
+    color: #ffffff;
+    border-color: #003366;
+    box-shadow:
+        0 0 0 6px rgba(0, 51, 102, 0.1),
+        0 12px 28px rgba(0, 51, 102, 0.28);
+    transform: scale(1.1);
+}
+.step-indicator.active .step-number::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 1.5px dashed #ffcc00;
+    opacity: 0.55;
+    animation: stepRingPulse 3s ease-in-out infinite;
+}
+
+@keyframes stepRingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.45; }
+    50% { transform: scale(1.08); opacity: 0.75; }
 }
 
 .step-indicator.completed .step-number {
-    background: var(--secondary-color);
-    color: var(--white);
-    border-color: var(--secondary-color);
+    background: #ffcc00;
+    color: #003366;
+    border-color: #ffcc00;
+    box-shadow: 0 8px 20px rgba(255, 204, 0, 0.38);
 }
 
-.step-indicator.completed::after {
-    background: var(--secondary-color);
+.step-indicator.completed .step-num-text {
+    visibility: hidden;
+    position: relative;
+}
+.step-indicator.completed .step-num-text::before {
+    content: '\F26E'; /* bi-check-lg */
+    font-family: 'bootstrap-icons';
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.4rem;
+    visibility: visible;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #003366;
 }
 
 .step-label {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
+    font-weight: 700;
+    color: #6c7689;
     text-transform: uppercase;
+    letter-spacing: 0.12em;
+    transition: color 0.3s ease;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .step-indicator.active .step-label {
-    color: var(--primary-color);
+    color: #003366;
+    font-weight: 800;
+}
+
+.step-indicator.completed .step-label {
+    color: #003366;
+    opacity: 0.85;
+}
+
+/* Responsive — granular tiers */
+@media (max-width: 1199px) {
+    .wizard-header-steps { padding: 44px 44px 28px; }
+    .step-track-line { top: 76px; }
+    .step-number { width: 56px; height: 56px; }
+    .step-number .step-num-text { font-size: 1.4rem; }
+}
+
+@media (max-width: 991px) {
+    .wizard-header-steps { padding: 36px 32px 24px; }
+    .step-track-line { top: 66px; left: 11%; right: 11%; }
+    .step-number { width: 50px; height: 50px; }
+    .step-number .step-num-text { font-size: 1.25rem; }
+    .step-label { font-size: 0.78rem; letter-spacing: 0.1em; }
+    .step-indicator { gap: 13px; }
+    .step-indicator.completed .step-num-text::before { font-size: 1.2rem; }
+}
+
+@media (max-width: 768px) {
+    .wizard-header-steps { padding: 28px 18px 20px; }
+    .step-track-line { top: 56px; left: 13%; right: 13%; }
+    .step-number { width: 42px; height: 42px; border-width: 1.5px; }
+    .step-number .step-num-text { font-size: 1.05rem; }
+    .step-label { font-size: 0.66rem; letter-spacing: 0.08em; }
+    .step-indicator { gap: 10px; }
+    .step-indicator.active .step-number::before { inset: -6px; }
+    .step-indicator.completed .step-num-text::before { font-size: 1rem; }
+}
+
+@media (max-width: 480px) {
+    .wizard-header-steps { padding: 22px 8px 16px; }
+    .step-track-line { top: 50px; left: 15%; right: 15%; }
+    .step-number { width: 36px; height: 36px; }
+    .step-number .step-num-text { font-size: 0.95rem; }
+    /* Hide labels on tiny phones — circles tell the story */
+    .step-label { display: none; }
+    .step-indicator.active::after {
+        content: attr(data-step-nav);
+        position: absolute;
+        top: 48px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #003366;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
 }
 
 /* Wizard Body & Watermark */
@@ -862,6 +1007,21 @@ select.form-control {
 .file-upload-container:hover .upload-icon-wrapper {
     transform: translateY(-5px);
     color: var(--secondary-color);
+}
+
+/* Tighter vertical spacing for the payment receipt upload area */
+#receipt-dropzone {
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+    margin-top: 6px !important;
+    margin-bottom: 10px !important;
+}
+#receipt-dropzone .bi-cloud-arrow-up {
+    font-size: 3rem !important;
+    margin-bottom: 6px !important;
+}
+#receipt-dropzone p {
+    margin-bottom: 0 !important;
 }
 
 /* Step 3 Layout Refinement */

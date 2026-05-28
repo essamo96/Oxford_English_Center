@@ -41,7 +41,9 @@
                     {{-- Program --}}
                     <div class="mb-5">
                         <label class="form-label fw-bold required">البرنامج</label>
-                        <select name="program_id" id="programSelect" class="form-select" required onchange="loadGroupsByProgram(this.value)">
+                        <select name="program_id" id="programSelect" class="form-select" required
+                                onchange="loadGroupsByProgram(this.value); loadProgramMinPayment(this.value);"
+                                data-programs="{{ json_encode($programs->map(fn($p) => ['id' => $p->id, 'min_payment_percent' => $p->min_payment_percent, 'min_payment_fixed' => $p->min_payment_fixed])) }}">
                             <option value="">-- اختر البرنامج --</option>
                             @foreach($programs as $program)
                                 <option value="{{ $program->id }}">{{ $program->title }}</option>
@@ -83,6 +85,33 @@
                         </div>
                     </div>
 
+                    {{-- Minimum payment controls (program-level) --}}
+                    <div class="mb-5 p-4 rounded bg-light-warning border border-warning border-opacity-25">
+                        <label class="form-label fw-bold mb-2">
+                            <i class="bi bi-shield-check text-warning me-1"></i>
+                            الحد الأدنى للدفعة الأولى — على مستوى البرنامج
+                        </label>
+                        <div class="text-muted fs-8 mb-3">
+                            هذا الإعداد مرتبط بالبرنامج ككل وليس ببند رسوم بعينه. الحد الأدنى الفعلي هو الأعلى بين النسبة والمبلغ الثابت.
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fs-8 fw-bold">نسبة % من إجمالي الرسوم</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="min_payment_percent" class="form-control" placeholder="مثال: 30" step="0.01" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fs-8 fw-bold">مبلغ ثابت</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="min_payment_fixed" class="form-control" placeholder="مثال: 200" step="0.01" min="0">
+                                    <span class="input-group-text">ILS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-save2-fill me-2"></i> حفظ الإعدادات
                     </button>
@@ -112,6 +141,7 @@
                                 <th class="min-w-120px">المستوى</th>
                                 <th class="min-w-120px">نوع الرسوم</th>
                                 <th class="min-w-80px text-center">المبلغ</th>
+                                <th class="min-w-120px text-center">الحد الأدنى للدفعة</th>
                                 <th class="min-w-60px text-center">العمليات</th>
                             </tr>
                         </thead>
@@ -156,6 +186,24 @@
                                         <span class="text-dark fw-bold fs-5">{{ number_format($fee->amount, 2) }}</span>
                                         <span class="text-muted fs-8 ms-1">ILS</span>
                                     </td>
+                                    {{-- Minimum payment (program-level) --}}
+                                    <td class="text-center">
+                                        @php
+                                            $pct   = optional($fee->program)->min_payment_percent;
+                                            $fixed = optional($fee->program)->min_payment_fixed;
+                                        @endphp
+                                        @if(is_null($pct) && is_null($fixed))
+                                            <span class="text-muted fs-8 fst-italic">— غير محدد —</span>
+                                        @else
+                                            @if(!is_null($pct))
+                                                <span class="badge badge-light-info fw-bold me-1"><i class="bi bi-percent"></i> {{ rtrim(rtrim(number_format($pct, 2), '0'), '.') }}%</span>
+                                            @endif
+                                            @if(!is_null($fixed))
+                                                <span class="badge badge-light-warning fw-bold">{{ number_format($fixed, 2) }} ILS</span>
+                                            @endif
+                                            <div class="fs-9 text-muted mt-1">على مستوى البرنامج</div>
+                                        @endif
+                                    </td>
                                     {{-- Actions --}}
                                     <td class="text-center">
                                         <form action="{{ route('admin.financial.fees.delete', $fee->id) }}" method="POST"
@@ -171,7 +219,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-10">
+                                    <td colspan="6" class="text-center text-muted py-10">
                                         <i class="bi bi-inbox fs-1 d-block mb-3 text-muted opacity-25"></i>
                                         لا توجد أنواع رسوم مضافة حالياً.
                                     </td>
@@ -260,6 +308,27 @@ function loadGroupsByProgram(programId) {
         .catch(() => {
             select.innerHTML = '<option value="">-- رسوم عامة لكل المستويات --</option>';
         });
+}
+
+function loadProgramMinPayment(programId) {
+    const pctInput   = document.querySelector('input[name="min_payment_percent"]');
+    const fixedInput = document.querySelector('input[name="min_payment_fixed"]');
+    if (!pctInput || !fixedInput) return;
+
+    if (!programId) {
+        pctInput.value = '';
+        fixedInput.value = '';
+        return;
+    }
+
+    fetch(`/api/program-min-payment/${programId}`, { headers: { 'Accept': 'application/json' } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data || !data.success) return;
+            pctInput.value   = data.min_payment_percent !== null ? data.min_payment_percent : '';
+            fixedInput.value = data.min_payment_fixed   !== null ? data.min_payment_fixed   : '';
+        })
+        .catch(() => {});
 }
 
 function refreshTypesTable() {

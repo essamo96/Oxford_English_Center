@@ -59,7 +59,7 @@ class StudentsController extends AdminController
     public function getStudentDetails(Request $request)
     {
         $id = $request->get('id');
-        $student = Students::with(['gropes.group'])->find($id);
+        $student = Students::with(['gropes.group', 'parent'])->find($id);
         if (!$student) return "Student not found";
 
         return view('admin.students.parts.student_modal_content', compact('student'))->render();
@@ -359,8 +359,23 @@ class StudentsController extends AdminController
         $exam_degree = $request->get('exam_degree');
         $status = (int) $request->get('status');
         $newGropeId = $request->get('grope');
-        // dd($newGropeId);
 
+        // Default join_date to today if admin did not set it
+        if (empty($join_date)) {
+            $join_date = now()->toDateString();
+        }
+
+        // Derive program_type from age (kids if <=15, otherwise adult).
+        // Falls back to admin-provided value, then 'adult' as a safe default.
+        $programType = $request->get('program_type', 'adult');
+        if (!empty($dob)) {
+            try {
+                $studentAge = \Carbon\Carbon::parse($dob)->age;
+                $programType = ($studentAge <= 15) ? 'kids' : 'adult';
+            } catch (\Exception $e) {
+                // keep provided/default programType
+            }
+        }
 
         $validator = Validator::make([
             'name' => $name,
@@ -380,7 +395,20 @@ class StudentsController extends AdminController
             $password = $this->split_myString($mobile);
             $students = new Students();
             $gender = $request->get('gender', 1);
+            // NOTE: addStudent signature accepts more fields than passed here historically.
+            // Persist program_type + join_date directly so age-based routing is enforced even
+            // if the legacy positional call drops them.
+            $students->program_type = $programType;
+            $students->join_date = $join_date;
             $add = $students->addStudent($name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status, 0, $gender);
+            // Safety net — re-stamp join_date + program_type after addStudent in case
+            // the positional signature reset them.
+            if ($add && $students->id) {
+                $students->newQuery()->where('id', $students->id)->update([
+                    'join_date'    => $join_date,
+                    'program_type' => $programType,
+                ]);
+            }
             if ($add) {
                 $student_id = $students->id;
                 if (isset($newGropeId) && $student_id != null) {
@@ -457,6 +485,23 @@ class StudentsController extends AdminController
             $status = (int) $request->get('status');
             $newGropeId = $request->get('grope');
 
+            // Preserve existing join_date if admin cleared the field, otherwise fall back to today
+            if (empty($join_date)) {
+                $join_date = $info->join_date ?: now()->toDateString();
+            }
+
+            // Re-evaluate program_type from (possibly updated) DOB
+            $programType = $info->program_type;
+            $dobForAge = !empty($dob) ? $dob : $info->dob;
+            if (!empty($dobForAge)) {
+                try {
+                    $studentAge = \Carbon\Carbon::parse($dobForAge)->age;
+                    $programType = ($studentAge <= 15) ? 'kids' : 'adult';
+                } catch (\Exception $e) {
+                    // keep existing programType
+                }
+            }
+
             $validator = Validator::make([
                 'name' => $name,
                 'mobile' => $mobile,
@@ -475,6 +520,11 @@ class StudentsController extends AdminController
                 $username = $this->split_myString($mobile);
                 $password = $this->split_myString($mobile);
                 $update = $students->updateStudent($info, $name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status);
+                // Re-stamp join_date + age-derived program_type after legacy update call
+                $students->newQuery()->where('id', $id)->update([
+                    'join_date'    => $join_date,
+                    'program_type' => $programType,
+                ]);
                 if ($update) {
 
                     session()->flash('success', self::UPDATE_SUCCESS);
@@ -503,8 +553,22 @@ class StudentsController extends AdminController
         $students = new Students();
         $info = $students->getStudent($id);
         if ($info) {
+            $parentId = $info->parent_id;
+            $studentId = $info->id;
             $delete = $students->deleteStudent($info);
             if ($delete) {
+                // Cascade: soft-delete the student's placement tests so admin lists clear out
+                \App\Models\PlacementTests::where('student_id', $studentId)->delete();
+
+                // Cascade: remove parent only if no other (non-trashed) children remain
+                if ($parentId) {
+                    $siblingsLeft = Students::where('parent_id', $parentId)
+                        ->whereNull('deleted_at')
+                        ->count();
+                    if ($siblingsLeft === 0) {
+                        \App\Models\Parents::where('id', $parentId)->delete();
+                    }
+                }
                 return response()->json(['status' => 'success', 'message' => self::DELETE_SUCCESS]);
             } else {
                 return response()->json(['status' => 'error', 'message' => self::EXECUTION_ERROR]);

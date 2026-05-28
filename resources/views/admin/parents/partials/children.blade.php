@@ -13,8 +13,14 @@
                 <tr>
                     <td>
                         <div class="d-flex align-items-center">
-                            <div class="symbol symbol-30px me-3">
-                                <img src="{{ $student->image ? asset('uploads/'.$student->image) : asset('assets/oxford/img/no-image.png') }}" alt="" />
+                            <div class="symbol symbol-40px me-3">
+                                @php
+                                    $defaultAvatar = asset('assets/media/avatars/blank.png');
+                                    $studentImg = $student->image ? asset('uploads/'.$student->image) : $defaultAvatar;
+                                @endphp
+                                <img src="{{ $studentImg }}" alt="{{ $student->name }}"
+                                     onerror="this.onerror=null; this.src='{{ $defaultAvatar }}';"
+                                     style="object-fit: cover; border-radius: 50%;" />
                             </div>
                             <div class="d-flex flex-column">
                                 <span class="text-gray-800 fw-bold fs-6">{{ $student->name }}</span>
@@ -29,8 +35,8 @@
                         <span class="badge badge-light-success">{{ $student->program_type }}</span>
                     </td>
                     <td class="text-end">
-                        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-sm btn-icon btn-light-primary" target="_blank">
-                            <i class="bi bi-eye"></i>
+                        <a href="{{ route('students.edit', \Illuminate\Support\Facades\Crypt::encrypt($student->id)) }}" class="btn btn-sm btn-icon btn-light-primary" target="_blank" title="تعديل بيانات الطالب">
+                            <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>
                 </tr>

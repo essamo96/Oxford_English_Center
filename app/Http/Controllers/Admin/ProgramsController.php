@@ -106,6 +106,27 @@ class ProgramsController extends AdminController
             return '<span class="badge badge-light-dark fs-5 fw-bold fs-5 me-1 p-3">0 - طلاب</span>';
         });
 
+        $datatable->addColumn('min_payment', function ($row) {
+            $pct   = $row->min_payment_percent;
+            $fixed = $row->min_payment_fixed;
+
+            if (is_null($pct) && is_null($fixed)) {
+                return '<span class="text-muted fst-italic fs-7">— غير محدد —</span>';
+            }
+
+            $html = '<div class="d-flex flex-column gap-1 align-items-center">';
+            if (!is_null($pct)) {
+                $pctStr = rtrim(rtrim(number_format($pct, 2), '0'), '.');
+                $html .= '<span class="badge badge-light-info fw-bold fs-7"><i class="bi bi-percent me-1"></i> ' . $pctStr . '% نسبة</span>';
+            }
+            if (!is_null($fixed)) {
+                $html .= '<span class="badge badge-light-warning fw-bold fs-7"><i class="bi bi-cash-coin me-1"></i> ' . number_format($fixed, 2) . ' ILS ثابت</span>';
+            }
+            $html .= '<small class="text-muted fs-9 mt-1">يُطبَّق الأعلى منهما</small>';
+            $html .= '</div>';
+            return $html;
+        });
+
         $datatable->addColumn('actions', function ($row) {
             $data['id'] = $row->id;
             $data['btn_class'] = parent::$data['btn_class'];

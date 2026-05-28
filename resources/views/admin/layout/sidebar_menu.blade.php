@@ -119,7 +119,7 @@
                 </div>
 
                 <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['parents', 'payment_methods', 'placement_tests']) ? 'here show' : '' }} menu-accordion">
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['parents', 'payment_methods', 'placement_tests', 'relationships']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="ki-duotone ki-briefcase fs-1 text-info"><span
                                      class="path1"></span><span class="path2"></span></i></span>
@@ -146,6 +146,13 @@
                                 href="{{ route('payment_methods.view') }}">
                                 <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                 <span class="menu-title">طرق الدفع</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'relationships' ? 'active' : '' }}"
+                                href="{{ route('admin.relationships.index') }}">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">صلات القرابة</span>
                             </a>
                         </div>
                     </div>

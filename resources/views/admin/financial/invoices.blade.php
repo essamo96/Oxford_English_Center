@@ -123,6 +123,23 @@
         </div>
     </div>
 
+    <!-- All Student Invoices Modal -->
+    <div class="modal fade" id="all_invoices_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mw-1000px">
+            <div class="modal-content">
+                <div class="modal-header py-3">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-receipt-cutoff text-warning me-2"></i>كل الفواتير</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="all_invoices_content">
+                    <div class="text-center py-10">
+                        <span class="spinner-border w-50px h-50px text-warning" role="status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Record Payment Modal -->
     <div class="modal fade" id="recordPaymentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -231,6 +248,23 @@
         window.showStudentModal = function(id) {
             fetchModalContent('{{ route('students.details') }}', { id: id });
         }
+
+        // All Invoices Modal — opens per-student detailed ledger across every program/test
+        window.showAllInvoices = function(studentId) {
+            const url = '{{ url('admin/financial/invoices/student') }}/' + studentId;
+            $('#all_invoices_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px text-warning" role="status"></span></div>');
+            $('#all_invoices_modal').modal('show');
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(html) {
+                    $('#all_invoices_content').html(html);
+                },
+                error: function() {
+                    $('#all_invoices_content').html('<div class="alert alert-danger m-4">تعذّر تحميل بيانات الفواتير</div>');
+                }
+            });
+        };
 
         function fetchModalContent(url, data) {
             $('#modal_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px" role="status"></span></div>');

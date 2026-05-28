@@ -298,6 +298,21 @@ class TeacherController extends AdminController {
     }
 
     //////////////////////////////////////////////
+    // AJAX: check username uniqueness (exclude optional id)
+    public function checkUsername(Request $request)
+    {
+        $username = $request->get('username');
+        $exclude = $request->get('exclude');
+        if (!$username) return response()->json(['exists' => false]);
+        $q = Teachers::where('username', $username);
+        if ($exclude) {
+            try { $excludeId = Crypt::decrypt($exclude); $q->where('id', '!=', $excludeId); } catch (\Exception $e) {}
+        }
+        $exists = $q->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    //////////////////////////////////////////////
     public function getPassword(Request $request, $id) {
         try {
             $id = Crypt::decrypt($id);

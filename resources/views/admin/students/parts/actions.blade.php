@@ -1,9 +1,10 @@
-<div class="dropdown">
-    <a href="#" class="btn btn-sm btn-light btn-active-light-primary dropdown-toggle border" data-bs-toggle="dropdown" 
-        data-bs-boundary="viewport" data-kt-menu-placement="bottom-end" aria-expanded="false">
+<div class="dropdown actions-dropdown">
+    <a href="#" class="btn btn-sm btn-light btn-active-light-primary dropdown-toggle border"
+        data-bs-toggle="dropdown" data-bs-strategy="fixed" data-bs-display="dynamic"
+        data-bs-boundary="window" data-kt-menu-placement="bottom-end" aria-expanded="false">
         إجراءات
     </a>
-    <div class="dropdown-menu menu menu-sub menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4" data-kt-menu="true">
+    <div class="dropdown-menu menu menu-sub menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-200px py-4 actions-dropdown-menu" data-kt-menu="true">
         @can('admin.students.edit')
             <div class="menu-item px-3">
                 <a href="{{ route('students.edit', ['id' => Crypt::encrypt($id)]) }}" class="menu-link px-3">
