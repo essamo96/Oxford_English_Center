@@ -12,6 +12,15 @@
     <li class="breadcrumb-item text-muted">كشف حساب الطلاب</li>
 @stop
 
+@section('css')
+<style>
+    /* Row-level highlights for special transaction types */
+    #kt_invoices_table tbody tr.row-credit  td { background: rgba(0,158,247,0.06) !important; border-inline-start: 3px solid #009ef7 !important; }
+    #kt_invoices_table tbody tr.row-refund  td { background: rgba(241,65,108,0.06) !important; border-inline-start: 3px solid #f1416c !important; }
+    #kt_invoices_table tbody tr.row-payment td { background: transparent; }
+</style>
+@endsection
+
 @section('page-content')
 @php $active_menu = 'financial_invoices'; @endphp
 
@@ -64,31 +73,39 @@
 <div class="card shadow-sm">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-                <div class="d-flex align-items-center position-relative">
-                    <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5"><span class="path1"></span><span class="path2"></span></i>
-                    <input type="text" id="invoice_search" class="form-control form-control-solid w-220px ps-13" placeholder="بحث: اسم/جوال/إيميل..." />
+            <style>
+                /* Ensure invoice filters stay on a single horizontal row and align vertically */
+                .invoice-filters { display:flex; flex-wrap:nowrap; gap:0.5rem; align-items:center; overflow-x:auto; }
+                .invoice-filters .form-control, .invoice-filters .form-select { height:36px; min-height:36px; }
+                .invoice-filters label.form-check { height:36px; display:flex; align-items:center; }
+                .invoice-filters .form-check .form-check-input { margin-top:0; }
+                @media (max-width: 720px) { .invoice-filters { gap:0.4rem; } }
+            </style>
+            <div class="d-flex invoice-filters" style="overflow-x:auto;">
+                <div class="d-flex align-items-center position-relative flex-shrink-0">
+                    <i class="ki-duotone ki-magnifier fs-4 position-absolute ms-4"><span class="path1"></span><span class="path2"></span></i>
+                    <input type="text" id="invoice_search" class="form-control form-control-solid form-control-sm ps-11" placeholder="بحث..." style="width:180px;" />
                 </div>
-                <select id="invoice_program_type" class="form-select form-select-solid w-150px">
-                    <option value="">نوع البرنامج</option>
-                    <option value="adult">الكبار</option>
-                    <option value="kids">الأطفال</option>
+                <select id="invoice_program_type" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:130px;">
+                    <option value="">النوع</option>
+                    <option value="adult">كبار</option>
+                    <option value="kids">أطفال</option>
                 </select>
-                <select id="invoice_program_id" class="form-select form-select-solid w-180px">
-                    <option value="">البرنامج (الكل)</option>
+                <select id="invoice_program_id" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:160px;">
+                    <option value="">البرنامج</option>
                     @foreach($programs_filter ?? [] as $p)
                         <option value="{{ $p->id }}">{{ $p->title }}</option>
                     @endforeach
                 </select>
-                <select id="invoice_level" class="form-select form-select-solid w-130px">
-                    <option value="">المستوى (الكل)</option>
+                <select id="invoice_level" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:120px;">
+                    <option value="">المستوى</option>
                     @foreach($levels_filter ?? [] as $lv)
                         <option value="{{ $lv }}">{{ $lv }}</option>
                     @endforeach
                 </select>
-                <label class="form-check form-switch form-check-custom form-check-solid bg-light-danger px-3 py-2 rounded border border-danger border-dashed">
+                <label class="form-check form-switch form-check-custom form-check-solid bg-light-danger px-2 py-1 rounded border border-danger border-dashed flex-shrink-0 mb-0" style="height:33px;">
                     <input class="form-check-input" type="checkbox" id="invoice_only_outstanding" value="1">
-                    <span class="ms-2 fw-bold text-danger fs-7"><i class="bi bi-exclamation-circle me-1"></i> مستحقات فقط</span>
+                    <span class="ms-2 fw-bold text-danger" style="font-size:0.78rem;"><i class="bi bi-exclamation-circle me-1"></i> مستحقات</span>
                 </label>
             </div>
         </div>
@@ -215,6 +232,12 @@
                 }},
                 { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' },
             ],
+            // Tint rows by transaction type so credit/refund are obvious in the list
+            createdRow: function (row, data) {
+                const t = (data && data.tx_type_class) || 'payment';
+                $(row).addClass('row-' + t);
+            },
+            order: [[6, 'desc']], // newest first by created_at
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
             }

@@ -59,7 +59,7 @@
                 </div>
                 <div class="menu-item px-3">
                     <a class="menu-link px-3" style="cursor:pointer;"
-                        onclick="openQrGenModal({{ $id }}, 'admin')">
+                        onclick="openQrGenModal({{ $id }}, 'admin', {{ json_encode($group_name ?? '') }})">
                         <span class="menu-icon"><i class="bi bi-qr-code-scan fs-4 text-warning"></i></span>
                         <span class="menu-title">إنشاء QR للتشعيب</span>
                     </a>

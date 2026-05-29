@@ -16,6 +16,7 @@ class GroupStudentsFees extends Model
         'student_fee_paid',
         'student_paid_type',
         'group_id',
+        'program_id',
         'payment_receipt',
         'admin_verified_amount',
         'total_due_amount',

@@ -94,15 +94,78 @@ class FinancialController extends AdminController
                 }
             })
             ->addColumn('actions', function ($row) {
-                $pId = $row->student ? $row->student->program_id : 0;
-                $sId = $row->student ? $row->student->id : 0;
+                // Pick the program the applicant actually chose at registration time.
+                // Stored directly on the fee row now; fall back to the student record for legacy data.
+                $pId  = $row->program_id ?: ($row->student->program_id ?? 0);
+                $sId  = $row->student ? $row->student->id : 0;
                 $type = (string) $row->student_paid_type;
-                // Use data-attributes and classes to avoid inline JS string-escaping issues
                 return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
                         <button data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-refund">رفض</button>';
             })
             ->rawColumns(['receipt', 'actions', 'created_at'])
             ->make(true);
+    }
+
+    /**
+     * AJAX: compute the price-difference summary when admin changes the program in the modal.
+     *
+     * Inputs (query string):
+     *   fee_id           – the pending fee row being verified
+     *   new_program_id   – the program the admin wants to move them to
+     *   verified_amount  – the amount the admin will actually verify (defaults to student_fee_paid)
+     *
+     * Returns:
+     *   original_fee     – total_due_amount from the registration row
+     *   new_fee          – sum of fees for the chosen program (excluding placement_test)
+     *   delta            – new_fee - original_fee  (positive ⇒ student owes more)
+     *   verified         – the actual amount admin will count
+     *   outstanding      – new_fee - verified      (positive ⇒ remaining, negative ⇒ credit)
+     *   credit_amount    – how much excess (if any) the student has already paid
+     *   recommendation   – textual hint for the admin (which action to take)
+     */
+    public function computeProgramSwapDiff(Request $request)
+    {
+        $request->validate([
+            'fee_id'          => 'required|exists:group_students_fees,id',
+            'new_program_id'  => 'required|exists:programs,id',
+            'verified_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $fee = GroupStudentsFees::find($request->fee_id);
+        $verified = $request->filled('verified_amount')
+            ? (float) $request->verified_amount
+            : (float) ($fee->student_fee_paid ?? 0);
+
+        $originalFee = (float) ($fee->total_due_amount ?? 0);
+
+        // New program's course fee (exclude placement_test — that's billed separately)
+        $newFee = (float) \App\Models\FeeSettings::where('program_id', $request->new_program_id)
+            ->where('type', '!=', 'placement_test')
+            ->sum('amount');
+
+        $delta       = $newFee - $originalFee;        // > 0 → owes more, < 0 → originally over-priced
+        $outstanding = $newFee - $verified;           // > 0 → remaining, < 0 → credit
+        $credit      = $outstanding < 0 ? abs($outstanding) : 0.0;
+
+        // Build a recommendation for the admin
+        if (abs($outstanding) < 0.01) {
+            $reco = ['type' => 'balanced',  'message' => '✅ المبلغ المدفوع يطابق الرسوم الجديدة تماماً.'];
+        } elseif ($outstanding > 0) {
+            $reco = ['type' => 'remaining', 'message' => '⚠️ متبقّي على الطالب ' . number_format($outstanding, 2) . ' ILS بعد التغيير.'];
+        } else {
+            $reco = ['type' => 'credit',    'message' => 'ℹ️ الطالب دفع زيادة ' . number_format($credit, 2) . ' ILS — يمكنك إيداعها كرصيد له أو ردّها.'];
+        }
+
+        return response()->json([
+            'success'       => true,
+            'original_fee'  => $originalFee,
+            'new_fee'       => $newFee,
+            'delta'         => $delta,
+            'verified'      => $verified,
+            'outstanding'   => max(0, $outstanding),
+            'credit_amount' => $credit,
+            'recommendation'=> $reco,
+        ]);
     }
 
     /**
@@ -156,6 +219,10 @@ class FinancialController extends AdminController
             'program_id'           => 'nullable|exists:programs,id',
             // Optional: admin changing the student's chosen program
             'change_program_to'    => 'nullable|exists:programs,id',
+            // When admin moves the student to a CHEAPER program and over-payment exists:
+            //   'keep'   → store as credit balance on the student's ledger
+            //   'refund' → record a refund transaction
+            'credit_action'        => 'nullable|in:keep,refund',
         ]);
 
         DB::beginTransaction();
@@ -193,7 +260,56 @@ class FinancialController extends AdminController
             if ($request->group_id) {
                 $fee->group_id = $request->group_id;
             }
+            if ($request->change_program_to) {
+                $fee->program_id = $request->change_program_to;
+            }
             $fee->save();
+
+            // -------- Over-payment handling (only when program was swapped to a cheaper one) --------
+            $extraEmailNote = null;
+            if ($request->change_program_to && !$isPlacementTestFee) {
+                $verified = (float) $request->verified_amount;
+                $overPay  = $verified - $newTotal;          // > 0 means student paid extra
+                if ($overPay > 0.01) {
+                    $action = $request->credit_action ?: 'keep';
+                    if ($action === 'refund') {
+                        // Record a refund row. Keep the original payment intact so the ledger
+                        // naturally nets to (paid 1350) - (refund 500) = 850 = newTotal.
+                        GroupStudentsFees::create([
+                            'student_id'        => $fee->student_id,
+                            'group_id'          => $fee->group_id,
+                            'program_id'        => $fee->program_id,
+                            'student_fee_paid'  => 0,
+                            'transaction_amount'=> $overPay,
+                            'transaction_type'  => 'refund',
+                            'total_due_amount'  => 0,
+                            'remaining_amount'  => 0,
+                            'student_paid_type' => 'Program Swap Refund',
+                            'status'            => 'confirmed',
+                            'audit_status'      => 'verified',
+                            'notes'             => 'استرداد فرق سعر بعد تغيير البرنامج (' . number_format($overPay, 2) . ' ILS)',
+                        ]);
+                        $extraEmailNote = 'تم تسجيل استرداد ' . number_format($overPay, 2) . ' ILS كفرق سعر.';
+                    } else {
+                        // 'keep' → store as credit so it offsets future fees automatically
+                        GroupStudentsFees::create([
+                            'student_id'        => $fee->student_id,
+                            'group_id'          => null,
+                            'program_id'        => null,
+                            'student_fee_paid'  => 0,
+                            'transaction_amount'=> $overPay,
+                            'transaction_type'  => 'credit',
+                            'total_due_amount'  => 0,
+                            'remaining_amount'  => 0,
+                            'student_paid_type' => 'Credit Balance',
+                            'status'            => 'confirmed',
+                            'audit_status'      => 'verified',
+                            'notes'             => 'رصيد دائن للطالب بعد تغيير البرنامج (' . number_format($overPay, 2) . ' ILS)',
+                        ]);
+                        $extraEmailNote = 'يوجد رصيد دائن لك بقيمة ' . number_format($overPay, 2) . ' ILS سيُحسم من رسوم لاحقة.';
+                    }
+                }
+            }
 
             $emailReports = [];
 
@@ -284,6 +400,9 @@ class FinancialController extends AdminController
                     : 'تم تأكيد الدفعة وتفعيل الحساب (لم يُسكَّن في مجموعة بعد).');
             if (!empty($emailReports)) {
                 $msg .= ' (' . implode(' · ', $emailReports) . ')';
+            }
+            if (!empty($extraEmailNote)) {
+                $msg .= ' — ' . $extraEmailNote;
             }
 
             return response()->json(['status' => 'success', 'message' => $msg]);
@@ -418,7 +537,8 @@ class FinancialController extends AdminController
                 $join->on('group_students.student_id', '=', 'group_students_fees.student_id')
                      ->on('group_students.group_id', '=', 'group_students_fees.group_id');
             })
-            ->leftJoin('groups as fg', 'fg.id', '=', 'group_students_fees.group_id');
+            ->leftJoin('groups as fg', 'fg.id', '=', 'group_students_fees.group_id')
+            ->orderBy('group_students_fees.created_at', 'desc'); // newest entries first (incl. credit/refund)
             
         // Apply Filters (all combined with AND)
         if ($request->program_type) {
@@ -434,9 +554,14 @@ class FinancialController extends AdminController
             });
         }
 
-        // NEW: Has-outstanding filter (remaining_amount > 0)
+        // NEW: Has-outstanding filter (remaining_amount > 0).
+        // Credit and refund rows are special (no due amount) — always include them so
+        // admin sees the credit/refund event in the list even when filtering for outstanding.
         if ($request->only_outstanding == 1) {
-            $query->where('group_students_fees.remaining_amount', '>', 0);
+            $query->where(function ($q) {
+                $q->where('group_students_fees.remaining_amount', '>', 0)
+                  ->orWhereIn('group_students_fees.transaction_type', ['credit', 'refund']);
+            });
         }
 
         // NEW: filter by specific program (joins through fg → program)
@@ -458,13 +583,27 @@ class FinancialController extends AdminController
                 return $row->student->name . $pType;
             })
             ->editColumn('program_level', function ($row) {
-                $program = ($row->group && $row->group->program) ? $row->group->program->title : 'N/A';
-                $level = $row->group ? $row->group->name : 'N/A';
+                // Special label for credit & refund rows so they're never mistaken for an enrollment
+                if ($row->transaction_type === 'credit') {
+                    return '<span class="badge badge-light-primary fw-bold"><i class="bi bi-piggy-bank-fill me-1"></i>رصيد دائن للطالب</span>';
+                }
+                if ($row->transaction_type === 'refund') {
+                    return '<span class="badge badge-light-danger fw-bold"><i class="bi bi-arrow-counterclockwise me-1"></i>استرداد رسوم</span>';
+                }
+                $program = ($row->group && $row->group->program) ? $row->group->program->title : '—';
+                $level = $row->group ? $row->group->name : '—';
                 return $program . ' / ' . $level;
             })
             ->editColumn('admin_verified_amount', function ($row) {
-                $prefix = $row->transaction_type == 'refund' ? '-' : '';
-                return '<span class="fw-bold">'.$prefix . number_format($row->transaction_amount, 2) . ' ILS</span>';
+                // Sign + colour by transaction type
+                $amount = (float) $row->transaction_amount;
+                if ($row->transaction_type === 'refund') {
+                    return '<span class="text-danger fw-bold fs-6">− '.number_format($amount, 2).' ILS</span>';
+                }
+                if ($row->transaction_type === 'credit') {
+                    return '<span class="text-primary fw-bold fs-6">⊕ '.number_format($amount, 2).' ILS</span>';
+                }
+                return '<span class="text-success fw-bold fs-6">+ '.number_format($amount, 2).' ILS</span>';
             })
             ->editColumn('remaining_amount', function ($row) {
                 $ledger = $this->financialService->getStudentLedger($row->student_id, $row->group_id);
@@ -525,7 +664,11 @@ class FinancialController extends AdminController
                 $btns .= '</div>';
                 return $btns;
             })
-            ->rawColumns(['student', 'admin_verified_amount', 'remaining_amount', 'audit_status', 'actions'])
+            ->addColumn('tx_type_class', function ($row) {
+                // Used by the front-end createdRow callback for row highlighting
+                return $row->transaction_type ?: 'payment';
+            })
+            ->rawColumns(['student', 'program_level', 'admin_verified_amount', 'remaining_amount', 'audit_status', 'actions'])
             ->make(true);
     }
 

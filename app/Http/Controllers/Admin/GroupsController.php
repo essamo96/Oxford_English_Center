@@ -765,13 +765,13 @@ class GroupsController extends AdminController
 
         $datatable->editColumn('code', function ($row) {
             $x = Str::random(8);
-            return '<button type="button" onclick="generatekey(' . $row->id . ')" data-random="' . $x . '" class="btn btn-sm btn-light-warning fw-bold">
+            return '<button type="button" onclick="generatekey(' . $row->id . ')" data-random="' . $x . '" class="btn btn-xs btn-light-warning fw-bold">
                         <i class="bi bi-key-fill fs-5 me-1"></i> كود
                     </button>';
         });
 
         $datatable->editColumn('certifcate', function ($row) {
-            return '<button type="button" onclick="generateCertificateCode(' . $row->id . ')" class="btn btn-sm btn-light-success fw-bold">
+            return '<button type="button" onclick="generateCertificateCode(' . $row->id . ')" class="btn btn-xs btn-light-success fw-bold">
                         <i class="bi bi-file-earmark-arrow-up fs-5 me-1"></i> تصدير
                     </button>';
         });
@@ -802,6 +802,7 @@ class GroupsController extends AdminController
         $datatable->addColumn('actions', function ($row) {
             $data['id'] = $row->id;
             $data['teacher_id'] = $row->teacher_id;
+            $data['group_name'] = $row->name ?? '';
             $data['x'] = 2;
             return view('admin.groups.parts.actions', $data)->render();
         });

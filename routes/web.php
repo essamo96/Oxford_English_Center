@@ -593,6 +593,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('financial/invoices/list', ['as' => 'admin.financial.invoices.list', 'uses' => 'FinancialController@getInvoicesLedgerList']);
     Route::get('financial/invoices/student/{studentId}', ['as' => 'admin.financial.invoices.student', 'uses' => 'FinancialController@getStudentInvoices']);
     Route::get('financial/groups/{programId}', ['as' => 'admin.financial.groups_by_program', 'uses' => 'FinancialController@getActualGroupsByProgram']);
+    Route::get('financial/pending/program-swap-diff', ['as' => 'admin.financial.program_swap_diff', 'uses' => 'FinancialController@computeProgramSwapDiff']);
 
     Route::get('financial/ledger/{studentId}/{groupId}', ['as' => 'admin.financial.ledger', 'uses' => 'FinancialController@ledger']);
     Route::post('financial/record-payment', ['as' => 'admin.financial.record_payment', 'uses' => 'FinancialController@postRecordPayment']);

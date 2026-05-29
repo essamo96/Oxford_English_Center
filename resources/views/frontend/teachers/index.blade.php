@@ -27,6 +27,146 @@
         background: #f5222d;
         color: white;
     }
+
+    /* QR button — matches the close button style but in brand colors */
+    .btn-qr-group {
+        background: rgba(255, 204, 0, 0.15);
+        color: #003366;
+        border: 1px solid rgba(255, 204, 0, 0.4);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .btn-qr-group:hover { background: #ffcc00; color: #003366; border-color: #ffcc00; }
+
+    /* Teacher QR Modal — themed header + animated overlay (mirrors admin side) */
+    #teacherQrModal .modal-content { border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 24px 60px rgba(0, 51, 102, 0.25); }
+    #teacherQrModal .modal-header {
+        background: linear-gradient(135deg, #003366 0%, #001a40 100%);
+        color: #fff !important;
+        border-bottom: 3px solid #ffcc00;
+    }
+    #teacherQrModal .modal-header .modal-title { font-size: 1.15rem; }
+    #teacherQrModal #teacherQrGroupName {
+        font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        color: #ffcc00;
+        text-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+    }
+    #teacherQrModal .modal-header .btn-close { filter: invert(1) brightness(1.5); opacity: 0.85; }
+    #teacherQrCanvas { max-width: 280px; width: 100%; }
+    .teacher-qr-wrap { background: #fff !important; border: 2px solid #003366 !important; }
+
+    /* Generate button — white text/icon + navy gradient + gold shimmer */
+    #teacherQrGenBtn, #teacherQrRegen {
+        background: linear-gradient(135deg, #003366 0%, #0a4486 50%, #003366 100%) !important;
+        background-size: 200% 200% !important;
+        color: #ffffff !important;
+        border: 2px solid transparent !important;
+        padding: 14px 28px !important;
+        font-weight: 700 !important;
+        font-size: 1.02rem !important;
+        letter-spacing: 0.04em;
+        border-radius: 10px !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 8px 22px rgba(0, 51, 102, 0.32);
+        transition: all 0.3s ease;
+        animation: tQrBtnGradient 4s ease infinite;
+        position: relative;
+        overflow: hidden;
+    }
+    @keyframes tQrBtnGradient {
+        0%, 100% { background-position: 0% 50%; }
+        50%      { background-position: 100% 50%; }
+    }
+    #teacherQrGenBtn i, #teacherQrGenBtn span { color: #fff !important; }
+    #teacherQrGenBtn i { transition: transform 0.4s ease; }
+    #teacherQrGenBtn:hover { transform: translateY(-2px); border-color: #ffcc00 !important; box-shadow: 0 12px 28px rgba(0, 51, 102, 0.42); color: #fff !important; }
+    #teacherQrGenBtn:hover i { transform: rotate(-15deg) scale(1.1); }
+    #teacherQrGenBtn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 0%, rgba(255,204,0,0.25) 50%, transparent 100%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+    #teacherQrGenBtn:hover::after { transform: translateX(100%); }
+
+    /* Scan-frame overlay (same flavor as admin) */
+    #teacherQrSpinner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(4px);
+        border-radius: inherit;
+    }
+    .t-qr-scan-frame {
+        width: 65%;
+        aspect-ratio: 1 / 1;
+        position: relative;
+        margin-bottom: 14px;
+    }
+    .t-qr-corner {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border: 4px solid #ffcc00;
+        animation: tQrCornerPulse 1.4s ease-in-out infinite;
+    }
+    .t-qr-corner.tl { top:0; left:0;    border-right:none; border-bottom:none; border-radius: 4px 0 0 0; }
+    .t-qr-corner.tr { top:0; right:0;   border-left:none;  border-bottom:none; border-radius: 0 4px 0 0; }
+    .t-qr-corner.bl { bottom:0; left:0;  border-right:none; border-top:none;    border-radius: 0 0 0 4px; }
+    .t-qr-corner.br { bottom:0; right:0; border-left:none;  border-top:none;    border-radius: 0 0 4px 0; }
+    @keyframes tQrCornerPulse {
+        0%, 100% { transform: scale(1);    opacity: 1;   }
+        50%      { transform: scale(1.15); opacity: 0.65; }
+    }
+    .t-qr-scan-line {
+        position: absolute;
+        left: 6%;
+        right: 6%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent 0%, #ffcc00 50%, transparent 100%);
+        box-shadow: 0 0 18px 2px #ffcc00, 0 0 6px rgba(255, 204, 0, 0.8);
+        border-radius: 3px;
+        top: 0;
+        animation: tQrScanSweep 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes tQrScanSweep {
+        0%   { top: 8%;  opacity: 0; }
+        10%  { opacity: 1; }
+        45%  { top: 92%; opacity: 1; }
+        55%  { top: 92%; opacity: 0; }
+        56%  { top: 8%;  opacity: 0; }
+        66%  { opacity: 1; }
+        95%  { top: 92%; opacity: 1; }
+        100% { top: 92%; opacity: 0; }
+    }
+    .t-qr-text {
+        color: #003366;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        animation: tQrTextPulse 1.8s ease-in-out infinite;
+    }
+    .t-qr-text i { color: #ffcc00; font-size: 1.2rem; animation: tQrIconSpin 2.5s linear infinite; }
+    @keyframes tQrIconSpin  { to { transform: rotate(360deg); } }
+    @keyframes tQrTextPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 </style>
 @endsection
 
@@ -236,11 +376,19 @@
                                 <div class="course-body">
                                     <div class="d-flex justify-content-between align-items-start mb-10">
                                         <h4 class="course-title">{{ $group->program->title }}</h4>
-                                        <button class="btn-stop-group staus_course" 
-                                                data-end-date="{{ $group->end_date }}" 
-                                                data-group-id="{{ $group->id }}">
-                                            <i class="fa fa-stop-circle"></i> Close
-                                        </button>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn-qr-group" type="button"
+                                                    data-group-id="{{ $group->id }}"
+                                                    data-group-name="{{ $group->name }}"
+                                                    onclick="openTeacherQrModal(this)">
+                                                <i class="fa fa-qrcode"></i> QR
+                                            </button>
+                                            <button class="btn-stop-group staus_course"
+                                                    data-end-date="{{ $group->end_date }}"
+                                                    data-group-id="{{ $group->id }}">
+                                                <i class="fa fa-stop-circle"></i> Close
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     <div class="course-meta">
@@ -405,6 +553,60 @@
             <div class="modal-body">
                 <img src="{{ url('assets/oxford/img/preloader.gif') }}" alt="" class="loading">
                 <span> &nbsp;&nbsp;Loading content... </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ===== Teacher QR Code Modal ===== --}}
+<div class="modal fade" id="teacherQrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-white"><i class="fa fa-qrcode me-2" style="color:#ffcc00;"></i> QR للمجموعة: <span id="teacherQrGroupName">—</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="teacherQrForm">
+                    <div class="mb-3">
+                        <label class="fw-bold">صالح حتى <span class="text-danger">*</span></label>
+                        <input type="datetime-local" id="teacherQrExpiry" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">حدّ أقصى للاستخدامات (اختياري)</label>
+                        <input type="number" id="teacherQrMaxUses" class="form-control" min="1" placeholder="بلا حدود">
+                    </div>
+                    <button type="button" id="teacherQrGenBtn">
+                        <i class="fa fa-magic"></i>
+                        <span>توليد الـ QR</span>
+                    </button>
+                </div>
+                <div id="teacherQrResult" class="text-center" style="display:none;">
+                    <div class="d-inline-block p-3 rounded mb-3 teacher-qr-wrap" style="position:relative;">
+                        <canvas id="teacherQrCanvas" width="480" height="480"></canvas>
+                        <div id="teacherQrSpinner">
+                            <div class="t-qr-scan-frame">
+                                <div class="t-qr-corner tl"></div>
+                                <div class="t-qr-corner tr"></div>
+                                <div class="t-qr-corner bl"></div>
+                                <div class="t-qr-corner br"></div>
+                                <div class="t-qr-scan-line"></div>
+                            </div>
+                            <div class="t-qr-text">
+                                <i class="bi bi-qr-code-scan"></i>
+                                <span id="teacherQrStage">جاري الإنشاء...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info small text-start">
+                        <i class="fa fa-info-circle"></i> صالح حتى: <strong id="teacherQrExpires"></strong>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a id="teacherQrDownload" href="#" download="oxford_qr.png" class="btn btn-primary"><i class="fa fa-download"></i> تحميل</a>
+                        <a id="teacherQrWhatsapp" href="#" target="_blank" class="btn btn-success"><i class="fa fa-whatsapp"></i> مشاركة عبر واتساب</a>
+                        <button type="button" class="btn btn-light" id="teacherQrRegen"><i class="fa fa-refresh"></i> جديد</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -631,6 +833,126 @@
                 history.replaceState(null, null, target);
             }
         });
+    });
+
+    // ===== Teacher QR generation =====
+    let teacherCurrentGroupId = null;
+    window.openTeacherQrModal = function(btn) {
+        teacherCurrentGroupId = $(btn).data('group-id');
+        $('#teacherQrGroupName').text($(btn).data('group-name') || '');
+        // Default expiry: now + 2 hours
+        const d = new Date(Date.now() + 2 * 3600 * 1000);
+        const local = d.toISOString().slice(0,16);
+        $('#teacherQrExpiry').val(local);
+        $('#teacherQrMaxUses').val('');
+        $('#teacherQrForm').show();
+        $('#teacherQrResult').hide();
+        $('#teacherQrModal').modal('show');
+    };
+
+    function teacherComposeQrWithLogo(qrUrl, logoUrl) {
+        return new Promise((resolve, reject) => {
+            const canvas = document.getElementById('teacherQrCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 480;
+            canvas.width = size; canvas.height = size;
+            ctx.clearRect(0, 0, size, size);
+            const qrImg = new Image();
+            qrImg.crossOrigin = 'anonymous';
+            qrImg.onload = () => {
+                ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
+                ctx.drawImage(qrImg, 0, 0, size, size);
+                const logo = new Image();
+                logo.onload = () => {
+                    const lb = size * 0.20, pad = size * 0.04;
+                    const box = lb + pad*2, x = (size-box)/2, y = (size-box)/2, r = box*0.12;
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.moveTo(x+r, y);
+                    ctx.lineTo(x+box-r, y);
+                    ctx.quadraticCurveTo(x+box, y, x+box, y+r);
+                    ctx.lineTo(x+box, y+box-r);
+                    ctx.quadraticCurveTo(x+box, y+box, x+box-r, y+box);
+                    ctx.lineTo(x+r, y+box);
+                    ctx.quadraticCurveTo(x, y+box, x, y+box-r);
+                    ctx.lineTo(x, y+r);
+                    ctx.quadraticCurveTo(x, y, x+r, y);
+                    ctx.closePath(); ctx.fill();
+                    ctx.strokeStyle = '#003366'; ctx.lineWidth = 2; ctx.stroke();
+                    const ratio = logo.width/logo.height;
+                    let lw = lb, lh = lb;
+                    if (ratio > 1) lh = lb/ratio; else lw = lb*ratio;
+                    ctx.drawImage(logo, (size-lw)/2, (size-lh)/2, lw, lh);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                logo.onerror = () => resolve(canvas.toDataURL('image/png'));
+                logo.src = logoUrl;
+            };
+            qrImg.onerror = () => reject(new Error('فشل تحميل QR'));
+            qrImg.src = qrUrl;
+        });
+    }
+
+    // Multi-stage loader text for the scan-frame
+    let _tQrStageTimer = null;
+    function startTeacherStageCycle() {
+        const stages = [
+            'يرسم رمز التشعيب...',
+            'يُضيف الحماية...',
+            'يضع شعار Oxford...',
+            'يُجهّز للتنزيل...',
+        ];
+        let i = 0;
+        const $el = $('#teacherQrStage');
+        $el.text(stages[0]);
+        _tQrStageTimer = setInterval(() => {
+            i = (i + 1) % stages.length;
+            $el.fadeOut(150, function () { $(this).text(stages[i]).fadeIn(150); });
+        }, 900);
+    }
+    function stopTeacherStageCycle() {
+        if (_tQrStageTimer) { clearInterval(_tQrStageTimer); _tQrStageTimer = null; }
+    }
+
+    $('#teacherQrGenBtn, #teacherQrRegen').on('click', function () {
+        const expires = $('#teacherQrExpiry').val();
+        if (!expires) { alert('حدد تاريخ ووقت انتهاء الصلاحية'); return; }
+        const btn = $('#teacherQrGenBtn');
+        const origHtml = '<i class="fa fa-magic"></i><span>توليد الـ QR</span>';
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span><span>جاري التوليد...</span>');
+
+        $.post('{{ route("groups.qr.generate") }}', {
+            _token: '{{ csrf_token() }}',
+            group_id: teacherCurrentGroupId,
+            expires_at: expires.replace('T',' ') + ':00',
+            max_uses: $('#teacherQrMaxUses').val() || null,
+            created_by_type: 'teacher',
+        }, function (res) {
+            if (res.status !== 'success') {
+                alert(res.message || 'فشل التوليد');
+                return;
+            }
+            $('#teacherQrForm').hide();
+            $('#teacherQrResult').show();
+            $('#teacherQrSpinner').show();
+            startTeacherStageCycle();
+            $('#teacherQrExpires').text(res.expires);
+
+            teacherComposeQrWithLogo(res.qr_image, res.logo_url).then(dataUrl => {
+                // Hold the animation briefly so the stages are visible
+                setTimeout(() => {
+                    stopTeacherStageCycle();
+                    $('#teacherQrSpinner').fadeOut(280);
+                }, 1200);
+                $('#teacherQrDownload').attr('href', dataUrl);
+                const txt = encodeURIComponent('انضم لمجموعة ' + (res.group.name||'') + ' عبر هذا الرمز:\n' + res.qr_url);
+                $('#teacherQrWhatsapp').attr('href', 'https://wa.me/?text=' + txt);
+            }).catch(() => {
+                stopTeacherStageCycle();
+                $('#teacherQrSpinner').hide();
+            });
+        }).fail(xhr => alert(xhr.responseJSON?.message || 'حدث خطأ'))
+          .always(() => btn.prop('disabled', false).html(origHtml));
     });
 </script>
 @endsection

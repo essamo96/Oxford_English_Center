@@ -94,15 +94,14 @@ class GroupQrController extends Controller
             ]);
         }
 
-        // Must be logged in AS A STUDENT
+        // Must be logged in AS A STUDENT — silently redirect to login with return URL.
+        // After successful login the student lands back on this exact endpoint and gets enrolled.
         $student = Auth::guard('student')->user() ?? Auth::user();
         if (!$student || !($student instanceof Students)) {
-            return view('frontend.qr.result', [
-                'status'  => 'error',
-                'title'   => 'يلزم تسجيل الدخول كطالب',
-                'message' => 'لا يمكن استخدام هذا الـ QR Code إلا من حساب طالب مُسجَّل. سجّل الدخول ثم أعد المسح.',
-                'login_url' => url('/login'),
-            ]);
+            $returnUrl = url('/qr/join/' . $token);
+            // Remember intended URL for the auth pipeline
+            session(['url.intended' => $returnUrl, 'qr_redirect' => $returnUrl]);
+            return redirect()->to('/login?redirect=' . urlencode($returnUrl) . '&qr=1');
         }
 
         // Already enrolled?

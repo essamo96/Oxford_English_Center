@@ -242,6 +242,7 @@ class RegistrationController extends Controller
 
                 GroupStudentsFees::create([
                     'student_id' => $student->id,
+                    'program_id' => $pId, // ← remember the program the applicant chose
                     'student_fee_paid' => $paid,
                     'total_due_amount' => $totalDue,
                     'remaining_amount' => $totalDue - $paid,
@@ -291,6 +292,7 @@ class RegistrationController extends Controller
 
                 GroupStudentsFees::create([
                     'student_id' => $student->id,
+                    'program_id' => $pId, // ← program associated with the placement test (if any)
                     'student_fee_paid' => $paid,
                     'total_due_amount' => $totalDue,
                     'remaining_amount' => $totalDue - $paid,

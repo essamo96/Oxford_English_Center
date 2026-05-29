@@ -39,12 +39,17 @@ class FinancialService
             if ($totalFee <= 0) {
                 $totalFee = (float) ($transactions->max('total_due_amount') ?: 0);
             }
-            $confirmedPaid    = (float) $transactions->where('audit_status', 'verified')
-                                                      ->where('transaction_type', '!=', 'refund')
-                                                      ->sum('transaction_amount');
-            $refunded         = (float) $transactions->where('audit_status', 'verified')
-                                                      ->where('transaction_type', 'refund')
-                                                      ->sum(\DB::raw('ABS(transaction_amount)'));
+            // Only rows explicitly typed as 'payment' (or untyped legacy rows = NULL) count as payments.
+            // 'credit' and 'refund' are handled separately.
+            $confirmedPaid = (float) $transactions->where('audit_status', 'verified')
+                ->filter(fn ($t) => is_null($t->transaction_type) || $t->transaction_type === 'payment')
+                ->sum('transaction_amount');
+            $refunded      = (float) $transactions->where('audit_status', 'verified')
+                                                  ->where('transaction_type', 'refund')
+                                                  ->sum(fn ($t) => abs((float) $t->transaction_amount));
+            $credit        = (float) $transactions->where('audit_status', 'verified')
+                                                  ->where('transaction_type', 'credit')
+                                                  ->sum('transaction_amount');
             $netPaid          = $confirmedPaid - $refunded;
             $remainingBalance = max(0, $totalFee - $netPaid);
 
@@ -53,6 +58,7 @@ class FinancialService
                 'transactions'      => $transactions,
                 'total_fee'         => $totalFee,
                 'total_paid'        => $netPaid,
+                'credit_balance'    => $credit,
                 'remaining_balance' => $remainingBalance,
                 'context'           => 'group',
             ];
@@ -74,11 +80,14 @@ class FinancialService
         $totalFee = (float) ($first->total_due_amount ?: $transactions->max('total_due_amount') ?: 0);
 
         $confirmedPaid = (float) $transactions->where('audit_status', 'verified')
-                                              ->where('transaction_type', '!=', 'refund')
-                                              ->sum('transaction_amount');
+            ->filter(fn ($t) => is_null($t->transaction_type) || $t->transaction_type === 'payment')
+            ->sum('transaction_amount');
         $refunded      = (float) $transactions->where('audit_status', 'verified')
                                               ->where('transaction_type', 'refund')
-                                              ->sum(\DB::raw('ABS(transaction_amount)'));
+                                              ->sum(fn ($t) => abs((float) $t->transaction_amount));
+        $credit        = (float) $transactions->where('audit_status', 'verified')
+                                              ->where('transaction_type', 'credit')
+                                              ->sum('transaction_amount');
         $netPaid       = $confirmedPaid - $refunded;
         $remainingBalance = max(0, $totalFee - $netPaid);
 
@@ -87,6 +96,7 @@ class FinancialService
             'transactions'      => $transactions,
             'total_fee'         => $totalFee,
             'total_paid'        => $netPaid,
+            'credit_balance'    => $credit,
             'remaining_balance' => $remainingBalance,
             'context'           => 'placement_or_pre_group',
         ];

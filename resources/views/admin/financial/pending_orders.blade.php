@@ -143,8 +143,85 @@
                         طلب لـ <strong>اختبار تحديد المستوى</strong> — لا حاجة لتسكين الطالب في برنامج/مجموعة الآن.
                     </div>
 
+                    {{-- Simple balance (when program unchanged) --}}
                     <div id="balance_preview" class="alert alert-light-info d-none">
                         المتبقي: <span id="remaining_val" class="fw-bold text-danger">0</span> ILS
+                    </div>
+
+                    {{-- Smart diff panel (shown when program is changed) --}}
+                    <div id="program_swap_panel" class="d-none mt-3" style="border:2px solid #f5a524; border-radius:14px; overflow:hidden;">
+                        <div class="px-4 py-2 fw-bold text-white" style="background:linear-gradient(90deg,#f5a524 0%,#ec9211 100%);">
+                            <i class="bi bi-arrow-left-right me-1"></i> تحليل فرق السعر بعد تغيير البرنامج
+                        </div>
+                        <div class="p-4">
+                            <div class="row g-3 mb-3 text-center">
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded" style="background:#e7f5ff;border:1px solid #c5e0ff;">
+                                        <div class="fs-8 text-muted fw-bold mb-1">رسوم البرنامج الأصلي</div>
+                                        <div class="fs-3 fw-bold text-info" id="swap_original_fee">0.00</div>
+                                        <small class="text-muted">ILS</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded" style="background:#fff4d6;border:1px solid #ffcf60;">
+                                        <div class="fs-8 text-muted fw-bold mb-1">رسوم البرنامج الجديد</div>
+                                        <div class="fs-3 fw-bold" style="color:#a86e00;" id="swap_new_fee">0.00</div>
+                                        <small class="text-muted">ILS</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded" id="swap_delta_box" style="background:#f3f4f6;border:1px solid #e5e7eb;">
+                                        <div class="fs-8 text-muted fw-bold mb-1">الفرق</div>
+                                        <div class="fs-3 fw-bold" id="swap_delta">0.00</div>
+                                        <small class="text-muted">ILS</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 text-center">
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded" style="background:#d1fae5;border:1px solid #6ee7b7;">
+                                        <div class="fs-8 text-muted fw-bold mb-1"><i class="bi bi-cash-coin me-1"></i> المؤكد دفعه</div>
+                                        <div class="fs-3 fw-bold text-success" id="swap_verified">0.00</div>
+                                        <small class="text-muted">ILS</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded" id="swap_outstanding_box">
+                                        <div class="fs-8 text-muted fw-bold mb-1" id="swap_outstanding_label">المتبقّي على الطالب</div>
+                                        <div class="fs-3 fw-bold" id="swap_outstanding">0.00</div>
+                                        <small class="text-muted">ILS</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="swap_recommendation" class="alert mb-3 d-flex align-items-start gap-2" style="font-size:0.95rem;"></div>
+
+                            {{-- Action options when there's a credit --}}
+                            <div id="swap_credit_actions" class="d-none">
+                                <label class="form-label fw-bold mb-2"><i class="bi bi-gear-fill me-1 text-warning"></i> ماذا نفعل بالرصيد الزائد؟</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="d-flex align-items-start gap-2 p-3 rounded border bg-light" style="cursor:pointer;">
+                                            <input type="radio" name="credit_action" value="keep" class="form-check-input mt-1" checked>
+                                            <div>
+                                                <strong class="d-block">حفظه كرصيد للطالب</strong>
+                                                <small class="text-muted">يُحسم تلقائياً من أي رسوم لاحقة (دورات/كتب).</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="d-flex align-items-start gap-2 p-3 rounded border bg-light" style="cursor:pointer;">
+                                            <input type="radio" name="credit_action" value="refund" class="form-check-input mt-1">
+                                            <div>
+                                                <strong class="d-block">ردّ المبلغ نقداً</strong>
+                                                <small class="text-muted">يُسجَّل سطر استرداد (refund) في السجل المالي.</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -202,8 +279,13 @@
             $('#change_program_notice').hide();
             $('#change_program_to_input').val('');
             $('#default_program_badge').hide();
+            $('#program_swap_panel').addClass('d-none');
+            $('#swap_credit_actions').addClass('d-none');
             receiptShown = false;
             receiptUrl = null;
+
+            // Remember the originally-chosen program (for diff detection)
+            window._setOriginalProgramId(programId);
 
             // Placement Test → no program/group assignment needed
             const isPlacementTest = /Placement\s*Test/i.test(paidType) || /اختبار/.test(paidType);
@@ -328,27 +410,132 @@
         });
 
         window.loadGroups = function(programId) {
+            const $sel  = $('#verify_group_id');
+            const $wrap = $sel.parent();
             if (!programId) {
-                $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
+                $sel.html('<option value="">-- اختر المجموعة --</option>');
                 return;
             }
-            
-            $('#verify_group_id').html('<option value="">جاري التحميل...</option>');
-            
+            $sel.html('<option value="">جاري التحميل...</option>').prop('disabled', true);
+            // Tiny inline spinner inside the select wrapper
+            $wrap.css('position','relative').find('.input-spinner').remove();
+            $wrap.append('<span class="input-spinner" style="position:absolute;inset-inline-end:32px;top:50%;transform:translateY(-50%);width:16px;height:16px;border:2px solid #e5e9f0;border-top-color:#009ef7;border-radius:50%;animation:inputSpin 0.7s linear infinite;pointer-events:none;"></span>');
+
             $.get('{{ route("admin.financial.groups_by_program", ":id") }}'.replace(':id', programId), function(data) {
                 let html = '<option value="">-- اختر المجموعة --</option>';
                 data.forEach(function(g) {
                     html += `<option value="${g.id}">${g.name} (${g.start_date || 'N/A'})</option>`;
                 });
-                $('#verify_group_id').html(html);
+                $sel.html(html);
+            }).always(() => {
+                $sel.prop('disabled', false);
+                $wrap.find('.input-spinner').remove();
             });
         };
+
+        // Ensure the input spinner keyframes exist on this page (in case the admin layout
+        // doesn't already declare them)
+        if (!document.getElementById('inputSpinKf')) {
+            const st = document.createElement('style');
+            st.id = 'inputSpinKf';
+            st.textContent = '@keyframes inputSpin{to{transform:translateY(-50%) rotate(360deg);}}';
+            document.head.appendChild(st);
+        }
 
         $('#verified_amount').on('input', function() {
             const total = parseFloat($('#total_due_display').val());
             const verified = parseFloat($(this).val()) || 0;
             updateBalancePreview(verified, total);
+            // Refresh diff when amount changes (only if a different program is chosen)
+            scheduleSwapDiff();
         });
+
+        // ===== Smart price-difference computation =====
+        // Triggered whenever admin picks a DIFFERENT program than the student originally chose.
+        let _swapDebounce = null;
+        function scheduleSwapDiff() {
+            clearTimeout(_swapDebounce);
+            _swapDebounce = setTimeout(loadProgramSwapDiff, 250);
+        }
+        window.scheduleSwapDiff = scheduleSwapDiff;
+
+        function loadProgramSwapDiff() {
+            const feeId    = $('#verify_id').val();
+            const chosen   = $('#verify_program_id').val();
+            const original = window._originalProgramId || '';
+            const verified = parseFloat($('#verified_amount').val()) || 0;
+
+            // No swap → hide panel, show simple preview
+            if (!chosen || String(chosen) === String(original)) {
+                $('#program_swap_panel').addClass('d-none');
+                $('#balance_preview').removeClass('d-none');
+                return;
+            }
+
+            $.get('{{ route("admin.financial.program_swap_diff") }}', {
+                fee_id: feeId,
+                new_program_id: chosen,
+                verified_amount: verified,
+            }, function (res) {
+                if (!res.success) return;
+                renderSwapDiffPanel(res);
+            });
+        }
+
+        function renderSwapDiffPanel(d) {
+            $('#balance_preview').addClass('d-none');
+            $('#program_swap_panel').removeClass('d-none');
+
+            $('#swap_original_fee').text(d.original_fee.toFixed(2));
+            $('#swap_new_fee').text(d.new_fee.toFixed(2));
+            $('#swap_verified').text(d.verified.toFixed(2));
+
+            // Delta box (green=cheaper, red=more expensive, gray=same)
+            const $delta = $('#swap_delta_box');
+            const sign = d.delta > 0 ? '+' : (d.delta < 0 ? '−' : '');
+            $('#swap_delta').text(sign + Math.abs(d.delta).toFixed(2));
+            if (d.delta > 0)      { $delta.css({background:'#fee2e2', borderColor:'#fecaca'}); $('#swap_delta').css('color','#b91c1c'); }
+            else if (d.delta < 0) { $delta.css({background:'#d1fae5', borderColor:'#6ee7b7'}); $('#swap_delta').css('color','#065f46'); }
+            else                  { $delta.css({background:'#f3f4f6', borderColor:'#e5e7eb'}); $('#swap_delta').css('color','#374151'); }
+
+            // Outstanding/credit box
+            const $out = $('#swap_outstanding_box');
+            const showCreditActions = d.credit_amount > 0.01;
+            if (showCreditActions) {
+                $('#swap_outstanding_label').html('<i class="bi bi-piggy-bank-fill me-1"></i> رصيد دائن للطالب');
+                $('#swap_outstanding').text(d.credit_amount.toFixed(2)).css('color','#1e40af');
+                $out.css({background:'#dbeafe', border:'1px solid #93c5fd'});
+                $('#swap_credit_actions').removeClass('d-none');
+            } else if (d.outstanding > 0.01) {
+                $('#swap_outstanding_label').html('<i class="bi bi-exclamation-triangle-fill me-1"></i> المتبقّي على الطالب');
+                $('#swap_outstanding').text(d.outstanding.toFixed(2)).css('color','#b91c1c');
+                $out.css({background:'#fee2e2', border:'1px solid #fecaca'});
+                $('#swap_credit_actions').addClass('d-none');
+            } else {
+                $('#swap_outstanding_label').html('<i class="bi bi-check-circle-fill me-1"></i> الرصيد متوازن');
+                $('#swap_outstanding').text('0.00').css('color','#065f46');
+                $out.css({background:'#d1fae5', border:'1px solid #6ee7b7'});
+                $('#swap_credit_actions').addClass('d-none');
+            }
+
+            // Recommendation alert
+            const recoMap = {
+                balanced:  ['alert-success', 'bi-check-circle-fill'],
+                remaining: ['alert-danger',  'bi-exclamation-triangle-fill'],
+                credit:    ['alert-primary', 'bi-piggy-bank-fill'],
+            };
+            const cls = recoMap[d.recommendation.type] || ['alert-secondary','bi-info-circle'];
+            $('#swap_recommendation')
+                .removeClass('alert-success alert-danger alert-primary alert-secondary')
+                .addClass(cls[0])
+                .html('<i class="bi ' + cls[1] + ' fs-4"></i><div><strong>توصية:</strong> ' + d.recommendation.message + '</div>');
+        }
+
+        // Track original program when modal opens so we know when admin changes it
+        window._setOriginalProgramId = function (pid) { window._originalProgramId = pid || ''; };
+
+        // Re-compute when program selection changes
+        $('#verify_program_id').on('change', scheduleSwapDiff);
 
         function updateBalancePreview(verified, total) {
             const remaining = total - verified;
