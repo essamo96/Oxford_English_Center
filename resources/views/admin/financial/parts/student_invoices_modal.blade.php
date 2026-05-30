@@ -38,11 +38,23 @@
         </div>
         <div class="col-md-4">
             <div class="p-4 rounded text-center" style="background: linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%); color:#fff;">
-                <div class="fs-7 opacity-75 mb-1">إجمالي المتبقي</div>
+                <div class="fs-7 opacity-75 mb-1">إجمالي المتبقي على الطالب</div>
                 <div class="fs-2 fw-bold">{{ number_format($data['grand_total_left'], 2) }} <small class="fs-6 opacity-75">ILS</small></div>
             </div>
         </div>
     </div>
+
+    {{-- Credit owed BY the center TO the student (over-payments / program-swap surplus) --}}
+    @if(($data['grand_total_credit'] ?? 0) > 0.01)
+    <div class="alert d-flex align-items-center gap-3 mb-5 border-0" style="background:linear-gradient(135deg,#0c4a6e 0%,#0ea5e9 100%);color:#fff;border-radius:12px;">
+        <i class="bi bi-piggy-bank-fill fs-2hx"></i>
+        <div class="flex-grow-1">
+            <div class="fw-bold fs-5">رصيد دائن للطالب — المركز مدين له</div>
+            <div class="opacity-75 fs-7">مبلغ فائض دفعه الطالب (يُحسم تلقائياً من أي رسوم لاحقة: دورات / كتب)</div>
+        </div>
+        <div class="fs-2hx fw-bold">{{ number_format($data['grand_total_credit'], 2) }} <small class="fs-5 opacity-75">ILS</small></div>
+    </div>
+    @endif
 
     {{-- Per-bucket (per program / placement test) breakdown --}}
     @foreach($data['summary'] as $bucket)

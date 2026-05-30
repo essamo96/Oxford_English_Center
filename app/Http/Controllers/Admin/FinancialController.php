@@ -37,7 +37,7 @@ class FinancialController extends AdminController
     public function getPendingList(Request $request)
     {
         // Fetch fees that are not yet verified (audit_status is pending)
-        $query = GroupStudentsFees::with(['student', 'group'])
+        $query = GroupStudentsFees::with(['student', 'group.program', 'program'])
             ->where('audit_status', 'pending')
             ->orderBy('created_at', 'desc');
 
@@ -63,17 +63,51 @@ class FinancialController extends AdminController
             ->addColumn('type', function ($row) {
                 return $row->student_paid_type;
             })
+            ->addColumn('program_group', function ($row) {
+                // The program the applicant was branched into (stored on the fee row at
+                // registration; falls back to the student record for legacy data), plus the
+                // group/level if the student has already been seated.
+                $program = $row->program
+                    ?: ($row->group && $row->group->program ? $row->group->program : null)
+                    ?: ($row->student && $row->student->program_id
+                        ? \App\Models\Programs::find($row->student->program_id) : null);
+
+                $programTitle = $program ? $program->title : null;
+                $groupName    = $row->group ? $row->group->name : null;
+
+                if (!$programTitle && !$groupName) {
+                    return '<span class="badge badge-light-secondary fs-8"><i class="bi bi-dash-circle me-1"></i>لم يُحدَّد بعد</span>';
+                }
+
+                $html = '<div class="d-flex flex-column align-items-center gap-1">';
+                if ($programTitle) {
+                    $html .= '<span class="badge badge-light-primary fw-bold fs-8 px-3 py-2">
+                                <i class="bi bi-mortarboard-fill me-1"></i>'.e($programTitle).'
+                              </span>';
+                }
+                if ($groupName) {
+                    $html .= '<span class="badge badge-light-info fs-9 px-3">
+                                <i class="bi bi-people-fill me-1"></i>'.e($groupName).'
+                              </span>';
+                } else {
+                    $html .= '<span class="text-muted fs-9 fst-italic">لم يُسكَّن في مجموعة بعد</span>';
+                }
+                $html .= '</div>';
+                return $html;
+            })
             ->editColumn('receipt', function ($row) {
                 if ($row->payment_receipt) {
                     $url = asset('uploads/' . $row->payment_receipt);
                     $ext = strtolower(pathinfo($row->payment_receipt, PATHINFO_EXTENSION));
                     $isImg = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                    $student = $row->student ? e($row->student->name) : '';
                     if ($isImg) {
-                        return '<a href="'.$url.'" target="_blank" title="فتح بحجم كامل">
-                                    <img src="'.$url.'" alt="receipt" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;box-shadow:0 2px 5px rgba(0,0,0,0.06);cursor:pointer;">
-                                </a>';
+                        return '<span class="receipt-thumb d-inline-block position-relative" data-receipt-url="'.$url.'" data-receipt-type="image" data-student="'.$student.'" title="عرض الإيصال" style="cursor:pointer;">
+                                    <img src="'.$url.'" alt="receipt" style="width:62px;height:62px;object-fit:cover;border-radius:10px;border:1px solid #eee;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                                    <span class="position-absolute top-50 start-50 translate-middle badge rounded-circle bg-dark bg-opacity-50 p-2"><i class="bi bi-zoom-in text-white fs-6"></i></span>
+                                </span>';
                     }
-                    return '<a href="'.$url.'" target="_blank" class="btn btn-sm btn-light-info"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</a>';
+                    return '<button type="button" class="btn btn-sm btn-light-info receipt-thumb" data-receipt-url="'.$url.'" data-receipt-type="pdf" data-student="'.$student.'"><i class="bi bi-file-earmark-pdf me-1"></i> عرض الإيصال</button>';
                 }
                 return '<span class="badge badge-light-danger">لا يوجد</span>';
             })
@@ -102,7 +136,7 @@ class FinancialController extends AdminController
                 return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
                         <button data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-refund">رفض</button>';
             })
-            ->rawColumns(['receipt', 'actions', 'created_at'])
+            ->rawColumns(['receipt', 'actions', 'created_at', 'program_group'])
             ->make(true);
     }
 
@@ -223,7 +257,13 @@ class FinancialController extends AdminController
             //   'keep'   → store as credit balance on the student's ledger
             //   'refund' → record a refund transaction
             'credit_action'        => 'nullable|in:keep,refund',
+            // Optional proof image the admin attaches when refunding the surplus to the student
+            'refund_receipt'       => 'nullable|image|max:5120',
         ]);
+
+        // Admin (users.id) performing this confirmation — stored on every row we touch
+        // so the ledger shows who approved each financial movement.
+        $adminId = optional(\Illuminate\Support\Facades\Auth::guard('admin')->user())->id;
 
         DB::beginTransaction();
         try {
@@ -241,14 +281,16 @@ class FinancialController extends AdminController
             // verified_amount toward it (so remaining = new_total - verified).
             $newTotal = (float) $fee->total_due_amount;
             if ($request->change_program_to && !$isPlacementTestFee) {
+                // Use the SAME formula the swap-diff panel shows the admin (every fee except
+                // the placement test) and apply it UNCONDITIONALLY — even when the new program
+                // is free / has no fees configured. In that case newTotal becomes 0, so the
+                // whole verified amount is correctly recognised as a credit owed to the student.
                 $newProgramFee = (float) \App\Models\FeeSettings::where('program_id', $request->change_program_to)
-                    ->whereIn('type', ['course', 'course_fee'])
+                    ->where('type', '!=', 'placement_test')
                     ->sum('amount');
-                if ($newProgramFee > 0) {
-                    $newTotal = $newProgramFee;
-                    $fee->total_due_amount = $newTotal;
-                    $fee->notes = trim(($fee->notes ?? '') . ' | تغيير البرنامج بواسطة الأدمن إلى program_id='.$request->change_program_to);
-                }
+                $newTotal = $newProgramFee;
+                $fee->total_due_amount = $newTotal;
+                $fee->notes = trim(($fee->notes ?? '') . ' | تغيير البرنامج بواسطة الأدمن إلى program_id='.$request->change_program_to);
             }
 
             $fee->admin_verified_amount = $request->verified_amount;
@@ -257,6 +299,7 @@ class FinancialController extends AdminController
             $fee->remaining_amount      = max(0, $newTotal - (float) $request->verified_amount);
             $fee->status                = 'confirmed';
             $fee->audit_status          = 'verified';
+            $fee->verified_by           = $adminId;
             if ($request->group_id) {
                 $fee->group_id = $request->group_id;
             }
@@ -273,6 +316,15 @@ class FinancialController extends AdminController
                 if ($overPay > 0.01) {
                     $action = $request->credit_action ?: 'keep';
                     if ($action === 'refund') {
+                        // Optional refund-settlement proof the admin uploads (image of the
+                        // refund notice handed to the student).
+                        $refundReceiptPath = null;
+                        if ($request->hasFile('refund_receipt')) {
+                            $file = $request->file('refund_receipt');
+                            $filename = 'refund_' . time() . '_' . $fee->student_id . '.' . $file->getClientOriginalExtension();
+                            $file->move(public_path('uploads/receipts'), $filename);
+                            $refundReceiptPath = 'receipts/' . $filename;
+                        }
                         // Record a refund row. Keep the original payment intact so the ledger
                         // naturally nets to (paid 1350) - (refund 500) = 850 = newTotal.
                         GroupStudentsFees::create([
@@ -285,8 +337,10 @@ class FinancialController extends AdminController
                             'total_due_amount'  => 0,
                             'remaining_amount'  => 0,
                             'student_paid_type' => 'Program Swap Refund',
+                            'payment_receipt'   => $refundReceiptPath,
                             'status'            => 'confirmed',
                             'audit_status'      => 'verified',
+                            'verified_by'       => $adminId,
                             'notes'             => 'استرداد فرق سعر بعد تغيير البرنامج (' . number_format($overPay, 2) . ' ILS)',
                         ]);
                         $extraEmailNote = 'تم تسجيل استرداد ' . number_format($overPay, 2) . ' ILS كفرق سعر.';
@@ -304,14 +358,13 @@ class FinancialController extends AdminController
                             'student_paid_type' => 'Credit Balance',
                             'status'            => 'confirmed',
                             'audit_status'      => 'verified',
+                            'verified_by'       => $adminId,
                             'notes'             => 'رصيد دائن للطالب بعد تغيير البرنامج (' . number_format($overPay, 2) . ' ILS)',
                         ]);
                         $extraEmailNote = 'يوجد رصيد دائن لك بقيمة ' . number_format($overPay, 2) . ' ILS سيُحسم من رسوم لاحقة.';
                     }
                 }
             }
-
-            $emailReports = [];
 
             if ($student) {
                 // Assignment to group only when not placement-test
@@ -334,46 +387,18 @@ class FinancialController extends AdminController
                     }
                 }
 
-                // --------- ACTIVATION + EMAILS ---------
-                // Rule:
+                // --------- ACTIVATION ---------
                 //   Placement-test path → confirm payment only, NEVER activate.
-                //   All other paths → activate + send 2 emails (activation + payment confirmation).
-                if ($isPlacementTestFee) {
-                    // Mark fee verified but keep status=0 (not active)
-                    $student->is_verified = 1;
-                    $student->save();
-
-                    // Single email: payment confirmation only
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($student->email)
-                            ->send(new \App\Mail\PaymentVerifiedMail($student, $fee));
-                        $emailReports[] = 'تم إرسال تأكيد الدفع';
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Payment confirmation email failed: ' . $e->getMessage());
-                    }
-                } else {
-                    // Activate the account
-                    $student->is_verified = 1;
-                    $student->status      = 1;
-                    $student->save();
-
-                    // Email 1: payment confirmation
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($student->email)
-                            ->send(new \App\Mail\PaymentVerifiedMail($student, $fee));
-                        $emailReports[] = 'تم إرسال تأكيد الدفع';
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Payment confirmation email failed: ' . $e->getMessage());
-                    }
-                    // Email 2: account activation (Welcome / activation notice)
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($student->email)
-                            ->send(new \App\Mail\WelcomeStudentMail($student));
-                        $emailReports[] = 'تم إرسال إشعار تفعيل الحساب';
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Activation email failed: ' . $e->getMessage());
-                    }
+                //   All other paths → activate the account.
+                // NOTE: notification emails are NOT sent here — they are dispatched by a
+                // separate lightweight request (admin.financial.send_notifications) right
+                // after this response returns, so confirming the payment stays instant and
+                // the SMTP delay happens in the background with a live status on screen.
+                $student->is_verified = 1;
+                if (!$isPlacementTestFee) {
+                    $student->status = 1;
                 }
+                $student->save();
             }
 
             // Sync placement_tests record when relevant
@@ -398,18 +423,106 @@ class FinancialController extends AdminController
                 : ($request->group_id
                     ? 'تم تأكيد الدفعة وتفعيل الحساب وتسكين الطالب في المجموعة.'
                     : 'تم تأكيد الدفعة وتفعيل الحساب (لم يُسكَّن في مجموعة بعد).');
-            if (!empty($emailReports)) {
-                $msg .= ' (' . implode(' · ', $emailReports) . ')';
-            }
             if (!empty($extraEmailNote)) {
                 $msg .= ' — ' . $extraEmailNote;
             }
 
-            return response()->json(['status' => 'success', 'message' => $msg]);
+            return response()->json([
+                'status'  => 'success',
+                'message' => $msg,
+                // Tell the front-end to fire the background notification request
+                'notify'  => (bool) $student,
+                'fee_id'  => $fee->id,
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'حدث خطأ أثناء المعالجة: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Send the confirmation notification emails for an already-verified fee.
+     *
+     * Called by the pending-orders screen immediately AFTER verifyPayment returns, so the
+     * confirm action itself is instant and the (slow) SMTP delivery happens separately with
+     * a live progress indicator on the page. Returns a per-email report.
+     */
+    public function sendConfirmationNotifications(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:group_students_fees,id']);
+
+        $fee = GroupStudentsFees::find($request->id);
+        $student = $fee ? Students::find($fee->student_id) : null;
+        if (!$student) {
+            return response()->json(['success' => false, 'reports' => []]);
+        }
+
+        $isPlacementTestFee = (bool) preg_match('/Placement\s*Test/i', (string) $fee->student_paid_type)
+            || str_contains((string) $fee->student_paid_type, 'اختبار');
+
+        // Recipient resolution — for an under-age applicant the correspondence goes to the
+        // guardian's inbox and the student is CC'd when they have their own email.
+        $student->loadMissing('parent');
+        $age = null;
+        if ($student->dob) {
+            try { $age = \Carbon\Carbon::parse($student->dob)->age; } catch (\Exception $e) {}
+        }
+        $isChild       = ($student->program_type === 'kids') || ($age !== null && $age <= 15);
+        $guardianEmail = optional($student->parent)->email;
+        $toGuardian    = $isChild && !empty($guardianEmail);
+        $primaryEmail  = $toGuardian ? $guardianEmail : $student->email;
+
+        $ccEmails = [];
+        if ($toGuardian && !empty($student->email) && $student->email !== $guardianEmail) {
+            $ccEmails[] = $student->email;
+        }
+
+        // Absolute path of the uploaded receipt (attached to the payment email)
+        $receiptAbsPath = null;
+        if ($fee->payment_receipt) {
+            $candidate = public_path('uploads/' . $fee->payment_receipt);
+            if (is_file($candidate)) {
+                $receiptAbsPath = $candidate;
+            }
+        }
+
+        $sendMail = function ($mailable) use ($primaryEmail, $ccEmails) {
+            if (empty($primaryEmail)) return false;
+            $mailable->to($primaryEmail);
+            if (!empty($ccEmails)) {
+                $mailable->cc($ccEmails);
+            }
+            $mailable->send(app('mailer'));
+            return true;
+        };
+
+        $reports = [];
+
+        // Email 1 — payment confirmation (invoice) with the verified amount + receipt
+        try {
+            if ($sendMail(new \App\Mail\PaymentVerifiedMail($student, $fee, $receiptAbsPath))) {
+                $reports[] = ['ok' => true, 'label' => $toGuardian ? 'إشعار الدفع + الإيصال → ولي الأمر' : 'إشعار الدفع + الإيصال'];
+            } else {
+                $reports[] = ['ok' => false, 'label' => 'لا يوجد بريد للطالب/ولي الأمر'];
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Payment confirmation email failed: ' . $e->getMessage());
+            $reports[] = ['ok' => false, 'label' => 'تعذّر إرسال إشعار الدفع'];
+        }
+
+        // Email 2 — account activation (non-placement only)
+        if (!$isPlacementTestFee && !empty($primaryEmail)) {
+            try {
+                if ($sendMail(new \App\Mail\WelcomeStudentMail($student))) {
+                    $reports[] = ['ok' => true, 'label' => 'إشعار تفعيل الحساب'];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Activation email failed: ' . $e->getMessage());
+                $reports[] = ['ok' => false, 'label' => 'تعذّر إرسال إشعار التفعيل'];
+            }
+        }
+
+        return response()->json(['success' => true, 'reports' => $reports]);
     }
 
     /**
@@ -465,6 +578,7 @@ class FinancialController extends AdminController
                 'amount'            => $request->amount,
                 'verified_amount'   => $request->amount,
                 'audit_status'      => 'verified',
+                'verified_by'       => optional(\Illuminate\Support\Facades\Auth::guard('admin')->user())->id,
                 'type'              => 'payment',
                 'notes'             => 'دفعة يدوية من الإدارة',
                 'paid_type'         => $baseFee->student_paid_type ?: 'Manual Payment',
@@ -530,7 +644,7 @@ class FinancialController extends AdminController
      */
     public function getInvoicesLedgerList(Request $request)
     {
-        $query = GroupStudentsFees::with(['student', 'group.program', 'paymentMethod'])
+        $query = GroupStudentsFees::with(['student', 'group.program', 'program', 'verifiedBy', 'paymentMethod'])
             ->select('group_students_fees.*', 'group_students.student_fee_total as total_invoice')
             ->join('students', 'group_students_fees.student_id', '=', 'students.id')
             ->leftJoin('group_students', function($join) {
@@ -564,9 +678,13 @@ class FinancialController extends AdminController
             });
         }
 
-        // NEW: filter by specific program (joins through fg → program)
+        // NEW: filter by specific program — match the seated group's program OR the fee row's
+        // own program_id (the latter is updated when an admin swaps the student's program).
         if ($request->program_id) {
-            $query->where('fg.program_id', $request->program_id);
+            $query->where(function ($q) use ($request) {
+                $q->where('fg.program_id', $request->program_id)
+                  ->orWhere('group_students_fees.program_id', $request->program_id);
+            });
         }
 
         // NEW: filter by level (current_level)
@@ -577,22 +695,58 @@ class FinancialController extends AdminController
         return DataTables::of($query)
             ->editColumn('student', function ($row) {
                 if (!$row->student) return 'N/A';
-                $pType = $row->student->program_type == 'kids' 
+                $pType = $row->student->program_type == 'kids'
                     ? '<span class="badge badge-light-success fs-8 fw-bold ms-2">KIDS</span>'
                     : '<span class="badge badge-light-primary fs-8 fw-bold ms-2">ADULT</span>';
-                return $row->student->name . $pType;
+                // Request/transaction type folded under the name to save a whole column
+                $paidType = $row->student_paid_type ?: '—';
+                return '<div class="d-flex flex-column">
+                            <div class="d-flex align-items-center">
+                                <span class="fw-bold text-dark">'.e($row->student->name).'</span>'.$pType.'
+                            </div>
+                            <span class="text-muted fs-8 mt-1"><i class="bi bi-tag me-1"></i>'.e($paidType).'</span>
+                        </div>';
             })
             ->editColumn('program_level', function ($row) {
-                // Special label for credit & refund rows so they're never mistaken for an enrollment
-                if ($row->transaction_type === 'credit') {
-                    return '<span class="badge badge-light-primary fw-bold"><i class="bi bi-piggy-bank-fill me-1"></i>رصيد دائن للطالب</span>';
+                // Credit & refund rows carry no program/group of their own. Keep their label
+                // but ALSO resolve the student's actual enrollment so the admin sees where the
+                // student was branched into.
+                if (in_array($row->transaction_type, ['credit', 'refund'], true)) {
+                    $badge = $row->transaction_type === 'credit'
+                        ? '<span class="badge badge-light-primary fw-bold"><i class="bi bi-piggy-bank-fill me-1"></i>رصيد دائن للطالب</span>'
+                        : '<span class="badge badge-light-danger fw-bold"><i class="bi bi-arrow-counterclockwise me-1"></i>استرداد رسوم</span>';
+
+                    [$prog, $grp] = $this->resolveStudentEnrollment($row->student_id);
+                    $enroll = '';
+                    if ($prog || $grp) {
+                        $enroll = '<div class="text-muted fs-8 mt-1"><i class="bi bi-mortarboard-fill me-1"></i>'
+                                . e($prog ?: '—') . ($grp ? ' / <span class="fw-semibold">'.e($grp).'</span>' : '')
+                                . '</div>';
+                    }
+                    return '<div class="d-flex flex-column align-items-start">'.$badge.$enroll.'</div>';
                 }
-                if ($row->transaction_type === 'refund') {
-                    return '<span class="badge badge-light-danger fw-bold"><i class="bi bi-arrow-counterclockwise me-1"></i>استرداد رسوم</span>';
-                }
-                $program = ($row->group && $row->group->program) ? $row->group->program->title : '—';
+                // Prefer the fee row's OWN program (it is updated when an admin swaps the
+                // student's program) and fall back to the seated group's program for legacy rows.
+                $program = $row->program
+                    ? $row->program->title
+                    : (($row->group && $row->group->program) ? $row->group->program->title : '—');
                 $level = $row->group ? $row->group->name : '—';
                 return $program . ' / ' . $level;
+            })
+            ->addColumn('date_info', function ($row) {
+                // Combined "date + who confirmed" cell to reduce column crowding
+                $by = $row->verifiedBy
+                    ? '<span class="badge badge-light-dark fs-9 fw-bold"><i class="bi bi-person-check-fill text-success me-1"></i>'.e($row->verifiedBy->name).'</span>'
+                    : '<span class="text-muted fs-9"><i class="bi bi-person-dash me-1"></i>—</span>';
+                $dt = '<span class="text-muted fs-8">—</span>';
+                if ($row->created_at) {
+                    try {
+                        $c = \Carbon\Carbon::parse($row->created_at);
+                        $dt = '<span class="fw-bold text-dark fs-8"><i class="bi bi-calendar-event text-info me-1"></i>'.$c->format('Y-m-d').'</span>
+                               <span class="text-muted fs-9">'.$c->format('h:i A').'</span>';
+                    } catch (\Exception $e) {}
+                }
+                return '<div class="d-flex flex-column align-items-start gap-1">'.$dt.$by.'</div>';
             })
             ->editColumn('admin_verified_amount', function ($row) {
                 // Sign + colour by transaction type
@@ -668,8 +822,50 @@ class FinancialController extends AdminController
                 // Used by the front-end createdRow callback for row highlighting
                 return $row->transaction_type ?: 'payment';
             })
-            ->rawColumns(['student', 'program_level', 'admin_verified_amount', 'remaining_amount', 'audit_status', 'actions'])
+            ->rawColumns(['student', 'program_level', 'admin_verified_amount', 'remaining_amount', 'audit_status', 'date_info', 'actions'])
             ->make(true);
+    }
+
+    /**
+     * Resolve the program / group a student was actually branched into.
+     * Used to enrich credit & refund ledger rows (which carry no program/group themselves).
+     * Returns [programTitle|null, groupName|null].
+     */
+    private function resolveStudentEnrollment($studentId)
+    {
+        $programTitle = null;
+        $groupName    = null;
+
+        // 1) Prefer an active group seat (GroupStudents → group → program)
+        $gs = \App\Models\GroupStudents::with('group.program')
+            ->where('student_id', $studentId)
+            ->whereNull('deleted_at')
+            ->orderByDesc('id')
+            ->first();
+        if ($gs && $gs->group) {
+            $groupName    = $gs->group->name;
+            $programTitle = optional($gs->group->program)->title;
+        }
+
+        // 2) Fallback: the latest payment fee row that carries a program
+        if (!$programTitle) {
+            $feeRow = GroupStudentsFees::with(['program', 'group.program'])
+                ->where('student_id', $studentId)
+                ->where('transaction_type', 'payment')
+                ->whereNotNull('program_id')
+                ->orderByDesc('id')
+                ->first();
+            if ($feeRow) {
+                $programTitle = $feeRow->program
+                    ? $feeRow->program->title
+                    : (($feeRow->group && $feeRow->group->program) ? $feeRow->group->program->title : null);
+                if (!$groupName && $feeRow->group) {
+                    $groupName = $feeRow->group->name;
+                }
+            }
+        }
+
+        return [$programTitle, $groupName];
     }
 
     public function ledger(Request $request)

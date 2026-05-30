@@ -119,13 +119,12 @@
         <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_invoices_table">
             <thead>
                 <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                    <th class="min-w-150px">الطالب</th>
+                    <th class="min-w-175px">الطالب / النوع</th>
                     <th class="min-w-150px">البرنامج / المستوى</th>
-                    <th class="min-w-100px">النوع</th>
                     <th class="min-w-100px">المسدد (مؤكد)</th>
                     <th class="min-w-100px">المتبقي</th>
                     <th class="min-w-100px">حالة التدقيق</th>
-                    <th class="min-w-100px">التاريخ</th>
+                    <th class="min-w-130px">التاريخ / أكّدها</th>
                     <th class="text-end min-w-70px">العمليات</th>
                 </tr>
             </thead>
@@ -223,13 +222,10 @@
             columns: [
                 { data: 'student', name: 'students.name' },
                 { data: 'program_level', name: 'group.name', orderable: false },
-                { data: 'student_paid_type', name: 'student_paid_type' },
                 { data: 'admin_verified_amount', name: 'admin_verified_amount' },
                 { data: 'remaining_amount', name: 'remaining_amount' },
                 { data: 'audit_status', name: 'audit_status' },
-                { data: 'created_at', name: 'created_at', render: function(data) {
-                    return moment(data).format('YYYY-MM-DD HH:mm');
-                }},
+                { data: 'date_info', name: 'group_students_fees.created_at', searchable: false },
                 { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' },
             ],
             // Tint rows by transaction type so credit/refund are obvious in the list
@@ -237,7 +233,7 @@
                 const t = (data && data.tx_type_class) || 'payment';
                 $(row).addClass('row-' + t);
             },
-            order: [[6, 'desc']], // newest first by created_at
+            order: [[5, 'desc']], // newest first by created_at (date / confirmed-by column)
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
             }

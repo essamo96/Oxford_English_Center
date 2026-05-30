@@ -252,6 +252,37 @@ class GroupsController extends AdminController
             return response()->json(['status' => 'error', 'message' => 'لا يمكن التشعيب لمجموعة غير فعّالة.'], 422);
         }
 
+        // ---- Program-match guard ----
+        // A student may only be seated in a group that belongs to the SAME program they are
+        // registered in. Reject the whole operation if any add candidate is registered in a
+        // different program (e.g. an IELTS student into a non-IELTS group). We only enforce
+        // when the student's program is actually known (has fee rows carrying a program_id).
+        if (!empty($addIds) && $group->program_id) {
+            $names    = Students::whereIn('id', $addIds)->pluck('name', 'id');
+            $mismatch = [];
+            foreach ($addIds as $sid) {
+                $studentProgramIds = \App\Models\GroupStudentsFees::where('student_id', $sid)
+                    ->whereNotNull('program_id')
+                    ->whereNull('deleted_at')
+                    ->distinct()
+                    ->pluck('program_id')
+                    ->map(fn ($p) => (int) $p)
+                    ->all();
+
+                if (!empty($studentProgramIds) && !in_array((int) $group->program_id, $studentProgramIds, true)) {
+                    $mismatch[] = $names[$sid] ?? ('#' . $sid);
+                }
+            }
+
+            if (!empty($mismatch)) {
+                $groupProgram = optional(\App\Models\Programs::find($group->program_id))->title ?: ('#' . $group->program_id);
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'تعذّر التشعيب: الطلاب التالون مسجّلون في برنامج آخر ولا يمكن تشعيبهم في مجموعة تابعة لبرنامج «' . $groupProgram . '»: ' . implode('، ', $mismatch) . '.',
+                ], 422);
+            }
+        }
+
         // Course fee for THIS program (separate from any placement-test fees)
         $programCourseFee = (float) \App\Models\FeeSettings::where('program_id', $group->program_id)
             ->whereIn('type', ['course', 'course_fee'])

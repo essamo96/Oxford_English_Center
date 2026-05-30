@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(php artisan *)",
-      "Bash(php -l app/Http/Controllers/Admin/FinancialController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/FinancialController.php)",
+      "Bash(php -l app/Mail/PaymentVerifiedMail.php)",
+      "Bash(php -l app/Models/GroupStudentsFees.php)",
+      "Bash(grep -nE 'protected \\\\$table|class User' app/Models/User.php)",
+      "Bash(php -l app/Services/FinancialService.php)",
+      "Bash(php -l app/Http/Controllers/Admin/GroupsController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/StudentsController.php)"
     ]
   }
 }

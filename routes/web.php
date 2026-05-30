@@ -598,6 +598,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('financial/ledger/{studentId}/{groupId}', ['as' => 'admin.financial.ledger', 'uses' => 'FinancialController@ledger']);
     Route::post('financial/record-payment', ['as' => 'admin.financial.record_payment', 'uses' => 'FinancialController@postRecordPayment']);
     Route::post('financial/verify', ['as' => 'admin.financial.verify', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'FinancialController@verifyPayment']);
+    Route::post('financial/send-notifications', ['as' => 'admin.financial.send_notifications', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'FinancialController@sendConfirmationNotifications']);
     Route::post('financial/refund', ['as' => 'admin.financial.refund', 'middleware' => ['permission:admin.financial.refund'], 'uses' => 'FinancialController@refundPayment']);
 
     Route::get('financial/fees', ['as' => 'admin.financial.fees', 'uses' => 'FinancialController@feeSettings']);

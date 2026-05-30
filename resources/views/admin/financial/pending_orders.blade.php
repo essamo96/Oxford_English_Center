@@ -41,6 +41,7 @@
                     <th class="text-center w-50px"> # </th>
                     <th class="text-center"> الطالب </th>
                     <th class="text-center"> نوع الطلب </th>
+                    <th class="text-center"> البرنامج / المجموعة </th>
                     <th class="text-center"> إجمالي المستحق </th>
                     <th class="text-center"> المبلغ المدفوع </th>
                     <th class="text-center"> إيصال الدفع </th>
@@ -61,7 +62,7 @@
                 <h5 class="modal-title">تأكيد الدفعة المالية وتفعيل الحساب</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="verifyForm">
+            <form id="verifyForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="id" id="verify_id">
                 <div class="modal-body">
@@ -220,6 +221,16 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                {{-- Optional refund-settlement proof image (shown only for the refund option) --}}
+                                <div id="refund_receipt_box" class="mt-3 p-3 rounded border border-danger border-dashed bg-light-danger" style="display:none;">
+                                    <label class="form-label fw-bold text-danger mb-2">
+                                        <i class="bi bi-paperclip me-1"></i> إرفاق صورة إشعار استرداد الرسوم للطالب <small class="text-muted">(اختياري)</small>
+                                    </label>
+                                    <input type="file" name="refund_receipt" id="refund_receipt" class="form-control" accept="image/*">
+                                    <div class="form-text">صورة إشعار/سند تسليم المبلغ المسترد للطالب — تُحفظ في السجل المالي.</div>
+                                    <div id="refund_receipt_preview" class="mt-2 text-center"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -229,6 +240,29 @@
                     <button type="submit" class="btn btn-success">تأكيد وتفعيل</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Lightbox Modal -->
+<div class="modal fade" id="receiptLightbox" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#003366,#002a55);">
+                <h5 class="modal-title text-white d-flex align-items-center gap-2 mb-0">
+                    <i class="bi bi-receipt-cutoff"></i> إيصال الدفع
+                    <span id="receipt_lightbox_student" class="badge badge-light-info ms-2 fs-9"></span>
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a id="receipt_lightbox_open" href="#" target="_blank" class="btn btn-sm btn-light-primary" title="فتح في تبويب جديد">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body text-center p-4" style="background:#f4f6fa;min-height:300px;">
+                <div id="receipt_lightbox_content" class="d-flex align-items-center justify-content-center"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -249,6 +283,7 @@
         { data: 'id', name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "student", name: "student.name" },
         { data: "type", name: "student_paid_type" },
+        { data: "program_group", name: "program_group", orderable: false, searchable: false },
         { data: "total_due_amount", name: "total_due_amount", render: function(d){ return '<span class="fw-bold text-dark">'+d+' ILS</span>'; } },
         { data: "student_fee_paid", name: "student_fee_paid", render: function(d){ return '<span class="fw-bold text-success">'+d+' ILS</span>'; } },
         { data: "receipt", name: "receipt", orderable: false, searchable: false },
@@ -281,6 +316,11 @@
             $('#default_program_badge').hide();
             $('#program_swap_panel').addClass('d-none');
             $('#swap_credit_actions').addClass('d-none');
+            // Reset refund-proof uploader + restore default credit action
+            $('#refund_receipt_box').hide();
+            $('#refund_receipt').val('');
+            $('#refund_receipt_preview').empty();
+            $('input[name="credit_action"][value="keep"]').prop('checked', true);
             receiptShown = false;
             receiptUrl = null;
 
@@ -312,9 +352,9 @@
             // Pull the receipt link from the row — keep hidden behind a button
             try {
                 const row = $('.btn-verify[data-id="' + id + '"]').closest('tr');
-                const link = row.find('a[href*="uploads/"]').first();
-                if (link.length) {
-                    receiptUrl = link.attr('href');
+                const thumb = row.find('.receipt-thumb').first();
+                if (thumb.length && thumb.data('receipt-url')) {
+                    receiptUrl = thumb.data('receipt-url');
                     $('#toggle_receipt_btn').show();
                     $('#toggle_receipt_label').text('معاينة الإيصال');
                     $('#toggle_receipt_btn').find('i').removeClass('bi-eye-slash-fill').addClass('bi-eye-fill');
@@ -344,6 +384,24 @@
             $('#verifyModal').modal('show');
             updateBalancePreview(claimed, total);
         };
+
+        // In-panel receipt lightbox — opens when the receipt thumbnail in the table is clicked
+        $(document).on('click', '.receipt-thumb', function () {
+            const url     = $(this).data('receipt-url');
+            const type    = $(this).data('receipt-type');
+            const student = $(this).data('student') || '';
+            if (!url) return;
+            let html;
+            if (type === 'pdf') {
+                html = '<embed src="' + url + '" type="application/pdf" width="100%" height="600" style="border-radius:10px;border:1px solid #e5e9f0;">';
+            } else {
+                html = '<img src="' + url + '" alt="receipt" style="max-width:100%;max-height:72vh;border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,0.18);">';
+            }
+            $('#receipt_lightbox_content').html(html);
+            $('#receipt_lightbox_student').text(student);
+            $('#receipt_lightbox_open').attr('href', url);
+            $('#receiptLightbox').modal('show');
+        });
 
         // Toggle inline receipt preview
         $(document).on('click', '#toggle_receipt_btn', function () {
@@ -402,6 +460,33 @@
             // call existing helper
             window.verifyPayment(id, claimed, total, programId, studentId, paidType);
         });
+
+        // Reject / refund a pending payment
+        window.refundPayment = function (id) {
+            if (!id) return;
+            Swal.fire({
+                title: 'رفض الطلب؟',
+                text: 'سيتم رفض هذا الطلب المالي. هل أنت متأكد؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، ارفض',
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: '#d33',
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                Swal.fire({ title: 'جاري المعالجة...', didOpen: () => { Swal.showLoading(); } });
+                $.post('{{ route("admin.financial.refund") }}', {
+                    _token: '{{ csrf_token() }}',
+                    id: id,
+                }, function (res) {
+                    const ok = res.status === 'success' || res.status === 'info';
+                    Swal.fire(ok ? 'تم!' : 'خطأ', res.message, ok ? 'success' : 'error');
+                    if (ok) $('#' + tableId).DataTable().ajax.reload();
+                }).fail(function () {
+                    Swal.fire('خطأ', 'تعذّر تنفيذ العملية.', 'error');
+                });
+            });
+        };
 
         // Delegated click for refund (keeps original refundPayment call behavior)
         $(document).on('click', '.btn-refund', function(e) {
@@ -543,23 +628,96 @@
             $('#balance_preview').removeClass('d-none');
         }
 
+        // Show the refund-proof uploader only when "ردّ المبلغ نقداً" is chosen
+        $(document).on('change', 'input[name="credit_action"]', function () {
+            if ($(this).val() === 'refund' && $(this).is(':checked')) {
+                $('#refund_receipt_box').slideDown(150);
+            } else {
+                $('#refund_receipt_box').slideUp(150);
+            }
+        });
+        // Live preview of the chosen refund image
+        $(document).on('change', '#refund_receipt', function () {
+            const file = this.files && this.files[0];
+            const $p = $('#refund_receipt_preview').empty();
+            if (file && /^image\//.test(file.type)) {
+                const reader = new FileReader();
+                reader.onload = e => $p.html('<img src="' + e.target.result + '" style="max-height:160px;border-radius:8px;border:1px solid #eee;">');
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ===== Side notification for background email sending =====
+        function mailNotify(state, reports) {
+            let $box = $('#mail_notify_box');
+            if (!$box.length) {
+                $('body').append(
+                    '<div id="mail_notify_box" style="position:fixed;bottom:20px;inset-inline-start:20px;z-index:1095;width:320px;background:#fff;border:1px solid #e5e9f0;border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,0.18);overflow:hidden;font-family:inherit;"></div>'
+                );
+                $box = $('#mail_notify_box');
+            }
+            let header = '<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:linear-gradient(135deg,#003366,#002a55);color:#fff;">'
+                + '<i class="bi bi-envelope-paper-fill"></i><span style="font-weight:700;font-size:0.92rem;">إشعارات البريد الإلكتروني</span>'
+                + '<i class="bi bi-x-lg ms-auto" style="cursor:pointer;opacity:.8;" onclick="$(\'#mail_notify_box\').remove();"></i></div>';
+            let body;
+            if (state === 'loading') {
+                body = '<div style="padding:16px;display:flex;align-items:center;gap:10px;color:#475569;font-size:0.88rem;">'
+                    + '<span class="spinner-border spinner-border-sm text-primary"></span> جاري الإرسال في الخلفية...</div>';
+            } else {
+                const rows = (reports || []).map(r =>
+                    '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.85rem;color:#334155;">'
+                    + (r.ok ? '<i class="bi bi-check-circle-fill" style="color:#16a34a;"></i>' : '<i class="bi bi-x-circle-fill" style="color:#dc2626;"></i>')
+                    + '<span>' + r.label + '</span></div>'
+                ).join('');
+                body = '<div style="padding:12px 16px;">' + (rows || '<div style="color:#94a3b8;font-size:0.85rem;">لا توجد إشعارات.</div>') + '</div>';
+            }
+            $box.html(header + body);
+            if (state === 'done') {
+                clearTimeout(window._mailNotifyTimer);
+                window._mailNotifyTimer = setTimeout(() => $('#mail_notify_box').fadeOut(400, function(){ $(this).remove(); }), 7000);
+            }
+        }
+
         $('#verifyForm').on('submit', function(e) {
             e.preventDefault();
-            const formData = $(this).serialize();
-            
+            const formData = new FormData(this); // FormData → supports the refund image upload
+
             Swal.fire({
-                title: 'جاري المعالجة...',
+                title: 'جاري تأكيد الدفعة...',
                 didOpen: () => { Swal.showLoading(); }
             });
 
-            $.post('{{ route("admin.financial.verify") }}', formData, function(res) {
+            $.ajax({
+                url: '{{ route("admin.financial.verify") }}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+            }).done(function (res) {
                 if (res.status === 'success') {
-                    Swal.fire('تم!', res.message, 'success');
+                    Swal.fire({ icon: 'success', title: 'تم تأكيد الدفعة!', text: res.message, timer: 2200, showConfirmButton: false });
                     $('#verifyModal').modal('hide');
                     $('#' + tableId).DataTable().ajax.reload();
+
+                    // Fire the email notifications in the background + show live status on the side
+                    if (res.notify && res.fee_id) {
+                        mailNotify('loading');
+                        $.post('{{ route("admin.financial.send_notifications") }}', {
+                            _token: '{{ csrf_token() }}',
+                            id: res.fee_id,
+                        }).done(function (r) {
+                            mailNotify('done', (r && r.reports) || []);
+                        }).fail(function () {
+                            mailNotify('done', [{ ok: false, label: 'تعذّر إرسال الإشعارات' }]);
+                        });
+                    }
                 } else {
                     Swal.fire('خطأ', res.message, 'error');
                 }
+            }).fail(function (xhr) {
+                let m = 'حدث خطأ أثناء المعالجة.';
+                if (xhr.responseJSON && xhr.responseJSON.message) m = xhr.responseJSON.message;
+                Swal.fire('خطأ', m, 'error');
             });
         });
     });

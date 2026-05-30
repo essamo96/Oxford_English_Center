@@ -23,6 +23,7 @@ class GroupStudentsFees extends Model
         'remaining_amount',
         'status',
         'audit_status',
+        'verified_by',
         'notes',
         'payment_method_id',
         'transaction_type',
@@ -42,6 +43,16 @@ class GroupStudentsFees extends Model
     public function group()
     {
         return $this->belongsTo(Groups::class, 'group_id');
+    }
+
+    public function program()
+    {
+        return $this->belongsTo(Programs::class, 'program_id');
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function paymentMethod()

@@ -27,6 +27,17 @@
     <p>عزيزي/عزيزتي <strong>{{ $student->name }}</strong>،</p>
     <p>يسعدنا إبلاغك بأنه تم تأكيد دفعتك المالية بنجاح من قِبل إدارة الأكاديمية.</p>
 
+    @if(!empty($programTitle) || !empty($groupName))
+    <div style="background:#eef5ff;border-right:4px solid #003366;padding:14px 18px;border-radius:10px;margin:18px 0;">
+      <div style="font-size:12px;font-weight:700;color:#6c7689;letter-spacing:.06em;">البرنامج الدراسي</div>
+      <div style="font-size:18px;font-weight:800;color:#003366;">{{ $programTitle ?? '—' }}</div>
+      @if(!empty($groupName))
+        <div style="font-size:12px;font-weight:700;color:#6c7689;margin-top:8px;">المجموعة / المستوى</div>
+        <div style="font-size:15px;font-weight:700;color:#0b5394;">{{ $groupName }}</div>
+      @endif
+    </div>
+    @endif
+
     @if($fee)
     <div class="amount-card">
       <div class="lbl">المبلغ المؤكَّد</div>

@@ -126,12 +126,17 @@ class FinancialService
                 $gs = GroupStudents::where('student_id', $studentId)->where('group_id', $groupId)->first();
                 if ($gs && $gs->student_fee_total > 0) $totalFee = (float) $gs->student_fee_total;
             }
+            // Only real payments (or untyped legacy rows) count toward the fee. Credit and
+            // refund rows are tracked separately so over-payments are not mistaken for fees paid.
             $paid = (float) $bucketRows->where('audit_status', 'verified')
-                                       ->where('transaction_type', '!=', 'refund')
+                                       ->filter(fn ($r) => is_null($r->transaction_type) || $r->transaction_type === 'payment')
                                        ->sum('transaction_amount');
             $refunded = (float) $bucketRows->where('audit_status', 'verified')
                                            ->where('transaction_type', 'refund')
-                                           ->sum(\DB::raw('ABS(transaction_amount)'));
+                                           ->sum(fn ($r) => abs((float) $r->transaction_amount));
+            $credit = (float) $bucketRows->where('audit_status', 'verified')
+                                         ->where('transaction_type', 'credit')
+                                         ->sum('transaction_amount');
             $net = $paid - $refunded;
             $summary[] = [
                 'group_id'   => $groupId,
@@ -140,6 +145,7 @@ class FinancialService
                                 : ($first->student_paid_type ?: 'رسوم خارج المجموعة'),
                 'total_fee'  => $totalFee,
                 'paid'       => $net,
+                'credit'     => $credit,
                 'remaining'  => max(0, $totalFee - $net),
                 'rows'       => $bucketRows,
             ];
@@ -148,9 +154,10 @@ class FinancialService
         return [
             'rows'      => $rows,
             'summary'   => $summary,
-            'grand_total_due'  => array_sum(array_column($summary, 'total_fee')),
-            'grand_total_paid' => array_sum(array_column($summary, 'paid')),
-            'grand_total_left' => array_sum(array_column($summary, 'remaining')),
+            'grand_total_due'    => array_sum(array_column($summary, 'total_fee')),
+            'grand_total_paid'   => array_sum(array_column($summary, 'paid')),
+            'grand_total_left'   => array_sum(array_column($summary, 'remaining')),
+            'grand_total_credit' => array_sum(array_column($summary, 'credit')),
         ];
     }
 
@@ -167,6 +174,7 @@ class FinancialService
             'transaction_amount' => $data['amount'],
             'admin_verified_amount' => $data['verified_amount'] ?? 0,
             'audit_status' => $data['audit_status'] ?? 'pending',
+            'verified_by' => $data['verified_by'] ?? null,
             'notes' => $data['notes'] ?? null,
             'student_paid_type' => $data['paid_type'] ?? 'partial',
             'payment_receipt' => $data['receipt'] ?? null,

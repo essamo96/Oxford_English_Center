@@ -818,6 +818,25 @@ class StudentsController extends AdminController
             return redirect()->back()->withInput();
         } else {
 
+            // Program-match guard: a student may only be seated in a group that belongs to the
+            // SAME program they are registered in (enforced when their program is known).
+            $targetGroup = \App\Models\Groups::find($new_grope);
+            if ($targetGroup && $targetGroup->program_id) {
+                $studentProgramIds = \App\Models\GroupStudentsFees::where('student_id', $student_id)
+                    ->whereNotNull('program_id')
+                    ->whereNull('deleted_at')
+                    ->distinct()
+                    ->pluck('program_id')
+                    ->map(fn ($p) => (int) $p)
+                    ->all();
+
+                if (!empty($studentProgramIds) && !in_array((int) $targetGroup->program_id, $studentProgramIds, true)) {
+                    $progTitle = optional(\App\Models\Programs::find($targetGroup->program_id))->title ?: ('#' . $targetGroup->program_id);
+                    session()->flash('danger', 'لا يمكن تشعيب الطالب في مجموعة تابعة لبرنامج «' . $progTitle . '» لأنه مسجّل في برنامج آخر.');
+                    return redirect()->back()->withInput();
+                }
+            }
+
             // $group_students = new GroupStudents();
             // $data = $group_students->checkStudentGroupExist($student_id,$new_grope);
             // if ($data) {
