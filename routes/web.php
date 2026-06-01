@@ -292,6 +292,17 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('absent_teacher/permissions/{id}', ['as' => 'absent_teacher.permissions', 'middleware' => ['permission:admin.absent_teacher.permissions'], 'uses' => 'Absent_TeacherController@postPermissions']);
     Route::get('absent_teacher/teacher-groups/{teacher_id}', ['as' => 'absent_teacher.groups', 'middleware' => ['permission:admin.absent_teacher.add'], 'uses' => 'Absent_TeacherController@showGroups']);
 
+    // Attendance settings (centre network IP + lecture-time enforcement)
+    Route::get('attendance/settings', ['as' => 'admin.attendance.settings', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'AttendanceSettingController@getIndex']);
+    Route::post('attendance/settings', ['as' => 'admin.attendance.settings.save', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'AttendanceSettingController@postIndex']);
+
+    // Teacher salaries (payroll from delivered lectures)
+    Route::get('teacher-salaries', ['as' => 'admin.teacher_salaries', 'middleware' => ['permission:admin.teacher_attendance.view'], 'uses' => 'TeacherSalaryController@getIndex']);
+    Route::post('teacher-salaries/generate', ['as' => 'admin.teacher_salaries.generate', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postGenerate']);
+    Route::post('teacher-salaries/update-form', ['as' => 'admin.teacher_salaries.update_form', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postUpdateForm']);
+    Route::post('teacher-salaries/close', ['as' => 'admin.teacher_salaries.close', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postClose']);
+    Route::get('teacher-salaries/details/{teacherId}', ['as' => 'admin.teacher_salaries.details', 'middleware' => ['permission:admin.teacher_attendance.view'], 'uses' => 'TeacherSalaryController@getDetails']);
+
     //Static Page Route
     Route::get('pages', ['as' => 'pages.view', 'uses' => 'PagesController@getIndex']);
     Route::get('pages/list', ['as' => 'pages.list', 'uses' => 'PagesController@getList']);

@@ -123,6 +123,9 @@ class TeacherController extends AdminController {
             $teachers = new Teachers();
             $add = $teachers->addTeacher($name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
             if ($add) {
+                if (is_object($add) && isset($add->id)) {
+                    Teachers::where('id', $add->id)->update(['lecture_rate' => (float) $request->get('lecture_rate', 0)]);
+                }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('teachers.view'));
             } else {
@@ -196,6 +199,7 @@ class TeacherController extends AdminController {
             } else {
                 $update = $teachers->updateTeacher($info, $name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
                 if ($update) {
+                    Teachers::where('id', $id)->update(['lecture_rate' => (float) $request->get('lecture_rate', 0)]);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('teachers.view'));
                 } else {

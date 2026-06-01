@@ -14,7 +14,7 @@ class Absent_Student extends Model
     //////////////////////////////////////////////
     protected $table = 'absent_student';
     protected $fillable = [
-        'teacher_id', 'student_id', 'group_id', 'days', 'status'
+        'teacher_id', 'student_id', 'group_id', 'days', 'status', 'round', 'is_late', 'recorded_at'
     ];
     protected $hidden = [
         'password', 'remember_token',

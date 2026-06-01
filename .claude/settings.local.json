@@ -8,7 +8,11 @@
       "Bash(grep -nE 'protected \\\\$table|class User' app/Models/User.php)",
       "Bash(php -l app/Services/FinancialService.php)",
       "Bash(php -l app/Http/Controllers/Admin/GroupsController.php)",
-      "Bash(php -l app/Http/Controllers/Admin/StudentsController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/StudentsController.php)",
+      "Bash(php -l app/Http/Controllers/GroupsController.php)",
+      "Bash(php -l app/Models/AttendanceSetting.php)",
+      "Bash(php -l app/Services/ScheduleParser.php)",
+      "Bash(php -l app/Providers/AuthServiceProvider.php)"
     ]
   }
 }

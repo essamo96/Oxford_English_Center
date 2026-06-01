@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Models\Fees;
 use DecryptException;
 use App\Models\Groups;
+use App\Models\Times;
 use App\Models\Absent_Teacher;
 use Illuminate\Http\Request;
 use App\Models\GroupStudents;
@@ -18,6 +19,8 @@ use App\Models\Evaluate_Items;
 use App\Models\GroupExamDates;
 use App\Models\Absent_Student;
 use App\Models\TeacherLibrary;
+use App\Models\AttendanceSetting;
+use App\Services\ScheduleParser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -49,67 +52,166 @@ class GroupsController extends Controller {
     }
 
     //////////////////////////////////////////////
-    public function getAttendance($group_id) {
-        if (ctype_digit($group_id)) {
-            $groupStudents = new GroupStudents();
-            $groups = new Groups();
-            parent::$data['group_info'] = $groups->getGroup($group_id);
-            $group_students = $groupStudents->getGroupStudentsDegrees($group_id);
-            parent::$data['data'] = $group_students;
-            // dd($group_students);
-            return view('frontend.teachers.absent_student', parent::$data);
+    /**
+     * Evaluate the two hard gates for taking attendance:
+     *   1) the request must originate from the centre's network (allowed IPs)
+     *   2) "now" must fall within the group's scheduled lecture window (today)
+     * Returns ['ok'=>bool, 'reasons'=>[], 'eval'=>scheduleEval, 'setting'=>AttendanceSetting].
+     */
+    private function attendanceGate($group_info, Carbon $now, Request $request) {
+        $setting = AttendanceSetting::current();
+        $reasons = [];
+
+        // (1) centre network
+        if ($setting->enforce_ip && !$setting->ipAllowed($request->ip())) {
+            $reasons[] = 'يجب أن تكون متصلاً بشبكة المركز لأخذ الحضور والغياب.';
         }
-        echo '<center><h1>Sorry, the data could not be found</h1>';
+
+        // (2) lecture time window
+        $time = ($group_info && $group_info->date_id) ? Times::find($group_info->date_id) : null;
+        $eval = (new ScheduleParser())->evaluate(
+            $time->days ?? null,
+            $time->times ?? null,
+            $now,
+            (int) $setting->grace_minutes
+        );
+        if ($setting->enforce_time) {
+            if ($eval['scheduled_today'] === false) {
+                $reasons[] = 'اليوم ليس من أيام محاضرات هذه المجموعة.';
+            } elseif ($eval['within'] === false) {
+                $win = ($eval['start'] && $eval['end'])
+                    ? ' (' . $eval['start']->format('h:i A') . ' - ' . $eval['end']->format('h:i A') . ')'
+                    : '';
+                $reasons[] = 'يمكن أخذ الحضور خلال وقت المحاضرة فقط' . $win . '.';
+            }
+        }
+
+        return ['ok' => empty($reasons), 'reasons' => $reasons, 'eval' => $eval, 'setting' => $setting];
+    }
+
+    //////////////////////////////////////////////
+    public function getAttendance(Request $request, $group_id) {
+        if (!ctype_digit((string) $group_id)) {
+            echo '<center><h1>Sorry, the data could not be found</h1>';
+            return;
+        }
+        $groupStudents = new GroupStudents();
+        $groups = new Groups();
+        $group_info = $groups->getGroup($group_id);
+        parent::$data['group_info'] = $group_info;
+
+        $now        = Carbon::now();
+        $teacher_id = Auth::guard('teachers')->user()->id;
+        $today      = $now->toDateString();
+
+        // Students already marked present today + whether the teacher already opened this lecture
+        $presentIds  = Absent_Student::where('group_id', $group_id)->whereDate('days', $today)
+                        ->pluck('student_id')->map(fn ($x) => (int) $x)->all();
+        $teacherTook = Absent_Teacher::where('teacher_id', $teacher_id)->where('group_id', $group_id)
+                        ->whereDate('days', $today)->exists();
+        $round = $teacherTook ? 2 : 1;
+
+        $group_students = collect($groupStudents->getGroupStudentsDegrees($group_id));
+        if ($round === 2) {
+            // Round 2 → show ONLY students not yet recorded (the late-comers)
+            $group_students = $group_students
+                ->filter(fn ($g) => !in_array((int) $g->student_id, $presentIds, true))
+                ->values();
+        }
+        parent::$data['data'] = $group_students;
+
+        $gate = $this->attendanceGate($group_info, $now, $request);
+        parent::$data['att_round']        = $round;
+        parent::$data['att_present_count'] = count($presentIds);
+        parent::$data['att_gate_ok']      = $gate['ok'];
+        parent::$data['att_gate_reasons'] = $gate['reasons'];
+        parent::$data['att_window']       = ($gate['eval']['start'] && $gate['eval']['end'])
+            ? ($gate['eval']['start']->format('h:i A') . ' - ' . $gate['eval']['end']->format('h:i A'))
+            : null;
+
+        return view('frontend.teachers.absent_student', parent::$data);
     }
 
     //////////////////////////////////////////////
     public function postAttendance(Request $request, $group_id) {
-        $attendanceStatus = $request['attendance'];
         $teacher_id = Auth::guard('teachers')->user()->id;
-        $currentDate = Carbon::today();
-        if ($attendanceStatus) {
-            $isadd = Absent_Teacher::where('teacher_id', $teacher_id)->where('group_id', $group_id)->
-              whereDate('days', $currentDate)->first();
-            if(isset($isadd)){
-                   $request->session()->flash('danger', 'تم اخذ الحضور والغياب لهذه المجموعة حاول مرة اخري في موعد اخر');
-                return redirect()->route('teacher.group.attendance', $group_id);
-            }
-            foreach ($attendanceStatus as $student_id => $status) {
-                $obj = new Absent_Student;
-                $obj->student_id = $student_id;
-                $obj->group_id = $group_id;
-                $obj->teacher_id = $teacher_id;
-                $obj->status = $status;
-                $obj->days = $currentDate;
-                $save = $obj->save();
-            }
-            $obj2 = new Absent_Teacher();
-            $obj2->group_id = $group_id;
-            $obj2->teacher_id = $teacher_id;
-            $obj2->status = $status;
-            $obj2->days = $currentDate;
-            $save2 = $obj2->save();
+        $now   = Carbon::now();
+        $today = $now->toDateString();
 
-            if ($save && $save2) {
-
-                $x = DB::table('groups')
-                                ->where('teacher_id', $teacher_id)->where('id', $group_id)->first();
-                $attendance = $x->attendance;
-                DB::table('groups')
-                        ->where('teacher_id', $teacher_id)->where('id', $group_id)
-                        ->update(['attendance' => $attendance + 1]);
-                $request->session()->flash('success', self::SAVE_SUCCESS);
-                return redirect()->route('teacher.group.attendance', $group_id);
-            } else {
-
-                $request->session()->flash('danger', 'حدث خطأ اثناء الاضافة');
-                return redirect()->route('teacher.group.attendance', $group_id);
-            }
-        } else {
-
-            $request->session()->flash('danger', 'حدث خطأ اثناء الاضافة');
+        $groups = new Groups();
+        $group_info = $groups->getGroup($group_id);
+        if (!$group_info) {
+            $request->session()->flash('danger', self::NOT_FOUND);
             return redirect()->route('teacher.group.attendance', $group_id);
         }
+
+        // ---- Gates: centre network + lecture time (server-side authority) ----
+        $gate = $this->attendanceGate($group_info, $now, $request);
+        if (!$gate['ok']) {
+            $request->session()->flash('danger', implode(' ', $gate['reasons']));
+            return redirect()->route('teacher.group.attendance', $group_id);
+        }
+
+        $attendanceStatus = $request['attendance']; // [student_id => 1] for checked (present) students
+
+        // Did the teacher already open this lecture today? → second pass = late round
+        $teacherRow = Absent_Teacher::where('teacher_id', $teacher_id)
+            ->where('group_id', $group_id)->whereDate('days', $today)->first();
+        $round = $teacherRow ? 2 : 1;
+
+        // Students already recorded present today (never re-record them)
+        $alreadyIds = Absent_Student::where('group_id', $group_id)->whereDate('days', $today)
+            ->pluck('student_id')->map(fn ($x) => (int) $x)->all();
+
+        DB::beginTransaction();
+        try {
+            $saved = 0;
+            if (is_array($attendanceStatus)) {
+                foreach ($attendanceStatus as $student_id => $status) {
+                    $sid = (int) $student_id;
+                    if (in_array($sid, $alreadyIds, true)) continue; // skip duplicates / already-present
+                    Absent_Student::create([
+                        'student_id'  => $sid,
+                        'group_id'    => $group_id,
+                        'teacher_id'  => $teacher_id,
+                        'status'      => 1,
+                        'round'       => $round,
+                        'is_late'     => $round >= 2 ? 1 : 0,
+                        'days'        => $today,
+                        'recorded_at' => $now,
+                    ]);
+                    $saved++;
+                }
+            }
+
+            // Teacher attendance + lecture counter are recorded ONCE per lecture (first round only)
+            if ($round === 1) {
+                $lectureNo = (int) ($group_info->attendance ?? 0) + 1;
+                Absent_Teacher::create([
+                    'teacher_id'  => $teacher_id,
+                    'group_id'    => $group_id,
+                    'status'      => 1,
+                    'lecture_no'  => $lectureNo,
+                    'recorded_at' => $now,
+                    'ip_address'  => $request->ip(),
+                    'days'        => $today,
+                ]);
+                DB::table('groups')->where('id', $group_id)->update(['attendance' => $lectureNo]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $request->session()->flash('danger', 'حدث خطأ أثناء الحفظ: ' . $e->getMessage());
+            return redirect()->route('teacher.group.attendance', $group_id);
+        }
+
+        if ($round === 2) {
+            $request->session()->flash('success', 'تم تسجيل حضور المتأخرين (' . $saved . ') دون احتساب محاضرة جديدة للمدرس.');
+        } else {
+            $request->session()->flash('success', 'تم حفظ الحضور واحتساب المحاضرة بنجاح (' . $saved . ' حاضر).');
+        }
+        return redirect()->route('teacher.group.attendance', $group_id);
     }
 
     //////////////////////////////////////////////

@@ -44,7 +44,45 @@
 
         @include('frontend.layouts.error')
 
-        <div class="marks-table-wrapper">
+        @php
+            $gateOk   = $att_gate_ok ?? true;
+            $round    = $att_round ?? 1;
+            $reasons  = $att_gate_reasons ?? [];
+            $window   = $att_window ?? null;
+        @endphp
+
+        {{-- Lecture window + round badges --}}
+        <div class="d-flex flex-wrap align-items-center" style="gap:10px; margin-bottom:14px;">
+            @if($window)
+                <span class="mark-chip" style="background:rgba(49,130,206,.12); color:#2c5282; font-weight:700;">
+                    <i class="fa fa-clock-o"></i> وقت المحاضرة: {{ $window }}
+                </span>
+            @endif
+            @if($round >= 2)
+                <span class="mark-chip" style="background:rgba(245,197,24,.18); color:#9a7400; font-weight:700;">
+                    <i class="fa fa-user-clock"></i> جولة المتأخرين — يظهر فقط الطلاب غير المسجَّلين ({{ $att_present_count ?? 0 }} مسجّل مسبقاً)
+                </span>
+            @endif
+        </div>
+
+        @if(!$gateOk)
+            <div style="background:#fff5f5; border:1px solid #feb2b2; border-radius:8px; padding:14px 16px; margin-bottom:16px; color:#9b2c2c;">
+                <strong><i class="fa fa-lock"></i> لا يمكن أخذ الحضور الآن:</strong>
+                <ul style="margin:8px 0 0; padding-inline-start:20px;">
+                    @foreach($reasons as $r)
+                        <li>{{ $r }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if($round >= 2 && (is_countable($data) ? count($data) : 0) === 0)
+            <div style="background:#f0fff4; border:1px solid #9ae6b4; border-radius:8px; padding:14px 16px; margin-bottom:16px; color:#276749;">
+                <i class="fa fa-check-circle"></i> تم تسجيل حضور جميع الطلاب — لا يوجد متأخرون.
+            </div>
+        @endif
+
+        <div class="marks-table-wrapper" @if(!$gateOk) style="opacity:.55; pointer-events:none;" @endif>
             <form action="{{ route('post.group.attendance', $group_info->id) }}" method="post" id="attendance-form">
                 {{ csrf_field() }}
 
@@ -92,8 +130,8 @@
                 </div>
 
                 <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #edf2f7; text-align: center;">
-                    <button type="submit" id="save-att-btn" class="btn-modern btn-modern-accent" style="min-width: 220px; justify-content: center;">
-                        <i class="fa fa-save"></i> Save Attendance
+                    <button type="submit" id="save-att-btn" class="btn-modern btn-modern-accent" style="min-width: 220px; justify-content: center;" @if(!$gateOk) disabled @endif>
+                        <i class="fa fa-save"></i> {{ $round >= 2 ? 'حفظ حضور المتأخرين' : 'حفظ الحضور' }}
                     </button>
                 </div>
             </form>
@@ -101,7 +139,7 @@
 
         <div class="mt-30" style="background: rgba(245,197,24,.05); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 13px; color: var(--light-text);">
             <i class="fa fa-info-circle" style="color: var(--accent);"></i>
-            <strong style="color: var(--primary);">Note:</strong> Attendance can only be submitted once per session.
+            <strong style="color: var(--primary);">ملاحظة:</strong> يُحتسب حضور المدرس مرة واحدة فقط لكل محاضرة. عند فتح الشاشة ثانيةً في نفس المحاضرة ستظهر قائمة المتأخرين فقط (الطلاب غير المسجّلين) دون احتساب محاضرة جديدة. ويُشترط الاتصال بشبكة المركز وأن يكون ضمن وقت المحاضرة.
         </div>
 
     </div>

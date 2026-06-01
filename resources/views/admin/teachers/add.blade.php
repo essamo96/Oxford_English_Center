@@ -103,6 +103,15 @@
                     </div>
                 </div>
 
+                <div class="row g-9 mb-8">
+                    <div class="col-md-6 fv-row">
+                        <label class="fs-6 fw-semibold mb-2">أجر المحاضرة الواحدة (ILS)</label>
+                        <input type="number" step="0.01" min="0" name="lecture_rate" id="lecture_rate"
+                            class="form-control form-control-solid" placeholder="0.00" value="{{ old('lecture_rate', 0) }}">
+                        <div class="form-text">يُستخدم لاحتساب الراتب: أجر المحاضرة × عدد المحاضرات المسجّلة.</div>
+                    </div>
+                </div>
+
                 <div class="card-footer d-flex justify-content-end py-6 px-9">
                     <a href="{{ route('teachers.view') }}" class="btn btn-light btn-active-light-primary me-2">إلغاء</a>
                     <button type="submit" class="btn btn-primary">حفظ البيانات</button>
