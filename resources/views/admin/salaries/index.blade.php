@@ -27,7 +27,14 @@
         <div class="card-toolbar">
             {{-- Period selector --}}
             <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
-                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control form-control-sm" style="width:170px;" placeholder="🔍 بحث باسم المعلم">
+                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control form-control-sm" style="width:160px;" placeholder="🔍 بحث باسم المعلم">
+                <input type="text" name="form_no" value="{{ $form_no ?? '' }}" class="form-control form-control-sm" style="width:160px;" placeholder="🧾 رقم الاستمارة">
+                <div class="d-flex align-items-center gap-1">
+                    <span class="text-muted fs-8">من</span>
+                    <input type="date" name="from" value="{{ $from ?? '' }}" class="form-control form-control-sm" style="width:150px;" title="من تاريخ">
+                    <span class="text-muted fs-8">إلى</span>
+                    <input type="date" name="to" value="{{ $to ?? '' }}" class="form-control form-control-sm" style="width:150px;" title="إلى تاريخ">
+                </div>
                 <select name="month" class="form-select form-select-sm" style="width:130px;">
                     @foreach($monthsAr as $m => $label)
                         <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>{{ $label }}</option>
@@ -93,7 +100,12 @@
                     @forelse($rows as $r)
                         @php $st = $statusMap[$r['status']] ?? [$r['status'],'badge-light-secondary']; @endphp
                         <tr>
-                            <td class="text-start fw-bold">{{ $r['teacher_name'] }}</td>
+                            <td class="text-start fw-bold">
+                                {{ $r['teacher_name'] }}
+                                @if(!empty($r['form_no']))
+                                    <div class="text-muted fs-8 fw-semibold"><i class="bi bi-hash"></i>{{ $r['form_no'] }}</div>
+                                @endif
+                            </td>
                             <td class="text-start">
                                 @forelse($r['groups'] as $g)
                                     <span class="badge badge-light-info fs-9 mb-1"><i class="bi bi-people-fill me-1"></i>{{ $g['name'] }} ({{ $g['lectures'] }})</span>
@@ -109,16 +121,27 @@
                             <td class="fw-bold text-dark fs-6">{{ number_format($r['net_amount'], 2) }}</td>
                             <td><span class="badge {{ $st[1] }}">{{ $st[0] }}</span></td>
                             <td>
-                                <button class="btn btn-sm btn-icon btn-light-info" title="تفاصيل الراتب"
-                                        onclick="showSalaryDetails({{ $r['teacher_id'] }}, '{{ $r['teacher_name'] }}')">
-                                    <i class="bi bi-list-ul"></i>
-                                </button>
-                                @if(!$is_closed)
-                                    <button class="btn btn-sm btn-icon btn-light-warning" title="علاوة/خصم"
-                                            onclick='editSalaryForm(@json($r))'>
-                                        <i class="bi bi-pencil"></i>
+                                <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                    <button class="btn btn-sm btn-icon btn-light-primary" title="معاينة الاستمارة"
+                                            onclick="showSalaryPreview({{ $r['teacher_id'] }})">
+                                        <i class="bi bi-eye-fill"></i>
                                     </button>
-                                @endif
+                                    <button class="btn btn-sm btn-icon btn-light-info" title="تفاصيل الراتب"
+                                            onclick="showSalaryDetails({{ $r['teacher_id'] }}, '{{ $r['teacher_name'] }}')">
+                                        <i class="bi bi-list-ul"></i>
+                                    </button>
+                                    @if(!$is_closed)
+                                        <button class="btn btn-sm btn-icon btn-light-warning" title="علاوة/خصم"
+                                                onclick='editSalaryForm(@json($r))'>
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    @endif
+                                    <button class="btn btn-sm btn-icon js-received-btn {{ $r['is_received'] ? 'btn-light-success' : 'btn-light-secondary' }}"
+                                            data-teacher="{{ $r['teacher_id'] }}" data-received="{{ $r['is_received'] ? 1 : 0 }}"
+                                            title="{{ $r['is_received'] ? 'تم استلام الراتب — اضغط للإلغاء' : 'تسجيل استلام المدرّس للراتب' }}">
+                                        <i class="bi {{ $r['is_received'] ? 'bi-check-circle-fill' : 'bi-cash-coin' }}"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -201,6 +224,26 @@
         </div>
     </div>
 </div>
+
+{{-- Salary-form preview modal (printable, theme-independent paper) --}}
+<div class="modal fade" id="salaryPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-text text-warning me-2"></i>معاينة استمارة الراتب</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="printSalaryPreview()">
+                        <i class="bi bi-printer-fill me-1"></i>طباعة
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body" id="salaryPreviewBody" style="background:var(--bs-gray-100);">
+                <div class="text-center py-10"><span class="spinner-border text-primary"></span></div>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
@@ -231,6 +274,79 @@
             Swal.fire('تم', res.message, 'success').then(() => location.reload());
         }).fail(function (xhr) {
             Swal.fire('خطأ', (xhr.responseJSON && xhr.responseJSON.message) || 'تعذّر الحفظ', 'error');
+        });
+    });
+
+    window.showSalaryPreview = function (teacherId) {
+        $('#salaryPreviewBody').html('<div class="text-center py-10"><span class="spinner-border text-primary"></span></div>');
+        $('#salaryPreviewModal').modal('show');
+        $.get('{{ url("admin/teacher-salaries/preview") }}/' + teacherId, { year: SAL_YEAR, month: SAL_MONTH }, function (html) {
+            $('#salaryPreviewBody').html(html);
+        }).fail(function () { $('#salaryPreviewBody').html('<div class="alert alert-danger m-4">تعذّر تحميل المعاينة</div>'); });
+    };
+
+    window.printSalaryPreview = function () {
+        var doc = document.getElementById('salaryPreviewDoc');
+        if (!doc) { return; }
+
+        // Print inside a hidden iframe — no popup window, no popup-blocker, no "flash".
+        var old = document.getElementById('salaryPrintFrame');
+        if (old) { old.remove(); }
+        var frame = document.createElement('iframe');
+        frame.id = 'salaryPrintFrame';
+        frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+        document.body.appendChild(frame);
+
+        var fdoc = frame.contentWindow.document;
+        fdoc.open();
+        fdoc.write(
+            '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">' +
+            '<title>استمارة راتب</title>' +
+            '<style>body{margin:0;padding:24px;background:#fff;}</style>' +
+            '</head><body>' + doc.outerHTML + '</body></html>'
+        );
+        fdoc.close();
+
+        var fwin = frame.contentWindow;
+        var done = false;
+        var cleanup = function () { setTimeout(function () { frame.remove(); }, 800); };
+        var go = function () {
+            if (done) { return; }
+            done = true;
+            fwin.focus();
+            fwin.print();
+            cleanup();
+        };
+
+        var img = fdoc.querySelector('img');
+        if (img && !img.complete) { img.onload = go; img.onerror = go; setTimeout(go, 1500); }
+        else { setTimeout(go, 300); }
+    };
+
+    // Toggle "salary received" state for a teacher
+    $(document).on('click', '.js-received-btn', function () {
+        var $btn = $(this);
+        var teacherId = $btn.data('teacher');
+        var current = parseInt($btn.data('received'), 10) === 1;
+        var next = current ? 0 : 1;
+
+        Swal.fire({
+            title: current ? 'إلغاء حالة الاستلام؟' : 'تأكيد استلام الراتب؟',
+            text: current ? 'سيتم وضع علامة بأن المدرّس لم يستلم الراتب.' : 'سيتم تسجيل أن المدرّس قد استلم راتبه الآن.',
+            icon: 'question', showCancelButton: true,
+            confirmButtonText: current ? 'نعم، إلغاء' : 'نعم، تم الاستلام',
+            cancelButtonText: 'تراجع', confirmButtonColor: current ? '#d33' : '#198754',
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+            $.post('{{ route("admin.teacher_salaries.mark_received") }}', {
+                _token: '{{ csrf_token() }}',
+                teacher_id: teacherId, year: SAL_YEAR, month: SAL_MONTH, is_received: next,
+            }, function (res) {
+                Swal.fire({ icon: 'success', title: res.message, timer: 1200, showConfirmButton: false })
+                    .then(() => location.reload());
+            }).fail(function (xhr) {
+                Swal.fire('خطأ', (xhr.responseJSON && xhr.responseJSON.message) || 'تعذّر تحديث الحالة', 'error');
+            });
         });
     });
 

@@ -24,7 +24,9 @@
       "Bash(grep -cn ''\\\\''status'\\\\'' => $status' app/Http/Controllers/GroupsController.php)",
       "Bash(sed -n '1,80p' resources/views/admin/videos/add.blade.php)",
       "Bash(sed -n '1,40p' resources/views/admin/photos/edit.blade.php)",
-      "Bash(awk 'NR>=494 && NR<=560' resources/views/admin/layout/sidebar_menu.blade.php)"
+      "Bash(awk 'NR>=494 && NR<=560' resources/views/admin/layout/sidebar_menu.blade.php)",
+      "Bash(curl -s \"http://127.0.0.1:8000/admin/teacher-salaries\" -o /tmp/sal.html -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)"
     ]
   }
 }

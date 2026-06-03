@@ -45,6 +45,24 @@ class TeacherSalaryService
         return SalaryCloseLog::where('year', $year)->where('month', $month)->exists();
     }
 
+    /** Human-readable, stored form (invoice) number, e.g. SAL-202605-00042. */
+    public function formNumber(int $year, int $month, int $formId): string
+    {
+        return 'SAL-' . $year . str_pad((string) $month, 2, '0', STR_PAD_LEFT) . '-' . str_pad((string) $formId, 5, '0', STR_PAD_LEFT);
+    }
+
+    /** Teacher ids that delivered a lecture between two dates (inclusive). */
+    public function teacherIdsActiveBetween(string $from, string $to): array
+    {
+        return DB::table('absent_teacher')
+            ->whereNull('deleted_at')
+            ->whereBetween(DB::raw('DATE(days)'), [$from, $to])
+            ->distinct()
+            ->pluck('teacher_id')
+            ->map(fn ($x) => (int) $x)
+            ->all();
+    }
+
     /**
      * Live preview for a period: computed straight from attendance, merged with any
      * saved form (so bonus/deduction and closed state are reflected).
@@ -100,6 +118,8 @@ class TeacherSalaryService
                 'net_amount'     => round($gross + $bonus - $deduction, 2),
                 'status'         => $form ? $form->status : 'draft',
                 'form_id'        => $form?->id,
+                'form_no'        => $form ? $this->formNumber($year, $month, $form->id) : null,
+                'is_received'    => $form ? (bool) $form->is_received : false,
                 'groups'         => $groups,                       // [{id,name,lectures}]
                 'group_ids'      => array_column($groups, 'id'),   // for filtering
             ];

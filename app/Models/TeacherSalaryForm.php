@@ -15,10 +15,13 @@ class TeacherSalaryForm extends Model
         'teacher_id', 'year', 'month', 'lectures_count', 'lecture_rate',
         'gross_amount', 'bonus', 'deduction', 'net_amount', 'status',
         'notes', 'closed_by', 'closed_at',
+        'is_received', 'received_at', 'received_by',
     ];
 
     protected $casts = [
-        'closed_at' => 'datetime',
+        'closed_at'   => 'datetime',
+        'received_at' => 'datetime',
+        'is_received' => 'boolean',
     ];
 
     public function teacher()
@@ -34,6 +37,11 @@ class TeacherSalaryForm extends Model
     public function closedBy()
     {
         return $this->belongsTo(User::class, 'closed_by');
+    }
+
+    public function receivedBy()
+    {
+        return $this->belongsTo(User::class, 'received_by');
     }
 
     public function isClosed(): bool

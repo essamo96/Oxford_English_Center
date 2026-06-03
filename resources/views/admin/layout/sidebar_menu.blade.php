@@ -396,9 +396,10 @@
                         auth()->user()->can('admin.pages.view') ||
                         auth()->user()->can('admin.videos.view') ||
                         auth()->user()->can('admin.categories.view') ||
-                        auth()->user()->can('admin.partners.view'))
+                        auth()->user()->can('admin.partners.view') ||
+                        auth()->user()->can('admin.photos.view'))
                     <div data-kt-menu-trigger="click"
-                        class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['news','pages','videos','categories','partners','site_management']) ? 'here show' : '' }} menu-accordion">
+                        class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['news','pages','videos','categories','partners','photos','site_management']) ? 'here show' : '' }} menu-accordion">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="ki-duotone ki-globe fs-1 text-success"><span
                                         class="path1"></span><span class="path2"></span></i></span>
@@ -446,12 +447,20 @@
                                     </a>
                                 </div>
                             @endif
+                            @if (auth()->user()->can('admin.photos.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'photos' ? 'active' : '' }}" href="{{ route('photos.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">الصور</span>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
 
                 <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['photos', 'file_manager']) ? 'here show' : '' }} menu-accordion">
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['file_manager']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="ki-duotone ki-picture fs-1 text-info"><span
                                     class="path1"></span><span class="path2"></span><span
@@ -466,13 +475,6 @@
                                     href="{{ route('admin.file_manager') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">مدير الملفات</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'photos' ? 'active' : '' }}"
-                                    href="{{ route('photos.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">الصور</span>
                                 </a>
                             </div>
                         @endif

@@ -303,6 +303,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('teacher-salaries/update-form', ['as' => 'admin.teacher_salaries.update_form', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postUpdateForm']);
     Route::post('teacher-salaries/close', ['as' => 'admin.teacher_salaries.close', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postClose']);
     Route::get('teacher-salaries/details/{teacherId}', ['as' => 'admin.teacher_salaries.details', 'middleware' => ['permission:admin.teacher_attendance.view'], 'uses' => 'TeacherSalaryController@getDetails']);
+    Route::get('teacher-salaries/preview/{teacherId}', ['as' => 'admin.teacher_salaries.preview', 'middleware' => ['permission:admin.teacher_attendance.view'], 'uses' => 'TeacherSalaryController@getPreview']);
+    Route::post('teacher-salaries/mark-received', ['as' => 'admin.teacher_salaries.mark_received', 'middleware' => ['permission:admin.teacher_attendance.edit'], 'uses' => 'TeacherSalaryController@postMarkReceived']);
 
     //Static Page Route
     Route::get('pages', ['as' => 'pages.view', 'uses' => 'PagesController@getIndex']);
