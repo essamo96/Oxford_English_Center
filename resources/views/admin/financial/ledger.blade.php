@@ -20,7 +20,7 @@
             <div class="card-body pt-15">
                 <div class="d-flex flex-center flex-column mb-5">
                     <div class="symbol symbol-100px symbol-circle mb-7">
-                        <img src="{{ asset('uploads/' . ($student->img ?? 'default-avatar.png')) }}" alt="image" />
+                        <img src="{{ ($student->image && file_exists(public_path($student->image))) ? asset($student->image) : asset('uploads/default.jpg') }}" alt="{{ $student->name ?? 'student' }}" />
                     </div>
                     <a href="#" class="fs-3 text-gray-800 text-hover-primary fw-bold mb-1">{{ $student->name }}</a>
                     <div class="fs-5 fw-semibold text-muted mb-6">{{ $student->email }}</div>

@@ -67,6 +67,111 @@
                 </div>
 
                 <div data-kt-menu-trigger="click"
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['programs', 'groups', 'students', 'times', 'fees', 'evaluations', 'teachers']) ? 'here show' : '' }} menu-accordion">
+                    <span class="menu-link">
+                        <span class="menu-icon"><i class="ki-duotone ki-book-open fs-1 text-info"><span
+                                    class="path1"></span><span class="path2"></span><span
+                                    class="path3"></span><span class="path4"></span></i></span>
+                        <span class="menu-title">ادارة الاكاديمية</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        @if (auth()->user()->can('admin.programs.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'programs' ? 'active' : '' }}"
+                                    href="{{ route('programs.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">البرامج</span>
+                                </a>
+                            </div>
+                        @endif
+                        @if (auth()->user()->can('admin.groups.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'groups' ? 'active' : '' }}"
+                                    href="{{ route('groups.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">المجموعات</span>
+                                </a>
+                            </div>
+                        @endif
+                        @if (auth()->user()->can('admin.teachers.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'teachers' ? 'active' : '' }}"
+                                    href="{{ route('teachers.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">المعلمون</span>
+                                </a>
+                            </div>
+                        @endif
+                        @if (auth()->user()->can('admin.students.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'students' ? 'active' : '' }}"
+                                    href="{{ route('students.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">الطلاب</span>
+                                </a>
+                            </div>
+                        @endif
+                        @if (auth()->user()->can('admin.times.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'times' ? 'active' : '' }}"
+                                    href="{{ route('times.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">المواعيد والاوقات</span>
+                                </a>
+                            </div>
+                        @endif
+                        @if (auth()->user()->can('admin.fees.view'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'fees' ? 'active' : '' }}"
+                                    href="{{ route('fees.view') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">الرسوم</span>
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div data-kt-menu-trigger="click"
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['financial', 'financial_fees']) ? 'here show' : '' }} menu-accordion">
+                    <span class="menu-link">
+                        <span class="menu-icon"><i class="ki-duotone ki-financial-schedule fs-1 text-info"><span
+                                    class="path1"></span><span class="path2"></span><span
+                                    class="path3"></span><span class="path4"></span></i></span>
+                        <span class="menu-title">الإدارة المالية</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        @if (auth()->user()->can('admin.financial.view') ||
+                                auth()->user()->can('admin.financial.verify') ||
+                                auth()->user()->can('admin.financial.refund'))
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.pending') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">الطلبات المالية المعلقة</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_invoices' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.invoices') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">كشف حساب الطلاب</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_fees' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.fees') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">إعدادات أنواع الرسوم</span>
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div data-kt-menu-trigger="click"
                     class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['memberships', 'closed_classes', 'ask_update']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="ki-duotone ki-time fs-1 text-info"><span
@@ -286,20 +391,67 @@
                     </div>
                 @endif
 
-                @if (auth()->user()->can('admin.news.view') || auth()->user()->can('admin.news.add'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'news' ? 'active' : '' }}"
-                            href="{{ route('news.view') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-document fs-1 text-info"><span
-                                        class="path1"></span><span class="path2"></span><span
-                                        class="path3"></span><span class="path4"></span></i></span>
-                            <span class="menu-title">الأخبار</span>
-                        </a>
+                {{-- ============ إدارة الموقع الخارجي ============ --}}
+                @if (auth()->user()->can('admin.news.view') ||
+                        auth()->user()->can('admin.pages.view') ||
+                        auth()->user()->can('admin.videos.view') ||
+                        auth()->user()->can('admin.categories.view') ||
+                        auth()->user()->can('admin.partners.view'))
+                    <div data-kt-menu-trigger="click"
+                        class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['news','pages','videos','categories','partners','site_management']) ? 'here show' : '' }} menu-accordion">
+                        <span class="menu-link">
+                            <span class="menu-icon"><i class="ki-duotone ki-globe fs-1 text-success"><span
+                                        class="path1"></span><span class="path2"></span></i></span>
+                            <span class="menu-title">إدارة الموقع الخارجي</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+                        <div class="menu-sub menu-sub-accordion">
+                            @if (auth()->user()->can('admin.news.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'news' ? 'active' : '' }}" href="{{ route('news.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">السلايدر والأخبار</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.pages.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'pages' ? 'active' : '' }}" href="{{ route('pages.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">الصفحات الثابتة</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.videos.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'videos' ? 'active' : '' }}" href="{{ route('videos.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">الفيديوهات</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.categories.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'categories' ? 'active' : '' }}" href="{{ route('categories.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">التصنيفات</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.partners.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'partners' ? 'active' : '' }}" href="{{ route('partners.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">الشركاء</span>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 @endif
 
                 <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['photos', 'videos']) ? 'here show' : '' }} menu-accordion">
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['photos', 'file_manager']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="ki-duotone ki-picture fs-1 text-info"><span
                                     class="path1"></span><span class="path2"></span><span
@@ -324,29 +476,8 @@
                                 </a>
                             </div>
                         @endif
-                        @if (auth()->user()->can('admin.videos.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'videos' ? 'active' : '' }}"
-                                    href="{{ route('videos.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">الفيديو</span>
-                                </a>
-                            </div>
-                        @endif
                     </div>
                 </div>
-
-                @if (auth()->user()->can('admin.pages.view'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'pages' ? 'active' : '' }}"
-                            href="{{ route('pages.view') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-tablet-book fs-1 text-info"><span
-                                        class="path1"></span><span class="path2"></span><span
-                                        class="path3"></span><span class="path4"></span></i></span>
-                            <span class="menu-title">الصفحات الثابته</span>
-                        </a>
-                    </div>
-                @endif
 
                 <div data-kt-menu-trigger="click"
                     class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['settings', 'socials', 'users', 'roles']) ? 'here show' : '' }} menu-accordion">
@@ -399,112 +530,6 @@
 
 
 
-                <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['programs', 'groups', 'students', 'times', 'fees', 'evaluations', 'teachers']) ? 'here show' : '' }} menu-accordion">
-                    <span class="menu-link">
-                        <span class="menu-icon"><i class="ki-duotone ki-book-open fs-1 text-info"><span
-                                    class="path1"></span><span class="path2"></span><span
-                                    class="path3"></span><span class="path4"></span></i></span>
-                        <span class="menu-title">ادارة الاكاديمية</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        @if (auth()->user()->can('admin.programs.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'programs' ? 'active' : '' }}"
-                                    href="{{ route('programs.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">البرامج</span>
-                                </a>
-                            </div>
-                        @endif
-                        @if (auth()->user()->can('admin.groups.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'groups' ? 'active' : '' }}"
-                                    href="{{ route('groups.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">المجموعات</span>
-                                </a>
-                            </div>
-                        @endif
-                        @if (auth()->user()->can('admin.teachers.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'teachers' ? 'active' : '' }}"
-                                    href="{{ route('teachers.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">المعلمون</span>
-                                </a>
-                            </div>
-                        @endif
-                        @if (auth()->user()->can('admin.students.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'students' ? 'active' : '' }}"
-                                    href="{{ route('students.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">الطلاب</span>
-                                </a>
-                            </div>
-                        @endif
-                        @if (auth()->user()->can('admin.times.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'times' ? 'active' : '' }}"
-                                    href="{{ route('times.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">المواعيد والاوقات</span>
-                                </a>
-                            </div>
-                        @endif
-                        @if (auth()->user()->can('admin.fees.view'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'fees' ? 'active' : '' }}"
-                                    href="{{ route('fees.view') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">الرسوم</span>
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['financial', 'financial_fees']) ? 'here show' : '' }} menu-accordion">
-                    <span class="menu-link">
-                        <span class="menu-icon"><i class="ki-duotone ki-financial-schedule fs-1 text-info"><span
-                                    class="path1"></span><span class="path2"></span><span
-                                    class="path3"></span><span class="path4"></span></i></span>
-                        <span class="menu-title">الإدارة المالية</span>
-                        <span class="arrow"></span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        @if (auth()->user()->can('admin.financial.view') ||
-                                auth()->user()->can('admin.financial.verify') ||
-                                auth()->user()->can('admin.financial.refund'))
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial' ? 'active' : '' }}"
-                                    href="{{ route('admin.financial.pending') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">الطلبات المالية المعلقة</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_invoices' ? 'active' : '' }}"
-                                    href="{{ route('admin.financial.invoices') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">كشف حساب الطلاب</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_fees' ? 'active' : '' }}"
-                                    href="{{ route('admin.financial.fees') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">إعدادات أنواع الرسوم</span>
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
                 @if (auth()->user()->can('admin.students_report.view'))
                     <div class="menu-item">
                         <a class="menu-link {{ Route::currentRouteName() == 'students_report.view' ? 'active' : '' }}"
@@ -552,15 +577,6 @@
                             @endif
                         </a>
                     </div>
-                    <div class="menu-item">
-                        <a class="menu-link {{ Route::currentRouteName() == 'categories.view' || (isset($active_menu) ? $active_menu : '') == 'categories' ? 'active' : '' }}"
-                            href="{{ route('categories.view') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-element-plus fs-1 text-info"><span
-                                        class="path1"></span><span class="path2"></span><span
-                                        class="path3"></span><span class="path4"></span></i></span>
-                            <span class="menu-title">التصنيفات</span>
-                        </a>
-                    </div>
                 @endif
 
                 @if (auth()->user()->can('admin.progress_menu.view'))
@@ -571,18 +587,6 @@
                                         class="path1"></span><span class="path2"></span><span
                                         class="path3"></span><span class="path4"></span></i></span>
                             <span class="menu-title">مستوى التقدم</span>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()->can('admin.partners.view'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'partners' ? 'active' : '' }}"
-                            href="{{ route('partners.view') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-people fs-1 text-info"><span
-                                        class="path1"></span><span class="path2"></span><span
-                                        class="path3"></span><span class="path4"></span></i></span>
-                            <span class="menu-title">الشركاء</span>
                         </a>
                     </div>
                 @endif

@@ -94,9 +94,23 @@
                         <label class="form-label">المبلغ الذي أدخله الطالب (Claimed):</label>
                         <input type="text" id="claimed_amount" class="form-control bg-light" readonly>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-success">المبلغ الفعلي المستلم (Verified Amount):</label>
-                        <input type="number" name="verified_amount" id="verified_amount" class="form-control border-success fs-4 fw-bold" required>
+
+                    {{-- Credit-balance breakdown (shown when part of the due was paid from credit) --}}
+                    {{-- Uses Metronic theme utilities so it adapts to BOTH dark & light themes --}}
+                    <div id="credit_breakdown_box" class="mb-4 p-4 rounded bg-light-primary border border-primary border-dashed" style="display:none;">
+                        <div class="fw-bold text-primary mb-3"><i class="bi bi-piggy-bank-fill me-1"></i> تسوية من الرصيد الدائن</div>
+                        <div class="row g-2 fs-8 text-center">
+                            <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">إجمالي الرسوم</div><div class="fw-bold text-gray-900" id="cb_total">0</div></div></div>
+                            <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">مخصوم من الرصيد</div><div class="fw-bold text-info" id="cb_credit">0</div></div></div>
+                            <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">الحد الأدنى للدفعة</div><div class="fw-bold text-gray-900" id="cb_min">0</div></div></div>
+                        </div>
+                        <div id="cb_note" class="mb-0 mt-3 py-2 px-3 fs-8 rounded d-flex align-items-start gap-2"></div>
+                    </div>
+
+                    <div class="mb-4" id="verified_amount_block">
+                        <label class="form-label fw-bold text-success">المبلغ الفعلي المستلم نقدًا (Verified Amount):</label>
+                        <input type="number" step="0.01" min="0" name="verified_amount" id="verified_amount" class="form-control border-success fs-4 fw-bold" required>
+                        <div id="cash_remaining_hint" class="form-text fw-bold mt-1" style="display:none;"></div>
                     </div>
 
                     {{-- Payment method + admin-attached payment notice --}}
@@ -375,14 +389,8 @@
                     $('#verify_program_id').val('');
                     $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
                 }
-
-                // Already seated in a group (branched) → lock the program, show a confirmation notice
-                if (groupId && parseInt(groupId) > 0) {
-                    $('#verify_program_id').prop('disabled', true);
-                    $('#default_program_badge').hide();
-                    $('#already_seated_group').text(groupName || '');
-                    $('#already_seated_notice').show();
-                }
+                // NOTE: program-lock for an already-SEATED student is decided by the financials
+                // response below (real GroupStudents membership), not by the fee row's group_id.
             }
 
             // Pull the receipt link from the row — keep hidden behind a button
@@ -417,9 +425,77 @@
                 });
             }
 
+            // Reset + load the credit/min breakdown for this pending order
+            $('#credit_breakdown_box').hide();
+            $('#cash_remaining_hint').hide();
+            $('#verified_amount_block').show();              // default: cash field visible & required
+            $('#verified_amount').prop('required', true);
+            window._pendingFin = null;
+            $.get('{{ url("admin/financial/pending/financials") }}/' + id, function (f) {
+                if (!f || !f.success) return;
+                window._pendingFin = f;
+
+                // Lock the program ONLY when the student has a REAL active seat in a group.
+                // (A student merely assigned to a program — no group membership — stays editable.)
+                if (f.is_seated && f.group_name) {
+                    $('#verify_program_id').prop('disabled', true);
+                    $('#default_program_badge').hide();
+                    $('#already_seated_group').text(f.group_name);
+                    $('#already_seated_notice').show();
+                } else {
+                    $('#verify_program_id').prop('disabled', false);
+                    $('#already_seated_notice').hide();
+                }
+
+                if (f.has_credit) {
+                    $('#cb_total').text(Number(f.total_due).toFixed(2));
+                    $('#cb_credit').text(Number(f.paid_from_credit).toFixed(2));
+                    $('#cb_min').text(Number(f.min_payment).toFixed(2));
+
+                    // Theme-aware note colours (bg-light-* / text-* adapt to dark & light themes)
+                    let noteCls, noteHtml;
+                    if (f.min_cash_now > 0.009) {
+                        noteCls = 'bg-light-warning text-warning';
+                        noteHtml = '<i class="bi bi-exclamation-triangle-fill"></i><div>الرصيد الدائن لا يغطّي الحد الأدنى. <strong>يجب دفع ' + Number(f.min_cash_now).toFixed(2) + ' ILS نقدًا على الأقل الآن</strong>، والمتبقّي الكلّي ' + Number(f.remaining).toFixed(2) + ' ILS لإكمال السداد.</div>';
+                    } else {
+                        noteCls = 'bg-light-success text-success';
+                        noteHtml = '<i class="bi bi-check-circle-fill"></i><div>تم تغطية الحد الأدنى من الرصيد الدائن. المتبقّي ' + Number(f.remaining).toFixed(2) + ' ILS (يمكن دفعه الآن أو لاحقًا) — يكفي تأكيد التسكين.</div>';
+                    }
+                    $('#cb_note').attr('class', 'mb-0 mt-3 py-2 px-3 fs-8 rounded d-flex align-items-start gap-2 ' + noteCls).html(noteHtml);
+                    $('#credit_breakdown_box').show();
+
+                    if (f.min_cash_now > 0.009) {
+                        // Minimum NOT covered → admin must collect cash now
+                        $('#verified_amount_block').show();
+                        $('#verified_amount').prop('required', true).val(Number(f.min_cash_now).toFixed(2));
+                        refreshCashHint();
+                    } else {
+                        // Minimum fully covered by credit → no cash needed; hide the field
+                        $('#verified_amount_block').hide();
+                        $('#verified_amount').prop('required', false).val('0');
+                        $('#cash_remaining_hint').hide();
+                    }
+                }
+            });
+
             $('#verifyModal').modal('show');
             updateBalancePreview(claimed, total);
         };
+
+        // Live hint: how much will remain after the cash entered now (credit already counted)
+        function refreshCashHint() {
+            const f = window._pendingFin;
+            if (!f || !f.has_credit) { $('#cash_remaining_hint').hide(); return; }
+            const cash = parseFloat($('#verified_amount').val()) || 0;
+            const left = Math.max(0, +(f.total_due - f.paid_from_credit - cash).toFixed(2));
+            const belowMin = cash + 0.009 < f.min_cash_now;
+            $('#cash_remaining_hint')
+                .css('color', belowMin ? '#dc3545' : (left > 0 ? '#b8860b' : '#198754'))
+                .html((belowMin ? '<i class="bi bi-x-circle me-1"></i>أقل من الحد الأدنى المطلوب نقدًا (' + Number(f.min_cash_now).toFixed(2) + ' ILS). ' : '')
+                    + 'المتبقّي بعد هذه الدفعة: ' + left.toFixed(2) + ' ILS')
+                .show();
+        }
+        $(document).on('input', '#verified_amount', refreshCashHint);
 
         // In-panel receipt lightbox — opens when the receipt thumbnail in the table is clicked
         $(document).on('click', '.receipt-thumb', function () {

@@ -26,18 +26,21 @@
             <span>Attendance</span>
         </div>
 
-        {{-- Page Header --}}
-        <div class="page-header-block d-flex justify-content-between align-items-center">
+        {{-- Page Header (themed gradient card, consistent with other teacher screens) --}}
+        <div class="d-flex justify-content-between align-items-center flex-wrap"
+             style="gap:12px; padding:18px 22px; margin-bottom:18px; border-radius:14px;
+                    background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff;
+                    box-shadow:0 10px 30px rgba(0,33,71,.18);">
             <div>
-                <p class="page-title m-0"><i class="fa fa-calendar-check-o"></i> Attendance Sheet</p>
-                <p class="page-subtitle m-0">Group: <strong>{{ $group_info->name }}</strong></p>
+                <div style="font-size:17px; font-weight:800;"><i class="fa fa-calendar-check-o" style="color:var(--accent,#f5c518);"></i> كشف الحضور والغياب</div>
+                <div style="font-size:13px; opacity:.85; margin-top:3px;">المجموعة: <strong>{{ $group_info->name }}</strong></div>
             </div>
             <div class="d-flex align-items-center" style="gap: 10px;">
-                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 13px;" onclick="window.print()">
-                    <i class="fa fa-print"></i> Print
+                <button type="button" class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; border:none; padding:7px 16px; font-size:13px;" onclick="window.print()">
+                    <i class="fa fa-print"></i> طباعة
                 </button>
-                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 13px;">
-                    <i class="fa fa-arrow-left"></i> Back
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-sm" style="background:#f5c518; color:#14213d; padding:7px 16px; font-size:13px; font-weight:700;">
+                    <i class="fa fa-arrow-left"></i> رجوع
                 </a>
             </div>
         </div>

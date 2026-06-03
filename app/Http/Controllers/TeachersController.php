@@ -32,8 +32,21 @@ class TeachersController extends Controller {
         parent::__construct();
     }
 
+    /**
+     * The logged-in teacher's salary history (forms + per-lecture details) — loaded into a
+     * modal when the teacher clicks their profile photo on the dashboard.
+     */
+    public function mySalaries() {
+        $teacherId = Auth::guard('teachers')->user()->id;
+        $forms = \App\Models\TeacherSalaryForm::with(['details.group'])
+            ->where('teacher_id', $teacherId)
+            ->orderByDesc('year')->orderByDesc('month')
+            ->get();
+        return view('frontend.teachers.my_salaries', ['forms' => $forms]);
+    }
+
     public function getIndex() {
-       
+
         $teacher = new Teachers();
         $groups = new Groups();
         $groupStudents = new GroupStudents();

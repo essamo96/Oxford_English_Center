@@ -369,6 +369,12 @@ class NewsController extends AdminController {
         $special_news = $news->getLastNews(5);
         Cache::forget('last_news');
         Cache::forever('last_news', $special_news);
+
+        // The public homepage reads the slider + news from these keys (rememberForever).
+        // They MUST be forgotten on every news change, otherwise updated images/titles
+        // never appear on the external site. They rebuild automatically on next visit.
+        Cache::forget('sliders');
+        Cache::forget('news');
     }
 
 //    public function upload(Request $request) {

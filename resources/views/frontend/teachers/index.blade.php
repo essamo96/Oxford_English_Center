@@ -42,6 +42,17 @@
     }
     .btn-qr-group:hover { background: transparent; color: #fff; border-color: #fff; }
 
+    /* Clickable teacher avatar → salaries */
+    .teacher-avatar-wrap { display:inline-block; transition: transform .2s; }
+    .teacher-avatar-wrap:hover { transform: scale(1.04); }
+    .avatar-salary-badge {
+        position:absolute; bottom:2px; inset-inline-end:2px;
+        width:26px; height:26px; border-radius:50%;
+        background:#ffcc00; color:#003366;
+        display:flex; align-items:center; justify-content:center;
+        font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,.25); border:2px solid #fff;
+    }
+
     /* Keep the QR/Close buttons a fixed size & shape regardless of the program title length */
     .course-head-row { gap: 10px; }
     .course-head-row .course-title {
@@ -72,9 +83,29 @@
         color: #ffcc00;
         text-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
     }
+    #teacherQrModal .modal-header { padding: 16px 22px; }
     #teacherQrModal .modal-header .btn-close { filter: invert(1) brightness(1.5); opacity: 0.85; }
+    #teacherQrModal #teacherQrGroupName { font-size: 1.05rem; }
     #teacherQrCanvas { max-width: 280px; width: 100%; }
-    .teacher-qr-wrap { background: #fff !important; border: 2px solid #003366 !important; }
+    .teacher-qr-wrap { background: #fff !important; border: 2px solid #003366 !important; border-radius: 14px; padding: 14px !important; }
+
+    /* QR modal body — consistent spacing + readable inputs on a soft background */
+    #teacherQrModal .modal-body { background: #f6f8fb; padding: 22px 24px; }
+    #teacherQrModal .modal-body label { color: #14213d; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
+    #teacherQrModal .modal-body .form-control {
+        border: 1px solid #d9e2ef; border-radius: 10px; padding: 11px 13px; font-size: .95rem;
+    }
+    #teacherQrModal .modal-body .form-control:focus {
+        border-color: #003366; box-shadow: 0 0 0 3px rgba(0,51,102,.12);
+    }
+    #teacherQrModal .alert-info { background: #eaf2ff; border: 1px solid #cfe0ff; color: #234; border-radius: 10px; }
+
+    /* Both modals: white titles with a gold accent on the highlighted part */
+    #teacherQrModal .modal-title,
+    #teacherSalaryModal .modal-title { color: #fff !important; }
+    #teacherQrModal .modal-title i,
+    #teacherSalaryModal .modal-title i,
+    #teacherQrModal #teacherQrGroupName { color: #ffcc00 !important; }
 
     /* Generate button — white text/icon + navy gradient + gold shimmer */
     #teacherQrGenBtn, #teacherQrRegen {
@@ -192,11 +223,14 @@
         <!-- Dashboard Header Card -->
         <div class="dashboard-header">
             <div class="header-content">
-                @if ($teacher_info->image != '')
-                    <img src="{{ asset($teacher_info->image) }}" class="student-avatar-large" alt="{{ $teacher_info->name }}" />
-                @else
-                    <img src="{{ url('assets/oxford/img/students/avatar.png') }}" class="student-avatar-large" alt="Avatar" />
-                @endif
+                <div class="teacher-avatar-wrap" id="teacherSalaryBtn" title="عرض رواتبي وتفاصيلها" style="cursor:pointer; position:relative;">
+                    @if ($teacher_info->image != '')
+                        <img src="{{ asset($teacher_info->image) }}" class="student-avatar-large" alt="{{ $teacher_info->name }}" />
+                    @else
+                        <img src="{{ url('assets/oxford/img/students/avatar.png') }}" class="student-avatar-large" alt="Avatar" />
+                    @endif
+                    <span class="avatar-salary-badge"><i class="fa fa-money"></i></span>
+                </div>
                 
                 <div class="header-info">
                     <p>Welcome back, Teacher</p>
@@ -581,7 +615,7 @@
                 <h5 class="modal-title fw-bold text-white"><i class="fa fa-qrcode me-2" style="color:#ffcc00;"></i> QR للمجموعة: <span id="teacherQrGroupName">—</span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4" dir="rtl" style="text-align:right;">
                 <div id="teacherQrForm">
                     <div class="mb-3">
                         <label class="fw-bold">صالح حتى <span class="text-danger">*</span></label>
@@ -626,6 +660,21 @@
         </div>
     </div>
 </div>
+
+<!-- Teacher Salaries Modal -->
+<div class="modal fade" id="teacherSalaryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#003366,#0b3d91);">
+                <h5 class="modal-title fw-bold text-white"><i class="fa fa-money me-2" style="color:#ffcc00;"></i> رواتبي وتفاصيلها</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="teacherSalaryBody" dir="rtl" style="background:#f6f8fb; text-align:right;">
+                <div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
@@ -640,6 +689,17 @@
 </script>
 <script>
     var base_url = '{{ url('/') }}';
+
+    // Teacher photo → open salary history modal
+    $(document).on('click', '#teacherSalaryBtn', function () {
+        $('#teacherSalaryBody').html('<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>');
+        $('#teacherSalaryModal').modal('show');
+        $.get('{{ route('teacher.my_salaries') }}', function (html) {
+            $('#teacherSalaryBody').html(html);
+        }).fail(function () {
+            $('#teacherSalaryBody').html('<div class="alert alert-danger m-3">تعذّر تحميل بيانات الرواتب.</div>');
+        });
+    });
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script src="{{ url('assets/oxford/js/chat.js') }}" type="text/javascript"></script>

@@ -1,80 +1,58 @@
 @extends('admin.layout.master')
 
-@section('title')
-اضافة أليوم 
-@stop
-
-@section('css')
-
-@stop
+@section('title', 'إضافة ألبوم')
 
 @section('page-breadcrumb')
-<ul class="page-breadcrumb">
-    <li>
-        <a href="{{ route('dashboard.view') }}">الرئيسية</a>
-        <i class="fa fa-angle-left"></i>
-    </li>
-    <li>
-        <a href="{{ route('photos.view') }}">إدارة الالبومات</a>
-        <i class="fa fa-angle-left"></i>
-    </li>
-    <li>
-        <a href="{{ route('photos.add') }}">إضافة أليوم جديد</a>
-    </li>
-</ul>
-@stop
-
-@section('page-title')
-<h1 class="page-title"> الالبومات
-    <small>إضافة أليوم</small>
-</h1>
+    <li class="breadcrumb-item text-muted"><a href="{{ route('dashboard.view') }}" class="text-muted text-hover-info">الرئيسية</a></li>
+    <li class="breadcrumb-item"><span class="bullet bg-gray-400 w-5px h-2px"></span></li>
+    <li class="breadcrumb-item text-muted"><a href="{{ route('photos.view') }}" class="text-muted text-hover-info">الألبومات</a></li>
+    <li class="breadcrumb-item"><span class="bullet bg-gray-400 w-5px h-2px"></span></li>
+    <li class="breadcrumb-item text-muted">إضافة ألبوم</li>
 @stop
 
 @section('page-content')
-<div class="portlet box {{ $form_class }}">
-    <div class="portlet-title">
-        <div class="caption">
-            <i class="icon-grid"></i>إضافة أليوم جديد </div>
-    </div>
-    <div class="portlet-body form">
-        @include('admin.layout.error')
-        <form role="form" method="post" action="" class="form-horizontal" enctype="multipart/form-data">
-            <div class="form-body">
-                <div class="row">
-                    <div class="form-group">
-                        <label class="control-label col-md-3">العنوان</label>
-                        <div class="col-md-6">
-                            <input type="text" value="{{ old('title') }}" name="title" id="title" class="form-control" placeholder="العنوان">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-3">الوصف</label>
-                        <div class="col-md-6">
-                            <textarea name="descs" id="descs" class="form-control" rows="6" style="resize: none">{{ old('descs') }}</textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-3">الكلمات الدلالية</label>
-                        <div class="col-md-6">
-                            <input type="text" value="{{ old('tags') }}" name="tags" id="tags" class="form-control input-large" data-role="tagsinput">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-3">الحالة</label>
-                        <div class="col-md-6">
-                            <input type="checkbox" value="1" name="status" class="make-switch" data-on-text="&nbsp;تفعيل&nbsp;" data-off-text="&nbsp;تعطيل&nbsp;" {{ old('status') == 1 ? 'checked' : '' }}>
-                        </div>
-                    </div>
-                </div>
+@php $active_menu = 'photos'; @endphp
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm">
+            <div class="card-header border-0 pt-6">
+                <div class="card-title"><h3 class="fw-bold"><i class="bi bi-images text-primary me-2"></i>إضافة ألبوم جديد</h3></div>
             </div>
-            <div class="form-actions">
-                <div class="col-md-offset-3 col-md-6">
-                    <button type="submit" class="btn default {{ $btn_class }}">حفظ</button>
-                    <a href="{{ route('photos.view') }}" type="button" class="btn default">إلغاء</a>
-                    {{ csrf_field() }}
-                </div>
+            <div class="card-body py-4">
+                @include('admin.layout.masterLayouts.error')
+
+                <form method="post" action="{{ route('photos.add') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="row g-5">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold required">عنوان الألبوم</label>
+                            <input type="text" name="title" value="{{ old('title') }}" class="form-control form-control-solid" placeholder="عنوان الألبوم">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">الوصف</label>
+                            <textarea name="descs" rows="5" class="form-control form-control-solid" style="resize:none;" placeholder="وصف مختصر للألبوم">{{ old('descs') }}</textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">الكلمات الدلالية</label>
+                            <input type="text" name="tags" value="{{ old('tags') }}" class="form-control form-control-solid" placeholder="افصل بين الكلمات بفاصلة (,)">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold d-block mb-2">الحالة</label>
+                            <label class="form-check form-switch form-check-custom form-check-solid">
+                                <input class="form-check-input" type="checkbox" value="1" name="status" {{ old('status') == 1 ? 'checked' : '' }}>
+                                <span class="form-check-label fw-semibold ms-3">تفعيل الألبوم وعرضه في الموقع</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-6 mt-6 border-top">
+                        <a href="{{ route('photos.view') }}" class="btn btn-light me-3">إلغاء</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> حفظ الألبوم</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 @stop

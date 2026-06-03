@@ -255,6 +255,70 @@ class FinancialController extends AdminController
     }
 
     /**
+     * Financial breakdown for a pending fee row — used by the verify modal to show how much of
+     * the due was already covered by the student's CREDIT balance, the minimum payment, and how
+     * much cash is still required to confirm the seating.
+     */
+    public function getPendingFinancials($feeId)
+    {
+        $fee = GroupStudentsFees::with('group')->find($feeId);
+        if (!$fee) {
+            return response()->json(['success' => false], 404);
+        }
+
+        $studentId = $fee->student_id;
+        $groupId   = $fee->group_id;
+
+        // Total due: prefer the group's enrolment fee, else the row's own due
+        $totalDue = (float) $fee->total_due_amount;
+        if ($groupId) {
+            $gs = \App\Models\GroupStudents::where('student_id', $studentId)
+                ->where('group_id', $groupId)->first();
+            if ($gs && $gs->student_fee_total > 0) $totalDue = (float) $gs->student_fee_total;
+        }
+
+        // Already paid for this enrolment (the credit auto-applied at branching time)
+        $ledger    = $this->financialService->getStudentLedger($studentId, $groupId);
+        $paidSoFar = $ledger ? (float) $ledger['total_paid'] : 0.0;
+        $remaining = $ledger ? (float) $ledger['remaining_balance'] : max(0, $totalDue - $paidSoFar);
+
+        // Minimum required payment for the program (credit already counts toward it)
+        $programId  = $fee->program_id ?: optional($fee->group)->program_id;
+        $program    = $programId ? \App\Models\Programs::find($programId) : null;
+        $minPayment = $program ? (float) $program->computeMinimumDue($totalDue) : 0.0;
+
+        // Minimum CASH the student must still pay now = minimum − what credit already covered
+        $minCashNow = max(0, round($minPayment - $paidSoFar, 2));
+
+        // Credit still available on the student's ledger (not yet consumed)
+        $creditAvailable = (float) GroupStudentsFees::where('student_id', $studentId)
+            ->where('audit_status', 'verified')
+            ->where('transaction_type', 'credit')
+            ->sum('transaction_amount');
+
+        // "Seated" = the student has an ACTIVE group membership for this group. Only then is the
+        // program locked. A row that merely carries a program (registration, or branched without
+        // an active seat) must NOT lock the program.
+        $isSeated = $groupId
+            ? \App\Models\GroupStudents::where('student_id', $studentId)
+                ->where('group_id', $groupId)->whereNull('deleted_at')->exists()
+            : false;
+
+        return response()->json([
+            'success'          => true,
+            'total_due'        => round($totalDue, 2),
+            'paid_from_credit' => round($paidSoFar, 2),
+            'remaining'        => round(max(0, $remaining), 2),
+            'min_payment'      => round($minPayment, 2),
+            'min_cash_now'     => $minCashNow,
+            'credit_available' => round(max(0, $creditAvailable), 2),
+            'is_seated'        => $isSeated,
+            'group_name'       => optional($fee->group)->name,
+            'has_credit'       => $paidSoFar > 0.009,
+        ]);
+    }
+
+    /**
      * Verify the payment and activate the student.
      */
     public function verifyPayment(Request $request)
@@ -309,10 +373,25 @@ class FinancialController extends AdminController
                 $fee->notes = trim(($fee->notes ?? '') . ' | تغيير البرنامج بواسطة الأدمن إلى program_id='.$request->change_program_to);
             }
 
+            // Prior verified payments already on this group's ledger (e.g. credit auto-applied at
+            // branching). The cash entered now is ADDED to them — so the remaining is computed as
+            // total − (prior payments + this cash), not just total − cash.
+            $priorPaid = 0.0;
+            if ($fee->group_id) {
+                $priorPaid = (float) GroupStudentsFees::where('student_id', $fee->student_id)
+                    ->where('group_id', $fee->group_id)
+                    ->where('id', '!=', $fee->id)
+                    ->where('audit_status', 'verified')
+                    ->where(function ($q) {
+                        $q->where('transaction_type', 'payment')->orWhereNull('transaction_type');
+                    })
+                    ->sum('transaction_amount');
+            }
+
             $fee->admin_verified_amount = $request->verified_amount;
             $fee->transaction_amount    = $request->verified_amount;
             $fee->transaction_type      = 'payment';
-            $fee->remaining_amount      = max(0, $newTotal - (float) $request->verified_amount);
+            $fee->remaining_amount      = max(0, $newTotal - $priorPaid - (float) $request->verified_amount);
             $fee->status                = 'confirmed';
             $fee->audit_status          = 'verified';
             $fee->verified_by           = $adminId;

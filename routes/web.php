@@ -108,6 +108,7 @@ Route::group(['middleware' => ['auth:teachers']], function () {
     Route::post('teacher/grope/info', ['as' => 'teacher.showGroue_info', 'uses' => 'GroupsController@postTeacherGroueInfo']);
     Route::get('students/grope/{group_id}/{teacher_id}', ['as' => 'teacher.showGroueStudents', 'uses' => 'GroupsController@postTeacherGroueStudents']);
     Route::get('grope/Exam/{teacher_id}', ['as' => 'teacher.ExamDates', 'uses' => 'GroupsController@getGroupExamDates']);
+    Route::get('teacher/my-salaries', ['as' => 'teacher.my_salaries', 'uses' => 'TeachersController@mySalaries']);
     //Chat
     Route::get('load-latest-messages_teacher', 'MessagesController@getLoadLatestMessages')->defaults('type', 'teacher');
     Route::post('send_teacher', 'MessagesController@postSendMessage')->defaults('type', 'teacher');
@@ -599,6 +600,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('financial/pending', ['as' => 'admin.financial.pending', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@pendingOrders']);
     Route::get('financial/pending/list', ['as' => 'admin.financial.pending.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingList']);
     Route::get('financial/pending/student/{id}', ['as' => 'admin.financial.pending.student', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingStudentDetails']);
+    Route::get('financial/pending/financials/{feeId}', ['as' => 'admin.financial.pending.financials', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingFinancials']);
     // Financial Ledger (Invoices)
     Route::get('financial/invoices', ['as' => 'admin.financial.invoices', 'uses' => 'FinancialController@invoicesLedger']);
     Route::get('financial/invoices/list', ['as' => 'admin.financial.invoices.list', 'uses' => 'FinancialController@getInvoicesLedgerList']);
