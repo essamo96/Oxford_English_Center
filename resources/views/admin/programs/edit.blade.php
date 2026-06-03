@@ -78,6 +78,13 @@
                         <label class="form-check-label">تفعيل</label>
                     </div>
                 </div>
+                <div class="col-md-6 fv-row mt-4">
+                    <label class="fs-6 fw-semibold mb-2">برنامج اختبار تحديد المستوى الافتراضي</label>
+                    <div class="form-check form-switch form-check-custom form-check-solid mt-2">
+                        <input class="form-check-input" type="checkbox" value="1" name="is_placement_test_default" {{ ($info->is_placement_test_default ?? 0) == 1 ? 'checked' : '' }} />
+                        <label class="form-check-label">يُحدَّد تلقائيًا في خطوة «تحديد المستوى» بالتسجيل (برنامج واحد فقط)</label>
+                    </div>
+                </div>
             </div>
 
             <div class="card-footer d-flex justify-content-end py-6 px-9">

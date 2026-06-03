@@ -12,7 +12,16 @@
       "Bash(php -l app/Http/Controllers/GroupsController.php)",
       "Bash(php -l app/Models/AttendanceSetting.php)",
       "Bash(php -l app/Services/ScheduleParser.php)",
-      "Bash(php -l app/Providers/AuthServiceProvider.php)"
+      "Bash(php -l app/Providers/AuthServiceProvider.php)",
+      "Bash(php -l app/Services/Enrollment/EnrollmentService.php)",
+      "Bash(php -l app/Services/Enrollment/EnrollmentValidator.php)",
+      "Bash(php -l app/Http/Controllers/StudentsController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/TeacherSalaryController.php)",
+      "Bash(php -l app/Services/TeacherSalaryService.php)",
+      "Bash(php -l app/Http/Controllers/RegistrationController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ProgramsController.php)",
+      "Bash(grep -n ''\\\\''status'\\\\'' => $status\\\\|\"status\" => $status' app/Http/Controllers/GroupsController.php)",
+      "Bash(grep -cn ''\\\\''status'\\\\'' => $status' app/Http/Controllers/GroupsController.php)"
     ]
   }
 }

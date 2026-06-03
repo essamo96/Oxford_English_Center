@@ -26,7 +26,8 @@
         <div class="card-title"><h3 class="fw-bold"><i class="bi bi-cash-coin text-success me-2"></i>رواتب المعلمين (حسب المحاضرات)</h3></div>
         <div class="card-toolbar">
             {{-- Period selector --}}
-            <form method="get" class="d-flex gap-2 align-items-center">
+            <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control form-control-sm" style="width:170px;" placeholder="🔍 بحث باسم المعلم">
                 <select name="month" class="form-select form-select-sm" style="width:130px;">
                     @foreach($monthsAr as $m => $label)
                         <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>{{ $label }}</option>
@@ -36,6 +37,12 @@
                     @for($y = now()->year; $y >= now()->year - 4; $y--)
                         <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
                     @endfor
+                </select>
+                <select name="group_id" class="form-select form-select-sm" style="width:170px;">
+                    <option value="0">كل المجموعات</option>
+                    @foreach($groups_for_filter ?? [] as $gid => $gname)
+                        <option value="{{ $gid }}" {{ ($group_id ?? 0) == $gid ? 'selected' : '' }}>{{ $gname }}</option>
+                    @endforeach
                 </select>
                 <button class="btn btn-sm btn-light-primary"><i class="bi bi-funnel"></i> عرض</button>
             </form>
@@ -71,6 +78,7 @@
                 <thead>
                     <tr class="text-muted fw-bold fs-7 text-uppercase">
                         <th>المدرس</th>
+                        <th>المجموعات</th>
                         <th>عدد المحاضرات</th>
                         <th>أجر المحاضرة</th>
                         <th>الإجمالي</th>
@@ -86,6 +94,13 @@
                         @php $st = $statusMap[$r['status']] ?? [$r['status'],'badge-light-secondary']; @endphp
                         <tr>
                             <td class="text-start fw-bold">{{ $r['teacher_name'] }}</td>
+                            <td class="text-start">
+                                @forelse($r['groups'] as $g)
+                                    <span class="badge badge-light-info fs-9 mb-1"><i class="bi bi-people-fill me-1"></i>{{ $g['name'] }} ({{ $g['lectures'] }})</span>
+                                @empty
+                                    <span class="text-muted fs-8">—</span>
+                                @endforelse
+                            </td>
                             <td><span class="badge badge-light-primary fw-bold">{{ $r['lectures_count'] }}</span></td>
                             <td>{{ number_format($r['lecture_rate'], 2) }}</td>
                             <td class="fw-bold">{{ number_format($r['gross_amount'], 2) }}</td>
@@ -107,7 +122,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="text-muted py-6">لا توجد محاضرات مسجّلة لهذه الفترة.</td></tr>
+                        <tr><td colspan="10" class="text-muted py-6">لا توجد محاضرات مسجّلة لهذه الفترة.</td></tr>
                     @endforelse
                 </tbody>
             </table>

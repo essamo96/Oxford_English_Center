@@ -141,7 +141,7 @@
 <!-- END PAGE LEVEL SCRIPTS -->
 <script src="vendor/laravel-filemanager/js/lfm.js"></script>
 <script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
-<script src="{{asset('assets/admin/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('assets/oxford/vendor/date/bootstrap-datepicker.min.js')}}" type="text/javascript"></script>
 
 <script>
 $('.date-picker').datepicker();

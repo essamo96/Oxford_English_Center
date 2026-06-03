@@ -3,7 +3,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}">
-<link href="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
 <style>
     .input-group-btn {
         background-color: #f0f0f0;
@@ -30,9 +30,9 @@
 
     /* QR button — matches the close button style but in brand colors */
     .btn-qr-group {
-        background: rgba(255, 204, 0, 0.15);
-        color: #003366;
-        border: 1px solid rgba(255, 204, 0, 0.4);
+        background: transparent;
+        color: #ffcc00;
+        border: 1px solid #ffcc00;
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 11px;
@@ -40,7 +40,22 @@
         transition: all 0.3s;
         cursor: pointer;
     }
-    .btn-qr-group:hover { background: #ffcc00; color: #003366; border-color: #ffcc00; }
+    .btn-qr-group:hover { background: transparent; color: #fff; border-color: #fff; }
+
+    /* Keep the QR/Close buttons a fixed size & shape regardless of the program title length */
+    .course-head-row { gap: 10px; }
+    .course-head-row .course-title {
+        flex: 1 1 auto; min-width: 0;            /* allow the title to shrink instead of the buttons */
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .course-actions {
+        display: flex;
+        gap: 8px;                                 /* spacing between the two buttons */
+        flex: 0 0 auto;                           /* never shrink */
+        align-items: center;
+    }
+    .course-actions .btn-qr-group,
+    .course-actions .btn-stop-group { white-space: nowrap; flex: 0 0 auto; }
 
     /* Teacher QR Modal — themed header + animated overlay (mirrors admin side) */
     #teacherQrModal .modal-content { border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 24px 60px rgba(0, 51, 102, 0.25); }
@@ -374,9 +389,9 @@
                                 </div>
                                 
                                 <div class="course-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-10">
+                                    <div class="d-flex justify-content-between align-items-start mb-10 course-head-row">
                                         <h4 class="course-title">{{ $group->program->title }}</h4>
-                                        <div class="d-flex gap-2">
+                                        <div class="course-actions">
                                             <button class="btn-qr-group" type="button"
                                                     data-group-id="{{ $group->id }}"
                                                     data-group-name="{{ $group->name }}"
@@ -614,7 +629,7 @@
 @stop
 
 @section('js')
-<script src="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
 <script type="text/javascript">
     $(function() {
         $('.date-picker').datepicker({

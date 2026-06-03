@@ -64,6 +64,14 @@ class StudentsController extends Controller {
         parent::$data['student_groups'] = $studentGroups;
         parent::$data['studentGropesExamday'] = $studentGropesExamday;
 
+        // Groups the student was seated in but whose due payment is NOT yet confirmed
+        // (a pending financial order exists). Access to such a group is held until confirmed.
+        parent::$data['pendingPaymentGroupIds'] = \App\Models\GroupStudentsFees::where('student_id', $user_id)
+            ->whereNotNull('group_id')
+            ->where('audit_status', 'pending')
+            ->whereNull('deleted_at')
+            ->pluck('group_id')->map(fn ($g) => (int) $g)->unique()->values()->all();
+
         parent::$data['user'] = $user = Auth::guard('students')->user();
         $groups_array_string = implode(',', $group);
         $teacher_ids = Teachers::whereNull('deleted_at')->where('evaluations', 1)->get();

@@ -252,12 +252,30 @@ class ProgramsController extends AdminController
             $programs = new Programs();
             $add = $programs->addProgram($title, $short, $exam, $status, $image);
             if ($add) {
+                if (is_object($add) && isset($add->id)) {
+                    $this->applyPlacementDefault($request, $add->id);
+                }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('programs.view'));
             } else {
                 $request->session()->flash('danger', self::EXECUTION_ERROR);
                 return redirect(route('programs.add'))->withInput();
             }
+        }
+    }
+
+    /**
+     * Set/clear the single "default placement-test program" flag. When turning it on for a
+     * program, it is cleared from every other program (only one default at a time).
+     */
+    private function applyPlacementDefault(Request $request, $programId)
+    {
+        if (!$programId) return;
+        if ($request->boolean('is_placement_test_default')) {
+            Programs::where('id', '!=', $programId)->update(['is_placement_test_default' => 0]);
+            Programs::where('id', $programId)->update(['is_placement_test_default' => 1]);
+        } else {
+            Programs::where('id', $programId)->update(['is_placement_test_default' => 0]);
         }
     }
 
@@ -317,7 +335,7 @@ class ProgramsController extends AdminController
             } else {
                 $update = $programs->updateProgram($info, $title, $short, $exam, $status, $image);
                 if ($update) {
-
+                    $this->applyPlacementDefault($request, $id);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('programs.view'));
                 } else {

@@ -28,6 +28,8 @@ class FinancialController extends AdminController
      */
     public function pendingOrders()
     {
+        parent::$data['payment_methods'] = \App\Models\PaymentMethods::where('is_active', 1)
+            ->orderBy('name')->get(['id', 'name']);
         return view('admin.financial.pending_orders', parent::$data);
     }
 
@@ -111,6 +113,14 @@ class FinancialController extends AdminController
                 }
                 return '<span class="badge badge-light-danger">لا يوجد</span>';
             })
+            // add class d-flex align-items-center to student name column for better vertical alignment with the receipt thumbnail
+            ->editColumn('student', function ($row) {
+                $name = $row->student ? e($row->student->name) : 'N/A';
+                return '<div class="d-flex align-items-center justify-content-center gap-2 text-center">
+                            <i class="bi bi-person-fill text-primary fs-5"></i>
+                            <span class="fw-bold text-dark">'.$name.'</span>
+                        </div>';
+            })
             ->editColumn('created_at', function ($row) {
                 if (!$row->created_at) return '<span class="text-muted">—</span>';
                 try {
@@ -130,13 +140,16 @@ class FinancialController extends AdminController
             ->addColumn('actions', function ($row) {
                 // Pick the program the applicant actually chose at registration time.
                 // Stored directly on the fee row now; fall back to the student record for legacy data.
-                $pId  = $row->program_id ?: ($row->student->program_id ?? 0);
-                $sId  = $row->student ? $row->student->id : 0;
-                $type = (string) $row->student_paid_type;
-                return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
+                $pId   = $row->program_id ?: ($row->student->program_id ?? 0);
+                $gId   = $row->group_id ?: 0; // group the admin seated the student in (pre-selected in the modal)
+                $gName = $row->group ? e($row->group->name) : ''; // shown in the "already seated" notice
+                $pmId  = $row->payment_method_id ?: 0; // stored payment method (pre-selected in the modal)
+                $sId   = $row->student ? $row->student->id : 0;
+                $type  = (string) $row->student_paid_type;
+                return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-group="'.$gId.'" data-group-name="'.$gName.'" data-payment="'.$pmId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
                         <button data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-refund">رفض</button>';
             })
-            ->rawColumns(['receipt', 'actions', 'created_at', 'program_group'])
+            ->rawColumns(['receipt','student', 'actions', 'created_at', 'program_group'])
             ->make(true);
     }
 
@@ -259,6 +272,9 @@ class FinancialController extends AdminController
             'credit_action'        => 'nullable|in:keep,refund',
             // Optional proof image the admin attaches when refunding the surplus to the student
             'refund_receipt'       => 'nullable|image|max:5120',
+            // Payment method + the payment notice the admin attaches when confirming
+            'payment_method_id'    => 'nullable|exists:payment_methods,id',
+            'payment_receipt'      => 'nullable|image|max:5120',
         ]);
 
         // Admin (users.id) performing this confirmation — stored on every row we touch
@@ -300,6 +316,15 @@ class FinancialController extends AdminController
             $fee->status                = 'confirmed';
             $fee->audit_status          = 'verified';
             $fee->verified_by           = $adminId;
+            if ($request->payment_method_id) {
+                $fee->payment_method_id = $request->payment_method_id;
+            }
+            if ($request->hasFile('payment_receipt')) {
+                $file = $request->file('payment_receipt');
+                $filename = 'pay_' . time() . '_' . $fee->student_id . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/receipts'), $filename);
+                $fee->payment_receipt = 'receipts/' . $filename;
+            }
             if ($request->group_id) {
                 $fee->group_id = $request->group_id;
             }
@@ -572,9 +597,15 @@ class FinancialController extends AdminController
                 ]);
             }
 
+            // Carry the program forward so the paid installment is tied to the SAME program
+            // (needed when later seating the student into a group of that program).
+            $programId = $baseFee->program_id
+                ?: optional(Groups::find($baseFee->group_id))->program_id;
+
             $this->financialService->recordTransaction([
                 'student_id'        => $baseFee->student_id,
                 'group_id'          => $baseFee->group_id, // may be null — that's fine
+                'program_id'        => $programId,
                 'amount'            => $request->amount,
                 'verified_amount'   => $request->amount,
                 'audit_status'      => 'verified',

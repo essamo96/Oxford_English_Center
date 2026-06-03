@@ -41,8 +41,8 @@
 
 /* Dashboard Stats/Summary Header */
 .dashboard-header {
-    background: linear-gradient(135deg, rgba(26, 39, 68, 0.95) 0%, rgba(45, 55, 72, 0.95) 100%), 
-                url('../assets/media/patterns/pattern-1.jpg');
+    background: linear-gradient(135deg, rgba(26, 39, 68, 0.95) 0%, rgba(45, 55, 72, 0.95) 100%),
+                url('../../assets/media/patterns/pattern-1.jpg');
     background-size: cover;
     background-attachment: fixed;
     padding: 40px;

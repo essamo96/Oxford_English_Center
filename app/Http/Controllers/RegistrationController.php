@@ -62,6 +62,11 @@ class RegistrationController extends Controller
         self::$data['placement_test_fee'] = (float) FeeSettings::where('type', 'placement_test')
                                                                 ->avg('amount') ?: 100.0;
 
+        // Program flagged in the admin panel as the DEFAULT placement-test program — pre-selected
+        // in Step 3 when the applicant chooses the Placement Test path.
+        self::$data['placement_default_program_id'] = Programs::where('status', 1)
+            ->where('is_placement_test_default', 1)->value('id');
+
         return view('frontend.contact.book', self::$data);
     }
 

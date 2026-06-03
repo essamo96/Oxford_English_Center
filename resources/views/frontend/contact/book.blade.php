@@ -1889,6 +1889,8 @@
         window.registrationRoute = '{{ route('contact.book.post') }}';
         window.apiCheckEmail = '{{ url("api/check-email") }}';
         window.apiCheckMobile = '{{ url("api/check-mobile") }}';
+        // Program flagged in admin as the default Placement-Test program (pre-selected in Step 3)
+        window.PLACEMENT_DEFAULT_PROGRAM_ID = {{ $placement_default_program_id ?? 'null' }};
 
 
         document.addEventListener('DOMContentLoaded', function() {

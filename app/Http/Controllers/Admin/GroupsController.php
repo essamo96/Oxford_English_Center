@@ -61,6 +61,15 @@ class GroupsController extends AdminController
             ->where('status', 1)->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name', 'program_id']);
+
+        // The "البرنامج" picker must list EVERY active program that has fees configured —
+        // not only the ones that currently own an active group.
+        parent::$data['programs_with_fees'] = Programs::where('status', 1)
+            ->whereNull('deleted_at')
+            ->whereIn('id', \App\Models\FeeSettings::distinct()->pluck('program_id'))
+            ->orderBy('title')
+            ->get(['id', 'title']);
+
         return view('admin.groups.view', parent::$data);
     }
 
@@ -93,20 +102,37 @@ class GroupsController extends AdminController
         $excludeIds   = array_filter(array_map('intval', explode(',', (string) $request->get('exclude_ids', ''))));
         $limit        = (int) $request->get('limit', 200);
         $limit        = max(1, min(500, $limit));
+        // Multi-enroll mode: show students already seated in OTHER active groups so they can
+        // be branched into an additional program. Off by default (existing behaviour intact).
+        $includeEnrolled = $request->boolean('include_enrolled');
+        $targetGroupId   = (int) $request->get('target_group_id', 0);
 
         $query = Students::query()
             ->where('students.status', 1)
             ->whereNull('students.deleted_at')
 
-            // Not in any active, non-deleted group
-            ->whereNotExists(function ($q) {
-                $q->select(\DB::raw(1))
-                  ->from('group_students')
-                  ->join('groups', 'groups.id', '=', 'group_students.group_id')
-                  ->whereColumn('group_students.student_id', 'students.id')
-                  ->whereNull('group_students.deleted_at')
-                  ->whereNull('groups.deleted_at')
-                  ->where('groups.status', 1);
+            // Group-membership filter:
+            //   • default            → exclude students already in ANY active group
+            //   • multi-enroll mode  → exclude only those already in the TARGET group
+            ->when(!$includeEnrolled, function ($qq) {
+                $qq->whereNotExists(function ($q) {
+                    $q->select(\DB::raw(1))
+                      ->from('group_students')
+                      ->join('groups', 'groups.id', '=', 'group_students.group_id')
+                      ->whereColumn('group_students.student_id', 'students.id')
+                      ->whereNull('group_students.deleted_at')
+                      ->whereNull('groups.deleted_at')
+                      ->where('groups.status', 1);
+                });
+            })
+            ->when($includeEnrolled && $targetGroupId, function ($qq) use ($targetGroupId) {
+                $qq->whereNotExists(function ($q) use ($targetGroupId) {
+                    $q->select(\DB::raw(1))
+                      ->from('group_students')
+                      ->whereColumn('group_students.student_id', 'students.id')
+                      ->where('group_students.group_id', $targetGroupId)
+                      ->whereNull('group_students.deleted_at');
+                });
             })
 
             // Has at least one verified payment
@@ -162,28 +188,23 @@ class GroupsController extends AdminController
         // tied to that program (or its FeeSettings), OR their previously-deleted
         // membership was in that program — we approximate via fee_settings.program_id
         // and group.program_id.
-        if ($programId) {
-            $query->where(function ($q) use ($programId) {
-                $q->whereExists(function ($s) use ($programId) {
-                    $s->select(\DB::raw(1))
-                      ->from('group_students_fees as gsf')
-                      ->leftJoin('groups as g', 'g.id', '=', 'gsf.group_id')
-                      ->whereColumn('gsf.student_id', 'students.id')
-                      ->whereNull('gsf.deleted_at')
-                      ->where(function ($w) use ($programId) {
-                          $w->where('g.program_id', $programId);
-                      });
-                })
-                // Or never been in any group yet (group_id null) — match by any signal
-                ->orWhere(function ($q2) use ($programId) {
-                    $q2->whereExists(function ($s2) use ($programId) {
-                        $s2->select(\DB::raw(1))
-                           ->from('group_students_fees as gsf2')
-                           ->whereColumn('gsf2.student_id', 'students.id')
-                           ->whereNull('gsf2.deleted_at')
-                           ->whereNull('gsf2.group_id');
-                    });
-                });
+        // In multi-enroll mode this program filter is RELAXED so the rest of the students
+        // (registered in other programs) also appear and can be branched into a new program.
+        if ($programId && !$includeEnrolled) {
+            // A student belongs to a program when they have a (non-deleted) fee row tied to it —
+            // either by the fee row's OWN program_id (registration / pre-group) OR via the
+            // program of the group the row is attached to. This binds the list to the program
+            // (the old "any pre-group fee" rule showed everyone regardless of program).
+            $query->whereExists(function ($s) use ($programId) {
+                $s->select(\DB::raw(1))
+                  ->from('group_students_fees as gsf')
+                  ->leftJoin('groups as g', 'g.id', '=', 'gsf.group_id')
+                  ->whereColumn('gsf.student_id', 'students.id')
+                  ->whereNull('gsf.deleted_at')
+                  ->where(function ($w) use ($programId) {
+                      $w->where('gsf.program_id', $programId)
+                        ->orWhere('g.program_id', $programId);
+                  });
             });
         }
 
@@ -199,12 +220,28 @@ class GroupsController extends AdminController
         $rows = $query->limit($limit)->get();
 
         $financialService = app(\App\Services\FinancialService::class);
+        $validator        = app(\App\Services\Enrollment\EnrollmentValidator::class);
 
-        $payload = $rows->map(function ($s) use ($financialService) {
+        // When the admin has chosen a target group, flag students that clash with it so the
+        // UI can highlight them BEFORE the branching is submitted.
+        $targetGroup = $request->get('target_group_id')
+            ? \App\Models\Groups::find($request->get('target_group_id'))
+            : null;
+
+        $payload = $rows->map(function ($s) use ($financialService, $validator, $targetGroup) {
             $ledger = $financialService->getStudentLedger($s->id, null);
             $totalPaid = $ledger ? (float) $ledger['total_paid'] : 0.0;
             $totalDue  = $ledger ? (float) $ledger['total_fee']  : 0.0;
-            $remaining = $ledger ? (float) $ledger['remaining_balance'] : 0.0;
+
+            // Outstanding across ALL of the student's ledgers (not just the pre-group one)
+            $outstanding = $validator->outstandingBalance($s->id);
+
+            $hasConflict   = false;
+            $conflictGroup = null;
+            if ($targetGroup) {
+                $conflict = $validator->findTimeConflict($s->id, $targetGroup);
+                if ($conflict) { $hasConflict = true; $conflictGroup = $conflict->name; }
+            }
 
             return [
                 'id'            => $s->id,
@@ -217,8 +254,15 @@ class GroupsController extends AdminController
                                    ? asset($s->image) : asset('uploads/default.jpg'),
                 'total_due'     => round($totalDue, 2),
                 'total_paid'    => round($totalPaid, 2),
-                'remaining'     => round($remaining, 2),
-                'fully_paid'    => $remaining <= 0,
+                'remaining'     => round($outstanding, 2),
+                'outstanding'   => round($outstanding, 2),
+                'fully_paid'    => $outstanding <= 0.009,
+                // UX flags for the target group
+                'has_conflict'  => $hasConflict,
+                'conflict_with' => $conflictGroup,
+                // Only a time clash blocks branching now; an outstanding balance is informational
+                // (a new-program seat raises a pending order instead of being refused).
+                'blocked'       => $hasConflict,
             ];
         })->values();
 
@@ -257,7 +301,8 @@ class GroupsController extends AdminController
         // registered in. Reject the whole operation if any add candidate is registered in a
         // different program (e.g. an IELTS student into a non-IELTS group). We only enforce
         // when the student's program is actually known (has fee rows carrying a program_id).
-        if (!empty($addIds) && $group->program_id) {
+        // SKIPPED in multi-enroll mode, where adding to a DIFFERENT program is intentional.
+        if (!empty($addIds) && $group->program_id && !$request->boolean('include_enrolled')) {
             $names    = Students::whereIn('id', $addIds)->pluck('name', 'id');
             $mismatch = [];
             foreach ($addIds as $sid) {
@@ -283,10 +328,32 @@ class GroupsController extends AdminController
             }
         }
 
-        // Course fee for THIS program (separate from any placement-test fees)
-        $programCourseFee = (float) \App\Models\FeeSettings::where('program_id', $group->program_id)
-            ->whereIn('type', ['course', 'course_fee'])
-            ->sum('amount');
+        // ---- Business-rule pre-validation (time conflict only) ----
+        // An outstanding balance NO LONGER blocks branching: a same-program seat is free and a
+        // new-program seat raises a pending order (handled in EnrollmentService::enroll).
+        // Duplicate memberships are handled inside the ADD loop below (counted as "skipped").
+        $adminId   = optional(\Illuminate\Support\Facades\Auth::guard('admin')->user())->id;
+        $validator = app(\App\Services\Enrollment\EnrollmentValidator::class);
+        $blocked   = [];
+        if (!empty($addIds)) {
+            $vNames  = Students::whereIn('id', $addIds)->pluck('name', 'id');
+            $allowed = [];
+            foreach ($addIds as $sid) {
+                if ($validator->isEnrolledIn($sid, $group->id)) { $allowed[] = $sid; continue; }
+                if ($conflict = $validator->findTimeConflict($sid, $group)) {
+                    $blocked[] = ['name' => $vNames[$sid] ?? ('#' . $sid),
+                                  'reasons' => ['تعارض زمني مع مجموعة «' . $conflict->name . '»']];
+                } else {
+                    $allowed[] = $sid;
+                }
+            }
+            $addIds = $allowed;
+        }
+
+        // Fee for THIS program — unified with the financial module: ALL fees except the
+        // placement test (course + registration + books …). Single source of truth.
+        $programCourseFee = app(\App\Services\Enrollment\EnrollmentService::class)
+            ->programFee($group->program_id);
 
         $added = 0; $skipped = 0; $removed = 0;
 
@@ -312,69 +379,22 @@ class GroupsController extends AdminController
                 $removed++;
             }
 
-            /* ---------------- ADD: new students ---------------- */
+            /* ---------------- ADD: new students (unified through EnrollmentService) ---------------- */
+            // enroll() does everything in one place: stores the chosen program + group, carries any
+            // prior registration payment, DEDUCTS the due from the student's credit balance, and for
+            // the remainder raises a PENDING order (الطلبات العالقة) at the minimum installment.
+            $svc = app(\App\Services\Enrollment\EnrollmentService::class);
             foreach ($addIds as $sid) {
-                // Skip if already in this group
-                $exists = GroupStudents::where('student_id', $sid)
-                    ->where('group_id', $request->group_id)
-                    ->whereNull('deleted_at')->exists();
-                if ($exists) { $skipped++; continue; }
-
-                GroupStudents::create([
-                    'student_id'         => $sid,
-                    'group_id'           => $request->group_id,
-                    'student_fee_total'  => $programCourseFee > 0 ? $programCourseFee : 0,
-                    'student_book_total' => 0,
-                    'status'             => 1,
-                ]);
-
-                /* Course-fee carry-over logic:
-                 *
-                 * If the student already has a verified "Course Enrollment" fee row
-                 * (group_id=null from registration), MOVE it to this group so their
-                 * registration payment counts toward this course.
-                 *
-                 * Placement-test fee rows are NEVER moved — they belong to the
-                 * placement-test ledger and stay tied to group_id=null. A fresh
-                 * course-fee row is created so the student's course balance is tracked.
-                 */
-                $courseRegRow = \App\Models\GroupStudentsFees::where('student_id', $sid)
-                    ->whereNull('group_id')
-                    ->whereNull('deleted_at')
-                    ->where(function ($q) {
-                        $q->where('student_paid_type', 'Course Enrollment')
-                          ->orWhere('student_paid_type', 'LIKE', '%Course%');
-                    })
-                    ->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
-                    ->first();
-
-                if ($courseRegRow) {
-                    // Move the registration row to this group (preserves verified payment)
-                    $courseRegRow->group_id = $request->group_id;
-                    if ($programCourseFee > 0 && $programCourseFee != $courseRegRow->total_due_amount) {
-                        $courseRegRow->total_due_amount = $programCourseFee;
-                        $paid = (float) ($courseRegRow->transaction_amount ?: $courseRegRow->student_fee_paid);
-                        $courseRegRow->remaining_amount = max(0, $programCourseFee - $paid);
-                    }
-                    $courseRegRow->save();
-                } else {
-                    // Placement-test path or no prior course row: create a fresh course-fee row
-                    if ($programCourseFee > 0) {
-                        \App\Models\GroupStudentsFees::create([
-                            'student_id'        => $sid,
-                            'group_id'          => $request->group_id,
-                            'total_due_amount'  => $programCourseFee,
-                            'student_fee_paid'  => 0,
-                            'remaining_amount'  => $programCourseFee,
-                            'student_paid_type' => 'Course Enrollment',
-                            'status'            => 'pending',
-                            'audit_status'      => 'pending',
-                            'notes'             => 'رسوم البرنامج عند التشعيب — مستقلة عن رسوم اختبار تحديد المستوى',
-                        ]);
-                    }
+                if (GroupStudents::where('student_id', $sid)->where('group_id', $request->group_id)
+                        ->whereNull('deleted_at')->exists()) {
+                    $skipped++; continue;
                 }
-
-                $added++;
+                try {
+                    $svc->enroll((int) $sid, $group, $adminId);
+                    $added++;
+                } catch (\App\Exceptions\EnrollmentException $e) {
+                    $blocked[] = ['name' => ($vNames[$sid] ?? ('#' . $sid)), 'reasons' => $e->errors];
+                }
             }
 
             \DB::commit();
@@ -387,11 +407,20 @@ class GroupsController extends AdminController
         if ($added)   $parts[] = "تشعيب {$added}";
         if ($removed) $parts[] = "إزالة {$removed}";
         if ($skipped) $parts[] = "تجاهل {$skipped} (موجودون أصلاً)";
+        if (!empty($blocked)) $parts[] = 'مُنع ' . count($blocked) . ' (مخالفة شروط)';
+
+        // Warn the admin when the target program has no chargeable fee configured (nothing was billed)
+        $feeWarning = ($added > 0 && $programCourseFee <= 0)
+            ? 'تنبيه: برنامج «' . optional(\App\Models\Programs::find($group->program_id))->title . '» لا توجد له رسوم مُعرّفة في إعدادات الرسوم، لذلك لم تُرصَّد رسوم على الطلاب. يرجى ضبط رسوم البرنامج.'
+            : null;
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'تم: ' . (implode(' · ', $parts) ?: 'لا تغييرات') . '.',
-            'added'   => $added, 'removed' => $removed, 'skipped' => $skipped,
+            'status'      => 'success',
+            'message'     => 'تم: ' . (implode(' · ', $parts) ?: 'لا تغييرات') . '.',
+            'added'       => $added, 'removed' => $removed, 'skipped' => $skipped,
+            // Students refused by a business rule, with the reason(s) for each — for the admin UI
+            'blocked'     => $blocked,
+            'fee_warning' => $feeWarning,
         ]);
     }
 
@@ -418,83 +447,32 @@ class GroupsController extends AdminController
             return response()->json(['status' => 'error', 'message' => 'المجموعة المُستهدفة غير فعّالة.'], 422);
         }
 
-        $carryFees = (bool) $request->boolean('carry_fees', true);
-        $targetCourseFee = (float) \App\Models\FeeSettings::where('program_id', $targetGroup->program_id)
-            ->whereIn('type', ['course', 'course_fee'])
-            ->sum('amount');
+        $sourceGroup = Groups::find($request->source_group_id);
+        $adminId = optional(\Illuminate\Support\Facades\Auth::guard('admin')->user())->id;
 
-        $financialService = app(\App\Services\FinancialService::class);
-        $moved = 0; $carriedFees = 0.0;
-
-        \DB::beginTransaction();
+        // Delegate to the service: only students with ZERO outstanding balance are promoted
+        // (billed the new level's fee + credit auto-applied); the rest are returned as skipped.
         try {
-            foreach ($request->student_ids as $sid) {
-                // 1. End old membership (soft-delete)
-                GroupStudents::where('student_id', $sid)
-                    ->where('group_id', $request->source_group_id)
-                    ->whereNull('deleted_at')
-                    ->delete();
-
-                // 2. Skip if already in target
-                $existsInTarget = GroupStudents::where('student_id', $sid)
-                    ->where('group_id', $request->target_group_id)
-                    ->whereNull('deleted_at')->exists();
-
-                // 3. Compute outstanding on source
-                $sourceLedger = $financialService->getStudentLedger($sid, $request->source_group_id);
-                $sourceRemaining = $sourceLedger ? (float) $sourceLedger['remaining_balance'] : 0.0;
-
-                // 4. New target fee_total = target course fee + any unpaid balance carried over
-                $newTotal = $targetCourseFee;
-                if ($carryFees && $sourceRemaining > 0) {
-                    $newTotal += $sourceRemaining;
-                }
-
-                if (!$existsInTarget) {
-                    GroupStudents::create([
-                        'student_id'         => $sid,
-                        'group_id'           => $request->target_group_id,
-                        'student_fee_total'  => $newTotal,
-                        'student_book_total' => 0,
-                        'status'             => 1,
-                    ]);
-                }
-
-                // 5. Update student's current_level to target group's level (group.name)
-                \App\Models\Students::where('id', $sid)->update([
-                    'current_level' => $targetGroup->name,
-                ]);
-
-                // 6. Record carried-over balance as a pending fee row on the target
-                //    (so it shows up in the financial ledger needing payment)
-                if ($carryFees && $sourceRemaining > 0) {
-                    \App\Models\GroupStudentsFees::create([
-                        'student_id'        => $sid,
-                        'group_id'          => $request->target_group_id,
-                        'total_due_amount'  => $newTotal,
-                        'student_fee_paid'  => 0,
-                        'remaining_amount'  => $newTotal,
-                        'student_paid_type' => 'Promotion Carry-over',
-                        'status'            => 'pending',
-                        'audit_status'      => 'pending',
-                        'notes'             => 'ترصيد رسوم متبقية من مجموعة سابقة عند التصعيد',
-                    ]);
-                    $carriedFees += $sourceRemaining;
-                }
-
-                $moved++;
-            }
-            \DB::commit();
+            $result = app(\App\Services\Enrollment\EnrollmentService::class)
+                ->promote($request->student_ids, $sourceGroup, $targetGroup, $adminId);
         } catch (\Exception $e) {
-            \DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'فشل التصعيد: ' . $e->getMessage()], 500);
         }
 
+        $promotedCount = count($result['promoted']);
+        $skippedCount  = count($result['skipped']);
+
+        $msg = "تم تصعيد {$promotedCount} طالباً إلى «" . ($targetGroup->name ?? 'المجموعة الجديدة') . '»';
+        if ($skippedCount > 0) {
+            $msg .= " — تعذّر تصعيد {$skippedCount} بسبب رسوم مستحقة عليهم";
+        }
+
         return response()->json([
-            'status'  => 'success',
-            'message' => "تم تصعيد {$moved} طالباً إلى " . ($targetGroup->name ?? 'المجموعة الجديدة')
-                       . ($carriedFees > 0 ? ' (تم ترصيد ' . number_format($carriedFees, 2) . ' ILS متبقي)' : '') . '.',
-            'moved'   => $moved,
+            'status'   => 'success',
+            'message'  => $msg . '.',
+            'promoted' => $result['promoted'],
+            // [{student_id, name, amount}] — students NOT promoted because they still owe money
+            'skipped'  => $result['skipped'],
         ]);
     }
 

@@ -3,7 +3,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}">
-<link href="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
 <style>
     .input-group-btn {
         background-color: #f0f0f0;
@@ -258,17 +258,24 @@
                         
                         <div class="course-grid">
                             @foreach ($student_groups as $group)
+                            @php $awaitingPay = in_array((int) $group->group_id, $pendingPaymentGroupIds ?? []); @endphp
                             <div class="course-card">
                                 <div class="course-img-wrapper">
                                     <img src="{{ $group->group->image ? url($group->group->image) : url('assets/oxford/img/logo.png') }}" class="course-img" alt="Course">
                                     <div class="course-overlay">
-                                        <a href="#Info" data-toggle="tab" class="joinG btn-join-circle" 
-                                           data-group_id="{{ Crypt::encrypt($group->group_id) }}" 
-                                           data-student_id="{{ Crypt::encrypt($group->student_id) }}">
+                                        <a href="#Info" data-toggle="tab" class="joinG btn-join-circle"
+                                           data-group_id="{{ Crypt::encrypt($group->group_id) }}"
+                                           data-student_id="{{ Crypt::encrypt($group->student_id) }}"
+                                           data-pending="{{ $awaitingPay ? 1 : 0 }}">
                                             <i class="fa fa-external-link"></i>
                                             <span>Join</span>
                                         </a>
                                     </div>
+                                    @if($awaitingPay)
+                                    <div style="position:absolute;inset:0;background:rgba(20,33,61,.55);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:10px;border-radius:inherit;">
+                                        <div><i class="fa fa-lock fa-2x"></i><div style="font-size:12px;font-weight:700;margin-top:6px;">بانتظار تأكيد الدفع</div></div>
+                                    </div>
+                                    @endif
                                 </div>
                                 
                                 <div class="course-body">
@@ -306,10 +313,11 @@
                                         </div>
 
                                         <div class="d-flex gap-10">
-                                            <a href="#Info" data-toggle="tab" class="joinG btn btn-sm btn-primary flex-grow-1" 
-                                               data-group_id="{{ Crypt::encrypt($group->group_id) }}" 
-                                               data-student_id="{{ Crypt::encrypt($group->student_id) }}">
-                                                <i class="fa fa-info-circle"></i> Details
+                                            <a href="#Info" data-toggle="tab" class="joinG btn btn-sm {{ $awaitingPay ? 'btn-warning' : 'btn-primary' }} flex-grow-1"
+                                               data-group_id="{{ Crypt::encrypt($group->group_id) }}"
+                                               data-student_id="{{ Crypt::encrypt($group->student_id) }}"
+                                               data-pending="{{ $awaitingPay ? 1 : 0 }}">
+                                                <i class="fa fa-{{ $awaitingPay ? 'lock' : 'info-circle' }}"></i> {{ $awaitingPay ? 'بانتظار الدفع' : 'Details' }}
                                             </a>
                                             @if($group->cer_code)
                                             <a href="{{ route('student.certificate.download', Crypt::encrypt($group->id)) }}" 
@@ -475,7 +483,7 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/jquery.autocomplete/1.0.7/jquery.autocomplete.min.js"></script>
 
-<script src="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"
+<script src="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.js') }}"
 type="text/javascript"></script>
 <script type="text/javascript">
 $(function () {
@@ -488,7 +496,18 @@ $('.date-picker').datepicker();
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script src="{{ url('assets/oxford/js/chat.js') }}" type="text/javascript"></script>
 <script>
-    $(document).on('click', ".joinG", function () {
+    $(document).on('click', ".joinG", function (e) {
+        // Block entry until the group's due payment is confirmed by administration
+        if (String($(this).data("pending")) === "1") {
+            e.preventDefault();
+            var msg = 'بانتظار تأكيد المبلغ المستحق لهذه المجموعة من قبل الإدارة لتتمكن من الاستفادة من مميزات هذه المجموعة.';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'info', title: 'بانتظار تأكيد الدفع', text: msg, confirmButtonText: 'حسناً' });
+            } else {
+                alert(msg);
+            }
+            return;
+        }
         var student_id = $(this).data("student_id");
         var group_id = $(this).data("group_id");
         $.ajax({

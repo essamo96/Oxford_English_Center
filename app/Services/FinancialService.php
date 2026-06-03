@@ -51,7 +51,7 @@ class FinancialService
                                                   ->where('transaction_type', 'credit')
                                                   ->sum('transaction_amount');
             $netPaid          = $confirmedPaid - $refunded;
-            $remainingBalance = max(0, $totalFee - $netPaid);
+            $remainingBalance = $totalFee <= 0 ? 0.0 : max(0, $totalFee - $netPaid); // no fee ⇒ never "owed" (ignore standalone refunds/credits)
 
             return [
                 'group_student'     => $groupStudent,
@@ -89,7 +89,7 @@ class FinancialService
                                               ->where('transaction_type', 'credit')
                                               ->sum('transaction_amount');
         $netPaid       = $confirmedPaid - $refunded;
-        $remainingBalance = max(0, $totalFee - $netPaid);
+        $remainingBalance = $totalFee <= 0 ? 0.0 : max(0, $totalFee - $netPaid); // no fee ⇒ never "owed" (ignore standalone refunds/credits)
 
         return [
             'group_student'     => null,
@@ -146,7 +146,7 @@ class FinancialService
                 'total_fee'  => $totalFee,
                 'paid'       => $net,
                 'credit'     => $credit,
-                'remaining'  => max(0, $totalFee - $net),
+                'remaining'  => $totalFee <= 0 ? 0.0 : max(0, $totalFee - $net),
                 'rows'       => $bucketRows,
             ];
         }
@@ -169,6 +169,7 @@ class FinancialService
         return GroupStudentsFees::create([
             'student_id' => $data['student_id'],
             'group_id' => $data['group_id'],
+            'program_id' => $data['program_id'] ?? null,
             'payment_method_id' => $data['payment_method_id'] ?? null,
             'transaction_type' => $data['type'] ?? 'payment',
             'transaction_amount' => $data['amount'],
@@ -194,36 +195,38 @@ class FinancialService
             ->where('transaction_type', 'refund')
             ->sum(DB::raw('ABS(transaction_amount)'));
 
-        // 2. Pending Amount (Student submitted but not yet verified)
-        // For pending records, transaction_amount is usually 0 until admin verifies it.
-        $pendingAmount = GroupStudentsFees::where('audit_status', 'pending')
-            ->sum('student_fee_paid');
+        // 2. Pending Amount (submitted but not yet verified) — use the row's remaining when set
+        // (enrollment pending orders carry student_fee_paid=0 but a real remaining_amount).
+        $pendingAmount = (float) GroupStudentsFees::where('audit_status', 'pending')
+            ->whereNull('deleted_at')
+            ->sum(DB::raw('GREATEST(COALESCE(remaining_amount,0), COALESCE(student_fee_paid,0))'));
 
-        // 3. Total Remaining (What students still owe)
-        // We calculate this by taking the total fees from groups and adding any other 
-        // independent fees (like placement tests) that haven't been fully paid.
-        $groupFees = GroupStudents::sum('student_fee_total');
-        
-        // Sum of all verified payments that were specifically for groups
-        $groupCollected = GroupStudentsFees::confirmed()
-            ->whereNotNull('group_id')
-            ->where('transaction_type', 'payment')
-            ->sum('transaction_amount');
-            
-        // For independent fees (like Placement Tests not tied to a group yet)
-        $independentRemaining = GroupStudentsFees::whereNull('group_id')
-            ->where('audit_status', '!=', 'rejected')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->unique('student_id') // Simplification: get latest for each student
-            ->sum('remaining_amount');
+        // 3. Total Remaining (what students still owe) — summed PER LEDGER so an over-payer
+        // never cancels out another student's outstanding (the old global net hid real dues).
+        $totalRemaining = 0.0;
 
-        $totalRemaining = ($groupFees - $groupCollected) + $independentRemaining;
+        // Group ledgers (one per distinct student+group membership)
+        $pairs = GroupStudents::whereNull('deleted_at')
+            ->get(['student_id', 'group_id'])
+            ->unique(fn ($r) => $r->student_id . '-' . $r->group_id);
+        foreach ($pairs as $p) {
+            $ledger = $this->getStudentLedger($p->student_id, $p->group_id);
+            if ($ledger) $totalRemaining += max(0, (float) $ledger['remaining_balance']);
+        }
+
+        // Pre-group ledgers (placement tests / fees not tied to a group)
+        $preStudents = GroupStudentsFees::whereNull('group_id')
+            ->whereNull('deleted_at')
+            ->distinct()->pluck('student_id');
+        foreach ($preStudents as $sid) {
+            $ledger = $this->getStudentLedger($sid, null);
+            if ($ledger) $totalRemaining += max(0, (float) $ledger['remaining_balance']);
+        }
 
         return [
             'total_collected' => $totalCollected,
-            'total_remaining' => max(0, $totalRemaining),
-            'pending_amount' => $pendingAmount,
+            'total_remaining' => round(max(0, $totalRemaining), 2),
+            'pending_amount'  => round((float) $pendingAmount, 2),
         ];
     }
 }

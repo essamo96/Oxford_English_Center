@@ -3,12 +3,21 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">
-<link href="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.css') }}?v={{ time() }}" rel="stylesheet" type="text/css" />
 <style>
-    .form-control-modern[readonly] {
-        background-color: #fff !important;
-        cursor: pointer;
+    .exam-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+    @media (max-width: 640px){ .exam-grid { grid-template-columns:1fr; } }
+    .exam-field label { display:block; font-size:13px; font-weight:700; color:var(--primary,#14213d); margin-bottom:6px; }
+    .exam-input-wrap { position:relative; }
+    .exam-input-wrap .fa-calendar { position:absolute; inset-inline-end:14px; top:50%; transform:translateY(-50%); color:#9aa4b8; pointer-events:none; }
+    .exam-date {
+        width:100%; height:48px; padding:10px 42px 10px 14px; border:1px solid #e2e8f0;
+        border-radius:10px; background:#fff; font-size:14px; font-weight:600; color:#1f2937; cursor:pointer;
+        transition:border-color .15s, box-shadow .15s;
     }
+    .exam-date:focus { outline:none; border-color:var(--accent,#f5c518); box-shadow:0 0 0 3px rgba(245,197,24,.15); }
+    /* Make sure the popup never sticks open below the field */
+    .datepicker.datepicker-dropdown { z-index: 1060; }
 </style>
 @endsection
 
@@ -16,89 +25,70 @@
 <div class="student-dashboard-wrapper">
     <div id="bg-particles"></div>
     <div class="container" style="position: relative; z-index: 1;">
-        {{-- Breadcrumbs Navigation --}}
+        {{-- Breadcrumbs --}}
         <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
-            <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
+            <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> الرئيسية</a>
             <span style="margin: 0 5px;">/</span>
-            <span style="color: var(--primary);">Exam Schedule</span>
+            <span style="color: var(--primary);">جدول الامتحانات</span>
             <span style="margin: 0 5px;">/</span>
             <strong>{{ $group->name }}</strong>
         </div>
 
-        <div class="page-header-block d-flex justify-content-between align-items-center">
-            <div>
-                <p class="page-title m-0"><i class="fa fa-calendar-plus-o"></i> Exam Scheduling</p>
-                <p class="page-subtitle m-0">Set exam dates for <strong>{{$group->name}}</strong></p>
-            </div>
-            <a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}" class="btn-modern btn-modern-primary btn-sm" style="padding: 6px 15px; font-size: 13px;">
-                <i class="fa fa-arrow-left"></i> Back
-            </a>
-        </div>
-
+        {{-- Page header (single, no repeated titles) --}}
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 @include('frontend.layouts.error')
-                <div class="info-card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: none;">
-                    <div class="p-10">
-                        <div style="font-size:15px; font-weight:700; color:var(--primary); margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid var(--bg-light);">
-                            <i class="fa fa-calendar-plus-o" style="color:var(--accent);"></i> Schedule Exams
+                <div class="info-card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:none; overflow:hidden;">
+                    {{-- Card header: title + subtitle + back button (all inside the form card) --}}
+                    <div class="d-flex justify-content-between align-items-center"
+                         style="gap:12px; padding:18px 20px; background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff;">
+                        <div>
+                            <div style="font-size:16px; font-weight:800;"><i class="fa fa-calendar-plus-o" style="color:var(--accent,#f5c518);"></i> جدولة امتحانات «{{ $group->name }}»</div>
+                            <div style="font-size:12.5px; opacity:.8; margin-top:3px;">حدّد مواعيد الاختبارات لتظهر لطلاب المجموعة</div>
                         </div>
+                        <a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}"
+                           class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; padding:7px 16px; font-size:13px; white-space:nowrap;">
+                            <i class="fa fa-arrow-left"></i> رجوع
+                        </a>
+                    </div>
+                    <div class="p-10" style="padding:22px 20px;">
                         <form method="post" action="{{ route('teacher.group.examDate',['id' =>$group->id]) }}">
                             {{ csrf_field() }}
-                            <div class="modern-form-grid">
-                                <div class="form-group-modern">
-                                    <label>Progress Test 1</label>
-                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" style="width: 100%;">
-                                        <input type="text" class="form-control-modern" readonly name="progress_test1" value="{{ $exam_dates ? $exam_dates->progress_test1 : '' }}" placeholder="Select Date">
-                                        <span class="input-group-btn" style="position: absolute; right: 15px; top: 12px; z-index: 5;">
-                                            <i class="fa fa-calendar text-muted"></i>
-                                        </span>
+                            <div class="exam-grid">
+                                @php
+                                    $fields = [
+                                        'progress_test1' => 'اختبار التقدّم الأول',
+                                        'progress_test2' => 'اختبار التقدّم الثاني',
+                                        'progress_test3' => 'اختبار التقدّم الثالث',
+                                        'final_exam'     => 'الامتحان النهائي',
+                                    ];
+                                @endphp
+                                @foreach($fields as $name => $label)
+                                    <div class="exam-field">
+                                        <label>{{ $label }}</label>
+                                        <div class="exam-input-wrap">
+                                            <input type="text" class="exam-date js-date" readonly autocomplete="off"
+                                                   name="{{ $name }}"
+                                                   value="{{ $exam_dates ? $exam_dates->{$name} : '' }}"
+                                                   placeholder="اختر التاريخ">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="form-group-modern">
-                                    <label>Progress Test 2</label>
-                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" style="width: 100%;">
-                                        <input type="text" class="form-control-modern" readonly name="progress_test2" value="{{ $exam_dates ? $exam_dates->progress_test2 : '' }}" placeholder="Select Date">
-                                        <span class="input-group-btn" style="position: absolute; right: 15px; top: 12px; z-index: 5;">
-                                            <i class="fa fa-calendar text-muted"></i>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group-modern">
-                                    <label>Progress Test 3</label>
-                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" style="width: 100%;">
-                                        <input type="text" class="form-control-modern" readonly name="progress_test3" value="{{ $exam_dates ? $exam_dates->progress_test3 : '' }}" placeholder="Select Date">
-                                        <span class="input-group-btn" style="position: absolute; right: 15px; top: 12px; z-index: 5;">
-                                            <i class="fa fa-calendar text-muted"></i>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group-modern">
-                                    <label>Final Exam</label>
-                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" style="width: 100%;">
-                                        <input type="text" class="form-control-modern" readonly name="final_exam" value="{{ $exam_dates ? $exam_dates->final_exam : '' }}" placeholder="Select Date">
-                                        <span class="input-group-btn" style="position: absolute; right: 15px; top: 12px; z-index: 5;">
-                                            <i class="fa fa-calendar text-muted"></i>
-                                        </span>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
 
                             <div class="mt-40 text-center">
-                                <button class="btn btn-success btn-lg" type="submit" style="min-width: 250px; padding: 15px; border-radius: 12px; font-weight: 700; box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);">
-                                    <i class="fa fa-save"></i> Save Exam Schedule
+                                <button class="btn-modern btn-modern-accent" type="submit" style="min-width:240px; justify-content:center;">
+                                    <i class="fa fa-save"></i> حفظ مواعيد الامتحانات
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
-                
-                <div class="mt-30 p-20" style="background: rgba(49, 130, 206, 0.05); border-left: 4px solid #3182ce; border-radius: 8px;">
-                    <div style="font-size:13px; font-weight:700; color:#2b6cb0; margin-bottom:6px;"><i class="fa fa-info-circle"></i> Important Note</div>
-                    <p class="m-0 text-muted small">Once set, dates will be visible to all students in <strong>{{$group->name}}</strong>. Please align dates with the academic calendar.</p>
+
+                <div class="mt-30" style="background: rgba(49,130,206,.05); border-inline-start:4px solid #3182ce; border-radius:8px; padding:14px 18px;">
+                    <div style="font-size:13px; font-weight:700; color:#2b6cb0; margin-bottom:4px;"><i class="fa fa-info-circle"></i> ملاحظة</div>
+                    <p class="m-0 text-muted small">ستظهر هذه المواعيد لجميع طلاب المجموعة بمجرّد حفظها. يُرجى مطابقتها مع التقويم الأكاديمي.</p>
                 </div>
             </div>
         </div>
@@ -108,7 +98,7 @@
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script src="{{ asset('assets/admin/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('assets/oxford/vendor/date/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof particlesJS !== 'undefined') {
@@ -133,10 +123,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
     $(function () {
-        $('.date-picker').datepicker({
+        // Initialise on the INPUT (not the container) so the calendar pops up on focus/click
+        // instead of rendering inline under every field.
+        $('.js-date').datepicker({
             format: 'yyyy-mm-dd',
             autoclose: true,
-            todayHighlight: true
+            todayHighlight: true,
+            orientation: 'bottom auto'
+        }).on('changeDate', function () {
+            $(this).datepicker('hide');
         });
     });
 </script>

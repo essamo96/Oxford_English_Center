@@ -163,6 +163,18 @@ window.selectEnrollmentType = function(type, el) {
         selectTestChoice('yes');
         const container = document.getElementById('test-options-container');
         if (container) container.style.display = 'none';
+
+        // Pre-select the admin-configured default Placement-Test program in Step 3
+        var pdp = window.PLACEMENT_DEFAULT_PROGRAM_ID;
+        var progSel = document.getElementById('program_id_select');
+        if (pdp && progSel) {
+            progSel.value = String(pdp);
+            if (window.jQuery && jQuery(progSel).hasClass('select2-hidden-accessible')) {
+                jQuery(progSel).trigger('change'); // updates select2 + fires onchange
+            } else if (typeof handleProgramChange === 'function') {
+                handleProgramChange();
+            }
+        }
     } else {
         const container = document.getElementById('test-options-container');
         if (container) container.style.display = 'none';

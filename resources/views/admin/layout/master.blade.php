@@ -33,6 +33,12 @@
             font-family: 'Cairo', sans-serif !important;
         }
     </style>
+    {{-- Global table alignment fix: keep every cell vertically centred so multi-line cells
+         (stacked badges, dates, action buttons) stay consistent across ALL admin tables. --}}
+    <style>
+        .table > :not(caption) > * > * { vertical-align: middle !important; }
+        table.dataTable td, table.dataTable th { vertical-align: middle !important; }
+    </style>
     @yield('css')
 </head>
 

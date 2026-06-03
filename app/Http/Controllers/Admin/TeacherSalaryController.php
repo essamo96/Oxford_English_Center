@@ -28,13 +28,38 @@ class TeacherSalaryController extends AdminController
 
     public function getIndex(Request $request)
     {
-        $year  = (int) $request->get('year', now()->year);
-        $month = (int) $request->get('month', now()->month);
+        $year    = (int) $request->get('year', now()->year);
+        $month   = (int) $request->get('month', now()->month);
+        $search  = trim((string) $request->get('search', ''));
+        $groupId = (int) $request->get('group_id', 0);
 
-        parent::$data['year']      = $year;
-        parent::$data['month']     = $month;
-        parent::$data['rows']      = $this->service->preview($year, $month);
-        parent::$data['is_closed'] = $this->service->isPeriodClosed($year, $month);
+        $rows = $this->service->preview($year, $month);
+
+        // Distinct groups present this period → for the "sort/filter by group" dropdown
+        $groupsForFilter = [];
+        foreach ($rows as $r) {
+            foreach ($r['groups'] as $g) { $groupsForFilter[$g['id']] = $g['name']; }
+        }
+        asort($groupsForFilter);
+
+        if ($search !== '') {
+            $rows = array_values(array_filter($rows, fn ($r) => mb_stripos($r['teacher_name'], $search) !== false));
+        }
+        if ($groupId) {
+            // Keep only teachers who delivered lectures in the chosen group
+            $rows = array_values(array_filter($rows, fn ($r) => in_array($groupId, $r['group_ids'], true)));
+        }
+
+        // Sort by the teacher's first group name so same-group teachers cluster together
+        usort($rows, fn ($a, $b) => strcmp($a['groups'][0]['name'] ?? '', $b['groups'][0]['name'] ?? ''));
+
+        parent::$data['year']             = $year;
+        parent::$data['month']            = $month;
+        parent::$data['search']           = $search;
+        parent::$data['group_id']         = $groupId;
+        parent::$data['groups_for_filter'] = $groupsForFilter;
+        parent::$data['rows']             = $rows;
+        parent::$data['is_closed']        = $this->service->isPeriodClosed($year, $month);
         parent::$data['logs']      = SalaryCloseLog::with('closedBy')->orderByDesc('year')->orderByDesc('month')->limit(24)->get();
 
         return view('admin.salaries.index', parent::$data);

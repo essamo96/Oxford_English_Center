@@ -56,12 +56,29 @@ class TeacherSalaryService
         $forms      = TeacherSalaryForm::where('year', $year)->where('month', $month)
                         ->get()->keyBy('teacher_id');
 
+        // Group-name lookup for every group that saw a lecture this period
+        $groupNames = \App\Models\Groups::whereIn('id', function ($q) use ($year, $month) {
+                $q->select('group_id')->from('absent_teacher')
+                  ->whereNull('deleted_at')->whereYear('days', $year)->whereMonth('days', $month);
+            })->pluck('name', 'id');
+
         $rows = [];
         foreach ($teacherIds as $tid) {
-            $teacher  = $teachers->get($tid);
-            $lectures = $this->lectureRows($tid, $year, $month)->count();
-            $rate     = $teacher ? (float) $teacher->lecture_rate : 0.0;
-            $form     = $forms->get($tid);
+            $teacher    = $teachers->get($tid);
+            $lectureRows = $this->lectureRows($tid, $year, $month);
+            $lectures   = $lectureRows->count();
+            $rate       = $teacher ? (float) $teacher->lecture_rate : 0.0;
+            $form       = $forms->get($tid);
+
+            // Per-group breakdown for this teacher (group_id => lectures count)
+            $groups = [];
+            foreach ($lectureRows->groupBy('group_id') as $gid => $rowsOfGroup) {
+                $groups[] = [
+                    'id'       => (int) $gid,
+                    'name'     => $groupNames[$gid] ?? ('#' . $gid),
+                    'lectures' => $rowsOfGroup->count(),
+                ];
+            }
 
             $bonus     = $form ? (float) $form->bonus : 0.0;
             $deduction = $form ? (float) $form->deduction : 0.0;
@@ -83,6 +100,8 @@ class TeacherSalaryService
                 'net_amount'     => round($gross + $bonus - $deduction, 2),
                 'status'         => $form ? $form->status : 'draft',
                 'form_id'        => $form?->id,
+                'groups'         => $groups,                       // [{id,name,lectures}]
+                'group_ids'      => array_column($groups, 'id'),   // for filtering
             ];
         }
         return $rows;

@@ -818,47 +818,36 @@ class StudentsController extends AdminController
             return redirect()->back()->withInput();
         } else {
 
-            // Program-match guard: a student may only be seated in a group that belongs to the
-            // SAME program they are registered in (enforced when their program is known).
-            $targetGroup = \App\Models\Groups::find($new_grope);
-            if ($targetGroup && $targetGroup->program_id) {
-                $studentProgramIds = \App\Models\GroupStudentsFees::where('student_id', $student_id)
-                    ->whereNotNull('program_id')
-                    ->whereNull('deleted_at')
-                    ->distinct()
-                    ->pluck('program_id')
-                    ->map(fn ($p) => (int) $p)
-                    ->all();
-
-                if (!empty($studentProgramIds) && !in_array((int) $targetGroup->program_id, $studentProgramIds, true)) {
-                    $progTitle = optional(\App\Models\Programs::find($targetGroup->program_id))->title ?: ('#' . $targetGroup->program_id);
-                    session()->flash('danger', 'لا يمكن تشعيب الطالب في مجموعة تابعة لبرنامج «' . $progTitle . '» لأنه مسجّل في برنامج آخر.');
-                    return redirect()->back()->withInput();
-                }
-            }
-
-            // $group_students = new GroupStudents();
-            // $data = $group_students->checkStudentGroupExist($student_id,$new_grope);
-            // if ($data) {
-            //     session()->flash('danger', "عذرا الطالب مسجل مسبقا بهذه المجموعة");
-            //     return redirect()->back()->withInput();
-            // } else {
-
-            $obj = new GroupStudents();
-            $obj->student_id = $student_id;
-            // $obj->student_fee_total = $student_fee_total;
-            // $obj->student_book_total = $student_book_total;
-            $obj->group_id = $new_grope;
-            $add = $obj->save();
-            if ($add) {
-
-                session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
-                return redirect(route('students.gropes', $student_id));
-            } else {
-                session()->flash('danger', self::EXECUTION_ERROR);
+            $group = \App\Models\Groups::find($new_grope);
+            if (!$group) {
+                session()->flash('danger', self::NOT_FOUND);
                 return redirect()->back()->withInput();
             }
-            // }
+
+            // Route through the EnrollmentService so ALL business rules apply consistently:
+            //   duplicate · time-conflict · outstanding-balance · program-fee billing · credit auto-apply.
+            // Multi-program enrollment is allowed here (no same-program restriction).
+            try {
+                $adminId = optional(Auth::guard('admin')->user())->id;
+                $result  = app(\App\Services\Enrollment\EnrollmentService::class)
+                    ->enroll((int) $student_id, $group, $adminId);
+
+                $msg = 'تم تشعيب الطالب في «' . ($group->name ?? '') . '».';
+                if (($result['credit_applied'] ?? 0) > 0.009) {
+                    $msg .= ' خُصم من رصيده الدائن ' . number_format($result['credit_applied'], 2) . ' ILS.';
+                }
+                if (!empty($result['no_fee'])) {
+                    session()->flash('warning', 'تنبيه: هذا البرنامج لا توجد له رسوم مُعرّفة، لذلك لم تُرصَّد رسوم على الطالب. اضبط رسوم البرنامج من إعدادات الرسوم.');
+                }
+                session()->flash('success', $msg);
+                return redirect(route('students.gropes', $student_id));
+            } catch (\App\Exceptions\EnrollmentException $e) {
+                session()->flash('danger', implode(' | ', $e->errors));
+                return redirect()->back()->withInput();
+            } catch (\Exception $e) {
+                session()->flash('danger', self::EXECUTION_ERROR . ' (' . $e->getMessage() . ')');
+                return redirect()->back()->withInput();
+            }
         }
     }
 

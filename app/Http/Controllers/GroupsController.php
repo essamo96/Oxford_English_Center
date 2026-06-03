@@ -440,6 +440,20 @@ class GroupsController extends Controller {
             $request->session()->flash('danger', self::NOT_FOUND);
             return redirect('/student');
         }
+        // Hold access until the group's due payment is confirmed by administration
+        $awaitingPayment = \App\Models\GroupStudentsFees::where('student_id', $student_id)
+            ->where('group_id', $group_id)
+            ->where('audit_status', 'pending')
+            ->whereNull('deleted_at')
+            ->exists();
+        if ($awaitingPayment) {
+            return '<div style="padding:40px 24px;text-align:center;">'
+                . '<i class="fa fa-clock-o" style="font-size:46px;color:#f5a524;"></i>'
+                . '<h3 style="margin:16px 0 8px;color:#14213d;">بانتظار تأكيد الدفع</h3>'
+                . '<p style="color:#555;max-width:480px;margin:0 auto;">بانتظار تأكيد المبلغ المستحق لهذه المجموعة من قبل الإدارة لتتمكن من الاستفادة من مميزات هذه المجموعة.</p>'
+                . '</div>';
+        }
+
         $curent_groups_infos = GroupStudents::with('group')->where('group_id', $group_id)->where('student_id', $student_id)->first();
         if ($curent_groups_infos != null) {
             parent::$data['data'] = $curent_groups_infos;
@@ -448,7 +462,7 @@ class GroupsController extends Controller {
             return view('frontend.students.student_grope_info', parent::$data);
         } else {
 
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
+            return response()->json(['message' => self::NOT_FOUND, 'status' => 404], 404);
         }
     }
 
@@ -473,10 +487,13 @@ class GroupsController extends Controller {
             parent::$data['data'] = $curent_groups_infos;
             parent::$data['group_image'] = $curent_groups_infos->group->image;
             return view('frontend.teachers.teacher_grope_info', parent::$data);
-        } else {
-
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
         }
+
+        // No students seated in this group yet → friendly notice (loaded into the #Info tab as HTML)
+        return '<div style="padding:40px 24px;text-align:center;color:#64748b;">'
+             . '<i class="fa fa-users fa-2x" style="opacity:.45;"></i>'
+             . '<p style="margin-top:12px;font-weight:600;">لا يوجد طلاب مسجّلون في هذه المجموعة بعد.</p>'
+             . '</div>';
     }
 
     //////////////////////////////////////////////
@@ -504,7 +521,7 @@ class GroupsController extends Controller {
             return view('frontend.teachers.student_marks', parent::$data);
         } else {
 
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
+            return response()->json(['message' => self::NOT_FOUND, 'status' => 404], 404);
         }
     }
 
@@ -544,7 +561,7 @@ class GroupsController extends Controller {
             parent::$data['data'] = $ExamDates;
             return view('frontend.teachers.group_exam', parent::$data);
         } else {
-            return response()->json(['message' => self::NOT_FOUND, 'status' => $status]);
+            return response()->json(['message' => self::NOT_FOUND, 'status' => 404], 404);
         }
     }
 

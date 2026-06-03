@@ -717,6 +717,8 @@
                                     <option value="adult">الكبار</option>
                                     <option value="kids">الأطفال</option>
                                 </select>
+                                <small class="text-muted fs-8 d-block mt-1">يفلتر الطلاب حسب (كبار وصغار)</small>
+
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">
@@ -726,7 +728,7 @@
                                 <select id="bulkProgramIdFilter" class="form-select form-select-solid"
                                         data-control="select2" data-placeholder="— كل البرامج —">
                                     <option value=""></option>
-                                    @foreach(($active_groups_for_picker ?? collect())->pluck('program')->filter()->unique('id') as $p)
+                                    @foreach(($programs_with_fees ?? collect()) as $p)
                                         <option value="{{ $p->id }}">{{ $p->title }}</option>
                                     @endforeach
                                 </select>
@@ -769,6 +771,12 @@
                                         </div>
                                     </div>
                                     <input type="text" id="poolSearch" class="form-control" placeholder="🔍 ابحث بالاسم أو الجوال...">
+                                    <label class="form-check form-switch form-check-custom form-check-solid mt-2 bg-light-warning rounded px-2 py-1 border border-warning border-dashed">
+                                        <input class="form-check-input" type="checkbox" id="bulkMultiEnroll" value="1">
+                                        <span class="form-check-label fw-bold text-warning fs-8 ms-2">
+                                            <i class="bi bi-people-fill me-1"></i> إظهار المسجّلين في مجموعات أخرى (تشعيب متعدّد البرامج)
+                                        </span>
+                                    </label>
                                 </div>
                                 <ul class="shuttle-list" id="poolList">
                                     <li class="shuttle-empty">جاري التحميل...</li>
@@ -1351,15 +1359,28 @@
             const locked = s.existing ? 'locked' : '';
             const lockedAttr = s.existing ? 'data-locked="1"' : '';
             const historyBtn = `<button type="button" class="shuttle-history-btn" data-history-id="${s.id}" data-history-name="${escapeHtml(s.name)}" title="عرض كل المجموعات السابقة"><i class="bi bi-clock-history"></i></button>`;
+
+            // Business-rule warnings (relative to the chosen target group)
+            let warnTags = '';
+            if (s.has_conflict) {
+                warnTags += `<span class="tag" style="background:#fee2e2;color:#b91c1c;font-weight:700;" title="تعارض في موعد المحاضرات"><i class="bi bi-clock-history"></i> تعارض: ${escapeHtml(s.conflict_with || '')}</span>`;
+            }
+            if (typeof s.outstanding === 'number' && s.outstanding > 0.009) {
+                warnTags += `<span class="tag" style="background:#fee2e2;color:#b91c1c;font-weight:700;" title="عليه رسوم مستحقة سابقة"><i class="bi bi-cash-coin"></i> مستحق ${s.outstanding.toFixed(0)}</span>`;
+            }
+            const blocked   = s.blocked === true;
+            const blkStyle  = blocked ? 'style="border-inline-start:4px solid #ef4444;background:#fff5f5;"' : '';
+            const blkTitle  = blocked ? 'title="هذا الطالب مخالف للشروط (تعارض زمني أو رسوم مستحقة) وسيُمنع تشعيبه"' : '';
+
             return `
-                <li class="shuttle-item ${locked}" data-id="${s.id}" ${lockedAttr}>
+                <li class="shuttle-item ${locked}" data-id="${s.id}" ${lockedAttr} ${blkStyle} ${blkTitle}>
                     <i class="bi bi-grip-vertical grip"></i>
                     <img src="${s.avatar}" class="avatar">
                     <div class="meta">
-                        <div class="name">${escapeHtml(s.name)}</div>
+                        <div class="name">${escapeHtml(s.name)} ${blocked ? '<i class="bi bi-exclamation-triangle-fill text-danger"></i>' : ''}</div>
                         <div class="sub">${mob}${paid}</div>
                     </div>
-                    <div class="tags">${statusTag}${pTag}${lvl}</div>
+                    <div class="tags">${statusTag}${pTag}${lvl}${warnTags}</div>
                     ${historyBtn}
                 </li>`;
         }
@@ -1544,10 +1565,14 @@
         function loadEligible() {
             ajaxBusy('#poolList', true, 'جاري جلب الطلاب المؤهلين...');
             $.get(URL_ELIGIBLE, {
-                search:       $('#poolSearch').val() || '',
-                program_type: $('#bulkProgramTypeFilter').val() || '',
-                program_id:   $('#bulkProgramIdFilter').val() || '',
-                exclude_ids:  bulk.getBasketIds().join(','),
+                search:           $('#poolSearch').val() || '',
+                program_type:     $('#bulkProgramTypeFilter').val() || '',
+                program_id:       $('#bulkProgramIdFilter').val() || '',
+                exclude_ids:      bulk.getBasketIds().join(','),
+                // Pass the chosen target group so the server flags time-conflict / outstanding students
+                target_group_id:  $('#bulkTargetGroup').val() || '',
+                // Multi-enroll mode: also list students already seated in other active groups
+                include_enrolled: $('#bulkMultiEnroll').is(':checked') ? 1 : 0,
             }, function (res) {
                 if (res.success) {
                     bulk.setPool(res.students);
@@ -1921,6 +1946,8 @@
               .always(() => ajaxBusy('#historyContent', false));
         });
         $('#poolSearch').on('input', () => bulk.searchUpdated());
+        // Re-fetch the eligible pool when toggling multi-enroll mode
+        $('#bulkMultiEnroll').on('change', function () { loadEligible(); });
         // "Clear" clears only NEW picks (keep locked existing members)
         $('#clearBasketBtn').on('click', () => {
             const keepExisting = bulk.state.basket.filter(s => s.existing);
@@ -1989,9 +2016,23 @@
                 group_id: groupId,
                 student_ids: newIds,
                 remove_ids: removedExisting,
+                // Carry the multi-enroll intent so the server relaxes the same-program guard
+                include_enrolled: $('#bulkMultiEnroll').is(':checked') ? 1 : 0,
             }, function (res) {
                 if (res.status === 'success') {
-                    Swal.fire({icon:'success', title:'تم!', text: res.message}).then(() => {
+                    const hasBlocked = res.blocked && res.blocked.length;
+                    let html = '<div>' + (res.message || '') + '</div>';
+                    if (res.fee_warning) {
+                        html += '<div style="margin-top:8px;padding:8px 10px;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;color:#8a6d00;font-size:13px;"><i class="bi bi-exclamation-triangle-fill"></i> ' + res.fee_warning + '</div>';
+                    }
+                    if (hasBlocked) {
+                        html += '<hr><div style="text-align:right;font-size:13px;"><b class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> طلاب مُنع تشعيبهم:</b><ul style="padding-inline-start:18px;margin-top:6px;">';
+                        res.blocked.forEach(b => {
+                            html += '<li><b>' + b.name + '</b>: ' + ((b.reasons || []).join('، ')) + '</li>';
+                        });
+                        html += '</ul></div>';
+                    }
+                    Swal.fire({ icon: hasBlocked ? 'warning' : 'success', title: 'تم!', html: html }).then(() => {
                         bulkCloseProgrammatic();
                         if (typeof table !== 'undefined' && table.ajax) table.ajax.reload();
                     });
@@ -2047,7 +2088,17 @@
                 student_ids: ids,
             }, function (res) {
                 if (res.status === 'success') {
-                    Swal.fire({icon:'success', title:'تم!', text: res.message}).then(() => {
+                    const skipped = res.skipped || [];
+                    let html = '<div>' + (res.message || '') + '</div>';
+                    if (skipped.length) {
+                        html += '<hr><div style="text-align:right;font-size:13px;"><b class="text-danger"><i class="bi bi-cash-coin"></i> لم يُصعَّدوا بسبب رسوم مستحقة:</b>'
+                              + '<ul style="padding-inline-start:18px;margin-top:6px;">';
+                        skipped.forEach(s => {
+                            html += '<li><b>' + s.name + '</b> — مستحق: <span class="text-danger">' + Number(s.amount).toFixed(2) + ' ILS</span></li>';
+                        });
+                        html += '</ul></div>';
+                    }
+                    Swal.fire({ icon: skipped.length ? 'warning' : 'success', title: 'تم!', html: html }).then(() => {
                         $('#promoteModal').modal('hide');
                         if (typeof table !== 'undefined' && table.ajax) table.ajax.reload();
                     });

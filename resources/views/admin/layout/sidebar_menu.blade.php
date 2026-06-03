@@ -242,37 +242,47 @@
                     </div>
                 </div>
 
-                @if (auth()->user()->can('admin.news.view'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'absent_teacher' ? 'active' : '' }}"
-                            href="{{ route('absent_teacher.view') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-user-tick fs-1 text-info"><span
-                                        class="path1"></span><span class="path2"></span><span
-                                        class="path3"></span><span class="path4"></span></i></span>
-                            <span class="menu-title">سجل حضور المدرسين</span>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()->can('admin.teacher_attendance.view'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'teacher_salaries' ? 'active' : '' }}"
-                            href="{{ route('admin.teacher_salaries') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-dollar fs-1 text-success"><span
-                                        class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
-                            <span class="menu-title">رواتب المعلمين</span>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()->can('admin.teacher_attendance.edit'))
-                    <div class="menu-item">
-                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'attendance_settings' ? 'active' : '' }}"
-                            href="{{ route('admin.attendance.settings') }}">
-                            <span class="menu-icon"><i class="ki-duotone ki-gear fs-1 text-primary"><span
-                                        class="path1"></span><span class="path2"></span></i></span>
-                            <span class="menu-title">إعدادات الحضور</span>
-                        </a>
+                @if (auth()->user()->can('admin.news.view') ||
+                        auth()->user()->can('admin.teacher_attendance.view') ||
+                        auth()->user()->can('admin.teacher_attendance.edit'))
+                    <div data-kt-menu-trigger="click"
+                        class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['absent_teacher', 'teacher_salaries', 'attendance_settings']) ? 'here show' : '' }} menu-accordion">
+                        <span class="menu-link">
+                            <span class="menu-icon"><i class="ki-duotone ki-people fs-1 text-info"><span
+                                        class="path1"></span><span class="path2"></span><span class="path3"></span><span
+                                        class="path4"></span><span class="path5"></span></i></span>
+                            <span class="menu-title">شؤون المدرّسين (HR)</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+                        <div class="menu-sub menu-sub-accordion">
+                            @if (auth()->user()->can('admin.news.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'absent_teacher' ? 'active' : '' }}"
+                                        href="{{ route('absent_teacher.view') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">سجل حضور المدرّسين</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.teacher_attendance.view'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'teacher_salaries' ? 'active' : '' }}"
+                                        href="{{ route('admin.teacher_salaries') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">استمارات رواتب المعلّمين</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @if (auth()->user()->can('admin.teacher_attendance.edit'))
+                                <div class="menu-item">
+                                    <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'attendance_settings' ? 'active' : '' }}"
+                                        href="{{ route('admin.attendance.settings') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">إعدادات الحضور والغياب</span>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 @endif
 

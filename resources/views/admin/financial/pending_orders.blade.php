@@ -99,6 +99,23 @@
                         <input type="number" name="verified_amount" id="verified_amount" class="form-control border-success fs-4 fw-bold" required>
                     </div>
 
+                    {{-- Payment method + admin-attached payment notice --}}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="bi bi-credit-card me-1 text-primary"></i> طريقة الدفع</label>
+                            <select name="payment_method_id" id="verify_payment_method" class="form-select">
+                                <option value="">-- اختر طريقة الدفع --</option>
+                                @foreach($payment_methods ?? [] as $pm)
+                                    <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="bi bi-paperclip me-1 text-info"></i> إرفاق إشعار الدفع <small class="text-muted">(اختياري)</small></label>
+                            <input type="file" name="payment_receipt" id="verify_payment_receipt" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+
                     {{-- Receipt preview — toggleable via button --}}
                     <div class="mb-3 d-flex align-items-center justify-content-between">
                         <span class="fw-bold text-dark"><i class="bi bi-receipt me-1 text-info"></i> إيصال الدفع</span>
@@ -108,6 +125,12 @@
                     </div>
                     <div id="receipt_preview_box" class="mb-4 text-center" style="display:none;">
                         <div id="receipt_preview_content" class="p-3 rounded border bg-light"></div>
+                    </div>
+
+                    {{-- Shown when the student is ALREADY seated in a group (branched) → program locked --}}
+                    <div id="already_seated_notice" class="alert alert-light-success border border-success border-dashed d-flex align-items-center gap-2" style="display:none;">
+                        <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                        <div>تم تسكين الطالب في المجموعة «<strong id="already_seated_group"></strong>» بالفعل — لا يمكن تغيير البرنامج، فقط أكّد الدفعة.</div>
                     </div>
 
                     <div id="program_group_box">
@@ -281,7 +304,7 @@
     };
     var columns = [
         { data: 'id', name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
-        { data: "student", name: "student.name" },
+        { data: "student", name: "student.name", className: "d-flex align-items-center" },
         { data: "type", name: "student_paid_type" },
         { data: "program_group", name: "program_group", orderable: false, searchable: false },
         { data: "total_due_amount", name: "total_due_amount", render: function(d){ return '<span class="fw-bold text-dark">'+d+' ILS</span>'; } },
@@ -298,7 +321,7 @@
         let receiptShown = false;
 
         // Function to open verification modal
-        window.verifyPayment = function(id, claimed, total, programId, studentId, paidType) {
+        window.verifyPayment = function(id, claimed, total, programId, studentId, paidType, groupId, paymentMethodId, groupName) {
             paidType = paidType || '';
             $('#verify_id').val(id);
             $('#total_due_display').val(total + ' ILS');
@@ -314,6 +337,8 @@
             $('#change_program_notice').hide();
             $('#change_program_to_input').val('');
             $('#default_program_badge').hide();
+            $('#verify_program_id').prop('disabled', false); // re-enable (may be locked below)
+            $('#already_seated_notice').hide();
             $('#program_swap_panel').addClass('d-none');
             $('#swap_credit_actions').addClass('d-none');
             // Reset refund-proof uploader + restore default credit action
@@ -321,6 +346,9 @@
             $('#refund_receipt').val('');
             $('#refund_receipt_preview').empty();
             $('input[name="credit_action"][value="keep"]').prop('checked', true);
+            // Pre-select the stored payment method (if any)
+            $('#verify_payment_method').val(paymentMethodId && parseInt(paymentMethodId) > 0 ? String(paymentMethodId) : '');
+            $('#verify_payment_receipt').val('');
             receiptShown = false;
             receiptUrl = null;
 
@@ -342,10 +370,18 @@
                 if (programId) {
                     $('#verify_program_id').val(programId);
                     $('#default_program_badge').show();
-                    loadGroups(programId);
+                    loadGroups(programId, groupId); // pre-select the seated group too
                 } else {
                     $('#verify_program_id').val('');
                     $('#verify_group_id').html('<option value="">-- اختر المجموعة --</option>');
+                }
+
+                // Already seated in a group (branched) → lock the program, show a confirmation notice
+                if (groupId && parseInt(groupId) > 0) {
+                    $('#verify_program_id').prop('disabled', true);
+                    $('#default_program_badge').hide();
+                    $('#already_seated_group').text(groupName || '');
+                    $('#already_seated_notice').show();
                 }
             }
 
@@ -455,10 +491,13 @@
             const claimed = parseFloat($btn.data('claimed')) || 0;
             const total = parseFloat($btn.data('total')) || 0;
             const programId = $btn.data('program') || null;
+            const groupId = $btn.data('group') || null;
+            const groupName = $btn.data('group-name') || '';
+            const paymentMethodId = $btn.data('payment') || null;
             const studentId = $btn.data('student') || null;
             const paidType = $btn.data('type') || '';
             // call existing helper
-            window.verifyPayment(id, claimed, total, programId, studentId, paidType);
+            window.verifyPayment(id, claimed, total, programId, studentId, paidType, groupId, paymentMethodId, groupName);
         });
 
         // Reject / refund a pending payment
@@ -494,7 +533,7 @@
             if (id) refundPayment(id);
         });
 
-        window.loadGroups = function(programId) {
+        window.loadGroups = function(programId, preselectGroupId) {
             const $sel  = $('#verify_group_id');
             const $wrap = $sel.parent();
             if (!programId) {
@@ -512,6 +551,10 @@
                     html += `<option value="${g.id}">${g.name} (${g.start_date || 'N/A'})</option>`;
                 });
                 $sel.html(html);
+                // Pre-select the group the student was seated in (if provided & present in the list)
+                if (preselectGroupId && $sel.find('option[value="' + preselectGroupId + '"]').length) {
+                    $sel.val(String(preselectGroupId));
+                }
             }).always(() => {
                 $sel.prop('disabled', false);
                 $wrap.find('.input-spinner').remove();
