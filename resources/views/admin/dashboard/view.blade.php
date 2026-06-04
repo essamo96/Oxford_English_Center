@@ -14,6 +14,7 @@
 @stop
 
 @section('page-content')
+@include('admin.dashboard._tabs', ['tab' => 'dashboard'])
 <!-- Principal Dashboard Row -->
 <div class="row g-5 g-xl-10">
     <!--begin::Col: Statistics Hub -->

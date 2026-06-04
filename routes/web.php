@@ -222,6 +222,9 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
 
     // Route
     Route::get('dashboard', ['as' => 'dashboard.view', 'uses' => 'DashboardController@getIndex']);
+    // Financial Center dashboard (tab beside the main dashboard)
+    Route::get('financial-center', ['as' => 'dashboard.financial', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialDashboardController@getIndex']);
+    Route::get('financial-center/data', ['as' => 'dashboard.financial.data', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialDashboardController@getData']);
     Route::get('profile', ['as' => 'dashboard.profile', 'uses' => 'DashboardController@getProfile']);
     Route::get('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@getPassword']);
     Route::post('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@postPassword']);
@@ -615,6 +618,12 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('financial/verify', ['as' => 'admin.financial.verify', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'FinancialController@verifyPayment']);
     Route::post('financial/send-notifications', ['as' => 'admin.financial.send_notifications', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'FinancialController@sendConfirmationNotifications']);
     Route::post('financial/refund', ['as' => 'admin.financial.refund', 'middleware' => ['permission:admin.financial.refund'], 'uses' => 'FinancialController@refundPayment']);
+
+    // Expenses (المصروفات)
+    Route::get('financial/expenses', ['as' => 'admin.financial.expenses', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'ExpensesController@index']);
+    Route::post('financial/expenses', ['as' => 'admin.financial.expenses.store', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'ExpensesController@store']);
+    Route::post('financial/expenses/{id}', ['as' => 'admin.financial.expenses.update', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'ExpensesController@update']);
+    Route::delete('financial/expenses/{id}', ['as' => 'admin.financial.expenses.delete', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'ExpensesController@destroy']);
 
     Route::get('financial/fees', ['as' => 'admin.financial.fees', 'uses' => 'FinancialController@feeSettings']);
     Route::post('financial/fees/update', ['as' => 'admin.financial.fees.update', 'uses' => 'FinancialController@updateFeeSetting']);

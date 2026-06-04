@@ -423,15 +423,26 @@
             border-bottom: 3px solid #ffcc00;
             color: #fff !important;
         }
-        .qr-modal-header .modal-title { font-size: 1.15rem; letter-spacing: 0.01em; }
+        /* position:relative so the close button can be pinned to the physical right edge */
+        .qr-modal-header { position: relative; display: block; padding: 16px 22px; min-height: 62px; }
+        .qr-modal-header .modal-title { font-size: 1.3rem; letter-spacing: 0.01em; color: #fff !important; margin: 0; padding-right: 60px; text-align: right; }
+        .qr-modal-header .modal-title i.bi-qr-code-scan { font-size: 1.55rem; vertical-align: -3px; }
         .qr-modal-header .modal-title #qrModalGroupName {
             font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             text-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
         }
-        .qr-modal-header .btn-close { opacity: 0.85; }
-        .qr-modal-header .btn-close:hover { opacity: 1; }
+        /* Close button — pinned to the far-right corner, always-visible × glyph */
+        .qr-modal-header .qr-close-btn {
+            position: absolute; top: 50%; right: 18px; transform: translateY(-50%);
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 42px; height: 42px; border-radius: 10px; padding: 0;
+            background: rgba(255, 255, 255, 0.18); border: none; color: #fff; cursor: pointer;
+            font-size: 30px; line-height: 1; font-weight: 700;
+            transition: background .2s ease, transform .2s ease; z-index: 2;
+        }
+        .qr-modal-header .qr-close-btn:hover { background: rgba(255, 255, 255, 0.34); transform: translateY(-50%) scale(1.07); }
 
         /* "توليد الـ QR" — white text + icon on navy → gold gradient */
         .btn-qr-generate {
@@ -821,13 +832,14 @@
     <div class="modal fade qr-modal" id="qrGenModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered mw-600px">
             <div class="modal-content">
-                <div class="modal-header qr-modal-header py-3">
-                    <h5 class="modal-title fw-bold text-white">
+                <div class="modal-header qr-modal-header" style="position:relative; min-height:62px;">
+                    <button type="button" aria-label="إغلاق" onclick="closeQrModal()"
+                            style="position:absolute; top:50%; right:16px; transform:translateY(-50%); width:42px; height:42px; padding:0; border:none; border-radius:10px; background:rgba(255,255,255,.22); color:#ffffff; font-size:30px; font-weight:700; line-height:1; cursor:pointer; z-index:5;">&times;</button>
+                    <h5 class="modal-title fw-bold" style="margin:0; padding-right:58px; color:#fff;">
                         <i class="bi bi-qr-code-scan me-2" style="color:#ffcc00;"></i>
                         QR للمجموعة:
                         <span id="qrModalGroupName" class="ms-1" style="color:#ffcc00; font-style:italic;">—</span>
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="qrGenGroupId">
@@ -1756,6 +1768,29 @@
             const pad = n => String(n).padStart(2,'0');
             $('#qrExpiresAt').val(`${def.getFullYear()}-${pad(def.getMonth()+1)}-${pad(def.getDate())}T${pad(def.getHours())}:${pad(def.getMinutes())}`);
             $('#qrGenModal').modal('show');
+        };
+
+        // Robust close: works whether the modal runs on the jQuery plugin, Bootstrap 5,
+        // or neither (hard teardown removes the backdrop + body locks as a last resort).
+        window.closeQrModal = function () {
+            var el = document.getElementById('qrGenModal');
+            if (!el) return;
+            var done = false;
+            try { if (window.jQuery && typeof jQuery(el).modal === 'function') { jQuery(el).modal('hide'); done = true; } } catch (e) {}
+            if (!done) {
+                try { if (window.bootstrap && bootstrap.Modal) { (bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el)).hide(); done = true; } } catch (e) {}
+            }
+            setTimeout(function () {
+                if (el.classList.contains('show') || el.style.display === 'block') {
+                    el.classList.remove('show');
+                    el.style.display = 'none';
+                    el.setAttribute('aria-hidden', 'true');
+                    document.querySelectorAll('.modal-backdrop').forEach(function (b) { b.remove(); });
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }
+            }, 80);
         };
 
         // Cycle the loading message through stages to give the operation a sense of progress.

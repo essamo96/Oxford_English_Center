@@ -664,10 +664,18 @@
 <!-- Teacher Salaries Modal -->
 <div class="modal fade" id="teacherSalaryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden;">
-            <div class="modal-header" style="background:linear-gradient(135deg,#003366,#0b3d91);">
-                <h5 class="modal-title fw-bold text-white"><i class="fa fa-money me-2" style="color:#ffcc00;"></i> رواتبي وتفاصيلها</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content" dir="rtl" style="border:none; border-radius:16px; overflow:hidden;">
+            {{-- inline flex + jQuery close: the teacher portal runs Bootstrap 3, so BS5 utility
+                 classes (d-flex/justify-content) and data-bs-dismiss do not work here. --}}
+            <div class="modal-header" dir="rtl"
+                 style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 26px; border:none; background:linear-gradient(135deg,#003366,#0b3d91);">
+                <h5 class="modal-title" style="margin:0; padding:0; color:#fff; font-weight:800; white-space:nowrap;">
+                    <i class="fa fa-money" style="color:#ffcc00; margin-left:6px;"></i> رواتبي وتفاصيلها
+                </h5>
+                <button type="button" onclick="$('#teacherSalaryModal').modal('hide');" data-dismiss="modal" aria-label="إغلاق"
+                        style="flex:0 0 auto; background:rgba(255,255,255,.18); color:#fff; border:none; border-radius:8px; width:34px; height:34px; line-height:1; font-size:20px; cursor:pointer;">
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
             <div class="modal-body p-4" id="teacherSalaryBody" dir="rtl" style="background:#f6f8fb; text-align:right;">
                 <div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>

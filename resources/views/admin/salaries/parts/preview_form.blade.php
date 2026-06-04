@@ -31,16 +31,17 @@
             pointer-events:none; z-index:0;
         }
         #salaryPreviewDoc .sp-watermark img{
-            width:62%; max-width:430px; opacity:.06; filter:grayscale(1);
+            width:70%; max-width:480px; opacity:.10; filter:grayscale(1);
             -webkit-print-color-adjust:exact; print-color-adjust:exact;
         }
         #salaryPreviewDoc .sp-body{ position:relative; z-index:1; }
         #salaryPreviewDoc .sp-strong{ color:var(--sp-fg); }
         #salaryPreviewDoc .sp-muted{ color:var(--sp-muted); }
         #salaryPreviewDoc table{ width:100%; border-collapse:collapse; }
+        /* translucent fills so the watermark bleeds through (theme-neutral grey) */
         #salaryPreviewDoc .sp-cell{ border:1px solid var(--sp-line); }
-        #salaryPreviewDoc .sp-soft{ background:var(--sp-soft); }
-        #salaryPreviewDoc .sp-head-row th{ background:var(--sp-soft-head); color:var(--sp-text); border:1px solid var(--sp-line); }
+        #salaryPreviewDoc .sp-soft{ background:rgba(128,128,128,.07); }
+        #salaryPreviewDoc .sp-head-row th{ background:rgba(128,128,128,.10); color:var(--sp-text); border:1px solid var(--sp-line); }
         #salaryPreviewDoc .sp-divider{ border-bottom:3px solid var(--sp-gold); }
         #salaryPreviewDoc .sp-net td{ background:var(--sp-brand); color:#fff; border:1px solid var(--sp-gold); }
         #salaryPreviewDoc .sp-net .sp-net-val{ color:var(--sp-gold); }
@@ -55,6 +56,11 @@
                 --sp-line:#e5e7eb; --sp-soft:#f3f5f9; --sp-soft-head:#eef2f7;
                 box-shadow:none; border:none;
             }
+            /* Force backgrounds, translucent fills and the watermark to actually print */
+            #salaryPreviewDoc, #salaryPreviewDoc *{
+                -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;
+            }
+            #salaryPreviewDoc .sp-watermark img{ opacity:.12 !important; }
         }
     </style>
 

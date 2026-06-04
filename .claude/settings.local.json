@@ -26,7 +26,11 @@
       "Bash(sed -n '1,40p' resources/views/admin/photos/edit.blade.php)",
       "Bash(awk 'NR>=494 && NR<=560' resources/views/admin/layout/sidebar_menu.blade.php)",
       "Bash(curl -s \"http://127.0.0.1:8000/admin/teacher-salaries\" -o /tmp/sal.html -w \"%{http_code}\\\\n\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(php -l app/Services/FinancialDashboardService.php)",
+      "Bash(php -l app/Http/Controllers/Admin/FinancialDashboardController.php)",
+      "Bash(php -l app/Models/Expense.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ExpensesController.php)"
     ]
   }
 }

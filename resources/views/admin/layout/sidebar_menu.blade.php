@@ -134,7 +134,7 @@
                 </div>
 
                 <div data-kt-menu-trigger="click"
-                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['financial', 'financial_fees']) ? 'here show' : '' }} menu-accordion">
+                    class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['financial', 'financial_invoices', 'financial_expenses', 'financial_fees']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="ki-duotone ki-financial-schedule fs-1 text-info"><span
                                     class="path1"></span><span class="path2"></span><span
@@ -158,6 +158,13 @@
                                     href="{{ route('admin.financial.invoices') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">كشف حساب الطلاب</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'financial_expenses' ? 'active' : '' }}"
+                                    href="{{ route('admin.financial.expenses') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">المصروفات</span>
                                 </a>
                             </div>
                             <div class="menu-item">

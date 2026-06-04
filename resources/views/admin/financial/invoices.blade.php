@@ -159,9 +159,11 @@
     <div class="modal fade" id="all_invoices_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mw-1000px">
             <div class="modal-content">
-                <div class="modal-header py-3">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-receipt-cutoff text-warning me-2"></i>كل الفواتير</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title fw-bold mb-0"><i class="bi bi-receipt-cutoff text-warning me-2"></i>كل الفواتير</h5>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal" aria-label="إغلاق">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
                 </div>
                 <div class="modal-body p-0" id="all_invoices_content">
                     <div class="text-center py-10">
@@ -176,9 +178,11 @@
     <div class="modal fade" id="recordPaymentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">تسديد دفعة مالية</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title mb-0">تسديد دفعة مالية</h5>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal" aria-label="إغلاق">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
                 </div>
                 <form id="recordPaymentForm">
                     @csrf

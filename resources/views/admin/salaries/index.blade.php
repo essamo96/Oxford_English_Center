@@ -188,8 +188,8 @@
 <div class="modal fade" id="salaryDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">تفاصيل الراتب</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header d-flex align-items-center justify-content-between"><h5 class="modal-title mb-0">تفاصيل الراتب</h5>
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal" aria-label="إغلاق"><i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i></div></div>
             <div class="modal-body" id="salaryDetailsBody">
                 <div class="text-center py-10"><span class="spinner-border text-primary"></span></div>
             </div>
@@ -201,8 +201,8 @@
 <div class="modal fade" id="editSalaryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">علاوة / خصم — <span id="esTeacherName"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header d-flex align-items-center justify-content-between"><h5 class="modal-title mb-0">علاوة / خصم — <span id="esTeacherName"></span></h5>
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal" aria-label="إغلاق"><i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i></div></div>
             <form id="editSalaryForm">
                 @csrf
                 <input type="hidden" name="teacher_id" id="es_teacher_id">
@@ -229,13 +229,13 @@
 <div class="modal fade" id="salaryPreviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-file-earmark-text text-warning me-2"></i>معاينة استمارة الراتب</h5>
+            <div class="modal-header d-flex align-items-center justify-content-between">
+                <h5 class="modal-title mb-0"><i class="bi bi-file-earmark-text text-warning me-2"></i>معاينة استمارة الراتب</h5>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-sm btn-primary" onclick="printSalaryPreview()">
                         <i class="bi bi-printer-fill me-1"></i>طباعة
                     </button>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal" aria-label="إغلاق"><i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i></div>
                 </div>
             </div>
             <div class="modal-body" id="salaryPreviewBody" style="background:var(--bs-gray-100);">
