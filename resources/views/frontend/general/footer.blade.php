@@ -1,80 +1,82 @@
-<!-- Footer Area Start Here -->
-<div class="text-center mb-10">
-    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="" style="max-width: 50%"/>
-</div>
-<footer>
-    <div class="footer-area-top">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
-                    <div class="footer-box">
-                        <a href="{{ url('/')}}"><img class="img-responsive" style="height: 170px;display: block;margin: auto;" src="{{ url('assets/oxford/img/footer-logo.png')}}" alt="logo"></a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="footer-box">
-                        <div class="footer-about">
-                            <p>{{ optional($mysettings)->more_desc }}</p>
-                        </div>
-                        <ul class="footer-social">
-                            @foreach($social as $row)
-                            <li>
-                                <a href="{{ $row->link }}" target="_blank" rel="nofollow">
-                                    <i class="fa {{ $row->icon }}" aria-hidden="true"></i>
-                                </a>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                    <div class="footer-box">
-                        <ul class="featured-links">
-                            <li>
-                                <ul>
-                                    <li><a href="{{ url('/')}}">Home</a></li>
-                                    <li><a href="{{ url('page/about')}}">About us</a></li>
-                                    <li><a href="{{ url('page/promise')}}">Oxford Promise </a></li>
-                                    <li><a href="{{ url('page/family')}}">Oxford Family</a></li>
-                                    <li><a href="{{ url('page/prize')}}">IELTS Prize</a></li>
-                                    <li><a href="{{ url('community')}}">Community</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <ul>
-                                    <li><a href="{{ url('page/methods')}}">Teaching Methods</a></li>
-                                    <li><a href="{{ url('photos')}}">Photos</a></li>
-                                    <li><a href="{{ url('videos')}}">Videos</a></li>
-                                    <li><a href="{{ url('contact')}}">Contact Us</a></li>
-                                    <li><a href="{{ url('page/privacy')}}">Privacy Policy</a></li>
-                                    <li><a href="{{ url('page/tos')}}">Terms of Service</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="footer-box">
-                        <h3>Information</h3>
-                        <ul class="corporate-address">
-                            <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Phone:+{{ optional($mysettings)->mobile }}"> +{{ optional($mysettings)->mobile }} </a></li>
-                            <li><i class="fa fa-envelope-o" aria-hidden="true"></i>{{ optional($mysettings)->contact_email }}</li>
-                            <li><i class="fa fa-map-marker" aria-hidden="true"></i>{{ optional($mysettings)->address }}</li>
-                        </ul>
-                    </div>
-                </div>
+{{-- ============================================================
+     Oxford English Centre — Footer (redesigned 2026)
+     Markup modernised; all dynamic data ($mysettings, $social) and
+     existing routes preserved. Legacy plugin scripts kept intact.
+     ============================================================ --}}
 
+<!-- Approvals strip -->
+<div class="ox-approve">
+    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+</div>
+
+<footer class="ox-footer">
+    <div class="ox-container ox-footer__inner">
+        <div class="ox-footer__grid">
+
+            <div data-reveal="up">
+                <a href="{{ url('/') }}">
+                    <img class="ox-footer__logo" src="{{ url('assets/oxford/img/footer-logo.png') }}" alt="Oxford English Centre">
+                </a>
+                <p>{{ optional($mysettings)->more_desc }}</p>
+                <div class="ox-social">
+                    @foreach($social as $row)
+                        <a href="{{ $row->link }}" target="_blank" rel="nofollow noopener" aria-label="social link">
+                            <i class="fa {{ $row->icon }}" aria-hidden="true"></i>
+                        </a>
+                    @endforeach
+                </div>
             </div>
+
+            <div data-reveal="up" data-reveal-delay=".05s">
+                <h3>Explore</h3>
+                <ul class="ox-footer__links">
+                    <li><a href="{{ url('/') }}">Home</a></li>
+                    <li><a href="{{ url('page/about') }}">About us</a></li>
+                    <li><a href="{{ url('page/promise') }}">Oxford Promise</a></li>
+                    <li><a href="{{ url('page/family') }}">Oxford Family</a></li>
+                    <li><a href="{{ url('page/prize') }}">IELTS Prize</a></li>
+                    <li><a href="{{ url('community') }}">Community</a></li>
+                </ul>
+            </div>
+
+            <div data-reveal="up" data-reveal-delay=".1s">
+                <h3>Resources</h3>
+                <ul class="ox-footer__links">
+                    <li><a href="{{ url('page/methods') }}">Teaching Methods</a></li>
+                    <li><a href="{{ url('photos') }}">Photos</a></li>
+                    <li><a href="{{ url('videos') }}">Videos</a></li>
+                    <li><a href="{{ url('contact') }}">Contact Us</a></li>
+                    <li><a href="{{ url('page/privacy') }}">Privacy Policy</a></li>
+                    <li><a href="{{ url('page/tos') }}">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <div data-reveal="up" data-reveal-delay=".15s">
+                <h3>Get in touch</h3>
+                <ul class="ox-footer__info">
+                    <li><i class="bi bi-telephone-fill"></i> <a href="tel:+{{ optional($mysettings)->mobile }}">+{{ optional($mysettings)->mobile }}</a></li>
+                    <li><i class="bi bi-envelope-fill"></i> <span>{{ optional($mysettings)->contact_email }}</span></li>
+                    <li><i class="bi bi-geo-alt-fill"></i> <span>{{ optional($mysettings)->address }}</span></li>
+                </ul>
+            </div>
+
         </div>
     </div>
-    <div class="footer-area-bottom">
-        <div class="container">
-            <p style="text-align: center">&copy; <?= date('Y') ?> oxford.ps All Rights Reserved. &nbsp; Designed by<a target="_blank" href="http://oxford.ps"> oxford.ps</a></p>
+
+    <div class="ox-footer__bottom">
+        <div class="ox-container">
+            &copy; <span data-year>{{ date('Y') }}</span> oxford.ps — All Rights Reserved. &nbsp; Designed by
+            <a target="_blank" href="http://oxford.ps">oxford.ps</a>
         </div>
     </div>
 </footer>
-<!-- Footer Area End Here -->
-<!-- Main Body Area End Here -->
+
+<!-- Back to top -->
+<button class="ox-totop" data-totop aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
+
+<!-- ============================================================
+     Legacy plugin scripts — preserved for existing pages
+     ============================================================ -->
 <!-- jquery-->
 <script src="{{url('assets/oxford/js/jquery-2.2.4.min.js') }}" type="text/javascript"></script>
 <!-- Plugins js -->
@@ -106,6 +108,15 @@
 <!-- Custom Js -->
 <script src="{{url('assets/oxford/js/main.js?v=3') }}" type="text/javascript"></script>
 
+<!-- ============================================================
+     Oxford 2026 Design System modules (new)
+     ============================================================ -->
+<script src="{{ url('assets/js/app.js?v=3') }}"></script>
+<script src="{{ url('assets/js/animations.js?v=3') }}"></script>
+<script src="{{ url('assets/js/particles.js?v=3') }}"></script>
+<script src="{{ url('assets/js/navbar.js?v=3') }}"></script>
+<script src="{{ url('assets/js/sliders.js?v=3') }}"></script>
+<script src="{{ url('assets/js/forms.js?v=3') }}"></script>
 
 <!-- Load Facebook SDK for JavaScript -->
 <div id="fb-root"></div>

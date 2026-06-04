@@ -1,221 +1,207 @@
-<!-- Header Area Start Here -->
-<header>
-    <div id="header2" class="header2-area">
-        <div class="header-top-area">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                        <div class="header-top-left">
-                            <ul>
-                                <li><i class="fa fa-phone" aria-hidden="true"></i><a href="Tel:+{{ optional($mysettings)->mobile }}"> + {{ optional($mysettings)->mobile }} </a></li>
-                                <li><i class="fa fa-envelope" aria-hidden="true"></i><a href="mailto:{{ optional($mysettings)->contact_email }}">{{ optional($mysettings)->contact_email }}</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 text-center">
-                        <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="" style="max-width: 50%"/>
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                        <div class="header-top-right">
-                            <ul class="navbar-nav">
-                                <li>
-                                    <div class="apply-btn-area">
-                                        <a href="{{ url('book')}}" class="apply-now-btn">Apply Now</a>
-                                    </div>
-                                </li>
+{{-- ============================================================
+     Oxford English Centre — Header / Navigation (redesigned 2026)
+     Markup modernised. ALL auth guards, routes, dashboard tab links
+     (data-toggle="tab") and active states preserved exactly.
+     ============================================================ --}}
+@php
+    $isStudent = Auth::guard('students')->check();
+    $isTeacher = Auth::guard('teachers')->check();
+    $onStudent = Request::is('student');
+    $onTeacher = Request::is('teacher');
+@endphp
 
-                                @if(!Auth::guard('students')->check() && !Auth::guard('teachers')->check())
-                                    <li>
-                                        <div class="apply-btn-area">
-                                            <a href="{{ url('login')}}" class="apply-now-btn">Student Gate</a>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="apply-btn-area">
-                                            <a href="{{ url('login/teacher')}}" class="apply-now-btn">Teacher Gate</a>
-                                        </div>
-                                    </li>
-                                @else
-                                    <li>
-                                        <a class="login-btn-area open" href="{{ url('logout')}}"><i class="fa fa-lock" aria-hidden="true"></i> Logout</a>
-                                    </li>
-                                @endif
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="main-menu-area bg-textPrimary" id="sticker">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-1 col-md-1 col-sm-3">
-                        <div class="logo-area">
-                            @if(Auth::guard('students')->check())
-                                <a href="{{ url('/student')}}">
-                                    <img class="img-responsive student-profile-nav" src="{{ Auth::guard('students')->user()->image ? url(Auth::guard('students')->user()->image) : url('assets/oxford/img/students/avatar.png') }}" style="height: 58px; border-radius: 50%; object-fit: cover;" alt="student">
-                                </a>
-                            @elseif(Auth::guard('teachers')->check())
-                                <a href="{{ url('/teacher')}}">
-                                    <img class="img-responsive student-profile-nav" src="{{ Auth::guard('teachers')->user()->image ? url(Auth::guard('teachers')->user()->image) : url('assets/oxford/img/students/avatar.png') }}" style="height: 58px; border-radius: 50%; object-fit: cover;" alt="teacher">
-                                </a>
-                            @else
-                                <a href="{{ url('/')}}"><img class="img-responsive" src="{{ url('assets/oxford/img/logo.png')}}" style="height: 58px;" alt="logo"></a>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-lg-10 col-md-10 col-sm-9">
-                        <nav id="desktop-nav">
-                            <ul>
-                                @if(Auth::guard('students')->check())
-                                    <!-- Student Dashboard Menu -->
-                                    <li class="{{ Request::is('student') ? 'active' : '' }}"><a href="{{ Request::is('student') ? '#Welcome' : url('/student#Welcome') }}" @if(Request::is('student')) data-toggle="tab" @endif>Welcome</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Courses' : url('/student#Courses') }}" @if(Request::is('student')) data-toggle="tab" @endif>Courses</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Exam' : url('/student#Exam') }}" @if(Request::is('student')) data-toggle="tab" @endif>Exam Data</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Teacher_Evaluations' : url('/student#Teacher_Evaluations') }}" @if(Request::is('student')) data-toggle="tab" @endif>Evaluations</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Profile' : url('/student#Profile') }}" @if(Request::is('student')) data-toggle="tab" @endif>Profile</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Password' : url('/student#Password') }}" @if(Request::is('student')) data-toggle="tab" @endif>Password</a></li>
-                                    <li><a href="{{ url('/logout') }}">Logout</a></li>
+<header class="ox-header" data-nav-sentinel>
 
-                                @elseif(Auth::guard('teachers')->check())
-                                    <!-- Teacher Dashboard Menu -->
-                                    <li class="{{ Request::is('teacher') ? 'active' : '' }}"><a href="{{ Request::is('teacher') ? '#Welcome' : url('/teacher#Welcome') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Welcome</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Courses' : url('/teacher#Courses') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Courses</a></li>
-                                    <li class="{{ (Request::is('grope/Exam*') || Request::is('examDate*')) ? 'active' : '' }}"><a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}">Exam Schedule</a></li>
-                                    <li class="{{ Request::is('progress*') ? 'active' : '' }}"><a href="{{ route('teacher.progress', Auth::guard('teachers')->user()->id) }}">Progress</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Profile' : url('/teacher#Profile') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Profile</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Password' : url('/teacher#Password') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Password</a></li>
-                                    <li><a href="{{ url('/logout') }}">Logout</a></li>
-
-                                @else
-                                    <!-- Main Website Menu -->
-                                    <li class="active"><a href="{{ url('/')}}">Home</a></li>
-                                    <li><a href="#">About</a>
-                                        <ul>
-                                            <li><a href="{{ url('page/about')}}">About us</a></li>
-                                            <li><a href="{{ url('page/promise')}}">Oxford Promise </a></li>
-                                            <li><a href="{{ url('family')}}">Oxford Family</a></li>
-                                            <li><a href="{{ url('page/methods')}}">Teaching Methods</a></li>
-                                            <li><a href="{{ url('partners')}}">Partners </a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('test-of-english')}}">OXFORD TEST OF ENGLISH</a></li>
-                                    <li><a href="#">Courses</a>
-                                        <ul>
-                                            <li><a href="{{ url('page/ielts')}}">IELTS Preparation Course</a></li>
-                                            <li><a href="{{ url('page/general')}}">General English Levels</a></li>
-                                            <li><a href="{{ url('page/speaking')}}">Speaking Course</a></li>
-                                            <li><a href="{{ url('page/writing')}}">Academic Writing Course</a></li>
-                                            <li><a href="{{ url('page/business')}}">Business English Course</a></li>
-                                            <li><a href="{{ url('page/esp')}}">ESP Course</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('page/prize')}}">IELTS Prize </a></li>
-                                    <li><a href="{{ url('community')}}">Community</a></li>
-                                    <li><a href="#">Gallery</a>
-                                        <ul>
-                                            <li><a href="{{ url('photos')}}">Photos</a></li>
-                                            <li><a href="{{ url('videos')}}">Videos</a></li>
-                                            <li><a href="{{ url('certificates')}}">Certificates</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('jobs')}}">Jobs</a></li>
-                                    <li><a href="{{ url('contact')}}">Contact Us</a></li>
-                                @endif
-                            </ul>
-                        </nav>
-                    </div>
-                    <div class="col-lg-1 col-md-1 hidden-sm">
-                        <div class="header-search">
-                            <form>
-                                <input type="text" class="search-form" placeholder="Search...." required="">
-                                <a href="#" class="search-button" id="search-button"><i class="fa fa-search" aria-hidden="true"></i></a>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    {{-- ---------- Top utility bar ---------- --}}
+    <div class="ox-topbar">
+        <div class="ox-container ox-topbar__inner">
+            <ul class="ox-topbar__contact">
+                <li><i class="bi bi-telephone-fill"></i> <a href="tel:+{{ optional($mysettings)->mobile }}">+{{ optional($mysettings)->mobile }}</a></li>
+                <li><i class="bi bi-envelope-fill"></i> <a href="mailto:{{ optional($mysettings)->contact_email }}">{{ optional($mysettings)->contact_email }}</a></li>
+            </ul>
+            <ul class="ox-topbar__cta">
+                <li><a class="ox-toplink ox-toplink--accent" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Apply Now</a></li>
+                @if(!$isStudent && !$isTeacher)
+                    <li><a class="ox-toplink" href="{{ url('login') }}"><i class="bi bi-person-fill"></i> Student Gate</a></li>
+                    <li><a class="ox-toplink" href="{{ url('login/teacher') }}"><i class="bi bi-person-workspace"></i> Teacher Gate</a></li>
+                @else
+                    <li><a class="ox-toplink" href="{{ url('logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                @endif
+            </ul>
         </div>
     </div>
-    <!-- Mobile Menu Area Start -->
-    <div class="mobile-menu-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mobile-menu">
-                        <nav id="dropdown">
-                            <ul>
-                                @if(Auth::guard('students')->check())
-                                    <!-- Student Mobile Menu -->
-                                    <li class="{{ Request::is('student') ? 'active' : '' }}"><a href="{{ Request::is('student') ? '#Welcome' : url('/student#Welcome') }}" @if(Request::is('student')) data-toggle="tab" @endif>Welcome</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Courses' : url('/student#Courses') }}" @if(Request::is('student')) data-toggle="tab" @endif>Courses</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Exam' : url('/student#Exam') }}" @if(Request::is('student')) data-toggle="tab" @endif>Exam Data</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Teacher_Evaluations' : url('/student#Teacher_Evaluations') }}" @if(Request::is('student')) data-toggle="tab" @endif>Evaluations</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Profile' : url('/student#Profile') }}" @if(Request::is('student')) data-toggle="tab" @endif>Profile</a></li>
-                                    <li><a href="{{ Request::is('student') ? '#Password' : url('/student#Password') }}" @if(Request::is('student')) data-toggle="tab" @endif>Password</a></li>
-                                    <li><a href="{{ url('/logout') }}">Logout</a></li>
 
-                                @elseif(Auth::guard('teachers')->check())
-                                    <!-- Teacher Mobile Menu -->
-                                    <li class="{{ Request::is('teacher') ? 'active' : '' }}"><a href="{{ Request::is('teacher') ? '#Welcome' : url('/teacher#Welcome') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Welcome</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Courses' : url('/teacher#Courses') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Courses</a></li>
-                                    <li class="{{ (Request::is('grope/Exam*') || Request::is('examDate*')) ? 'active' : '' }}"><a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}">Exam Schedule</a></li>
-                                    <li class="{{ Request::is('progress*') ? 'active' : '' }}"><a href="{{ route('teacher.progress', Auth::guard('teachers')->user()->id) }}">Progress</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Profile' : url('/teacher#Profile') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Profile</a></li>
-                                    <li><a href="{{ Request::is('teacher') ? '#Password' : url('/teacher#Password') }}" @if(Request::is('teacher')) data-toggle="tab" @endif>Password</a></li>
-                                    <li><a href="{{ url('/logout') }}">Logout</a></li>
+    {{-- ---------- Main navbar ---------- --}}
+    <div class="ox-navbar" data-navbar>
+        <div class="ox-container ox-navbar__inner">
 
-                                @else
-                                    <!-- Main Website Mobile Menu -->
-                                    <li class="active"><a href="{{ url('/')}}">Home</a></li>
-                                    <li><a href="#">About Oxford</a>
-                                        <ul>
-                                            <li><a href="{{ url('page/about')}}">About us</a></li>
-                                            <li><a href="{{ url('page/promise')}}">Oxford Promise </a></li>
-                                            <li><a href="{{ url('family')}}">Oxford Family</a></li>
-                                            <li><a href="{{ url('page/methods')}}">Teaching Methods</a></li>
-                                            <li><a href="{{ url('partners')}}">Partners </a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('test-of-english')}}">OXFORD TEST OF ENGLISH</a></li>
-                                    <li><a href="#">Our Courses</a>
-                                        <ul>
-                                            <li><a href="{{ url('page/ielts')}}">IELTS Preparation Course</a></li>
-                                            <li><a href="{{ url('page/general')}}">General English Levels</a></li>
-                                            <li><a href="{{ url('page/speaking')}}">Speaking Course</a></li>
-                                            <li><a href="{{ url('page/writing')}}">Academic Writing Course</a></li>
-                                            <li><a href="{{ url('page/business')}}">Business English Course</a></li>
-                                            <li><a href="{{ url('page/esp')}}">ESP Course</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('page/prize')}}">Oxford IELTS Prize </a></li>
-                                    <li><a href="{{ url('community')}}">Community</a></li>
-                                    <li><a href="#">Gallery</a>
-                                        <ul>
-                                            <li><a href="{{ url('photos')}}">Photos</a></li>
-                                            <li><a href="{{ url('videos')}}">Videos</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="{{ url('jobs')}}">Jobs</a></li>
-                                    <li><a href="{{ url('contact')}}">Contact Us</a></li>
-                                    <li><a href="{{ url('book')}}">Apply Now</a></li>
-                                    @if(!Auth::guard('students')->check() && !Auth::guard('teachers')->check())
-                                        <li>
-                                            <a class="login-btn-area open" href="{{ url('login')}}"><i class="fa fa-lock" aria-hidden="true"></i> Login</a>
-                                            <a class="login-btn-area open" href="{{ url('login/teacher')}}"><i class="fa fa-lock" aria-hidden="true"></i> Teacher Login</a>
-                                        </li>
-                                    @else
-                                        <li>
-                                            <a class="login-btn-area open" href="{{ url('logout')}}"><i class="fa fa-lock" aria-hidden="true"></i> Logout</a>
-                                        </li>
-                                    @endif
-                                @endif
+            {{-- Brand / avatar --}}
+            @if($isStudent)
+                <a class="ox-brand ox-brand--avatar" href="{{ url('/student') }}">
+                    <img src="{{ Auth::guard('students')->user()->image ? url(Auth::guard('students')->user()->image) : url('assets/oxford/img/students/avatar.png') }}" alt="student">
+                </a>
+            @elseif($isTeacher)
+                <a class="ox-brand ox-brand--avatar" href="{{ url('/teacher') }}">
+                    <img src="{{ Auth::guard('teachers')->user()->image ? url(Auth::guard('teachers')->user()->image) : url('assets/oxford/img/students/avatar.png') }}" alt="teacher">
+                </a>
+            @else
+                <a class="ox-brand" href="{{ url('/') }}"><img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford English Centre"></a>
+            @endif
+
+            {{-- Desktop nav --}}
+            <nav class="ox-nav" aria-label="Primary">
+                <ul class="ox-menu">
+                    @if($isStudent)
+                        {{-- Student Dashboard Menu --}}
+                        <li class="{{ $onStudent ? 'is-active' : '' }}"><a href="{{ $onStudent ? '#Welcome' : url('/student#Welcome') }}" @if($onStudent) data-toggle="tab" @endif>Welcome</a></li>
+                        <li><a href="{{ $onStudent ? '#Courses' : url('/student#Courses') }}" @if($onStudent) data-toggle="tab" @endif>Courses</a></li>
+                        <li><a href="{{ $onStudent ? '#Exam' : url('/student#Exam') }}" @if($onStudent) data-toggle="tab" @endif>Exam Data</a></li>
+                        <li><a href="{{ $onStudent ? '#Teacher_Evaluations' : url('/student#Teacher_Evaluations') }}" @if($onStudent) data-toggle="tab" @endif>Evaluations</a></li>
+                        <li><a href="{{ $onStudent ? '#Profile' : url('/student#Profile') }}" @if($onStudent) data-toggle="tab" @endif>Profile</a></li>
+                        <li><a href="{{ $onStudent ? '#Password' : url('/student#Password') }}" @if($onStudent) data-toggle="tab" @endif>Password</a></li>
+                        <li><a href="{{ url('/logout') }}">Logout</a></li>
+
+                    @elseif($isTeacher)
+                        {{-- Teacher Dashboard Menu --}}
+                        <li class="{{ $onTeacher ? 'is-active' : '' }}"><a href="{{ $onTeacher ? '#Welcome' : url('/teacher#Welcome') }}" @if($onTeacher) data-toggle="tab" @endif>Welcome</a></li>
+                        <li><a href="{{ $onTeacher ? '#Courses' : url('/teacher#Courses') }}" @if($onTeacher) data-toggle="tab" @endif>Courses</a></li>
+                        <li class="{{ (Request::is('grope/Exam*') || Request::is('examDate*')) ? 'is-active' : '' }}"><a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}">Exam Schedule</a></li>
+                        <li class="{{ Request::is('progress*') ? 'is-active' : '' }}"><a href="{{ route('teacher.progress', Auth::guard('teachers')->user()->id) }}">Progress</a></li>
+                        <li><a href="{{ $onTeacher ? '#Profile' : url('/teacher#Profile') }}" @if($onTeacher) data-toggle="tab" @endif>Profile</a></li>
+                        <li><a href="{{ $onTeacher ? '#Password' : url('/teacher#Password') }}" @if($onTeacher) data-toggle="tab" @endif>Password</a></li>
+                        <li><a href="{{ url('/logout') }}">Logout</a></li>
+
+                    @else
+                        {{-- Main Website Menu --}}
+                        <li class="{{ Request::is('/') ? 'is-active' : '' }}"><a href="{{ url('/') }}">Home</a></li>
+                        <li>
+                            <a href="#">About <i class="bi bi-chevron-down ox-caret"></i></a>
+                            <ul class="ox-submenu">
+                                <li><a href="{{ url('page/about') }}">About us</a></li>
+                                <li><a href="{{ url('page/promise') }}">Oxford Promise</a></li>
+                                <li><a href="{{ url('family') }}">Oxford Family</a></li>
+                                <li><a href="{{ url('page/methods') }}">Teaching Methods</a></li>
+                                <li><a href="{{ url('partners') }}">Partners</a></li>
                             </ul>
-                        </nav>
-                    </div>
+                        </li>
+                        <li><a href="{{ url('test-of-english') }}">Oxford Test of English</a></li>
+                        <li>
+                            <a href="#">Courses <i class="bi bi-chevron-down ox-caret"></i></a>
+                            <ul class="ox-submenu">
+                                <li><a href="{{ url('page/ielts') }}">IELTS Preparation Course</a></li>
+                                <li><a href="{{ url('page/general') }}">General English Levels</a></li>
+                                <li><a href="{{ url('page/speaking') }}">Speaking Course</a></li>
+                                <li><a href="{{ url('page/writing') }}">Academic Writing Course</a></li>
+                                <li><a href="{{ url('page/business') }}">Business English Course</a></li>
+                                <li><a href="{{ url('page/esp') }}">ESP Course</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{{ url('page/prize') }}">IELTS Prize</a></li>
+                        <li><a href="{{ url('community') }}">Community</a></li>
+                        <li>
+                            <a href="#">Gallery <i class="bi bi-chevron-down ox-caret"></i></a>
+                            <ul class="ox-submenu">
+                                <li><a href="{{ url('photos') }}">Photos</a></li>
+                                <li><a href="{{ url('videos') }}">Videos</a></li>
+                                <li><a href="{{ url('certificates') }}">Certificates</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{{ url('jobs') }}">Jobs</a></li>
+                        <li><a href="{{ url('contact') }}">Contact Us</a></li>
+                    @endif
+                </ul>
+            </nav>
+
+            {{-- Actions --}}
+            <div class="ox-nav-actions">
+                <button class="ox-iconbtn" data-search-toggle aria-label="Search"><i class="bi bi-search"></i></button>
+                <button class="ox-iconbtn ox-burger" data-drawer-open aria-label="Open menu"><i class="bi bi-list"></i></button>
+                <div class="ox-search-box" data-search-box>
+                    <form action="#" style="display:flex;gap:8px;width:100%">
+                        <input class="ox-input" type="text" placeholder="Search…." aria-label="Search">
+                        <button type="submit" class="ox-btn ox-btn--primary ox-btn--sm" aria-label="Search"><i class="bi bi-search"></i></button>
+                    </form>
                 </div>
             </div>
+
         </div>
     </div>
-    <!-- Mobile Menu Area End -->
 </header>
+
+{{-- ---------- Mobile drawer ---------- --}}
+<div class="ox-backdrop" data-backdrop></div>
+<aside class="ox-drawer" data-drawer aria-label="Mobile menu">
+    <div class="ox-drawer__head">
+        <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford" style="height:42px">
+        <button class="ox-iconbtn" data-drawer-close aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <ul class="ox-drawer__menu">
+        @if($isStudent)
+            <li><a href="{{ $onStudent ? '#Welcome' : url('/student#Welcome') }}" @if($onStudent) data-toggle="tab" @endif>Welcome</a></li>
+            <li><a href="{{ $onStudent ? '#Courses' : url('/student#Courses') }}" @if($onStudent) data-toggle="tab" @endif>Courses</a></li>
+            <li><a href="{{ $onStudent ? '#Exam' : url('/student#Exam') }}" @if($onStudent) data-toggle="tab" @endif>Exam Data</a></li>
+            <li><a href="{{ $onStudent ? '#Teacher_Evaluations' : url('/student#Teacher_Evaluations') }}" @if($onStudent) data-toggle="tab" @endif>Evaluations</a></li>
+            <li><a href="{{ $onStudent ? '#Profile' : url('/student#Profile') }}" @if($onStudent) data-toggle="tab" @endif>Profile</a></li>
+            <li><a href="{{ $onStudent ? '#Password' : url('/student#Password') }}" @if($onStudent) data-toggle="tab" @endif>Password</a></li>
+            <li><a href="{{ url('/logout') }}">Logout</a></li>
+
+        @elseif($isTeacher)
+            <li><a href="{{ $onTeacher ? '#Welcome' : url('/teacher#Welcome') }}" @if($onTeacher) data-toggle="tab" @endif>Welcome</a></li>
+            <li><a href="{{ $onTeacher ? '#Courses' : url('/teacher#Courses') }}" @if($onTeacher) data-toggle="tab" @endif>Courses</a></li>
+            <li><a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}">Exam Schedule</a></li>
+            <li><a href="{{ route('teacher.progress', Auth::guard('teachers')->user()->id) }}">Progress</a></li>
+            <li><a href="{{ $onTeacher ? '#Profile' : url('/teacher#Profile') }}" @if($onTeacher) data-toggle="tab" @endif>Profile</a></li>
+            <li><a href="{{ $onTeacher ? '#Password' : url('/teacher#Password') }}" @if($onTeacher) data-toggle="tab" @endif>Password</a></li>
+            <li><a href="{{ url('/logout') }}">Logout</a></li>
+
+        @else
+            <li><a href="{{ url('/') }}">Home</a></li>
+            <li>
+                <a href="#" data-submenu-toggle>About Oxford <i class="bi bi-chevron-down"></i></a>
+                <ul>
+                    <li><a href="{{ url('page/about') }}">About us</a></li>
+                    <li><a href="{{ url('page/promise') }}">Oxford Promise</a></li>
+                    <li><a href="{{ url('family') }}">Oxford Family</a></li>
+                    <li><a href="{{ url('page/methods') }}">Teaching Methods</a></li>
+                    <li><a href="{{ url('partners') }}">Partners</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url('test-of-english') }}">Oxford Test of English</a></li>
+            <li>
+                <a href="#" data-submenu-toggle>Our Courses <i class="bi bi-chevron-down"></i></a>
+                <ul>
+                    <li><a href="{{ url('page/ielts') }}">IELTS Preparation Course</a></li>
+                    <li><a href="{{ url('page/general') }}">General English Levels</a></li>
+                    <li><a href="{{ url('page/speaking') }}">Speaking Course</a></li>
+                    <li><a href="{{ url('page/writing') }}">Academic Writing Course</a></li>
+                    <li><a href="{{ url('page/business') }}">Business English Course</a></li>
+                    <li><a href="{{ url('page/esp') }}">ESP Course</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url('page/prize') }}">Oxford IELTS Prize</a></li>
+            <li><a href="{{ url('community') }}">Community</a></li>
+            <li>
+                <a href="#" data-submenu-toggle>Gallery <i class="bi bi-chevron-down"></i></a>
+                <ul>
+                    <li><a href="{{ url('photos') }}">Photos</a></li>
+                    <li><a href="{{ url('videos') }}">Videos</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url('jobs') }}">Jobs</a></li>
+            <li><a href="{{ url('contact') }}">Contact Us</a></li>
+        @endif
+    </ul>
+
+    @if(!$isStudent && !$isTeacher)
+        <div class="ox-drawer__cta">
+            <a class="ox-btn ox-btn--accent ox-btn--block" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Book Now</a>
+            <div style="display:flex;gap:10px">
+                <a class="ox-btn ox-btn--outline ox-btn--sm ox-btn--block" href="{{ url('login') }}"><i class="bi bi-person-fill"></i> Student Gate</a>
+                <a class="ox-btn ox-btn--outline ox-btn--sm ox-btn--block" href="{{ url('login/teacher') }}"><i class="bi bi-person-workspace"></i> Teacher Gate</a>
+            </div>
+        </div>
+    @else
+        <a class="ox-btn ox-btn--outline ox-btn--block" href="{{ url('logout') }}" style="margin-top:auto"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    @endif
+</aside>

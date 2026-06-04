@@ -1,0 +1,178 @@
+/* ============================================================================
+   Oxford English Centre — Layout (layout.css)
+   Hero, grid, section backgrounds, content blocks.
+   ============================================================================ */
+
+/* --------------------------- Lightweight grid ---------------------------- */
+.ox-grid { display: grid; gap: var(--ox-s-6); }
+.ox-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.ox-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.ox-grid--4 { grid-template-columns: repeat(4, 1fr); }
+.ox-grid--auto { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.ox-grid--split { grid-template-columns: 1fr 1fr; align-items: center; gap: var(--ox-s-12); }
+
+/* ------------------------------- HERO ------------------------------------ */
+.ox-hero {
+    position: relative;
+    min-height: clamp(560px, 88vh, 880px);
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+    color: #fff;
+    background: var(--ox-gradient-deep);
+}
+/* slides (cross-fade) */
+.ox-hero__slides { position: absolute; inset: 0; z-index: 0; }
+.ox-hero__slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center center; background-repeat: no-repeat;
+    width: 100%; height: 100%;
+    opacity: 0; transform: scale(1.08);
+    transition: opacity 1.2s var(--ox-ease), transform 7s linear;
+}
+.ox-hero__slide.is-active { opacity: 1; transform: scale(1); }
+.ox-hero__overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+        linear-gradient(115deg, rgba(8,39,66,.72) 0%, rgba(15,76,129,.55) 45%, rgba(44,154,183,.25) 100%);
+}
+/* extra readability scrim only behind the text column (start side) */
+.ox-hero__overlay::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(8,39,66,.45) 0%, rgba(8,39,66,.15) 40%, transparent 65%);
+}
+[dir="rtl"] .ox-hero__overlay::after {
+    background: linear-gradient(270deg, rgba(8,39,66,.45) 0%, rgba(8,39,66,.15) 40%, transparent 65%);
+}
+.ox-hero__particles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+/* floating decorative shapes */
+.ox-hero__shapes { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.ox-shape { position: absolute; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; filter: blur(2px); opacity: .5; }
+.ox-shape--1 { width: 320px; height: 320px; top: -80px; inset-inline-start: -60px; background: radial-gradient(circle at 30% 30%, rgba(44,154,183,.7), transparent 70%); animation: oxFloat 9s ease-in-out infinite; }
+.ox-shape--2 { width: 240px; height: 240px; bottom: -60px; inset-inline-end: 8%; background: radial-gradient(circle at 30% 30%, rgba(247,183,51,.55), transparent 70%); animation: oxFloat 11s ease-in-out infinite reverse; }
+.ox-shape--3 { width: 160px; height: 160px; top: 30%; inset-inline-end: 22%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.4), transparent 70%); animation: oxFloat 7s ease-in-out infinite; }
+
+.ox-hero__inner { position: relative; z-index: 5; padding-block: var(--ox-s-16); max-width: 760px; }
+.ox-hero__badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; margin-bottom: var(--ox-s-6);
+    background: var(--ox-glass-bg); border: 1px solid var(--ox-glass-border);
+    backdrop-filter: blur(var(--ox-glass-blur));
+    border-radius: var(--ox-radius-pill);
+    font-size: var(--ox-fs-sm); font-weight: 600; color: #fff;
+}
+.ox-hero__badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ox-accent); box-shadow: 0 0 0 4px rgba(247,183,51,.3); }
+.ox-hero h1 {
+    color: #fff;
+    font-size: var(--ox-fs-5xl);
+    letter-spacing: -.02em;
+    margin-bottom: var(--ox-s-4);
+    text-shadow: 0 8px 40px rgba(0,0,0,.25);
+}
+.ox-hero h1 .hl {
+    background: var(--ox-gradient-accent);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ox-hero__text { font-size: var(--ox-fs-lg); color: rgba(255,255,255,.9); max-width: 56ch; margin-bottom: var(--ox-s-8); }
+.ox-hero__text p { margin: 0; }
+.ox-hero__cta { display: flex; flex-wrap: wrap; gap: var(--ox-s-3); }
+
+/* rotating captions */
+.ox-hero__caps { position: relative; min-height: 230px; margin-bottom: var(--ox-s-6); }
+.ox-hero__cap {
+    position: absolute; inset: 0;
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .8s var(--ox-ease), transform .8s var(--ox-ease);
+    pointer-events: none;
+}
+.ox-hero__cap.is-active { opacity: 1; transform: none; position: relative; pointer-events: auto; }
+.ox-hero__cap h1 { margin-bottom: var(--ox-s-4); }
+.ox-hero__cap .ox-hero__text { margin-bottom: 0; }
+
+/* scroll indicator */
+.ox-scroll-ind {
+    position: absolute; left: 50%; bottom: 26px; z-index: 5;
+    transform: translateX(-50%);
+    display: grid; place-items: center; gap: 8px;
+    color: rgba(255,255,255,.8); font-size: var(--ox-fs-xs); letter-spacing: .2em; text-transform: uppercase;
+}
+.ox-scroll-ind .mouse {
+    width: 26px; height: 42px; border: 2px solid rgba(255,255,255,.6); border-radius: 14px;
+    display: grid; justify-items: center; padding-top: 7px;
+}
+.ox-scroll-ind .mouse::before { content: ""; width: 4px; height: 8px; border-radius: 4px; background: #fff; animation: oxWheel 1.6s var(--ox-ease) infinite; }
+
+/* ---------------------------- About / split ------------------------------ */
+.ox-media {
+    position: relative; border-radius: var(--ox-radius-xl); overflow: hidden;
+    box-shadow: var(--ox-shadow-lg); aspect-ratio: 4/3; background: var(--ox-gray-200);
+}
+.ox-media img { width: 100%; height: 100%; object-fit: cover; }
+.ox-media__play {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: linear-gradient(0deg, rgba(8,39,66,.45), rgba(8,39,66,.15));
+}
+.ox-play-btn {
+    width: 84px; height: 84px; border-radius: 50%;
+    display: grid; place-items: center; color: var(--ox-primary); font-size: 26px;
+    background: #fff; box-shadow: var(--ox-shadow-lg);
+    transition: transform var(--ox-dur) var(--ox-ease-spring);
+}
+.ox-play-btn::before { content: ""; position: absolute; width: 84px; height: 84px; border-radius: 50%; background: rgba(255,255,255,.45); animation: oxPulse 2s ease-out infinite; z-index: -1; }
+.ox-play-btn:hover { transform: scale(1.08); color: var(--ox-secondary); }
+
+.ox-prose { color: var(--ox-text); line-height: var(--ox-lh-base); }
+.ox-prose :is(h1,h2,h3) { color: var(--ox-heading); }
+.ox-prose p { margin-bottom: var(--ox-s-4); }
+.ox-prose ul { padding-inline-start: 20px; margin-bottom: var(--ox-s-4); }
+.ox-prose li { margin-bottom: 8px; }
+
+/* ------------------------- Section backgrounds ---------------------------- */
+.ox-bg-soft { background: var(--ox-bg-soft); }
+.ox-bg-dots {
+    background-color: var(--ox-bg-soft);
+    background-image: radial-gradient(var(--ox-gray-300) 1.1px, transparent 1.1px);
+    background-size: 26px 26px;
+}
+.ox-stats-band {
+    position: relative; overflow: hidden;
+    background: var(--ox-gradient-deep);
+    border-radius: var(--ox-radius-xl);
+}
+.ox-stats-band::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(700px 360px at 80% -10%, rgba(247,183,51,.18), transparent 60%);
+}
+.ox-stats-band__inner { position: relative; z-index: 1; padding: var(--ox-s-16) var(--ox-s-8); }
+
+/* approvals strip */
+.ox-approve { display: flex; align-items: center; justify-content: center; gap: var(--ox-s-6); flex-wrap: wrap; padding-block: var(--ox-s-8); }
+.ox-approve img { height: 64px; width: auto; opacity: .9; }
+
+/* section divider */
+.ox-divider-wave { display: block; width: 100%; height: 60px; }
+
+/* ------------------------- Inner page hero / banner ---------------------- */
+.ox-pagehero {
+    position: relative;
+    display: grid; align-items: center;
+    min-height: 320px;
+    padding-block: var(--ox-s-16);
+    color: #fff; overflow: hidden;
+    background-size: cover; background-position: center center; background-repeat: no-repeat;
+}
+.ox-pagehero::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(115deg, rgba(8,39,66,.92) 0%, rgba(15,76,129,.78) 55%, rgba(44,154,183,.5) 100%);
+}
+.ox-pagehero__shapes { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.ox-pagehero__inner { position: relative; z-index: 2; }
+.ox-pagehero h1 { color: #fff; font-size: var(--ox-fs-4xl); margin-bottom: var(--ox-s-3); text-shadow: 0 8px 30px rgba(0,0,0,.25); }
+.ox-breadcrumb { display: flex; align-items: center; gap: 10px; list-style: none; margin: 0; padding: 0; font-size: var(--ox-fs-sm); }
+.ox-breadcrumb li { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,.85); }
+.ox-breadcrumb a { color: rgba(255,255,255,.85); }
+.ox-breadcrumb a:hover { color: var(--ox-accent); }
+.ox-breadcrumb li + li::before { content: "\F285"; font-family: "bootstrap-icons"; font-size: 11px; opacity: .6; }
+[dir="rtl"] .ox-breadcrumb li + li::before { content: "\F284"; }
+.ox-breadcrumb li:last-child { color: var(--ox-accent); font-weight: 600; }

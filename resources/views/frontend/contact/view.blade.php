@@ -1,106 +1,97 @@
 @extends('frontend.layouts.master')
 @section('title', 'Contact Us')
 @section('content')
-<div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/contact.jpg')}}');">
-    <div class="container">
-        <div class="pagination-area">
+<div class="ox-scope">
+
+    {{-- ---------- Banner ---------- --}}
+    <section class="ox-pagehero" style="background-image:url('{{ url('assets/oxford/img/banner/contact.jpg') }}')">
+        <div class="ox-pagehero__shapes">
+            <span class="ox-shape ox-shape--2"></span>
+            <span class="ox-shape ox-shape--3"></span>
+        </div>
+        <div class="ox-container ox-pagehero__inner" data-reveal="fade">
             <h1>Contact Us</h1>
-            <ul>
-                <li><a href="#">Home</a> - </li>
+            <ul class="ox-breadcrumb">
+                <li><a href="{{ url('/') }}"><i class="bi bi-house-door-fill"></i> Home</a></li>
                 <li>Contact Us</li>
             </ul>
         </div>
-    </div>
-</div>
-<!--CONTACT US AREA-->
-<div class="contact-us-page1-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                <div class="contact-us-info1">
-                    <ul>
-                        <li>
-                            <i class="fa fa-phone" aria-hidden="true"></i>
-                            <h3>Phone</h3>
-                            <p>+{{$mysettings->mobile}}</p>
-                        </li>
-                        <li>
-                            <i class="fa fa-map-marker" aria-hidden="true"></i>
-                            <h3>Address</h3>
-                            <p>{{$mysettings->address}}</p>
-                        </li>
-                        <li>
-                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                            <h3>E-mail</h3>
-                            <p>{{$mysettings->contact_email}}</p>
-                        </li>
-                        <li>
+    </section>
+
+    {{-- ---------- Contact ---------- --}}
+    <section class="ox-section">
+        <div class="ox-container">
+            <div class="ox-grid" style="grid-template-columns:1fr 1.6fr;gap:48px;align-items:start">
+
+                {{-- info column --}}
+                <div data-reveal="right" style="display:grid;gap:16px">
+                    <div class="ox-infocard">
+                        <span class="ox-infocard__icon"><i class="bi bi-telephone-fill"></i></span>
+                        <div><h3>Phone</h3><p>+{{ $mysettings->mobile }}</p></div>
+                    </div>
+                    <div class="ox-infocard">
+                        <span class="ox-infocard__icon"><i class="bi bi-geo-alt-fill"></i></span>
+                        <div><h3>Address</h3><p>{{ $mysettings->address }}</p></div>
+                    </div>
+                    <div class="ox-infocard">
+                        <span class="ox-infocard__icon"><i class="bi bi-envelope-fill"></i></span>
+                        <div><h3>E-mail</h3><p>{{ $mysettings->contact_email }}</p></div>
+                    </div>
+                    <div class="ox-infocard" style="align-items:center">
+                        <span class="ox-infocard__icon"><i class="bi bi-share-fill"></i></span>
+                        <div>
                             <h3>Follow Us</h3>
-                            <ul class="contact-social">
+                            <div class="ox-social" style="margin-top:8px">
                                 @foreach($social as $row)
-                                <li>
-                                    <a href="{{ $row->link }}" target="_blank" rel="nofollow">
+                                    <a href="{{ $row->link }}" target="_blank" rel="nofollow noopener" aria-label="social">
                                         <i class="fa {{ $row->icon }}" aria-hidden="true"></i>
                                     </a>
-                                </li>
                                 @endforeach
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <h2 class="title-default-left title-bar-high">Contact With Us</h2>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="contact-form1">
+
+                {{-- form column --}}
+                <div data-reveal="left">
+                    <span class="ox-eyebrow">Get in touch</span>
+                    <h2 class="ox-title">Contact With Us</h2>
+
+                    <div class="ox-form-card">
                         <center>
                             @include('frontend.layouts.error')
                         </center>
                         <form id="contact-form" method="post">
-                            <fieldset>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <input type="text" placeholder="Name" class="form-control" name="name" id="form-name" required="">
+                            <fieldset style="border:0;padding:0;margin:0">
+                                <div class="ox-form-row">
+                                    <div class="ox-field form-group">
+                                        <label class="ox-label" for="form-name">Name</label>
+                                        <input type="text" placeholder="Your name" class="ox-input form-control" name="name" id="form-name" required="">
                                     </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <input type="email" placeholder="Email" class="form-control" name="email" id="form-email" data-error="Email field is required" required="">
+                                    <div class="ox-field form-group">
+                                        <label class="ox-label" for="form-email">Email</label>
+                                        <input type="email" placeholder="you@example.com" class="ox-input form-control" name="email" id="form-email" data-error="Email field is required" required="">
                                         <div class="help-block with-errors"></div>
                                     </div>
                                 </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <textarea placeholder="Message" class="textarea form-control" name="message" id="form-message" rows="8" cols="20" data-error="Message field is required" required=""></textarea>
-                                        <div class="help-block with-errors"></div>
-                                    </div>
+                                <div class="ox-field form-group">
+                                    <label class="ox-label" for="form-message">Message</label>
+                                    <textarea placeholder="How can we help you?" class="ox-textarea textarea form-control" name="message" id="form-message" rows="8" cols="20" data-error="Message field is required" required=""></textarea>
+                                    <div class="help-block with-errors"></div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-6 col-sm-12">
-                                    <div class="form-group margin-bottom-none">
-                                        <button type="submit" class="default-big-btn disabled">Send Message</button>
-                                    </div>
-                                </div>
-                                <div class="col-lg-8 col-md-8 col-sm-6 col-sm-12">
-                                    <div class="form-response"></div>
+                                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+                                    <button type="submit" class="ox-btn ox-btn--primary default-big-btn disabled"><i class="bi bi-send-fill"></i> Send Message</button>
+                                    <div class="form-response" style="flex:1"></div>
                                 </div>
                             </fieldset>
                             {{ csrf_field() }}
                         </form>
                     </div>
                 </div>
+
             </div>
         </div>
-    </div>
+    </section>
+
 </div>
-<div class="container-fluid">
-    <div class="row">
-        <div class="google-map-area">
-        </div>
-    </div>
-</div>
-<!--CONTACT US AREA END-->
 @stop

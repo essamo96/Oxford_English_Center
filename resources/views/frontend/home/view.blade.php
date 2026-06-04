@@ -1,225 +1,210 @@
 @extends('frontend.layouts.master')
 @section('title', optional($mysettings)->title ?? 'Oxford')
 @section('content')
-<!-- Slider 1 Area Start Here -->
-<div class="slider1-area overlay-default">
-    <div class="bend niceties preview-1">
-        <div id="ensign-nivoslider-3" class="slides">
-            @foreach($sliders as $item)
-            <img src="{{ url($item->image)}}" alt="slider" title="#slider-direction-{{ $loop->iteration}}" />
-            @endforeach
+<div class="ox-scope">
+
+    {{-- ============================ HERO ============================ --}}
+    <section class="ox-hero" data-hero data-hero-interval="6000">
+        <div class="ox-hero__slides">
+            @forelse($sliders as $item)
+                <div class="ox-hero__slide {{ $loop->first ? 'is-active' : '' }}" style="background-image:url('{{ url($item->image) }}')"></div>
+            @empty
+                <div class="ox-hero__slide is-active" style="background-image:url('{{ url('assets/oxford/img/banner/1.jpg') }}')"></div>
+            @endforelse
         </div>
-        @foreach($sliders as $item)
-        <div id="slider-direction-{{ $loop->iteration}}" class="t-cn slider-direction">
-            <div class="slider-content s-tb slide-{{ $loop->iteration}}">
-                <div class="title-container s-tb-c">
-                    <div class="title1">{{ $item->title}}</div>
-                    <p>
-                        {!! $item->sub !!}
-                    </p>
+        <div class="ox-hero__overlay"></div>
+        <div class="ox-hero__particles" data-particles data-particles-color="rgba(255,255,255,"></div>
+        <div class="ox-hero__shapes">
+            <span class="ox-shape ox-shape--1"></span>
+            <span class="ox-shape ox-shape--2"></span>
+            <span class="ox-shape ox-shape--3"></span>
+        </div>
+
+        <div class="ox-container">
+            <div class="ox-hero__inner">
+                <span class="ox-hero__badge"><span class="dot"></span> Approved Oxford Test of English Centre</span>
+
+                <div class="ox-hero__caps">
+                    @forelse($sliders as $item)
+                        <div class="ox-hero__cap {{ $loop->first ? 'is-active' : '' }}">
+                            <h1>{{ $item->title }}</h1>
+                            <div class="ox-hero__text">{!! $item->sub !!}</div>
+                        </div>
+                    @empty
+                        <div class="ox-hero__cap is-active">
+                            <h1>Speak English with <span class="hl">Real Confidence</span></h1>
+                            <div class="ox-hero__text"><p>Premium English training — IELTS, general levels, business English and more.</p></div>
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="ox-hero__cta">
+                    <a class="ox-btn ox-btn--white ox-btn--lg" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Book a Course</a>
+                    <a class="ox-btn ox-btn--outline-white ox-btn--lg" href="{{ url('contact') }}"><i class="bi bi-envelope"></i> Contact Us</a>
                 </div>
             </div>
         </div>
-        @endforeach
-    </div>
-</div>
-<!-- Slider 1 Area End Here -->
-<!-- About 2 Area Start Here -->
-<div class="about2-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h1 class="about-title">{{ optional($about)->title ?? 'About Us' }}</h1>
-                <div class="about-sub-title">{!! optional($about)->details ?? '' !!}</div>
-            </div>
-            <div class="col-md-6">
-                <div class="video-area2 overlay-video bg-common-style" style="background-image: url('{{ url('assets/oxford/img/banner/1.jpg')}}');">
-                    <div class="video-content">
-                        <a class="play-btn popup-youtube" href="{{ optional($about)->url ?? '#' }}"><i class="fa fa-play" aria-hidden="true"></i></a>
-                    </div>
+
+        <div class="ox-scroll-ind"><span class="mouse"></span> Scroll</div>
+    </section>
+
+    {{-- ============================ ABOUT ============================ --}}
+    <section class="ox-section">
+        <div class="ox-container">
+            <div class="ox-grid ox-grid--split">
+                <div data-reveal="right">
+                    <span class="ox-eyebrow">Who we are</span>
+                    <h2 class="ox-title">{{ optional($about)->title ?? 'About Us' }}</h2>
+                    <div class="ox-prose">{!! optional($about)->details ?? '' !!}</div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- About 2 Area End Here -->
-<div class="service-bottom-area section-padding">
-    <div class="service-bottom-area-bg" style="background-image: url({{ optional($timetable)->banner ?? '' }})"></div>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 col-lg-6 col-md-offset-6 col-lg-offset-6 col-sm-12 col-xs-12">
-                <div class="service-list wow fadeIn" style="visibility: visible; animation-name: fadeIn;">
-                    <div class="single-service">
-                        <div class="service-icon-hexagon">
-                            <div class="hex">
-                                <div class="service-icon">
-                                    <i class="fa {{ optional($timetable)->url ?? 'fa-clock-o' }}"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="service-details">
-                            <h4>{{ optional($timetable)->title ?? 'Timetable' }}</h4>
-                            {!! optional($timetable)->details ?? '' !!}
-                        </div>
-                    </div>
-                    <div class="single-service">
-                        <div class="service-icon-hexagon">
-                            <div class="hex">
-                                <div class="service-icon"><i class="fa {{ optional($teachers)->url ?? 'fa-users' }}"></i></div>
-                            </div>
-                        </div>
-                        <div class="service-details">
-                            <h4>{{ optional($teachers)->title ?? 'Teachers' }}</h4>
-                            {!! optional($teachers)->details ?? '' !!}
-                        </div>
-                    </div>
-                    <div class="single-service">
-                        <div class="service-icon-hexagon">
-                            <div class="hex">
-                                <div class="service-icon"><i class="fa {{ optional($value)->url ?? 'fa-line-chart' }}"></i></div>
-                            </div>
-                        </div>
-                        <div class="service-details">
-                            <h4>{{ optional($value)->title ?? 'Value' }}</h4>
-                            {!! optional($value)->details ?? '' !!}
-                        </div>
-                    </div>
-                    <div class="single-service">
-                        <div class="service-icon-hexagon">
-                            <div class="hex">
-                                <div class="service-icon"><i class="fa {{ optional($students)->url ?? 'fa-smile-o' }}"></i></div>
-                            </div>
-                        </div>
-                        <div class="service-details">
-                            <h4>{{ optional($students)->title ?? 'Students' }}</h4>
-                            {!! optional($students)->details ?? '' !!}
-                        </div>
+                <div data-reveal="left">
+                    <div class="ox-media">
+                        <img src="{{ url('assets/oxford/img/banner/1.jpg') }}" alt="{{ optional($about)->title ?? 'About' }}">
+                        <a class="ox-media__play popup-youtube" href="{{ optional($about)->url ?? '#' }}" aria-label="Play video">
+                            <span class="ox-play-btn"><i class="bi bi-play-fill"></i></span>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- About 2 Area Start Here -->
-<div class="about2-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 wow fadeIn" data-wow-duration="2s" data-wow-delay=".1s">
-                <div class="service-box2">
-                    <div class="service-box-icon">
-                        <a href="{{ url('/brochur.pdf')}}" target="_blank"><i class="fa fa-graduation-cap" aria-hidden="true"></i></a>
-                    </div>
-                    <h3><a href="{{ url('/brochur.pdf')}}" target="_blank">Our Brochure</a></h3>
-                </div>
+    </section>
+
+    {{-- ============================ FEATURES ============================ --}}
+    <section class="ox-section ox-bg-dots">
+        <div class="ox-container">
+            <div style="text-align:center;max-width:640px;margin:0 auto 48px" data-reveal>
+                <span class="ox-eyebrow" style="justify-content:center">Why Oxford</span>
+                <h2 class="ox-title ox-title--center">Everything you need to succeed</h2>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 wow fadeIn" data-wow-duration="2s" data-wow-delay=".4s">
-                <div class="service-box2">
-                    <div class="service-box-icon">
-                        <a href="{{ url('exam')}}"><i class="fa fa-user" aria-hidden="true"></i></a>
-                    </div>
-                    <h3><a href="{{ url('exam')}}">Placement Test Booking</a></h3>
+            <div class="ox-grid ox-grid--4">
+                <div class="ox-feature" data-reveal="up">
+                    <div class="ox-feature__icon"><i class="fa {{ optional($timetable)->url ?? 'fa-clock-o' }}"></i></div>
+                    <h4>{{ optional($timetable)->title ?? 'Timetable' }}</h4>
+                    <div>{!! optional($timetable)->details ?? '' !!}</div>
                 </div>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 wow fadeIn" data-wow-duration="2s" data-wow-delay=".7s">
-                <div class="service-box2">
-                    <div class="service-box-icon">
-                        <a href="{{ url('book')}}"><i class="fa fa-book" aria-hidden="true"></i></a>
-                    </div>
-                    <h3><a href="{{ url('book')}}">Book A Course</a></h3>
+                <div class="ox-feature" data-reveal="up" data-reveal-delay=".1s">
+                    <div class="ox-feature__icon"><i class="fa {{ optional($teachers)->url ?? 'fa-users' }}"></i></div>
+                    <h4>{{ optional($teachers)->title ?? 'Teachers' }}</h4>
+                    <div>{!! optional($teachers)->details ?? '' !!}</div>
+                </div>
+                <div class="ox-feature" data-reveal="up" data-reveal-delay=".2s">
+                    <div class="ox-feature__icon"><i class="fa {{ optional($value)->url ?? 'fa-line-chart' }}"></i></div>
+                    <h4>{{ optional($value)->title ?? 'Value' }}</h4>
+                    <div>{!! optional($value)->details ?? '' !!}</div>
+                </div>
+                <div class="ox-feature" data-reveal="up" data-reveal-delay=".3s">
+                    <div class="ox-feature__icon"><i class="fa {{ optional($students)->url ?? 'fa-smile-o' }}"></i></div>
+                    <h4>{{ optional($students)->title ?? 'Students' }}</h4>
+                    <div>{!! optional($students)->details ?? '' !!}</div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- About 2 Area End Here -->
-<!-- Counter Area Start Here -->
-<div class="counter-area bg-primary-deep" style="background-image: url('{{ url('assets/oxford/img/banner/nos.jpg')}}');">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".20s">
-                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->donars ?? 0 }}">{{ optional($mysettings)->donars ?? 0 }}</h2>
-                <p>Total Training Hours</p>
+    </section>
+
+    {{-- ============================ QUICK ACTIONS ============================ --}}
+    <section class="ox-section ox-section--tight">
+        <div class="ox-container">
+            <div class="ox-grid ox-grid--3">
+                <a class="ox-action" href="{{ url('/brochur.pdf') }}" target="_blank" data-reveal="up">
+                    <span class="ox-action__icon"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <div><h3>Our Brochure</h3><span>Download the full programme</span></div>
+                </a>
+                <a class="ox-action" href="{{ url('exam') }}" data-reveal="up" data-reveal-delay=".1s">
+                    <span class="ox-action__icon"><i class="bi bi-clipboard-check"></i></span>
+                    <div><h3>Placement Test Booking</h3><span>Find your level in minutes</span></div>
+                </a>
+                <a class="ox-action" href="{{ url('book') }}" data-reveal="up" data-reveal-delay=".2s">
+                    <span class="ox-action__icon"><i class="bi bi-journal-bookmark-fill"></i></span>
+                    <div><h3>Book A Course</h3><span>Reserve your seat today</span></div>
+                </a>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".40s">
-                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->clients ?? 0 }}">{{ optional($mysettings)->clients ?? 0 }}</h2>
-                <p>Total Number of Courses</p>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".60s">
-                <h2 class="about-counter title-bar-counter" data-num="{{ optional($mysettings)->happy ?? 0 }}">{{ optional($mysettings)->happy ?? 0 }}</h2>
-                <p>Total Number of Students</p>
-            </div>
-            <!--            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".80s">
-                            <h2 class="about-counter title-bar-counter" data-num="{{$mysettings->tickects}}">{{$mysettings->tickects}}</h2>
-                            <p>Total Students Passed IELTS</p>
-                        </div>-->
         </div>
-    </div>
-</div>
-<!-- Counter Area End Here -->
-<!-- News and Event Area Start Here -->
-<div class="news-event-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h2 class="title-default-left">Latest News</h2>
+    </section>
+
+    {{-- ============================ STATS ============================ --}}
+    <section class="ox-section">
+        <div class="ox-container">
+            <div class="ox-stats-band" data-reveal="zoom">
+                <div class="ox-stats-band__inner">
+                    <div class="ox-grid ox-grid--3">
+                        <div class="ox-stat">
+                            <div class="ox-stat__num" data-count="{{ optional($mysettings)->donars ?? 0 }}" data-suffix="+">0</div>
+                            <div class="ox-stat__label">Total Training Hours</div>
+                        </div>
+                        <div class="ox-stat">
+                            <div class="ox-stat__num" data-count="{{ optional($mysettings)->clients ?? 0 }}" data-suffix="+">0</div>
+                            <div class="ox-stat__label">Total Number of Courses</div>
+                        </div>
+                        <div class="ox-stat">
+                            <div class="ox-stat__num" data-count="{{ optional($mysettings)->happy ?? 0 }}" data-suffix="+">0</div>
+                            <div class="ox-stat__label">Total Number of Students</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================ LATEST NEWS ============================ --}}
+    <section class="ox-section ox-bg-soft">
+        <div class="ox-container">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:48px;flex-wrap:wrap" data-reveal>
+                <div><span class="ox-eyebrow">From the centre</span><h2 class="ox-title" style="margin:0">Latest News</h2></div>
+            </div>
+            <div class="ox-grid ox-grid--3">
                 @foreach($news as $item)
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 ">
-                    <?php
-                    $cimg = $item->thumb;
-                    if (substr($cimg, 0, 1) != '/') {
-                        $cimg = '/' . $cimg;
-                    }
-                    $nimg = 'assets/site/images/default.jpg';
-                    $img = (File::exists(public_path() . $cimg)) ? $cimg : $nimg;
-                    ?>
-                    <div class="news-box">
-                        <div class="news-img-holder">
-                            <img src="{{ URL::to(Helper::get_image($img)) }}" class="img-responsive" alt="{{ str_replace('"','',$item->title)}}">
-                            <ul class="news-date2">
-                                <li><?= date('d M', strtotime($item->pub_date)) ?></li>
-                                <li><?= date('Y', strtotime($item->pub_date)) ?></li>
-                            </ul>
+                    @php
+                        $cimg = $item->thumb;
+                        if (substr($cimg, 0, 1) != '/') { $cimg = '/' . $cimg; }
+                        $nimg = 'assets/site/images/default.jpg';
+                        $img = (File::exists(public_path() . $cimg)) ? $cimg : $nimg;
+                    @endphp
+                    <article class="ox-card" data-reveal="up" data-reveal-delay="{{ $loop->index * 0.1 }}s">
+                        <div class="ox-card__media">
+                            <img src="{{ URL::to(Helper::get_image($img)) }}" alt="{{ str_replace('"','',$item->title) }}">
+                            <span class="ox-datechip">
+                                <b>{{ date('d', strtotime($item->pub_date)) }}</b>
+                                <span>{{ date('M Y', strtotime($item->pub_date)) }}</span>
+                            </span>
                         </div>
-                        <h3 class="title-news-left-bold"><a href="{{ URL::to('posts/'.$item->id) }}">{{$item->title}}</a></h3>
-                        <p>{{$item->sub}}</p>
-                    </div>
-                </div>
+                        <div class="ox-card__body">
+                            <h3 class="ox-card__title"><a href="{{ URL::to('posts/'.$item->id) }}">{{ $item->title }}</a></h3>
+                            <p class="ox-card__text">{{ $item->sub }}</p>
+                        </div>
+                    </article>
                 @endforeach
             </div>
         </div>
-    </div>
-</div>
-<!-- News and Event Area End Here -->
-<!-- Students Say Area Start Here -->
-<div class="students-say-area">
-    <h2 class="title-default-center">What Our Students Say</h2>
-    <div class="container">
-        <div class="rc-carousel" data-loop="true" data-items="2" data-margin="30" data-autoplay="false" data-autoplay-timeout="10000" data-smart-speed="2000" data-dots="true" data-nav="false" data-nav-speed="false" data-r-x-small="1" data-r-x-small-nav="false" data-r-x-small-dots="true" data-r-x-medium="2" data-r-x-medium-nav="false" data-r-x-medium-dots="true" data-r-small="2" data-r-small-nav="false" data-r-small-dots="true" data-r-medium="2" data-r-medium-nav="false" data-r-medium-dots="true" data-r-large="2" data-r-large-nav="false" data-r-large-dots="true">
-            @foreach($partners as $partner)            
-            <div class="single-item">
-                <div class="single-item-wrapper">
-                    <div class="profile-img-wrapper">
-                        <a href="#" class="profile-img">
+    </section>
 
-                            <img class="profile-img-responsive img-circle" src="{{ url($partner->image)}}" alt="Testimonial"></a>
-                    </div>
-                    <div class="tlp-tm-content-wrapper">
-                        <h3 class="item-title"><a href="#">{{ $partner->title}}</a></h3>
-                        <span class="item-designation">{{ $partner->url}}</span>
-                        <ul class="rating-wrapper">
-                            <li><i class="fa fa-star" aria-hidden="true"></i></li>
-                            <li><i class="fa fa-star" aria-hidden="true"></i></li>
-                            <li><i class="fa fa-star" aria-hidden="true"></i></li>
-                            <li><i class="fa fa-star" aria-hidden="true"></i></li>
-                            <li><i class="fa fa-star" aria-hidden="true"></i></li>
-                        </ul>
-                        <div class="item-content">{{ $partner->descs}}</div>
-                    </div>
+    {{-- ============================ TESTIMONIALS ============================ --}}
+    <section class="ox-section">
+        <div class="ox-container">
+            <div style="text-align:center;max-width:640px;margin:0 auto 48px" data-reveal>
+                <span class="ox-eyebrow" style="justify-content:center">Testimonials</span>
+                <h2 class="ox-title ox-title--center">What Our Students Say</h2>
+            </div>
+            <div class="ox-carousel" data-carousel data-reveal>
+                <div class="ox-carousel__track" data-carousel-track>
+                    @foreach($partners as $partner)
+                        <div class="ox-quote">
+                            <div class="ox-quote__stars">★★★★★</div>
+                            <p class="ox-quote__text">{{ $partner->descs }}</p>
+                            <div class="ox-quote__person">
+                                <img src="{{ url($partner->image) }}" alt="{{ $partner->title }}">
+                                <div><b>{{ $partner->title }}</b><span>{{ $partner->url }}</span></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="ox-carousel__nav">
+                    <button class="ox-carousel__btn" data-carousel-prev aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+                    <div class="ox-dots" data-carousel-dots></div>
+                    <button class="ox-carousel__btn" data-carousel-next aria-label="Next"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
-            @endforeach
         </div>
-    </div>
+    </section>
+
 </div>
-<!-- Students Say Area End Here -->
 @stop

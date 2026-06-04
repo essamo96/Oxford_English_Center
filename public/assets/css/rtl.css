@@ -1,0 +1,28 @@
+/* ============================================================================
+   Oxford English Centre — RTL refinements (rtl.css)
+   The design system uses logical properties (inset-inline-*, margin-inline,
+   padding-inline) so it is mostly direction-agnostic. This file holds the
+   few physical-property corrections needed when [dir="rtl"] is active.
+   ============================================================================ */
+
+[dir="rtl"] .ox-scope,
+html[lang="ar"] .ox-scope { text-align: right; }
+
+/* hero text alignment in RTL */
+[dir="rtl"] .ox-hero__inner { text-align: right; }
+
+/* scroll indicator stays centered (uses translateX) — flip nothing */
+
+/* date chip / overlays use logical props already */
+
+/* dropdown caret + submenu use logical start — fine */
+
+/* footer link arrow flips */
+[dir="rtl"] .ox-footer__links a::before { content: "\F284"; } /* chevron-left in RTL */
+
+/* back-to-top + drawer handled via inset-inline-end + transform in components.css */
+
+/* number/stat blocks remain LTR for digits */
+[dir="rtl"] .ox-stat__num { direction: ltr; }
+
+/* buttons keep icon order natural; no flip needed */

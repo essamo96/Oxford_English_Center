@@ -1,0 +1,70 @@
+/* ============================================================================
+   Oxford English Centre — Responsive (responsive.css)
+   Mobile-first breakpoints for the redesigned shell + pages.
+   Nav collapses to the drawer below 1200px (wider academic menu needs room).
+   ============================================================================ */
+
+/* ---- Collapse desktop nav into the drawer below 1200px ---- */
+@media (max-width: 1200px) {
+    :root { --ox-container: 100%; }
+
+    .ox-nav { display: none; }
+    .ox-burger { display: grid; }
+}
+
+/* ---- Tablet / small laptop ---- */
+@media (max-width: 992px) {
+    :root { --ox-fs-4xl: 2.75rem; --ox-fs-3xl: 2.25rem; --ox-s-24: 72px; }
+
+    .ox-grid--4 { grid-template-columns: repeat(2, 1fr); }
+    .ox-grid--3 { grid-template-columns: repeat(2, 1fr); }
+    .ox-grid--split { grid-template-columns: 1fr; gap: var(--ox-s-8); }
+    .ox-footer__grid { grid-template-columns: 1fr 1fr; gap: var(--ox-s-8); }
+
+    /* contact page two-col → stack */
+    .ox-section .ox-grid[style*="1.6fr"] { grid-template-columns: 1fr !important; }
+    .ox-section .ox-grid[style*="1.6fr"] { gap: var(--ox-s-8) !important; }
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 768px) {
+    :root {
+        --ox-fs-base: 1.0625rem;   /* 17 */
+        --ox-fs-4xl: 2.25rem;      /* 36 */
+        --ox-fs-3xl: 1.875rem;     /* 30 */
+        --ox-fs-2xl: 1.625rem;     /* 26 */
+        --ox-s-24: 56px; --ox-s-16: 48px; --ox-header-h: 70px;
+    }
+
+    .ox-grid--2, .ox-grid--3, .ox-grid--4 { grid-template-columns: 1fr; }
+    .ox-footer__grid { grid-template-columns: 1fr; gap: var(--ox-s-6); text-align: center; }
+    .ox-footer h3::after { left: 50%; transform: translateX(-50%); }
+    [dir="rtl"] .ox-footer h3::after { right: 50%; left: auto; transform: translateX(50%); }
+    .ox-footer__links a, .ox-footer__info li { justify-content: center; }
+    .ox-social { justify-content: center; }
+
+    .ox-topbar__contact { display: none; }
+    .ox-topbar__inner { justify-content: center; }
+
+    .ox-hero { min-height: 80vh; text-align: center; }
+    .ox-hero__inner { margin-inline: auto; }
+    .ox-hero__cta { justify-content: center; }
+    .ox-hero__badge { margin-inline: auto; }
+
+    .ox-brand img { height: 46px; }
+    .ox-stats-band__inner { padding: var(--ox-s-12) var(--ox-s-4); }
+    .ox-section { padding-block: var(--ox-s-16); }
+    .ox-pagehero { min-height: 240px; }
+}
+
+@media (max-width: 576px) {
+    :root { --ox-fs-3xl: 1.75rem; }
+    .ox-container { padding-inline: var(--ox-s-4); }
+    .ox-hero__cta .ox-btn { width: 100%; }
+    .ox-approve img { height: 48px; }
+}
+
+/* large / ultrawide */
+@media (min-width: 1600px) {
+    :root { --ox-container: 1360px; }
+}

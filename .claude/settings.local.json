@@ -30,7 +30,13 @@
       "Bash(php -l app/Services/FinancialDashboardService.php)",
       "Bash(php -l app/Http/Controllers/Admin/FinancialDashboardController.php)",
       "Bash(php -l app/Models/Expense.php)",
-      "Bash(php -l app/Http/Controllers/Admin/ExpensesController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/ExpensesController.php)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft/Edge/Application/**)",
+      "Bash(php -v)",
+      "Bash(cd \"c:/laragon/www/oxford/public\" && mkdir -p assets/css assets/js assets/images assets/fonts 2>/dev/null; ls -la assets | head)",
+      "Bash(taskkill //F //IM php.exe)",
+      "Bash(mkdir -p public/assets/_preview)"
     ]
   }
 }

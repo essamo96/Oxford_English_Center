@@ -1,0 +1,80 @@
+/* ============================================================================
+   Oxford English Centre — Animations (animations.css)
+   Scroll-reveal classes (driven by animations.js IntersectionObserver) +
+   keyframes for floating / pulse / gradient / sheen effects.
+   ============================================================================ */
+
+/* ---- Scroll reveal: initial hidden states ---- */
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .7s var(--ox-ease), transform .7s var(--ox-ease);
+    will-change: opacity, transform;
+}
+[data-reveal="up"]    { transform: translateY(40px); }
+[data-reveal="down"]  { transform: translateY(-40px); }
+[data-reveal="left"]  { transform: translateX(48px); }
+[data-reveal="right"] { transform: translateX(-48px); }
+[data-reveal="zoom"]  { transform: scale(.9); }
+[data-reveal="fade"]  { transform: none; }
+
+[data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+}
+
+/* stagger via inline --d set by JS or markup */
+[data-reveal] { transition-delay: var(--d, 0s); }
+
+/* ---- Keyframes ---- */
+@keyframes oxFloat {
+    0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+    50%      { transform: translateY(-26px) translateX(10px) rotate(8deg); }
+}
+@keyframes oxPulse {
+    0%   { transform: scale(1);   opacity: .7; }
+    100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes oxWheel {
+    0%   { transform: translateY(0);   opacity: 1; }
+    100% { transform: translateY(12px); opacity: 0; }
+}
+@keyframes oxGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+@keyframes oxFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes oxSpin { to { transform: rotate(360deg); } }
+
+/* animated gradient text/background helper */
+.ox-anim-gradient {
+    background-size: 200% 200%;
+    animation: oxGradientShift 7s ease infinite;
+}
+
+/* floating element utility */
+.ox-floating { animation: oxFloat 6s ease-in-out infinite; }
+
+/* hover lift utility */
+.ox-lift { transition: transform var(--ox-dur) var(--ox-ease), box-shadow var(--ox-dur) var(--ox-ease); }
+.ox-lift:hover { transform: translateY(-6px); box-shadow: var(--ox-shadow); }
+
+/* preloader */
+.ox-preloader {
+    position: fixed; inset: 0; z-index: 9999;
+    display: grid; place-items: center;
+    background: var(--ox-gradient-deep);
+    transition: opacity .5s var(--ox-ease), visibility .5s;
+}
+.ox-preloader.is-done { opacity: 0; visibility: hidden; }
+.ox-preloader__spinner {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25);
+    border-top-color: var(--ox-accent);
+    animation: oxSpin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1 !important; transform: none !important; }
+    .ox-floating, .ox-anim-gradient { animation: none !important; }
+}
