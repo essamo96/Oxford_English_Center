@@ -15,8 +15,11 @@
     <link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet" type="text/css" />
     <style>
         .fc-event { cursor: pointer; }
-        .conflict-event { border: 2px solid red !important; }
-        .transition-3d { transition: all 0.3s ease; }
+        .conflict-event { border: 2px solid #F64E60 !important; box-shadow: 0 0 0 1px #F64E60; }
+        .fc-content { line-height: 1.2; }
+        .cal-legend { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+        .cal-legend .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-inline-end: .35rem; }
+        #kt_calendar_app .fc-day-today { background: rgba(54,153,255,.06) !important; }
     </style>
 @stop
 
@@ -50,6 +53,11 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="cal-legend mb-5 text-gray-600 fs-7">
+                <span><span class="dot" style="background:#3699FF"></span> جلسة عادية</span>
+                <span><span class="dot" style="background:#F64E60"></span> تعارض في جدول المدرس</span>
+                <span class="text-muted">اضغط على أي جلسة لعرض التفاصيل ورابط المجموعة.</span>
+            </div>
             <div id="kt_calendar_app"></div>
         </div>
     </div>
@@ -134,16 +142,24 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                 },
                 initialView: 'dayGridMonth',
                 locale: 'ar',
                 direction: 'rtl',
-                navLinks: true, 
-                selectable: true,
-                selectMirror: true,
+                height: 'auto',
+                navLinks: true,
+                selectable: false,
                 editable: false,
                 dayMaxEvents: true,
+                nowIndicator: true,
+                slotMinTime: '07:00:00',
+                slotMaxTime: '23:00:00',
+                expandRows: true,
+                eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: true },
+                eventClassNames: function(arg) {
+                    return (arg.event.extendedProps && arg.event.extendedProps.conflict) ? ['conflict-event'] : [];
+                },
                 events: function(fetchInfo, successCallback, failureCallback) {
                     $.ajax({
                         url: '{{ route("calendar.events") }}',
@@ -226,16 +242,25 @@
                     });
                 },
                 eventClick: function(info) {
-                    $('#event_title').text(info.event.title);
-                    $('#event_program').text(info.event.extendedProps.program);
-                    $('#event_teacher').text(info.event.extendedProps.teacher);
-                    $('#event_students').text(info.event.extendedProps.students);
-                    
-                    let start = moment(info.event.start).format('hh:mm A');
-                    let end = moment(info.event.end).format('hh:mm A');
-                    $('#event_time').text(start + ' - ' + end);
+                    let props = info.event.extendedProps || {};
+                    $('#event_title').text(info.event.title || '---');
+                    $('#event_program').text(props.program || '---');
+                    $('#event_teacher').text(props.teacher || '---');
+                    $('#event_students').text(props.students || 0);
 
-                    if (info.event.extendedProps.conflict) {
+                    let start = moment(info.event.start).format('hh:mm A');
+                    let end = info.event.end ? moment(info.event.end).format('hh:mm A') : '';
+                    $('#event_time').text(end ? (start + ' - ' + end) : start);
+
+                    // Wire the Zoom/Drive link (or disable it when none exists).
+                    let $link = $('#event_link');
+                    if (props.link) {
+                        $link.attr('href', props.link).removeClass('disabled text-muted').addClass('text-primary');
+                    } else {
+                        $link.attr('href', '#').removeClass('text-primary').addClass('disabled text-muted');
+                    }
+
+                    if (props.conflict) {
                         $('#conflict_warning').removeClass('d-none');
                     } else {
                         $('#conflict_warning').addClass('d-none');
@@ -244,9 +269,8 @@
                     $('#kt_modal_view_event').modal('show');
                 },
                 loading: function(isLoading) {
-                    if (isLoading) {
-                        // Optional: Show loading spinner
-                    }
+                    $('#refresh_calendar').prop('disabled', isLoading)
+                        .find('i').toggleClass('spinner-border spinner-border-sm', isLoading);
                 }
             });
 
@@ -256,9 +280,20 @@
                 calendar.refetchEvents();
             });
 
-            $('#student_filter').on('keypress', function(e) {
-                if(e.which == 13) {
+            // Search on Enter, plus a debounced auto-search while typing.
+            let searchTimer = null;
+            $('#student_filter').on('keyup', function(e) {
+                clearTimeout(searchTimer);
+                if (e.which === 13) {
                     calendar.refetchEvents();
+                    return;
+                }
+                let val = $(this).val().trim();
+                // Refetch when cleared, or once the query is specific enough.
+                if (val.length === 0 || val.length >= 3) {
+                    searchTimer = setTimeout(function() {
+                        calendar.refetchEvents();
+                    }, 500);
                 }
             });
 

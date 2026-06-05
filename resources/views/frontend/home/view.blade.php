@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="ox-hero__cta">
-                    <a class="ox-btn ox-btn--white ox-btn--lg" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Book a Course</a>
+                    <a id="heroBookNow" class="ox-btn ox-btn--white ox-btn--lg" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Book a Course</a>
                     <a class="ox-btn ox-btn--outline-white ox-btn--lg" href="{{ url('contact') }}"><i class="bi bi-envelope"></i> Contact Us</a>
                 </div>
             </div>

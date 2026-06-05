@@ -167,7 +167,7 @@ body {
 
 .ox-scope p { margin: 0 0 var(--ox-s-4); }
 
-.ox-scope a { color: var(--ox-secondary-600); text-decoration: none; transition: color var(--ox-dur-fast) var(--ox-ease); }
+.ox-scope a { color: var(--ox-primary-050); text-decoration: none; transition: color var(--ox-dur-fast) var(--ox-ease); }
 .ox-scope a:hover { color: var(--ox-primary); }
 
 .ox-scope img { max-width: 100%; height: auto; }

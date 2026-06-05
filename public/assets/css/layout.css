@@ -87,7 +87,7 @@
     pointer-events: none;
 }
 .ox-hero__cap.is-active { opacity: 1; transform: none; position: relative; pointer-events: auto; }
-.ox-hero__cap h1 { margin-bottom: var(--ox-s-4); }
+.ox-hero__cap h1 { margin-bottom: var(--ox-s-4); color: var(--ox-accent); }
 .ox-hero__cap .ox-hero__text { margin-bottom: 0; }
 
 /* scroll indicator */

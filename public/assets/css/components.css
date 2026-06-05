@@ -69,18 +69,26 @@
 .ox-btn--outline   { --_bg: transparent; --_fg: var(--ox-primary); box-shadow: inset 0 0 0 2px var(--ox-primary); }
 .ox-btn--outline:hover { --_bg: var(--ox-primary); --_fg:#fff; }
 
-/* Solid white CTA — white background, brand-blue text (high contrast on hero) */
-.ox-btn--white { --_bg: #ffffff; --_fg: var(--ox-primary); box-shadow: 0 10px 28px -8px rgba(0,0,0,.35); }
-.ox-btn--white:hover { --_bg: #ffffff; --_fg: var(--ox-primary-700); filter: brightness(1); box-shadow: 0 16px 40px -10px rgba(0,0,0,.45); }
-
-/* Outlined white CTA — transparent, white text + solid white border */
-.ox-btn--outline-white {
+/* Outlined white CTA — transparent, white text + white border; orange text/icon/border on hover */
+.ox-btn--white {
     --_bg: transparent; --_fg: #ffffff;
     border: 2px solid #ffffff;
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     box-shadow: none;
+    transition: color .3s var(--ox-ease), border-color .3s var(--ox-ease), background-color .3s var(--ox-ease), transform .3s var(--ox-ease);
 }
-.ox-btn--outline-white:hover { --_bg: #ffffff; --_fg: var(--ox-primary-700); border-color: #fff; box-shadow: var(--ox-shadow); }
+.ox-btn--white:hover { --_bg: transparent; --_fg: var(--ox-accent); border-color: var(--ox-accent); box-shadow: none; }
+
+/* Hero "Book Now" CTA — on hover only the text turns accent (border stays white) */
+#heroBookNow:hover { --_fg: var(--ox-accent); border-color: var(--ox-accent); color: var(--ox-accent); box-shadow: none; }
+
+/* Solid orange CTA — orange background, white text; white bg + blue text/icon on hover */
+.ox-btn--outline-white {
+    --_bg: var(--ox-accent); --_fg: #ffffff;
+    border: 2px solid transparent;
+    box-shadow: 0 10px 28px -8px rgba(0,0,0,.25);
+    transition: color .3s var(--ox-ease), border-color .3s var(--ox-ease), background-color .3s var(--ox-ease), box-shadow .3s var(--ox-ease), transform .3s var(--ox-ease);
+}
+.ox-btn--outline-white:hover { --_bg: #ffffff; --_fg: var(--ox-accent); border-color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0,0,0,.3); }
 .ox-btn--sm        { min-height: 40px; padding: 9px 18px; font-size: var(--ox-fs-sm); }
 .ox-btn--lg        { min-height: 56px; padding: 17px 38px; font-size: var(--ox-fs-lg); }
 .ox-btn--block     { display: flex; width: 100%; }
