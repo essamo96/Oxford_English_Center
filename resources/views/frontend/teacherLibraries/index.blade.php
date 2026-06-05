@@ -1,5 +1,6 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Teacher Library')
+@section('page-title', 'Library')
 @section('content')
 <div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/gallary.jpg')}}');">
     <div class="container">

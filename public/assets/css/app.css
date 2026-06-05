@@ -124,6 +124,153 @@ html[lang="ar"], [dir="rtl"] {
 }
 
 /* ============================================================================
+   Dashboard Shell Palette (student & teacher portals) — additive.
+   Requested navy/gold palette kept verbatim, plus a parallel light set.
+   Semantic --d-* tokens are read by the shell AND inherited by AJAX-injected
+   fragments, so no inline styles are ever required.
+   ============================================================================ */
+:root {
+    /* requested dark palette (verbatim) */
+    --bg-primary:   #0B1D3A;
+    --bg-secondary: #0E2250;
+    --bg-card:      #162B5E;
+    --gold-dark:    #C8992A;
+    --gold-mid:     #E8B84B;
+    --gold-light:   #F5D078;
+    --text-white:   #FFFFFF;
+    --text-gold:    #D4A017;
+    --text-muted:   #B8C8E0;
+    --btn-bg:       #1A3A6E;
+    --btn-border:   #2A5298;
+
+    /* shell metrics */
+    --d-sidebar-w:      264px;
+    --d-sidebar-w-min:  78px;
+    --d-header-h:       66px;
+    --d-topmenu-h:      58px;
+}
+
+/* DARK theme (default) */
+.ox-dash[data-dash-theme="dark"] {
+    --d-bg:            var(--bg-primary);
+    --d-sidebar:       var(--bg-secondary);
+    --d-header:        var(--bg-secondary);
+    --d-topmenu:       var(--bg-primary);
+    --d-card:          var(--bg-card);
+    --d-card-2:        #1b3268;
+    --d-border:        var(--btn-border);
+    --d-text:          var(--text-white);
+    --d-heading:       var(--text-white);
+    --d-muted:         var(--text-muted);
+    --d-active-bg:     var(--btn-bg);
+    --d-active-border: var(--gold-dark);
+    --d-accent:        var(--text-gold);
+    --d-accent-grad:   linear-gradient(135deg, var(--gold-dark) 0%, var(--gold-mid) 100%);
+    --d-hover:         rgba(255,255,255,.06);
+    --d-input-bg:      #0d2247;
+    --d-shadow:        0 14px 40px -16px rgba(0,0,0,.55);
+    color-scheme: dark;
+
+    /* sidebar (navy in dark) */
+    --side-bg:          var(--bg-secondary);
+    --side-border:      var(--btn-border);
+    --side-text:        #cdd9ef;
+    --side-muted:       #9fb3d6;
+    --side-label:       var(--text-muted);
+    --side-hover:       rgba(255,255,255,.06);
+    --side-active-bg:   var(--btn-bg);
+    --side-active-text: #ffffff;
+    --side-active-icon: var(--gold-mid);
+    --side-logout:      #f3b1b1;
+    --side-scroll:      rgba(255,255,255,.14);
+
+    /* semantic aliases (used by AJAX-injected content + component classes) */
+    --surface:        var(--d-card);
+    --surface-2:      var(--d-card-2);
+    --surface-hover:  var(--d-active-bg);
+    --border-color:   var(--d-border);
+    --text-primary:   var(--d-text);
+    --text-secondary: var(--d-muted);
+    /* status colors (theme-aware) */
+    --c-success:      #22C55E;
+    --c-success-bg:   rgba(34,197,94,.15);
+    --c-warning:      var(--gold-mid);
+    --c-warning-bg:   rgba(232,184,75,.15);
+    --c-danger:       #FF6B6B;
+    --c-danger-bg:    rgba(255,107,107,.15);
+    --c-info:         var(--d-muted);
+    --c-info-bg:      rgba(42,82,152,.3);
+    /* chart palette */
+    --chart-1: var(--gold-mid);
+    --chart-2: #22C55E;
+    --chart-3: #FF6B6B;
+    --chart-4: #3B82F6;
+    --chart-5: #A855F7;
+    --chart-grid:  var(--d-border);
+    --chart-label: var(--d-muted);
+}
+
+/* LIGHT theme */
+.ox-dash[data-dash-theme="light"] {
+    --d-bg:            #f4f6fb;
+    --d-sidebar:       #0E2250;   /* brand navy sidebar in both modes */
+    --d-header:        #0E2250;   /* navy header in both modes (keeps logo + contrast) */
+    --d-topmenu:       #ffffff;
+    --d-card:          #ffffff;
+    --d-card-2:        #f8fafc;
+    --d-border:        #e2e8f0;
+    --d-text:          #1e293b;
+    --d-heading:       #0a3258;
+    --d-muted:         #64748b;
+    --d-active-bg:     rgba(255,255,255,.10);
+    --d-active-border: var(--gold-dark);
+    --d-accent:        var(--gold-dark);
+    --d-accent-grad:   linear-gradient(135deg, var(--gold-dark) 0%, var(--gold-mid) 100%);
+    --d-hover:         rgba(255,255,255,.07);
+    --d-input-bg:      #ffffff;
+    --d-shadow:        0 14px 40px -18px rgba(15,76,129,.22);
+    color-scheme: light;
+
+    /* sidebar (white in light) */
+    --side-bg:          #ffffff;
+    --side-border:      #e6eaf2;
+    --side-text:        #000000;
+    --side-muted:       #64748b;
+    --side-label:       #94a3b8;
+    --side-hover:       rgba(15,76,129,.06);
+    --side-active-bg:   rgba(200,153,42,.14);
+    --side-active-text: #0a3258;
+    --side-active-icon: var(--gold-dark);
+    --side-logout:      #dc2626;
+    --side-scroll:      rgba(15,23,42,.18);
+
+    /* semantic aliases (used by AJAX-injected content + component classes) */
+    --surface:        var(--d-card);
+    --surface-2:      var(--d-card-2);
+    --surface-hover:  var(--d-active-bg);
+    --border-color:   var(--d-border);
+    --text-primary:   var(--d-text);
+    --text-secondary: var(--d-muted);
+    /* status colors (theme-aware) */
+    --c-success:      #16A34A;
+    --c-success-bg:   rgba(22,163,74,.12);
+    --c-warning:      var(--gold-dark);
+    --c-warning-bg:   rgba(200,153,42,.14);
+    --c-danger:       #DC2626;
+    --c-danger-bg:    rgba(220,38,38,.10);
+    --c-info:         #2563EB;
+    --c-info-bg:      rgba(37,99,235,.10);
+    /* chart palette */
+    --chart-1: var(--gold-dark);
+    --chart-2: #16A34A;
+    --chart-3: #DC2626;
+    --chart-4: #2563EB;
+    --chart-5: #9333EA;
+    --chart-grid:  var(--d-border);
+    --chart-label: var(--d-muted);
+}
+
+/* ============================================================================
    Gentle, scoped base — applied to the redesigned shell. Kept minimal so it
    does not disturb legacy Bootstrap-3 page bodies.
    ============================================================================ */

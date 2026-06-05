@@ -1,10 +1,11 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Group Progress')
+@section('page-title', 'Group Progress')
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">
 <style>
-    .progress-card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(0,0,0,.07); border: 1px solid #edf2f7; margin-bottom: 16px; transition: box-shadow .2s; }
+    .progress-card { background: var(--surface, white); border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(0,0,0,.07); border: 1px solid var(--border-color, #edf2f7); margin-bottom: 16px; transition: box-shadow .2s; }
     .progress-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); }
     .progress-track { display: flex; justify-content: space-between; align-items: center; position: relative; margin: 28px 0 40px; }
     .progress-track::before { content:''; position:absolute; top:13px; left:0; right:0; height:4px; background:#e2e8f0; z-index:1; }

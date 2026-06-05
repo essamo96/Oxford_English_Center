@@ -1,5 +1,6 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Student Area')
+@section('page-title', 'Dashboard')
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}">
@@ -12,63 +13,26 @@
 </style>
 @endsection
 
+@section('quick-actions')
+    <button onclick="window.print()" class="ox-dash__qbtn btn-print-dashboard" title="Print Dashboard">
+        <i class="bi bi-printer"></i> Print
+    </button>
+    <a href="#StudentGroupsMarks" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="Markstudent ox-dash__qbtn" data-toggle="tab" title="My Marks">
+        <i class="bi bi-card-checklist"></i> Marks
+    </a>
+    <a href="#StudentGroupsProgress" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="StudentGroupsProgress ox-dash__qbtn" data-toggle="tab" title="My Progress">
+        <i class="bi bi-graph-up-arrow"></i> Progress
+    </a>
+    <a href="#Exam" data-toggle="tab" class="ox-dash__qbtn" title="Exam Dates">
+        <i class="bi bi-calendar-check"></i> Exams
+    </a>
+@endsection
+
 @section('content')
 <div class="student-dashboard-wrapper">
+    {{-- hidden: kept so the existing particlesJS('particles-js') init call stays safe --}}
+    <div id="particles-js"></div>
     <div class="container">
-        <!-- Dashboard Header Card -->
-        <div class="dashboard-header">
-            <div id="particles-js"></div>
-            <div class="header-content">
-                @if ($student_info->image != '')
-                    <img src="{{ asset($student_info->image) }}" class="student-avatar-large" alt="{{ $student_info->name }}" />
-                @else
-                    <img src="{{ url('assets/oxford/img/students/avatar.png') }}" class="student-avatar-large" alt="Avatar" />
-                @endif
-                
-                <div class="header-info">
-                    <p>Welcome back,</p>
-                    <h1>{{ $student_info->name ?: 'Oxford Student' }}</h1>
-                    <div class="status-badge {{ $student_info->delaying != 0 ? 'status-delayed' : 'status-active' }}">
-                        {{ $student_info->delaying != 0 ? 'Delayed' : 'Active Student' }}
-                    </div>
-                </div>
-
-                <div class="header-actions" style="margin-left: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <!-- Print Dashboard -->
-                    <button onclick="window.print()" class="header-action-btn btn-print-dashboard" title="Print Dashboard">
-                        <i class="fa fa-print fa-lg"></i>
-                        <span class="action-label">Print</span>
-                    </button>
-
-                    <!-- Marks Quick Link -->
-                    <a href="#StudentGroupsMarks" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="Markstudent header-action-btn" data-toggle="tab" title="My Marks">
-                        <i class="fa fa-check-square-o fa-lg"></i>
-                        <span class="action-label">Marks</span>
-                    </a>
-                    
-                    <!-- Progress Quick Link -->
-                    <a href="#StudentGroupsProgress" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="StudentGroupsProgress header-action-btn" data-toggle="tab" title="My Progress">
-                        <i class="fa fa-line-chart fa-lg"></i>
-                        <span class="action-label">Progress</span>
-                    </a>
-
-                    <!-- Exam Dates Quick Link -->
-                    <a href="#Exam" data-toggle="tab" class="header-action-btn" title="Exam Dates">
-                        <i class="fa fa-calendar fa-lg"></i>
-                        <span class="action-label">Exams</span>
-                    </a>
-
-                    <!-- Notifications -->
-                    <a href="#AdminNotify" class="AdminNotify header-action-btn" data-toggle="tab" title="Messages" style="position: relative;">
-                        <i class="fa fa-envelope-o fa-lg"></i>
-                        @if($count > 0)
-                            <span class="badge badge-danger unread-badge animate__animated animate__heartBeat animate__infinite">{{ $count }}</span>
-                        @endif
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             @include('frontend.layouts.error')
             @include('frontend.chat.chat-box')
@@ -80,7 +44,89 @@
             
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="dashboard-content tab-content">
+                    {{-- ===================== Dashboard (KPIs + charts) ===================== --}}
                     <div class="tab-pane fade active in" id="Welcome">
+                        <div class="kpi-grid">
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic"><i class="fa fa-book"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['enrolled'] }}">0</div><div class="kpi-card__lbl">Enrolled Courses</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--success"><i class="fa fa-check-circle"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['completed'] }}">0</div><div class="kpi-card__lbl">Completed</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--info"><i class="fa fa-hourglass-half"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['in_progress'] }}">0</div><div class="kpi-card__lbl">In Progress</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--warn"><i class="fa fa-line-chart"></i></div>
+                                <div>
+                                    <div class="kpi-card__val"><span data-countup="{{ $kpis['avg_progress'] }}">0</span>%</div>
+                                    <div class="kpi-card__lbl">Overall Progress</div>
+                                    <div class="kpi-card__sub">Avg score: {{ $kpis['avg_score'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-bar-chart"></i> Course Progress</div>
+                                @if(($kpis['enrolled'] ?? 0) > 0)
+                                    <div class="chart-box"><canvas id="chartProgress"></canvas></div>
+                                @else
+                                    <div class="empty-state"><i class="fa fa-bar-chart"></i><p>No courses to display yet.</p></div>
+                                @endif
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-line-chart"></i> Grade Trend</div>
+                                <div class="chart-box"><canvas id="chartTrend"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-history"></i> Recent Evaluations</div>
+                                @forelse($recent as $r)
+                                    <div class="dash-list__item">
+                                        <div class="dash-list__ic"><i class="fa fa-star"></i></div>
+                                        <div class="dash-list__main">
+                                            <div class="dash-list__title">{{ $r['group'] }}</div>
+                                            <div class="dash-list__sub">{{ $r['date'] ? \Carbon\Carbon::parse($r['date'])->format('F j, Y') : 'Not provided' }}</div>
+                                        </div>
+                                        <div class="dash-list__meta">Score: {{ $r['total'] ?? '—' }}</div>
+                                    </div>
+                                @empty
+                                    <div class="empty-state"><i class="fa fa-history"></i><p>No recent activity.</p></div>
+                                @endforelse
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-calendar-check-o"></i> Upcoming Exams</div>
+                                @forelse($upcoming as $u)
+                                    <div class="dash-list__item">
+                                        <div class="dash-list__ic"><i class="fa fa-calendar"></i></div>
+                                        <div class="dash-list__main">
+                                            <div class="dash-list__title">{{ $u['label'] }} — {{ $u['group'] }}</div>
+                                            <div class="dash-list__sub">{{ $u['date']->format('F j, Y') }}</div>
+                                        </div>
+                                        <div class="dash-list__meta">{{ $u['date']->diffForHumans() }}</div>
+                                    </div>
+                                @empty
+                                    <div class="empty-state"><i class="fa fa-calendar-o"></i><p>No upcoming exams.</p></div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="quick-links">
+                            <a href="#Courses" data-toggle="tab" class="quick-link"><i class="fa fa-mortar-board"></i><span>My Courses</span></a>
+                            <a href="#StudentGroupsMarks" data-student_id="{{ Crypt::encrypt($student_info->id) }}" class="Markstudent quick-link" data-toggle="tab"><i class="fa fa-check-square-o"></i><span>My Grades</span></a>
+                            <a href="#Exam" data-toggle="tab" class="quick-link"><i class="fa fa-calendar"></i><span>My Schedule</span></a>
+                            <a href="#MyInfo" data-toggle="tab" class="quick-link"><i class="fa fa-user"></i><span>My Information</span></a>
+                        </div>
+                    </div>
+
+                    {{-- ===================== My Information ===================== --}}
+                    <div class="tab-pane fade" id="MyInfo">
                         <div class="row">
                             <!-- Academic Profile Tiles -->
                             <div class="col-md-12 mb-30 animate-up delay-1">
@@ -94,7 +140,7 @@
                                         </div>
                                     </div>
                                     <div class="info-tile">
-                                        <div class="tile-icon"><i class="fa fa-id-card"></i></div>
+                                        <div class="tile-icon"><i class="bi bi-person-vcard-fill"></i></div>
                                         <div class="tile-content">
                                             <h4>Student ID</h4>
                                             <p>#{{ $student_info->id }}</p>
@@ -175,7 +221,7 @@
                     </div>
                     <div class="tab-pane fade" id="Profile">
                         <div class="info-card">
-                            <h3 class="mb-30"><i class="fa fa-user-circle"></i> Edit Profile Information</h3>
+                            <h3 class="mb-30"><i class="fa fa-pencil-square-o oc-profile-edit"></i> Edit Profile Information</h3>
                             <form method="post" enctype="multipart/form-data" action="/student/editProfile">
                                 {{ csrf_field() }}
                                 <div class="row">
@@ -492,6 +538,42 @@ $('.date-picker').datepicker();
 </script>
 <script>
     var base_url = '{{ url(' / ') }}';
+</script>
+<script>
+/* ---- Dashboard KPI count-up + charts (theme-aware) ---- */
+(function () {
+    if (typeof Chart === 'undefined') return;
+    var charts = @json($charts);
+    var instances = {};
+    function cssVar(n){ var s=document.querySelector('.ox-dash'); return s ? getComputedStyle(s).getPropertyValue(n).trim() : ''; }
+    function build() {
+        Object.keys(instances).forEach(function(k){ if(instances[k]) instances[k].destroy(); });
+        instances = {};
+        var grid=cssVar('--chart-grid')||'rgba(255,255,255,.1)', label=cssVar('--chart-label')||'#888',
+            c1=cssVar('--chart-1')||'#E8B84B', c4=cssVar('--chart-4')||'#3B82F6';
+        Chart.defaults.color = label; Chart.defaults.borderColor = grid;
+        var p=document.getElementById('chartProgress');
+        if (p && charts.progress && charts.progress.labels.length) {
+            instances.p = new Chart(p, { type:'bar',
+                data:{ labels:charts.progress.labels, datasets:[{ label:'Progress %', data:charts.progress.data, backgroundColor:c1, borderRadius:6, maxBarThickness:42 }] },
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,max:100,grid:{color:grid}}, x:{grid:{display:false}} } } });
+        }
+        var t=document.getElementById('chartTrend');
+        if (t && charts.trend) {
+            instances.t = new Chart(t, { type:'line',
+                data:{ labels:charts.trend.labels, datasets:[{ label:'Average', data:charts.trend.data, borderColor:c4, backgroundColor:'rgba(59,130,246,.15)', fill:true, tension:.35, pointRadius:4 }] },
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,grid:{color:grid}}, x:{grid:{display:false}} } } });
+        }
+    }
+    function countUp() {
+        document.querySelectorAll('.ox-dash [data-countup]').forEach(function(el){
+            var target=parseFloat(el.getAttribute('data-countup'))||0, cur=0, steps=28, inc=target/steps, i=0;
+            var tm=setInterval(function(){ i++; cur+=inc; if(i>=steps){cur=target;clearInterval(tm);} el.textContent=(target%1===0)?Math.round(cur):cur.toFixed(1); }, 18);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){ build(); countUp(); });
+    window.addEventListener('ox-theme-change', build);
+})();
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script src="{{ url('assets/oxford/js/chat.js') }}" type="text/javascript"></script>

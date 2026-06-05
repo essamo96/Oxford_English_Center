@@ -1,5 +1,6 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Teacher Area - Exam Dates')
+@section('page-title', 'Exam Dates')
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">

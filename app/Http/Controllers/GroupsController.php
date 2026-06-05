@@ -64,7 +64,7 @@ class GroupsController extends Controller {
 
         // (1) centre network
         if ($setting->enforce_ip && !$setting->ipAllowed($request->ip())) {
-            $reasons[] = 'يجب أن تكون متصلاً بشبكة المركز لأخذ الحضور والغياب.';
+            $reasons[] = 'You must be connected to the centre network to record attendance.';
         }
 
         // (2) lecture time window
@@ -77,12 +77,12 @@ class GroupsController extends Controller {
         );
         if ($setting->enforce_time) {
             if ($eval['scheduled_today'] === false) {
-                $reasons[] = 'اليوم ليس من أيام محاضرات هذه المجموعة.';
+                $reasons[] = 'Today is not a scheduled lecture day for this group.';
             } elseif ($eval['within'] === false) {
                 $win = ($eval['start'] && $eval['end'])
                     ? ' (' . $eval['start']->format('h:i A') . ' - ' . $eval['end']->format('h:i A') . ')'
                     : '';
-                $reasons[] = 'يمكن أخذ الحضور خلال وقت المحاضرة فقط' . $win . '.';
+                $reasons[] = 'Attendance can only be recorded during the lecture time' . $win . '.';
             }
         }
 
@@ -202,14 +202,14 @@ class GroupsController extends Controller {
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $request->session()->flash('danger', 'حدث خطأ أثناء الحفظ: ' . $e->getMessage());
+            $request->session()->flash('danger', 'An error occurred while saving: ' . $e->getMessage());
             return redirect()->route('teacher.group.attendance', $group_id);
         }
 
         if ($round === 2) {
-            $request->session()->flash('success', 'تم تسجيل حضور المتأخرين (' . $saved . ') دون احتساب محاضرة جديدة للمدرس.');
+            $request->session()->flash('success', 'Late arrivals recorded (' . $saved . ') without counting a new lecture for the teacher.');
         } else {
-            $request->session()->flash('success', 'تم حفظ الحضور واحتساب المحاضرة بنجاح (' . $saved . ' حاضر).');
+            $request->session()->flash('success', 'Attendance saved and lecture counted successfully (' . $saved . ' present).');
         }
         return redirect()->route('teacher.group.attendance', $group_id);
     }
@@ -320,7 +320,7 @@ class GroupsController extends Controller {
             return view('frontend.teacherLibraries.index', parent::$data);
         }
         echo '<center><h1>';
-        echo 'حدث خطا';
+        echo 'An error occurred';
         echo '</h1>';
     }
 
@@ -360,7 +360,7 @@ class GroupsController extends Controller {
             }
         }
         echo '<center><h1>';
-        echo 'حدث خطا';
+        echo 'An error occurred';
         echo '</h1>';
     }
 
@@ -447,10 +447,10 @@ class GroupsController extends Controller {
             ->whereNull('deleted_at')
             ->exists();
         if ($awaitingPayment) {
-            return '<div style="padding:40px 24px;text-align:center;">'
-                . '<i class="fa fa-clock-o" style="font-size:46px;color:#f5a524;"></i>'
-                . '<h3 style="margin:16px 0 8px;color:#14213d;">بانتظار تأكيد الدفع</h3>'
-                . '<p style="color:#555;max-width:480px;margin:0 auto;">بانتظار تأكيد المبلغ المستحق لهذه المجموعة من قبل الإدارة لتتمكن من الاستفادة من مميزات هذه المجموعة.</p>'
+            return '<div class="empty-state">'
+                . '<i class="fa fa-clock-o" style="color:var(--c-warning);"></i>'
+                . '<div class="empty-state__title">Awaiting payment confirmation</div>'
+                . '<p style="max-width:480px;margin:0 auto;">Your payment for this group is pending confirmation by the administration. Once confirmed, you will be able to access this group\'s features.</p>'
                 . '</div>';
         }
 
@@ -490,9 +490,9 @@ class GroupsController extends Controller {
         }
 
         // No students seated in this group yet → friendly notice (loaded into the #Info tab as HTML)
-        return '<div style="padding:40px 24px;text-align:center;color:#64748b;">'
-             . '<i class="fa fa-users fa-2x" style="opacity:.45;"></i>'
-             . '<p style="margin-top:12px;font-weight:600;">لا يوجد طلاب مسجّلون في هذه المجموعة بعد.</p>'
+        return '<div class="empty-state">'
+             . '<i class="fa fa-users"></i>'
+             . '<p style="font-weight:600;">No students are enrolled in this group yet.</p>'
              . '</div>';
     }
 

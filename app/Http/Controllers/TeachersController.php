@@ -18,15 +18,15 @@ use Image;
 
 class TeachersController extends Controller {
 
-    const SEND_SUCCESS_MESSAGE = "تم إرسال الرسالة";
+    const SEND_SUCCESS_MESSAGE = "Message sent successfully";
     const INSERT_SUCCESS_MESSAGE = 'site.add_student_success';
-    const UPDATE_SUCCESS = "نجاح، تم التعديل بنجاح";
-    const DELETE_SUCCESS = "نجاح، تم الحذف بنجاح";
-    const PASSWORD_SUCCESS = "نجاح، تم تغيير كلمة المرور بنجاح";
-    const EXECUTION_ERROR = "عذراً، حدث خطأ أثناء تنفيذ العملية";
-    const NOT_FOUND = "عذراً،لا يمكن العثور على البيانات";
-    const ACTIVATION_SUCCESS = "نجاح، تم التفعيل بنجاح";
-    const DISABLE_SUCCESS = "نجاح، تم التعطيل بنجاح";
+    const UPDATE_SUCCESS = "Updated successfully";
+    const DELETE_SUCCESS = "Deleted successfully";
+    const PASSWORD_SUCCESS = "Password changed successfully";
+    const EXECUTION_ERROR = "Sorry, an error occurred while processing the request";
+    const NOT_FOUND = "Sorry, the requested data could not be found";
+    const ACTIVATION_SUCCESS = "Activated successfully";
+    const DISABLE_SUCCESS = "Disabled successfully";
     
     public function __construct() {
         parent::__construct();
@@ -70,6 +70,168 @@ class TeachersController extends Controller {
         parent::$data['count'] = $count;
         parent::$data['teacher_id'] = $user_id;
         parent::$data['groups_array'] = $groups_array;
+
+        // ---------------- Dashboard KPIs / charts / activity (real data) ----------------
+        $gids = $teacher_groups->pluck('id')->all();
+
+        $allGroupStudents = !empty($gids)
+            ? \App\Models\GroupStudents::whereIn('group_id', $gids)->whereNull('deleted_at')->get()
+            : collect();
+
+        $totalStudents = $allGroupStudents->pluck('student_id')->unique()->count();
+        $activeCourses = $teacher_groups->count();
+        $pendingGrade  = $allGroupStudents->where('has_evaluation', 0)->count();
+        $gradedTotals  = $allGroupStudents->whereNotNull('total_degree')->pluck('total_degree');
+        $avgScore      = $gradedTotals->count() ? round($gradedTotals->avg(), 1) : 0;
+        $avgProgress   = $allGroupStudents->count() ? (int) round($allGroupStudents->avg('progress') ?: 0) : 0;
+
+        // Finished Groups count
+        $finishedGroupsCount = \App\Models\Groups::where('teacher_id', $user_id)
+            ->where('status', 0)
+            ->whereNull('deleted_at')
+            ->count();
+
+        // Financial Stats
+        $salaryStats = \App\Models\TeacherSalaryForm::where('teacher_id', $user_id)
+            ->where('is_received', 1)
+            ->selectRaw('count(id) as total_received_forms, sum(net_amount) as total_amount')
+            ->first();
+
+        parent::$data['financials'] = [
+            'total_forms' => $salaryStats->total_received_forms ?? 0,
+            'total_amount' => $salaryStats->total_amount ?? 0,
+        ];
+
+        // Weekly Schedule for active groups
+        $teacher_groups_with_time = \App\Models\Groups::with(['ctime', 'program'])
+            ->where('teacher_id', $user_id)
+            ->where('status', 1)
+            ->whereNull('deleted_at')
+            ->get();
+
+        $weeklySchedule = [
+            'saturday' => [],
+            'sunday' => [],
+            'monday' => [],
+            'tuesday' => [],
+            'wednesday' => [],
+            'thursday' => [],
+            'friday' => [],
+        ];
+
+        $dayMap = [
+            'السبت'     => 'saturday',
+            'الأحد'     => 'sunday',
+            'الاحد'     => 'sunday',
+            'الاثنين'   => 'monday',
+            'الإثنين'   => 'monday',
+            'الثلاثاء'  => 'tuesday',
+            'الأربعاء'  => 'wednesday',
+            'الاربعاء'  => 'wednesday',
+            'الخميس'    => 'thursday',
+            'الجمعة'    => 'friday',
+            'saturday'  => 'saturday',
+            'sunday'    => 'sunday',
+            'monday'    => 'monday',
+            'tuesday'   => 'tuesday',
+            'wednesday' => 'wednesday',
+            'thursday'  => 'thursday',
+            'friday'    => 'friday',
+        ];
+
+        foreach ($teacher_groups_with_time as $group) {
+            if ($group->ctime && $group->ctime->days && $group->ctime->times) {
+                $daysStr = $group->ctime->days;
+                $timesStr = $group->ctime->times;
+                $isDaily = (mb_strpos($daysStr, 'يومي') !== false || stripos($daysStr, 'daily') !== false);
+
+                foreach ($dayMap as $label => $canonical) {
+                    $found = false;
+                    if ($isDaily) {
+                        $found = true;
+                    } else {
+                        if (preg_match('/[ء-ي]/u', $label)) {
+                            $found = mb_strpos($daysStr, $label) !== false;
+                        } else {
+                            $found = stripos($daysStr, $label) !== false;
+                        }
+                    }
+                    if ($found) {
+                        $weeklySchedule[$canonical][] = [
+                            'id' => $group->id,
+                            'group_name' => $group->name,
+                            'program_title' => optional($group->program)->title ?? 'N/A',
+                            'times' => $timesStr,
+                            'zoom' => $group->zoom,
+                            'drive' => $group->drive,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Deduplicate events per day
+        foreach ($weeklySchedule as $day => $events) {
+            $temp = [];
+            foreach ($events as $ev) {
+                $key = $ev['id'] . '|' . $ev['times'];
+                $temp[$key] = $ev;
+            }
+            $weeklySchedule[$day] = array_values($temp);
+        }
+
+        parent::$data['weeklySchedule'] = $weeklySchedule;
+
+        parent::$data['kpis'] = [
+            'total_students' => $totalStudents,
+            'active_courses' => $activeCourses,
+            'pending_grade'  => $pendingGrade,
+            'avg_progress'   => $avgProgress,
+            'avg_score'      => $avgScore,
+            'finished_courses' => $finishedGroupsCount,
+        ];
+
+        // chart 1: student performance distribution (by total_degree)
+        $buckets = ['0-49' => 0, '50-69' => 0, '70-84' => 0, '85-100' => 0];
+        foreach ($allGroupStudents as $row) {
+            if ($row->total_degree === null) continue;
+            $t = (float) $row->total_degree;
+            if ($t < 50)      $buckets['0-49']++;
+            elseif ($t < 70)  $buckets['50-69']++;
+            elseif ($t < 85)  $buckets['70-84']++;
+            else              $buckets['85-100']++;
+        }
+        // chart 2: enrollment per course (studentsCount is an array of ids)
+        parent::$data['charts'] = [
+            'distribution' => ['labels' => array_keys($buckets), 'data' => array_values($buckets)],
+            'enrollment'   => [
+                'labels' => $teacher_groups->map(fn ($g) => $g->name)->values(),
+                'data'   => $teacher_groups->map(fn ($g) => is_array($g->studentsCount) ? count($g->studentsCount) : (int) $g->studentsCount)->values(),
+            ],
+        ];
+
+        // needs grading (last 5 ungraded)
+        parent::$data['needsGrading'] = !empty($gids)
+            ? \App\Models\GroupStudents::with(['student', 'group'])->whereIn('group_id', $gids)
+                ->where('has_evaluation', 0)->whereNull('deleted_at')
+                ->orderByDesc('created_at')->limit(5)->get()
+            : collect();
+
+        // recently active students (attendance) — Absent_Student has no relations, resolve via maps
+        $recentRows = !empty($gids)
+            ? \App\Models\Absent_Student::whereIn('group_id', $gids)->orderByDesc('recorded_at')->limit(5)->get()
+            : collect();
+        $studentsMap = \App\Models\Students::whereIn('id', $recentRows->pluck('student_id')->unique()->all())->pluck('name', 'id');
+        $groupsMap   = \App\Models\Groups::whereIn('id', $recentRows->pluck('group_id')->unique()->all())->pluck('name', 'id');
+        parent::$data['recentActive'] = $recentRows->map(function ($a) use ($studentsMap, $groupsMap) {
+            return [
+                'student' => $studentsMap[$a->student_id] ?? ('#' . $a->student_id),
+                'group'   => $groupsMap[$a->group_id] ?? 'Group',
+                'date'    => $a->recorded_at ?: $a->days,
+                'status'  => $a->status,
+            ];
+        });
+
         return view('frontend.teachers.index', parent::$data);
     }
     public function getIndex2($id) {

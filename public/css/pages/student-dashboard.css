@@ -32,7 +32,7 @@
 
 /* Content Area */
 .dashboard-content {
-    background: var(--white);
+    background: var(--surface, var(--white));
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 30px;
@@ -174,16 +174,16 @@
 /* Course Grid & Cards */
 .course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 30px;
 }
 
 .course-card {
-    background: linear-gradient(145deg, var(--primary) 0%, #0f1823 100%);
+    background: var(--surface, #1a2744);
     border-radius: var(--radius);
     overflow: visible; /* Allow overlap */
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
     transition: all var(--transition);
     display: flex;
     flex-direction: column;
@@ -284,7 +284,7 @@
 .course-title {
     font-size: 19px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text-primary, var(--white));
     margin-bottom: 12px;
 }
 
@@ -300,8 +300,8 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    background: var(--surface-2, rgba(255, 255, 255, 0.05));
     padding: 4px 10px;
     border-radius: 6px;
 }
@@ -311,7 +311,7 @@
 /* Progress Bar */
 .progress-info {
     font-weight: 600;
-    color: var(--white);
+    color: var(--text-primary, var(--white));
     margin-bottom: 8px;
 }
 
@@ -330,8 +330,8 @@
 
 /* Detail Card Styling (AJAX View) */
 .detail-header {
-    background: linear-gradient(135deg, var(--primary) 0%, #0f1823 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--surface-2, var(--primary)) 0%, var(--surface-hover, #0f1823) 100%);
+    color: var(--text-primary, white);
     padding: 30px;
     border-radius: var(--radius);
     margin-bottom: 30px;
@@ -345,12 +345,12 @@
 }
 
 .action-card {
-    background: var(--white);
+    background: var(--surface, var(--white));
     padding: 20px;
     border-radius: 12px;
     text-align: center;
     transition: all var(--transition);
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color, #eee);
     text-decoration: none !important;
 }
 
@@ -373,7 +373,7 @@
 
 .action-card span {
     font-weight: 700;
-    color: var(--primary);
+    color: var(--text-primary, var(--primary));
     font-size: 14px;
 }
 
@@ -487,6 +487,14 @@
 .mb-30 { margin-bottom: 30px !important; }
 .mt-30 { margin-top: 30px !important; }
 .w-100 { width: 100% !important; }
+
+/* Responsive adjustments */
+.course-body .d-flex.gap-10 {
+    flex-wrap: wrap;
+}
+.course-body .d-flex.gap-10 .btn {
+    flex: 1 1 auto;
+}
 
 /* Profile Editing */
 .profile-avatar-edit {

@@ -22,15 +22,15 @@ use Illuminate\Support\Facades\Validator;
 
 class StudentsController extends Controller {
 
-    const SEND_SUCCESS_MESSAGE = "تم إرسال الرسالة";
+    const SEND_SUCCESS_MESSAGE = "Message sent successfully";
     const INSERT_SUCCESS_MESSAGE = 'site.add_student_success';
-    const UPDATE_SUCCESS = "نجاح، تم التعديل بنجاح";
-    const DELETE_SUCCESS = "نجاح، تم الحذف بنجاح";
-    const PASSWORD_SUCCESS = "نجاح، تم تغيير كلمة المرور بنجاح";
-    const EXECUTION_ERROR = "عذراً، حدث خطأ أثناء تنفيذ العملية";
-    const NOT_FOUND = "عذراً،لا يمكن العثور على البيانات";
-    const ACTIVATION_SUCCESS = "نجاح، تم التفعيل بنجاح";
-    const DISABLE_SUCCESS = "نجاح، تم التعطيل بنجاح";
+    const UPDATE_SUCCESS = "Updated successfully";
+    const DELETE_SUCCESS = "Deleted successfully";
+    const PASSWORD_SUCCESS = "Password changed successfully";
+    const EXECUTION_ERROR = "Sorry, an error occurred while processing the request";
+    const NOT_FOUND = "Sorry, the requested data could not be found";
+    const ACTIVATION_SUCCESS = "Activated successfully";
+    const DISABLE_SUCCESS = "Disabled successfully";
 
     public function __construct() {
         parent::__construct();
@@ -81,6 +81,66 @@ class StudentsController extends Controller {
         parent::$data['count'] = $count;
         parent::$data['groups_array'] = $groups_array_string;
         parent::$data['teacherStudentEvaluation'] = $teacher_ids;
+
+        // ---------------- Dashboard KPIs / charts / activity (real data) ----------------
+        $enrolled   = $studentGroups->count();
+        $completed  = $studentGroups->filter(function ($g) {
+            return ($g->progress !== null && $g->progress >= 100) || !empty($g->cer_code);
+        })->count();
+        $inProgress = max($enrolled - $completed, 0);
+        $avgProgress = $enrolled ? (int) round($studentGroups->avg('progress') ?: 0) : 0;
+        $gradedTotals = $studentGroups->filter(fn ($g) => $g->total_degree !== null)->pluck('total_degree');
+        $avgScore = $gradedTotals->count() ? round($gradedTotals->avg(), 1) : 0;
+
+        parent::$data['kpis'] = [
+            'enrolled'     => $enrolled,
+            'completed'    => $completed,
+            'in_progress'  => $inProgress,
+            'avg_progress' => $avgProgress,
+            'avg_score'    => $avgScore,
+        ];
+
+        // chart 1: progress per course
+        $progressChart = [
+            'labels' => $studentGroups->map(fn ($g) => optional($g->group)->name ?? 'N/A')->values(),
+            'data'   => $studentGroups->map(fn ($g) => (int) ($g->progress ?: 0))->values(),
+        ];
+        // chart 2: grade trend (average of each assessment across courses)
+        $assessments = ['exam1_degree' => 'P.T 1', 'exam2_degree' => 'P.T 2', 'exam3_degree' => 'P.T 3', 'exam4_degree' => 'Final'];
+        $trendData = [];
+        foreach (array_keys($assessments) as $field) {
+            $vals = $studentGroups->filter(fn ($g) => $g->$field !== null)->pluck($field);
+            $trendData[] = $vals->count() ? round($vals->avg(), 1) : 0;
+        }
+        parent::$data['charts'] = [
+            'progress' => $progressChart,
+            'trend'    => ['labels' => array_values($assessments), 'data' => $trendData],
+        ];
+
+        // recent activity (proxy): latest teacher evaluations of this student
+        $recentEvals = \App\Models\Teacher_Evaluate_Student::where('student_id', $user_id)
+            ->orderByDesc('created_at')->limit(5)->get();
+        parent::$data['recent'] = $recentEvals->map(function ($e) use ($studentGroups) {
+            $gname = optional(optional($studentGroups->firstWhere('group_id', $e->group_id))->group)->name ?? 'Course';
+            return ['group' => $gname, 'date' => $e->created_at, 'total' => $e->total, 'progress' => $e->progress];
+        });
+
+        // upcoming exam deadlines (real dates from GroupExamDates)
+        $upcoming = [];
+        foreach ($studentGropesExamday as $ed) {
+            $gname = optional(optional($studentGroups->firstWhere('group_id', $ed->group_id))->group)->name ?? 'Course';
+            foreach (['progress_test1' => 'P.T 1', 'progress_test2' => 'P.T 2', 'progress_test3' => 'P.T 3', 'final_exam' => 'Final Exam'] as $field => $label) {
+                if (!empty($ed->$field)) {
+                    try { $d = \Carbon\Carbon::parse($ed->$field); } catch (\Exception $e) { continue; }
+                    if ($d->isFuture()) {
+                        $upcoming[] = ['label' => $label, 'group' => $gname, 'date' => $d];
+                    }
+                }
+            }
+        }
+        usort($upcoming, fn ($a, $b) => $a['date'] <=> $b['date']);
+        parent::$data['upcoming'] = array_slice($upcoming, 0, 5);
+
         return view('frontend.students.index', parent::$data);
     }
 

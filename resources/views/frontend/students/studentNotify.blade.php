@@ -28,7 +28,7 @@
                                 <span class="ticket-status {{ $msg->note ? 'status-replied' : 'status-pending' }}">
                                     {{ $msg->note ? 'Replied' : 'Pending' }}
                                 </span>
-                                <h5 class="mt-10 mb-5" style="color: white; font-weight: 700;">{{ $msg->title }}</h5>
+                                <h5 class="mt-10 mb-5" style="font-weight: 700;">{{ $msg->title }}</h5>
                             </div>
                             <span class="msg-time">{{ $msg->created_at->diffForHumans() }}</span>
                         </div>

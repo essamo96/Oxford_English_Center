@@ -1,5 +1,11 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Courses')
+@section('page-title', 'Teacher Evaluation')
+@section('breadcrumb')
+    <a href="{{ url('/student') }}">Student Area</a>
+    <span class="sep">/</span>
+    <span>{{ $teacher->name }} Evaluate</span>
+@endsection
 @section('content')
     <div class="inner-page-banner-area" style="background-image: url('{{ url('assets/oxford/img/banner/gallary.jpg') }}');">
         <div class="container">

@@ -1,0 +1,302 @@
+/* ============================================================================
+   Oxford Dashboard — Reusable, theme-safe component classes.
+   Everything is scoped under .ox-dash and built from the --d-* / semantic
+   tokens (app.css), so AJAX-injected HTML automatically follows the active
+   light/dark theme. Use these instead of hardcoded colors / inline styles.
+   ============================================================================ */
+
+/* ---- Cards ---- */
+.ox-dash .dash-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem;
+    color: var(--text-primary);
+    box-shadow: var(--d-shadow);
+}
+.ox-dash .dash-card--flush { padding: 0; overflow: hidden; }
+.ox-dash .dash-card__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--border-color);
+    background: var(--surface-2);
+}
+.ox-dash .dash-card__title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px; }
+.ox-dash .dash-card__title i { color: var(--d-accent); }
+.ox-dash .dash-card__body { padding: 18px; }
+
+/* ---- Tables ---- */
+.ox-dash .dash-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ox-dash .dash-table thead { background: var(--surface-2); }
+.ox-dash .dash-table thead th {
+    color: var(--text-secondary); font-weight: 600; text-align: left;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+.ox-dash .dash-table tbody td {
+    color: var(--text-primary); padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border-color); vertical-align: middle;
+}
+.ox-dash .dash-table tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.ox-dash[data-dash-theme="light"] .dash-table tbody tr:nth-child(even) { background: rgba(15,76,129,.03); }
+.ox-dash .dash-table tbody tr:hover { background: var(--surface-hover); }
+.ox-dash .dash-table--sticky thead th { position: sticky; top: 0; z-index: 2; }
+
+/* sortable header hooks (dash-table.js) */
+.ox-dash .dash-table th[data-sort] { cursor: pointer; user-select: none; }
+.ox-dash .dash-table th[data-sort]::after { content: "\2195"; opacity: .35; margin-left: 6px; font-size: 11px; }
+.ox-dash .dash-table th.is-asc::after  { content: "\2191"; opacity: .9; }
+.ox-dash .dash-table th.is-desc::after { content: "\2193"; opacity: .9; }
+
+/* table toolbar + pagination (dash-table.js) */
+.ox-dash .dash-table-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.ox-dash .dash-table-toolbar .dash-input { max-width: 280px; }
+.ox-dash .dash-pagination { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 12px; flex-wrap: wrap; }
+.ox-dash .dash-pagination button {
+    min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: transparent; color: var(--text-primary);
+    cursor: pointer; font-size: 13px;
+}
+.ox-dash .dash-pagination button.is-active { background: var(--d-accent-grad); color: #1a1300; border-color: transparent; font-weight: 700; }
+.ox-dash .dash-pagination button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---- Badges ---- */
+.ox-dash .badge-success,
+.ox-dash .badge-warning,
+.ox-dash .badge-danger,
+.ox-dash .badge-info {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 600; line-height: 1.7;
+    border: 1px solid transparent;
+}
+.ox-dash .badge-success { background: var(--c-success-bg); color: var(--c-success); border-color: var(--c-success); }
+.ox-dash .badge-warning { background: var(--c-warning-bg); color: var(--c-warning); border-color: var(--c-warning); }
+.ox-dash .badge-danger  { background: var(--c-danger-bg);  color: var(--c-danger);  border-color: var(--c-danger); }
+.ox-dash .badge-info    { background: var(--c-info-bg);    color: var(--c-info);    border-color: var(--border-color); }
+
+/* ---- Buttons ---- */
+.ox-dash .dash-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border-color); background: transparent;
+    color: var(--text-primary); transition: background .18s, border-color .18s, color .18s, transform .12s, opacity .18s;
+    text-decoration: none;
+}
+.ox-dash .dash-btn:hover { background: var(--surface-hover); transform: translateY(-1px); }
+.ox-dash .dash-btn--primary { background: var(--d-accent-grad); color: #1a1300; border-color: transparent; }
+.ox-dash .dash-btn--primary:hover { opacity: .92; color: #1a1300; }
+.ox-dash .dash-btn--secondary { background: var(--surface-2); }
+.ox-dash .dash-btn--danger { color: var(--c-danger); border-color: var(--c-danger); }
+.ox-dash .dash-btn--danger:hover { background: var(--c-danger-bg); }
+.ox-dash .dash-btn--sm { padding: 0.32rem 0.7rem; font-size: 12px; }
+.ox-dash .dash-btn--block { width: 100%; }
+.ox-dash .dash-btn--icon { padding: 0; width: 34px; height: 34px; }
+
+/* ---- Inputs ---- */
+.ox-dash .dash-input,
+.ox-dash .dash-select,
+.ox-dash .dash-textarea {
+    width: 100%; background: var(--d-input-bg); border: 1px solid var(--border-color);
+    border-radius: 8px; color: var(--text-primary); padding: 0.5rem 0.75rem; font-size: 14px;
+    outline: none; transition: border-color .18s, box-shadow .18s;
+}
+.ox-dash .dash-input::placeholder, .ox-dash .dash-textarea::placeholder { color: var(--text-secondary); }
+.ox-dash .dash-input:focus,
+.ox-dash .dash-select:focus,
+.ox-dash .dash-textarea:focus { border-color: var(--gold-mid); box-shadow: 0 0 0 3px rgba(200,153,42,.18); }
+.ox-dash .dash-label { display: block; color: var(--text-secondary); font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.ox-dash .dash-field { margin-bottom: 16px; }
+.ox-dash .dash-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) { .ox-dash .dash-form-grid { grid-template-columns: 1fr; } }
+.ox-dash .dash-hint { font-size: 12px; margin-top: 4px; }
+.ox-dash .dash-hint--error { color: var(--c-danger); }
+.ox-dash .dash-hint--ok { color: var(--c-success); }
+
+/* ---- KPI cards ---- */
+.ox-dash .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 22px; }
+.ox-dash .kpi-card { display: flex; align-items: center; gap: 16px; }
+.ox-dash .kpi-card__ic {
+    width: 54px; height: 54px; border-radius: 14px; flex: 0 0 54px;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    color: #1a1300; background: var(--d-accent-grad);
+}
+.ox-dash .kpi-card__ic--success { background: var(--c-success); color: #fff; }
+.ox-dash .kpi-card__ic--info    { background: var(--chart-4); color: #fff; }
+.ox-dash .kpi-card__ic--warn    { background: var(--c-warning); color: #1a1300; }
+.ox-dash .kpi-card__val { font-size: 28px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.ox-dash .kpi-card__lbl { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
+.ox-dash .kpi-card__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; opacity: .85; }
+
+/* ---- Charts ---- */
+.ox-dash .chart-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-bottom: 22px; }
+@media (max-width: 900px) { .ox-dash .chart-grid { grid-template-columns: 1fr; } }
+.ox-dash .chart-box { position: relative; height: 300px; }
+
+/* ---- Activity / list rows ---- */
+.ox-dash .dash-list { display: flex; flex-direction: column; gap: 10px; }
+.ox-dash .dash-list__item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface);
+    transition: background .18s;
+}
+.ox-dash .dash-list__item:hover { background: var(--surface-hover); }
+.ox-dash .dash-list__ic { width: 40px; height: 40px; border-radius: 10px; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; background: var(--surface-2); color: var(--d-accent); font-size: 18px; }
+.ox-dash .dash-list__main { flex: 1 1 auto; min-width: 0; }
+.ox-dash .dash-list__title { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+.ox-dash .dash-list__sub { font-size: 12.5px; color: var(--text-secondary); }
+.ox-dash .dash-list__meta { margin-left: auto; text-align: right; font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; }
+
+/* ---- Quick links ---- */
+.ox-dash .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; }
+.ox-dash .quick-link {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+    padding: 18px 12px; border: 1px solid var(--border-color); border-radius: 14px;
+    background: var(--surface); color: var(--text-primary); transition: background .18s, transform .12s, border-color .18s;
+}
+.ox-dash .quick-link:hover { background: var(--surface-hover); transform: translateY(-2px); border-color: var(--d-active-border); text-decoration: none; }
+.ox-dash .quick-link i { font-size: 26px; color: var(--d-accent); }
+.ox-dash .quick-link span { font-size: 13px; font-weight: 600; }
+
+/* ---- Info screen ---- */
+.ox-dash .info-profile { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.ox-dash .info-profile__avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--d-active-border); }
+.ox-dash .info-profile__name { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+.ox-dash .info-profile__role { color: var(--text-secondary); font-size: 14px; }
+.ox-dash .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 768px) { .ox-dash .info-grid { grid-template-columns: 1fr; } }
+.ox-dash .info-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+.ox-dash .info-row:last-child { border-bottom: 0; }
+.ox-dash .info-row__ic { color: var(--d-accent); width: 22px; text-align: center; flex: 0 0 22px; }
+.ox-dash .info-row__label { color: var(--text-secondary); font-size: 12.5px; }
+.ox-dash .info-row__value { color: var(--text-primary); font-weight: 600; font-size: 14px; }
+.ox-dash .info-row__value.is-empty { color: var(--text-secondary); font-weight: 400; font-style: italic; }
+
+/* ---- Loaders ---- */
+.ox-dash .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+    background-size: 200% 100%; animation: dashShimmer 1.5s infinite; border-radius: 8px;
+    min-height: 16px;
+}
+@keyframes dashShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ox-dash .spinner { border: 3px solid var(--border-color); border-top-color: var(--gold-mid); border-radius: 50%; width: 32px; height: 32px; animation: dashSpin .8s linear infinite; margin: 2rem auto; }
+@keyframes dashSpin { to { transform: rotate(360deg); } }
+
+/* ---- Empty state ---- */
+.ox-dash .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+.ox-dash .empty-state i { font-size: 46px; color: var(--border-color); margin-bottom: 1rem; display: block; }
+.ox-dash .empty-state__title { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+
+/* ============================================================================
+   Responsive tables → stacked label:value cards on mobile.
+   Mark a table with class="dash-table" data-responsive and give each <td>
+   a data-label="Column name".
+   ============================================================================ */
+/* ============================================================================
+   PERSONAL INFO TILES (My Information) — white text + orange (gold) accents.
+   Overrides the legacy navy-on-navy colors so values are readable in both themes.
+   ============================================================================ */
+.ox-dash .info-tile { background: var(--surface) !important; border: 1px solid var(--border-color) !important; }
+.ox-dash .info-tile .tile-icon {
+    background: var(--d-accent-grad) !important;   /* orange gradient chip */
+    color: #ffffff !important;                      /* white glyph */
+}
+.ox-dash .info-tile:hover .tile-icon { filter: brightness(1.06); color: #ffffff !important; }
+.ox-dash .info-tile .tile-content h4 { color: var(--d-accent) !important; }   /* orange label */
+.ox-dash .info-tile .tile-content p  { color: var(--text-primary) !important; } /* white value (dark in light theme) */
+
+/* ============================================================================
+   LIGHT-MODE accents (both portals): course-card buttons orange w/ white
+   text+icons, course titles orange, and an orange profile-edit icon.
+   ============================================================================ */
+.ox-dash[data-dash-theme="light"] .course-card .btn-primary,
+.ox-dash[data-dash-theme="light"] .course-card .btn-outline-light,
+.ox-dash[data-dash-theme="light"] .course-card .btn-success {
+    background: var(--d-accent-grad) !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+}
+.ox-dash[data-dash-theme="light"] .course-card .btn-primary:hover,
+.ox-dash[data-dash-theme="light"] .course-card .btn-outline-light:hover,
+.ox-dash[data-dash-theme="light"] .course-card .btn-success:hover { filter: brightness(1.06); color: #ffffff !important; }
+.ox-dash[data-dash-theme="light"] .course-card .btn-primary i,
+.ox-dash[data-dash-theme="light"] .course-card .btn-outline-light i,
+.ox-dash[data-dash-theme="light"] .course-card .btn-success i { color: #ffffff !important; }
+
+.ox-dash[data-dash-theme="light"] .course-title { color: var(--d-accent) !important; }
+.ox-dash[data-dash-theme="light"] .oc-profile-edit { color: var(--d-accent) !important; }
+
+/* ============================================================================
+   RESPONSIVE GRID FIXES — the legacy grids use fixed min track widths
+   (course-grid 320px, welcome-grid 280px) which overflow a narrow content
+   area. min(100%, N) caps the min track so columns never exceed the viewport.
+   ============================================================================ */
+.ox-dash .course-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)) !important;
+    gap: 20px !important;
+}
+.ox-dash .welcome-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)) !important;
+}
+@media (max-width: 575.98px) {
+    .ox-dash .course-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ============================================================================
+   LEGACY THEMING BRIDGE — maps the class colors from
+   public/css/pages/student-dashboard.css onto the theme tokens so existing
+   AJAX partials follow light/dark without rewriting all their markup.
+   (Token values flip with the theme, so one token-based rule serves both.)
+   ============================================================================ */
+.ox-dash .info-card { background: var(--surface) !important; border: 1px solid var(--border-color) !important; color: var(--text-primary); }
+.ox-dash .info-card h3 { color: var(--text-primary); border-bottom-color: var(--border-color) !important; }
+.ox-dash .info-card h4 { color: var(--text-primary); }
+
+.ox-dash .table-modern th { background: var(--surface-2) !important; color: var(--text-secondary) !important; }
+.ox-dash .table-modern td { background: var(--surface) !important; border-color: var(--border-color) !important; color: var(--text-primary); }
+.ox-dash .table-modern tr td:first-child,
+.ox-dash .table-modern tr td:last-child { border-color: var(--border-color) !important; }
+
+.ox-dash .action-card { background: var(--surface) !important; border-color: var(--border-color) !important; }
+.ox-dash .action-card span { color: var(--text-primary) !important; }
+
+.ox-dash .comm-header { border-bottom-color: var(--border-color) !important; }
+.ox-dash .ticket-item { background: var(--surface) !important; border-color: var(--border-color) !important; }
+.ox-dash .ticket-content { color: var(--text-secondary) !important; }
+.ox-dash .admin-reply-box { background: var(--c-warning-bg) !important; }
+.ox-dash .modern-notice { background: var(--surface) !important; }
+.ox-dash .notice-icon-box { background: var(--surface-2) !important; color: var(--d-accent); }
+
+.ox-dash .chat-window { background: var(--surface-2) !important; }
+.ox-dash .chat-input-wrapper { background: var(--surface) !important; border-top-color: var(--border-color) !important; }
+.ox-dash .chat-header { border-bottom-color: var(--border-color) !important; }
+.ox-dash .chat-messages-area { color: var(--text-primary); }
+
+.ox-dash .custom-progress { background: var(--surface-hover) !important; }
+.ox-dash .modern-input { background: var(--d-input-bg) !important; border-color: var(--border-color) !important; color: var(--text-primary) !important; }
+
+/* force-white legacy text → follow the theme */
+.ox-dash .text-white { color: var(--text-primary) !important; }
+.ox-dash .text-muted { color: var(--text-secondary) !important; }
+/* the detail-header keeps its dark gradient + white text in both themes (intended) */
+.ox-dash .detail-header,
+.ox-dash .detail-header * { color: #fff; }
+
+@media (max-width: 768px) {
+    .ox-dash .dash-table[data-responsive] thead { display: none; }
+    .ox-dash .dash-table[data-responsive],
+    .ox-dash .dash-table[data-responsive] tbody,
+    .ox-dash .dash-table[data-responsive] tr,
+    .ox-dash .dash-table[data-responsive] td { display: block; width: 100%; }
+    .ox-dash .dash-table[data-responsive] tr {
+        margin-bottom: 14px; border: 1px solid var(--border-color); border-radius: 12px;
+        overflow: hidden; background: var(--surface);
+    }
+    .ox-dash .dash-table[data-responsive] td {
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        text-align: right; border-bottom: 1px solid var(--border-color); padding: 10px 14px;
+    }
+    .ox-dash .dash-table[data-responsive] td:last-child { border-bottom: 0; }
+    .ox-dash .dash-table[data-responsive] td::before {
+        content: attr(data-label); font-weight: 600; color: var(--text-secondary);
+        text-align: left; flex: 0 0 45%;
+    }
+}

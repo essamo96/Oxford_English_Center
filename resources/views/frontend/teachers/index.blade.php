@@ -1,5 +1,15 @@
-@extends('frontend.layouts.master')
+@extends('frontend.layouts.dashboard')
 @section('title', 'Teacher Area')
+@section('page-title', 'Dashboard')
+
+@section('quick-actions')
+    <button type="button" id="teacherSalaryBtn" class="ox-dash__qbtn" title="View my salaries">
+        <i class="bi bi-cash-coin"></i> Salaries
+    </button>
+    <a href="javascript:void(0)" id="dialog-btn" class="ox-dash__qbtn ox-dash__qbtn--primary" title="Send Message to Admin">
+        <i class="bi bi-paper-plane"></i> Message Admin
+    </a>
+@endsection
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}">
@@ -218,57 +228,9 @@
 
 @section('content')
 <div class="student-dashboard-wrapper">
+    {{-- hidden: kept so the existing particlesJS('bg-particles') init call stays safe --}}
     <div id="bg-particles"></div>
     <div class="container" style="position: relative; z-index: 1;">
-        <!-- Dashboard Header Card -->
-        <div class="dashboard-header">
-            <div class="header-content">
-                <div class="teacher-avatar-wrap" id="teacherSalaryBtn" title="عرض رواتبي وتفاصيلها" style="cursor:pointer; position:relative;">
-                    @if ($teacher_info->image != '')
-                        <img src="{{ asset($teacher_info->image) }}" class="student-avatar-large" alt="{{ $teacher_info->name }}" />
-                    @else
-                        <img src="{{ url('assets/oxford/img/students/avatar.png') }}" class="student-avatar-large" alt="Avatar" />
-                    @endif
-                    <span class="avatar-salary-badge"><i class="fa fa-money"></i></span>
-                </div>
-                
-                <div class="header-info">
-                    <p>Welcome back, Teacher</p>
-                    <h1>{{ $teacher_info->name ?: 'Oxford Instructor' }}</h1>
-                    <div class="status-badge {{ $teacher_info->status != 0 ? 'status-active' : 'status-delayed' }}">
-                        {{ $teacher_info->status != 0 ? 'Active Instructor' : 'Inactive' }}
-                    </div>
-                </div>
-
-                <div class="header-actions" style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
-                    <!-- Exam Data Link -->
-                    <a href="{{ route('teacher.ExamDates', $teacher_id) }}" class="header-action-btn" title="Exam Data">
-                        <i class="fa fa-file-text-o fa-lg"></i>
-                        <span class="action-label">Exam Data</span>
-                    </a>
-                    
-                    <!-- Progress Quick Link -->
-                    <a href="{{ route('teacher.progress', $teacher_info->id) }}" class="header-action-btn" title="My Progress">
-                        <i class="fa fa-line-chart fa-lg"></i>
-                        <span class="action-label">Progress</span>
-                    </a>
-
-                    <!-- Notifications -->
-                    <a href="#AdminNotify" class="AdminNotify header-action-btn" data-toggle="tab" title="Messages" style="position: relative;">
-                        <i class="fa fa-envelope-o fa-lg"></i>
-                        @if($count > 0)
-                            <span class="badge badge-danger unread-badge animate__animated animate__heartBeat animate__infinite" style="position: absolute; top: -5px; right: -5px; font-size: 10px;">{{ $count }}</span>
-                        @endif
-                    </a>
-
-                    <!-- Quick Message -->
-                    <a href="javascript:void(0)" id="dialog-btn" class="header-action-btn" title="Send Message to Admin">
-                        <i class="fa fa-paper-plane-o fa-lg"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             @include('frontend.layouts.error')
             @include('frontend.chat.chat-box')
@@ -280,8 +242,194 @@
             
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="dashboard-content tab-content">
-                    <!-- Welcome Tab -->
+                    {{-- ===================== Dashboard (KPIs + charts) ===================== --}}
                     <div class="tab-pane fade active in" id="Welcome">
+                        <div class="kpi-grid">
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic"><i class="fa fa-users"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['total_students'] }}">0</div><div class="kpi-card__lbl">Total Students</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--info"><i class="fa fa-book"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['active_courses'] }}">0</div><div class="kpi-card__lbl">Active Courses</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--danger"><i class="fa fa-check-square-o"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['finished_courses'] ?? 0 }}">0</div><div class="kpi-card__lbl">Finished Courses</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--warn"><i class="fa fa-star-half-o"></i></div>
+                                <div><div class="kpi-card__val" data-countup="{{ $kpis['pending_grade'] }}">0</div><div class="kpi-card__lbl">Pending to Grade</div></div>
+                            </div>
+                            <div class="dash-card kpi-card">
+                                <div class="kpi-card__ic kpi-card__ic--success"><i class="fa fa-line-chart"></i></div>
+                                <div>
+                                    <div class="kpi-card__val"><span data-countup="{{ $kpis['avg_progress'] }}">0</span>%</div>
+                                    <div class="kpi-card__lbl">Avg Student Progress</div>
+                                    <div class="kpi-card__sub">Avg score: {{ $kpis['avg_score'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-bar-chart"></i> Student Performance Distribution</div>
+                                <div class="chart-box"><canvas id="chartDist"></canvas></div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-pie-chart"></i> Enrollment by Course</div>
+                                @if(($kpis['active_courses'] ?? 0) > 0)
+                                    <div class="chart-box"><canvas id="chartEnroll"></canvas></div>
+                                @else
+                                    <div class="empty-state"><i class="fa fa-pie-chart"></i><p>No active courses yet.</p></div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-star-o"></i> Students Awaiting Grading</div>
+                                @forelse($needsGrading as $ng)
+                                    <div class="dash-list__item">
+                                        <div class="dash-list__ic"><i class="fa fa-user"></i></div>
+                                        <div class="dash-list__main">
+                                            <div class="dash-list__title">{{ optional($ng->student)->name ?? ('#'.$ng->student_id) }}</div>
+                                            <div class="dash-list__sub">{{ optional($ng->group)->name ?? 'Group' }}</div>
+                                        </div>
+                                        <div class="dash-list__meta"><span class="badge-warning">Pending</span></div>
+                                    </div>
+                                @empty
+                                    <div class="empty-state"><i class="fa fa-check-circle"></i><p>All students are graded.</p></div>
+                                @endforelse
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:14px;"><i class="fa fa-history"></i> Recently Active Students</div>
+                                @forelse($recentActive as $ra)
+                                    <div class="dash-list__item">
+                                        <div class="dash-list__ic"><i class="fa fa-calendar-check-o"></i></div>
+                                        <div class="dash-list__main">
+                                            <div class="dash-list__title">{{ $ra['student'] }}</div>
+                                            <div class="dash-list__sub">{{ $ra['group'] }}</div>
+                                        </div>
+                                        <div class="dash-list__meta">{{ $ra['date'] ? \Carbon\Carbon::parse($ra['date'])->format('F j, Y') : 'Not provided' }}</div>
+                                    </div>
+                                @empty
+                                    <div class="empty-state"><i class="fa fa-history"></i><p>No recent attendance activity.</p></div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            {{-- Financial Overview --}}
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:18px;"><i class="fa fa-credit-card"></i> Financial Overview</div>
+                                <div style="display: flex; flex-direction: column; gap: 15px;">
+                                    <div style="display: flex; align-items: center; gap: 15px; background: var(--surface-2); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
+                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-success-bg); color: var(--c-success); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                            <i class="bi bi-wallet2"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${{ number_format($financials['total_amount'] ?? 0, 2) }}</div>
+                                            <div style="font-size: 12px; color: var(--text-secondary);">Total Received Salary</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 15px; background: var(--surface-2); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
+                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-info); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                            <i class="bi bi-file-earmark-check"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">{{ $financials['total_forms'] ?? 0 }}</div>
+                                            <div style="font-size: 12px; color: var(--text-secondary);">Received Salary Forms</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dash-btn dash-btn--primary teacherSalaryBtn-trigger" style="margin-top: 5px; width: 100%;">
+                                        <i class="bi bi-cash-coin"></i> View Salary History
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Weekly Schedule --}}
+                            @php
+                                $daysOfWeek = [
+                                    'saturday' => 'Sat',
+                                    'sunday' => 'Sun',
+                                    'monday' => 'Mon',
+                                    'tuesday' => 'Tue',
+                                    'wednesday' => 'Wed',
+                                    'thursday' => 'Thu',
+                                    'friday' => 'Fri'
+                                ];
+                                $todayName = strtolower(date('l'));
+                                if (!array_key_exists($todayName, $daysOfWeek)) {
+                                    $todayName = 'saturday';
+                                }
+                            @endphp
+                            <div class="dash-card">
+                                <div class="dash-card__title" style="margin-bottom:18px;"><i class="fa fa-calendar-check-o"></i> Weekly Schedule</div>
+                                <div style="display: flex; gap: 6px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+                                    @foreach($daysOfWeek as $dayKey => $dayLabel)
+                                        @php 
+                                            $hasLectures = !empty($weeklySchedule[$dayKey]);
+                                            $isToday = ($dayKey === $todayName);
+                                        @endphp
+                                        <button type="button" class="schedule-day-tab {{ $isToday ? 'is-active' : '' }}" 
+                                                data-day="{{ $dayKey }}" 
+                                                style="flex: 1; min-width: 48px; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface-2); color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; text-align: center; position: relative;">
+                                            {{ $dayLabel }}
+                                            @if($hasLectures)
+                                                <span style="position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--gold-mid);"></span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <div class="schedule-content-container">
+                                    @foreach($daysOfWeek as $dayKey => $dayLabel)
+                                        <div class="schedule-day-panel" id="panel-{{ $dayKey }}" style="display: {{ $dayKey === $todayName ? 'block' : 'none' }};">
+                                            @forelse($weeklySchedule[$dayKey] ?? [] as $event)
+                                                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--surface-2); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                                    <div>
+                                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">{{ $event['group_name'] }}</div>
+                                                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">{{ $event['program_title'] }}</div>
+                                                        <div style="font-size: 12px; color: var(--gold-mid); margin-top: 5px; font-weight: 600;">
+                                                            <i class="fa fa-clock-o"></i> {{ $event['times'] }}
+                                                        </div>
+                                                    </div>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        @if($event['zoom'])
+                                                            <a href="{{ $event['zoom'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 11px; background: #2D8CFF; color: #fff; border-color: transparent;" title="Zoom Link">
+                                                                <i class="fa fa-video-camera"></i> Zoom
+                                                            </a>
+                                                        @endif
+                                                        @if($event['drive'])
+                                                            <a href="{{ $event['drive'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 11px; background: var(--c-success-bg); color: var(--c-success); border-color: transparent;" title="Drive Link">
+                                                                <i class="fa fa-hdd-o"></i> Drive
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div style="text-align: center; padding: 30px 10px; color: var(--text-secondary);">
+                                                    <i class="fa fa-calendar-o" style="font-size: 30px; color: var(--border-color); margin-bottom: 10px; display: block;"></i>
+                                                    <p class="m-0" style="font-size: 13px;">No lectures scheduled for this day.</p>
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-links">
+                            <a href="#Courses" data-toggle="tab" class="quick-link"><i class="fa fa-mortar-board"></i><span>My Courses</span></a>
+                            <a href="{{ route('teacher.ExamDates', $teacher_id) }}" class="quick-link"><i class="fa fa-calendar"></i><span>Exam Schedule</span></a>
+                            <a href="{{ route('teacher.progress', $teacher_id) }}" class="quick-link"><i class="fa fa-line-chart"></i><span>Course Reports</span></a>
+                            <a href="#MyInfo" data-toggle="tab" class="quick-link"><i class="fa fa-user"></i><span>My Information</span></a>
+                        </div>
+                    </div>
+
+                    {{-- ===================== My Information ===================== --}}
+                    <div class="tab-pane fade" id="MyInfo">
                         <div class="row">
                             <!-- Professional Profile Tiles -->
                             <div class="col-md-12 mb-30 animate-up delay-1">
@@ -490,7 +638,7 @@
                     <!-- Profile Tab -->
                     <div class="tab-pane fade" id="Profile">
                         <div class="info-card">
-                            <h3 class="mb-30"><i class="fa fa-user-circle"></i> Professional Profile Settings</h3>
+                            <h3 class="mb-30"><i class="fa fa-pencil-square-o oc-profile-edit"></i> Professional Profile Settings</h3>
                             <form method="post" enctype="multipart/form-data" action="/student/editProfile">
                                 {{ csrf_field() }}
                                 <div class="row">
@@ -612,22 +760,22 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold text-white"><i class="fa fa-qrcode me-2" style="color:#ffcc00;"></i> QR للمجموعة: <span id="teacherQrGroupName">—</span></h5>
+                <h5 class="modal-title fw-bold text-white"><i class="fa fa-qrcode me-2" style="color:#ffcc00;"></i> Group QR: <span id="teacherQrGroupName">—</span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4" dir="rtl" style="text-align:right;">
+            <div class="modal-body p-4" style="text-align:left;">
                 <div id="teacherQrForm">
                     <div class="mb-3">
-                        <label class="fw-bold">صالح حتى <span class="text-danger">*</span></label>
+                        <label class="fw-bold">Valid until <span class="text-danger">*</span></label>
                         <input type="datetime-local" id="teacherQrExpiry" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="fw-bold">حدّ أقصى للاستخدامات (اختياري)</label>
-                        <input type="number" id="teacherQrMaxUses" class="form-control" min="1" placeholder="بلا حدود">
+                        <label class="fw-bold">Max uses (optional)</label>
+                        <input type="number" id="teacherQrMaxUses" class="form-control" min="1" placeholder="Unlimited">
                     </div>
                     <button type="button" id="teacherQrGenBtn">
                         <i class="fa fa-magic"></i>
-                        <span>توليد الـ QR</span>
+                        <span>Generate QR</span>
                     </button>
                 </div>
                 <div id="teacherQrResult" class="text-center" style="display:none;">
@@ -643,17 +791,17 @@
                             </div>
                             <div class="t-qr-text">
                                 <i class="bi bi-qr-code-scan"></i>
-                                <span id="teacherQrStage">جاري الإنشاء...</span>
+                                <span id="teacherQrStage">Generating...</span>
                             </div>
                         </div>
                     </div>
                     <div class="alert alert-info small text-start">
-                        <i class="fa fa-info-circle"></i> صالح حتى: <strong id="teacherQrExpires"></strong>
+                        <i class="fa fa-info-circle"></i> Valid until: <strong id="teacherQrExpires"></strong>
                     </div>
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
-                        <a id="teacherQrDownload" href="#" download="oxford_qr.png" class="btn btn-primary"><i class="fa fa-download"></i> تحميل</a>
-                        <a id="teacherQrWhatsapp" href="#" target="_blank" class="btn btn-success"><i class="fa fa-whatsapp"></i> مشاركة عبر واتساب</a>
-                        <button type="button" class="btn btn-light" id="teacherQrRegen"><i class="fa fa-refresh"></i> جديد</button>
+                        <a id="teacherQrDownload" href="#" download="oxford_qr.png" class="btn btn-primary"><i class="fa fa-download"></i> Download</a>
+                        <a id="teacherQrWhatsapp" href="#" target="_blank" class="btn btn-success"><i class="fa fa-whatsapp"></i> Share via WhatsApp</a>
+                        <button type="button" class="btn btn-light" id="teacherQrRegen"><i class="fa fa-refresh"></i> New</button>
                     </div>
                 </div>
             </div>
@@ -664,20 +812,20 @@
 <!-- Teacher Salaries Modal -->
 <div class="modal fade" id="teacherSalaryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content" dir="rtl" style="border:none; border-radius:16px; overflow:hidden;">
+        <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden;">
             {{-- inline flex + jQuery close: the teacher portal runs Bootstrap 3, so BS5 utility
                  classes (d-flex/justify-content) and data-bs-dismiss do not work here. --}}
-            <div class="modal-header" dir="rtl"
+            <div class="modal-header"
                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 26px; border:none; background:linear-gradient(135deg,#003366,#0b3d91);">
                 <h5 class="modal-title" style="margin:0; padding:0; color:#fff; font-weight:800; white-space:nowrap;">
-                    <i class="fa fa-money" style="color:#ffcc00; margin-left:6px;"></i> رواتبي وتفاصيلها
+                    <i class="fa fa-money" style="color:#ffcc00; margin-right:6px;"></i> My Salaries &amp; Details
                 </h5>
-                <button type="button" onclick="$('#teacherSalaryModal').modal('hide');" data-dismiss="modal" aria-label="إغلاق"
+                <button type="button" onclick="$('#teacherSalaryModal').modal('hide');" data-dismiss="modal" aria-label="Close"
                         style="flex:0 0 auto; background:rgba(255,255,255,.18); color:#fff; border:none; border-radius:8px; width:34px; height:34px; line-height:1; font-size:20px; cursor:pointer;">
                     <i class="fa fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body p-4" id="teacherSalaryBody" dir="rtl" style="background:#f6f8fb; text-align:right;">
+            <div class="modal-body p-4" id="teacherSalaryBody" style="background:var(--surface,#f6f8fb); text-align:left;">
                 <div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>
             </div>
         </div>
@@ -697,6 +845,42 @@
 </script>
 <script>
     var base_url = '{{ url('/') }}';
+</script>
+<script>
+/* ---- Dashboard KPI count-up + charts (theme-aware) ---- */
+(function () {
+    if (typeof Chart === 'undefined') return;
+    var charts = @json($charts);
+    var instances = {};
+    function cssVar(n){ var s=document.querySelector('.ox-dash'); return s ? getComputedStyle(s).getPropertyValue(n).trim() : ''; }
+    function build() {
+        Object.keys(instances).forEach(function(k){ if(instances[k]) instances[k].destroy(); });
+        instances = {};
+        var grid=cssVar('--chart-grid')||'rgba(255,255,255,.1)', label=cssVar('--chart-label')||'#888';
+        var palette=[cssVar('--chart-1')||'#E8B84B', cssVar('--chart-2')||'#22C55E', cssVar('--chart-4')||'#3B82F6', cssVar('--chart-5')||'#A855F7', cssVar('--chart-3')||'#EF4444'];
+        Chart.defaults.color = label; Chart.defaults.borderColor = grid;
+        var d=document.getElementById('chartDist');
+        if (d && charts.distribution) {
+            instances.d = new Chart(d, { type:'bar',
+                data:{ labels:charts.distribution.labels, datasets:[{ label:'Students', data:charts.distribution.data, backgroundColor:palette[0], borderRadius:6, maxBarThickness:54 }] },
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,grid:{color:grid},ticks:{precision:0}}, x:{grid:{display:false}} } } });
+        }
+        var e=document.getElementById('chartEnroll');
+        if (e && charts.enrollment && charts.enrollment.labels.length) {
+            instances.e = new Chart(e, { type:'doughnut',
+                data:{ labels:charts.enrollment.labels, datasets:[{ data:charts.enrollment.data, backgroundColor:palette, borderColor:cssVar('--surface')||'#162B5E', borderWidth:2 }] },
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{color:label}}} } });
+        }
+    }
+    function countUp() {
+        document.querySelectorAll('.ox-dash [data-countup]').forEach(function(el){
+            var target=parseFloat(el.getAttribute('data-countup'))||0, cur=0, steps=28, inc=target/steps, i=0;
+            var tm=setInterval(function(){ i++; cur+=inc; if(i>=steps){cur=target;clearInterval(tm);} el.textContent=(target%1===0)?Math.round(cur):cur.toFixed(1); }, 18);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){ build(); countUp(); });
+    window.addEventListener('ox-theme-change', build);
+})();
 
     // Teacher photo → open salary history modal
     $(document).on('click', '#teacherSalaryBtn', function () {
@@ -705,8 +889,20 @@
         $.get('{{ route('teacher.my_salaries') }}', function (html) {
             $('#teacherSalaryBody').html(html);
         }).fail(function () {
-            $('#teacherSalaryBody').html('<div class="alert alert-danger m-3">تعذّر تحميل بيانات الرواتب.</div>');
+            $('#teacherSalaryBody').html('<div class="alert alert-danger m-3">Failed to load salary data.</div>');
         });
+    });
+
+    $(document).on('click', '.teacherSalaryBtn-trigger', function() {
+        $('#teacherSalaryBtn').trigger('click');
+    });
+
+    $(document).on('click', '.schedule-day-tab', function() {
+        var day = $(this).data('day');
+        $('.schedule-day-tab').removeClass('is-active');
+        $(this).addClass('is-active');
+        $('.schedule-day-panel').hide();
+        $('#panel-' + day).fadeIn(200);
     });
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
@@ -971,7 +1167,7 @@
                 logo.onerror = () => resolve(canvas.toDataURL('image/png'));
                 logo.src = logoUrl;
             };
-            qrImg.onerror = () => reject(new Error('فشل تحميل QR'));
+            qrImg.onerror = () => reject(new Error('Failed to load QR'));
             qrImg.src = qrUrl;
         });
     }
@@ -980,10 +1176,10 @@
     let _tQrStageTimer = null;
     function startTeacherStageCycle() {
         const stages = [
-            'يرسم رمز التشعيب...',
-            'يُضيف الحماية...',
-            'يضع شعار Oxford...',
-            'يُجهّز للتنزيل...',
+            'Drawing the QR code...',
+            'Adding protection...',
+            'Placing the Oxford logo...',
+            'Preparing for download...',
         ];
         let i = 0;
         const $el = $('#teacherQrStage');
@@ -999,10 +1195,10 @@
 
     $('#teacherQrGenBtn, #teacherQrRegen').on('click', function () {
         const expires = $('#teacherQrExpiry').val();
-        if (!expires) { alert('حدد تاريخ ووقت انتهاء الصلاحية'); return; }
+        if (!expires) { alert('Please select an expiry date and time'); return; }
         const btn = $('#teacherQrGenBtn');
-        const origHtml = '<i class="fa fa-magic"></i><span>توليد الـ QR</span>';
-        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span><span>جاري التوليد...</span>');
+        const origHtml = '<i class="fa fa-magic"></i><span>Generate QR</span>';
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span><span>Generating...</span>');
 
         $.post('{{ route("groups.qr.generate") }}', {
             _token: '{{ csrf_token() }}',
@@ -1012,7 +1208,7 @@
             created_by_type: 'teacher',
         }, function (res) {
             if (res.status !== 'success') {
-                alert(res.message || 'فشل التوليد');
+                alert(res.message || 'Generation failed');
                 return;
             }
             $('#teacherQrForm').hide();
@@ -1028,13 +1224,13 @@
                     $('#teacherQrSpinner').fadeOut(280);
                 }, 1200);
                 $('#teacherQrDownload').attr('href', dataUrl);
-                const txt = encodeURIComponent('انضم لمجموعة ' + (res.group.name||'') + ' عبر هذا الرمز:\n' + res.qr_url);
+                const txt = encodeURIComponent('Join the group ' + (res.group.name||'') + ' using this code:\n' + res.qr_url);
                 $('#teacherQrWhatsapp').attr('href', 'https://wa.me/?text=' + txt);
             }).catch(() => {
                 stopTeacherStageCycle();
                 $('#teacherQrSpinner').hide();
             });
-        }).fail(xhr => alert(xhr.responseJSON?.message || 'حدث خطأ'))
+        }).fail(xhr => alert(xhr.responseJSON?.message || 'An error occurred'))
           .always(() => btn.prop('disabled', false).html(origHtml));
     });
 </script>

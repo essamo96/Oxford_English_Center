@@ -53,7 +53,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
 {{-- ============ Oxford 2026 Design System (new, additive) ============ --}}
-<link rel="stylesheet" href="{{ url('assets/css/app.css?v=3') }}">
+<link rel="stylesheet" href="{{ url('assets/css/app.css?v=4') }}">
 <link rel="stylesheet" href="{{ url('assets/css/layout.css?v=3') }}">
 <link rel="stylesheet" href="{{ url('assets/css/components.css?v=3') }}">
 <link rel="stylesheet" href="{{ url('assets/css/animations.css?v=3') }}">

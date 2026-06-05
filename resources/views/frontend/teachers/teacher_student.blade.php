@@ -1,17 +1,17 @@
-<div class="info-card" style="padding: 0; overflow: hidden; border: none; background: transparent; box-shadow: none;">
+<div class="dash-card dash-card--flush ajax-content">
     <!-- Modern Header -->
-    <div class="detail-header" style="background: linear-gradient(135deg, #1a2744 0%, #2d3748 100%); padding: 25px; border-radius: 12px 12px 0 0; color: white;">
+    <div class="detail-header" style="padding: 22px; border-radius: 12px 12px 0 0;">
         <div class="d-flex justify-content-between align-items-center">
-            <h3 class="m-0" style="color: white; font-weight: 700;"><i class="fa fa-users text-accent"></i> Group Students & Marks</h3>
-            <button id="go-back" href="#Courses" data-toggle="tab" class="btn btn-sm modern-back-btn">
+            <h3 class="m-0" style="color:#fff; font-weight: 700;"><i class="fa fa-users" style="color:var(--gold-mid);"></i> Group Students &amp; Marks</h3>
+            <button id="go-back" href="#Courses" data-toggle="tab" class="dash-btn dash-btn--sm">
                 <i class="fa fa-arrow-left"></i> Back to Courses
             </button>
         </div>
     </div>
 
-    <div class="dashboard-content" style="margin-top: 0; border-radius: 0 0 12px 12px;">
+    <div style="padding: 18px;">
         <div class="table-responsive">
-            <table class="table-modern">
+            <table class="dash-table dash-table--sticky" data-responsive data-enhance>
                 <thead>
                     <tr>
                         <th style="width: 80px;">Student</th>
@@ -29,51 +29,29 @@
                 <tbody>
                     @foreach ($data as $group)
                         <tr>
-                            <td>
+                            <td data-label="Student">
                                 <img src="{{ $group->student->image ? url($group->student->image) : url('assets/oxford/img/students/avatar.png') }}"
-                                     style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #eee; object-fit: cover;">
+                                     style="width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border-color); object-fit: cover;">
                             </td>
-                            <td>
-                                <strong style="color: var(--primary);">{{ $group->student->name }}</strong>
+                            <td data-label="Name">
+                                <strong>{{ $group->student->name }}</strong>
                                 <div class="small text-muted">ID: #{{ $group->student->id }}</div>
                             </td>
-                            <td class="text-center">
-                                <span style="font-weight: 600; color: {{ $group->exam1_degree ? 'var(--primary)' : '#f5222d' }}">
-                                    {!! $group->exam1_degree ?: '<i class="fa fa-minus-circle"></i>' !!}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span style="font-weight: 600; color: {{ $group->exam2_degree ? 'var(--primary)' : '#f5222d' }}">
-                                    {!! $group->exam2_degree ?: '<i class="fa fa-minus-circle"></i>' !!}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span style="font-weight: 600; color: {{ $group->exam3_degree ? 'var(--primary)' : '#f5222d' }}">
-                                    {!! $group->exam3_degree ?: '<i class="fa fa-minus-circle"></i>' !!}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span style="font-weight: 700; color: {{ $group->exam4_degree ? '#28a745' : '#f5222d' }}">
-                                    {!! $group->exam4_degree ?: '<i class="fa fa-minus-circle"></i>' !!}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span style="font-weight: 600;">{!! $group->activity_degree ?: '-' !!}</span>
-                            </td>
-                            <td class="text-center">
-                                <span style="font-weight: 600;">{!! $group->workbook_degree ?: '-' !!}</span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge" style="background: var(--primary); color: white;">{{ $group->total_degree ?: 0 }}</span>
-                            </td>
-                            <td class="text-center">
+                            <td class="text-center" data-label="PT 1">{!! $group->exam1_degree ? '<span class="badge-success">'.$group->exam1_degree.'</span>' : '<span class="badge-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                            <td class="text-center" data-label="PT 2">{!! $group->exam2_degree ? '<span class="badge-success">'.$group->exam2_degree.'</span>' : '<span class="badge-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                            <td class="text-center" data-label="PT 3">{!! $group->exam3_degree ? '<span class="badge-success">'.$group->exam3_degree.'</span>' : '<span class="badge-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                            <td class="text-center" data-label="Final">{!! $group->exam4_degree ? '<span class="badge-success">'.$group->exam4_degree.'</span>' : '<span class="badge-danger"><i class="fa fa-minus-circle"></i></span>' !!}</td>
+                            <td class="text-center" data-label="Activity">{!! $group->activity_degree ?: '-' !!}</td>
+                            <td class="text-center" data-label="Workbook">{!! $group->workbook_degree ?: '-' !!}</td>
+                            <td class="text-center" data-label="Total"><span class="badge-info">{{ $group->total_degree ?: 0 }}</span></td>
+                            <td class="text-center" data-label="Evaluation">
                                 @if ($group->has_evaluation == 0)
-                                    <a href="{{ route('teacher.evaluate.view',[ 'group_id' => Crypt::encrypt($group_id),'student_id'=>Crypt::encrypt($group->student_id)])}}" 
-                                       class="btn btn-xs btn-warning" style="font-weight: 700; border-radius: 4px;">
+                                    <a href="{{ route('teacher.evaluate.view',[ 'group_id' => Crypt::encrypt($group_id),'student_id'=>Crypt::encrypt($group->student_id)])}}"
+                                       class="dash-btn dash-btn--primary dash-btn--sm">
                                         <i class="fa fa-star"></i> Evaluate
                                     </a>
                                 @else
-                                    <span class="text-success small" style="font-weight: 700;"><i class="fa fa-check-circle"></i> Done</span>
+                                    <span class="badge-success"><i class="fa fa-check-circle"></i> Done</span>
                                 @endif
                             </td>
                         </tr>
