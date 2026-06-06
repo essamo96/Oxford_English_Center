@@ -15,38 +15,48 @@
         <link href="{{ asset('assets/css/style.bundle.rtl.css') }}" rel="stylesheet" type="text/css" />
         <!--end::Global Stylesheets Bundle-->
         <style>
-            html,
-            body {
-                font-family: Cairo, Helvetica, "sans-serif";
-            }
+            html, body { font-family: Cairo, Helvetica, "sans-serif"; }
+
+            .btn-primary { background-color: #003366 !important; border-color: #003366 !important; }
+            .btn-primary:hover { background-color: #002244 !important; border-color: #002244 !important; }
+
+            /* ── Aside animated background ── */
             .login-aside {
-                background-color: #f2f6ff;
+                background: linear-gradient(145deg, #03122b 0%, #0a2556 40%, #0f4c81 70%, #1a6aad 100%);
+                position: relative;
+                overflow: hidden;
             }
-            .btn-primary {
-                background-color: #003366 !important;
-                border-color: #003366 !important;
+
+            /* ── Floating particles canvas ── */
+            #login-canvas {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
             }
-            .btn-primary:hover {
-                background-color: #002244 !important;
-                border-color: #002244 !important;
-            }
+
+            /* ── Rotating images ── */
             .image-rotation-container {
                 display: grid;
                 grid-template-columns: 1fr;
                 grid-template-rows: 1fr;
                 place-items: center;
                 width: 100%;
+                position: relative;
+                z-index: 2;
             }
             .rotating-image {
                 grid-area: 1 / 1;
                 opacity: 0;
                 transition: opacity 1.5s ease-in-out;
                 z-index: 1;
+                filter: drop-shadow(0 8px 32px rgba(0,0,0,.4));
             }
-            .rotating-image.active {
-                opacity: 1;
-                z-index: 2;
-            }
+            .rotating-image.active { opacity: 1; z-index: 2; }
+
+            .login-aside h1,
+            .login-aside div { position: relative; z-index: 2; }
         </style>
     </head>
     <!--end::Head-->
@@ -153,6 +163,7 @@
                 <!--end::Body-->
                 <!--begin::Aside-->
                 <div class="d-flex flex-lg-row-fluid w-lg-50 bgi-size-cover bgi-position-center order-1 order-lg-2 login-aside">
+                    <canvas id="login-canvas"></canvas>
                     <!--begin::Content-->
                     <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
                         <!--begin::Image Rotation-->
@@ -165,8 +176,8 @@
                                  src="{{ asset('assets/oxford/img/logo.png') }}" alt="" />
                         </div>
                         <!--end::Image Rotation-->
-                        <h1 class="d-none d-lg-block fw-bolder fs-2qx text-center mb-7" style="color: #003366;">أكسفورد للغات</h1>
-                        <div class="d-none d-lg-block fs-base text-center" style="color: #4B5563; max-width: 450px;">
+                        <h1 class="d-none d-lg-block fw-bolder fs-2qx text-center mb-7 text-white">أكسفورد للغات</h1>
+                        <div class="d-none d-lg-block fs-base text-center text-white opacity-75" style="max-width: 450px;">
                         مرحباً بك في لوحة تحكم أكسفورد. يمكنك من هنا إدارة جميع جوانب الموقع، المواعيد، الدورات، والطلاب بكل سهولة واحترافية.
                         </div>
                     </div>
@@ -187,29 +198,132 @@
         <!--end::Global Javascript Bundle-->
         
         <script>
-            // Add loading indicator on form submit
+            // Form submit indicator
             document.querySelector('#kt_sign_in_form').addEventListener('submit', function(e) {
-                var form = e.target;
-                if (form.checkValidity()) {
-                    var submitButton = document.querySelector('#kt_sign_in_submit');
-                    submitButton.setAttribute('data-kt-indicator', 'on');
-                    submitButton.disabled = true;
+                if (e.target.checkValidity()) {
+                    var btn = document.querySelector('#kt_sign_in_submit');
+                    btn.setAttribute('data-kt-indicator', 'on');
+                    btn.disabled = true;
                 }
             });
 
-            // Image Rotation Logic
+            // Image rotation
             document.addEventListener('DOMContentLoaded', function() {
-                const images = document.querySelectorAll('.rotating-image');
-                let currentIndex = 0;
-
+                var images = document.querySelectorAll('.rotating-image');
+                var idx = 0;
                 if (images.length > 1) {
                     setInterval(function() {
-                        images[currentIndex].classList.remove('active');
-                        currentIndex = (currentIndex + 1) % images.length;
-                        images[currentIndex].classList.add('active');
-                    }, 9000); // 9 seconds
+                        images[idx].classList.remove('active');
+                        idx = (idx + 1) % images.length;
+                        images[idx].classList.add('active');
+                    }, 9000);
                 }
             });
+
+            // ── Balls & Stars canvas animation ──────────────────────────
+            (function () {
+                var canvas = document.getElementById('login-canvas');
+                if (!canvas) return;
+                var ctx = canvas.getContext('2d');
+                var W, H, particles = [];
+
+                var COLORS = [
+                    'rgba(255,255,255,VAL)',
+                    'rgba(247,183,51,VAL)',
+                    'rgba(44,154,183,VAL)',
+                    'rgba(100,180,255,VAL)',
+                ];
+
+                function resize() {
+                    W = canvas.width  = canvas.offsetWidth;
+                    H = canvas.height = canvas.offsetHeight;
+                }
+
+                // Draw a 5-pointed star
+                function drawStar(x, y, r, color) {
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.beginPath();
+                    for (var i = 0; i < 5; i++) {
+                        var outer = (Math.PI * 2 * i / 5) - Math.PI / 2;
+                        var inner = outer + Math.PI / 5;
+                        var ox = Math.cos(outer) * r, oy = Math.sin(outer) * r;
+                        var ix = Math.cos(inner) * (r * 0.42), iy = Math.sin(inner) * (r * 0.42);
+                        if (i === 0) ctx.moveTo(ox, oy); else ctx.lineTo(ox, oy);
+                        ctx.lineTo(ix, iy);
+                    }
+                    ctx.closePath();
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                function rnd(min, max) { return Math.random() * (max - min) + min; }
+                function rndColor(a) { return COLORS[Math.floor(Math.random() * COLORS.length)].replace('VAL', a); }
+
+                function createParticle() {
+                    var isStar = Math.random() > 0.45; // 55% balls, 45% stars
+                    return {
+                        x:     rnd(0, W),
+                        y:     rnd(0, H),
+                        r:     isStar ? rnd(3, 8) : rnd(3, 9),
+                        vx:    rnd(-0.35, 0.35),
+                        vy:    rnd(-0.5, -0.12),
+                        alpha: rnd(0.15, 0.7),
+                        color: rndColor(1),
+                        type:  isStar ? 'star' : 'ball',
+                        pulse: rnd(0, Math.PI * 2),
+                        pulseSpeed: rnd(0.012, 0.028),
+                    };
+                }
+
+                function init() {
+                    resize();
+                    particles = [];
+                    var count = Math.floor((W * H) / 9000);
+                    count = Math.max(35, Math.min(count, 90));
+                    for (var i = 0; i < count; i++) particles.push(createParticle());
+                }
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+
+                    particles.forEach(function(p) {
+                        // Pulse alpha
+                        p.pulse += p.pulseSpeed;
+                        var a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+                        var color = p.color.replace('1)', a + ')');
+
+                        if (p.type === 'ball') {
+                            // Soft glow
+                            var grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+                            grd.addColorStop(0, color);
+                            grd.addColorStop(1, p.color.replace('1)', '0)'));
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                            ctx.fillStyle = grd;
+                            ctx.fill();
+                        } else {
+                            drawStar(p.x, p.y, p.r, color);
+                        }
+
+                        // Move
+                        p.x += p.vx;
+                        p.y += p.vy;
+
+                        // Wrap around
+                        if (p.y < -20)  { p.y = H + 20; p.x = rnd(0, W); }
+                        if (p.x < -20)  p.x = W + 20;
+                        if (p.x > W+20) p.x = -20;
+                    });
+
+                    requestAnimationFrame(draw);
+                }
+
+                window.addEventListener('resize', init);
+                init();
+                draw();
+            })();
         </script>
     </body>
     <!--end::Body-->
