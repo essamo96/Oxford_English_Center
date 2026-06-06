@@ -88,6 +88,7 @@ class AdminController extends BaseController
         self::$data['notify_Students_Admin_Messages'] = Students_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
         self::$data['notify_Teachers_Admin_Messages'] = Teachers_Admin_Messages::where('seen', 0)->latest()->take(5)->get();
         self::$data['notify_Groups'] = Groups::where('seen_progress', 0)->where('progress', '!=', 0)->latest()->take(5)->get();
+        self::$data['notify_contacts'] = \App\Models\Contacts::where('status', 0)->latest()->take(5)->get();
 
         // Original list variables (standardized names)
         self::$data['Programs'] = Programs::whereNull('deleted_at')->get();

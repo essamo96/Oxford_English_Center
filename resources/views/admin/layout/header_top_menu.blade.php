@@ -199,7 +199,25 @@
                                     </div>
                                     @endforeach
 
-                                    @if(count($notify_Students_Admin_Messages ?? []) == 0 && count($notify_Teachers_Admin_Messages ?? []) == 0)
+                                    {{-- Contact Us messages --}}
+                                    @foreach($notify_contacts ?? [] as $ct)
+                                    <div class="d-flex flex-stack py-4">
+                                        <div class="d-flex align-items-center me-2">
+                                            <div class="symbol symbol-35px me-4">
+                                                <span class="symbol-label bg-light-primary">
+                                                    <i class="ki-duotone ki-sms fs-2 text-primary"><span class="path1"></span><span class="path2"></span></i>
+                                                </span>
+                                            </div>
+                                            <div class="mb-0 me-2">
+                                                <a href="{{ route('contacts.view') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ct->name ?? 'زائر' }}</a>
+                                                <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $ct->subject ?? 'رسالة اتصل بنا' }}</div>
+                                            </div>
+                                        </div>
+                                        <span class="badge badge-light-primary fs-8">اتصل بنا</span>
+                                    </div>
+                                    @endforeach
+
+                                    @if(count($notify_Students_Admin_Messages ?? []) == 0 && count($notify_Teachers_Admin_Messages ?? []) == 0 && count($notify_contacts ?? []) == 0)
                                     <div class="d-flex flex-column px-9 items-center justify-content-center py-10">
                                         <div class="text-center">
                                             <div class="fw-bold fs-6 text-gray-800">لا توجد رسائل جديدة</div>
