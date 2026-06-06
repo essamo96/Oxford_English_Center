@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Auth;
-use Hash;
-use Crypt;
-use Session;
-use Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 //////////////////////////////////
 use App\Models\GroupStudents;
 use App\Models\Students;
+use App\Models\Fees;
+use App\Models\Absent_Student;
 use Yajra\DataTables\DataTables;
-use Illuminate\Contracts\Encryption\DecryptException;
 
 class Students_ReportController extends AdminController {
 
@@ -57,7 +54,7 @@ class Students_ReportController extends AdminController {
             return !empty($row->student) 
                 ? '<div class="d-flex align-items-center">
                     <div class="d-flex flex-column">
-                        <a href="'.route('students.edit', \Crypt::encrypt($row->student->id)).'" class="text-gray-800 text-hover-primary mb-1 fw-bold">'.$row->student->name.'</a>
+                        <a href="'.route('students.edit', Crypt::encrypt($row->student->id)).'" class="text-gray-800 text-hover-primary mb-1 fw-bold">'.$row->student->name.'</a>
                         <span class="text-muted fs-7">'.$row->student->mobile.'</span>
                     </div>
                 </div>'
@@ -110,13 +107,46 @@ class Students_ReportController extends AdminController {
         $name = $request->input('info');
         if (empty($name)) return '';
 
-        $info = Students::where('name', 'like', '%' . $name . '%')
+        $info = Students::with(['parent'])
+                        ->where('name', 'like', '%' . $name . '%')
                         ->orWhere('mobile', 'like', '%' . $name . '%')
                         ->first();
-        
+
         if (!$info) return '<div class="text-center text-muted p-10">No matching student found.</div>';
 
-        $data['info'] = $info;
+        // All groups/courses with teacher, program, fees
+        $groups = GroupStudents::with(['group.teacher', 'group.program', 'group.ctime'])
+                    ->where('student_id', $info->id)
+                    ->whereNull('deleted_at')
+                    ->orderByDesc('id')
+                    ->get();
+
+        // Financial: all fee records for this student
+        $fees = Fees::with('group')
+                    ->where('student_id', $info->id)
+                    ->whereNull('deleted_at')
+                    ->orderByDesc('id')
+                    ->get();
+
+        // Absence records
+        $absences = Absent_Student::where('student_id', $info->id)
+                    ->whereNull('deleted_at')
+                    ->orderByDesc('recorded_at')
+                    ->get();
+
+        // Certificates: group_students rows with cer_code set
+        $certificates = GroupStudents::with('group')
+                    ->where('student_id', $info->id)
+                    ->whereNotNull('cer_code')
+                    ->whereNull('deleted_at')
+                    ->get();
+
+        $data['info']         = $info;
+        $data['groups']       = $groups;
+        $data['fees']         = $fees;
+        $data['absences']     = $absences;
+        $data['certificates'] = $certificates;
+
         return view('admin.students_report.info', $data)->render();
     }
 
