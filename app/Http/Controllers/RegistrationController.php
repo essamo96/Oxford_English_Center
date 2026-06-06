@@ -322,6 +322,19 @@ class RegistrationController extends Controller
 
             DB::commit();
 
+            // Real-time notification to the admin dashboard (laravel-websockets).
+            // Wrapped so a websocket outage can never break the registration flow.
+            try {
+                broadcast(new \App\Events\NewBookingEvent(
+                    student: $student,
+                    pendingBookings: \App\Support\NotifyCounts::pendingBookings(),
+                    todayBookings: \App\Support\NotifyCounts::todayBookings(),
+                    totalNotifyCount: \App\Support\NotifyCounts::total(),
+                ));
+            } catch (\Throwable $e) {
+                Log::error('Booking broadcast failed: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'تم التسجيل بنجاح. تم إرسال إيميل ترحيبي لبريدك الإلكتروني.'

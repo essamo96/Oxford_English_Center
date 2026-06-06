@@ -59,7 +59,19 @@ class ContactController extends Controller
             return redirect('contact')->withInput();
         } else {
             // Persist the submission so admins can manage it from "Contact Management"
-            (new Contacts())->addContactUs($name, $email, $mobile, $subject, $details, 0);
+            $contact = (new Contacts())->addContactUs($name, $email, $mobile, $subject, $details, 0);
+
+            // Real-time notification to the admin dashboard (laravel-websockets).
+            // Never let a websocket outage break the public contact form.
+            try {
+                broadcast(new \App\Events\NewContactEvent(
+                    contact: $contact,
+                    unreadContacts: \App\Support\NotifyCounts::unreadContacts(),
+                    totalNotifyCount: \App\Support\NotifyCounts::total(),
+                ));
+            } catch (\Throwable $e) {
+                Log::error('Contact broadcast failed: ' . $e->getMessage());
+            }
 
             $myarray['name'] = $name;
             $myarray['email'] = $email;

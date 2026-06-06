@@ -39,6 +39,19 @@
         .table > :not(caption) > * > * { vertical-align: middle !important; }
         table.dataTable td, table.dataTable th { vertical-align: middle !important; }
     </style>
+    {{-- Real-time notification animations --}}
+    <style>
+        @keyframes rtProgress { from { width: 100%; } to { width: 0%; } }
+        @keyframes rtPulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+        [data-counter] { transition: all .3s ease; display: inline-block; }
+        .rt-bell-badge {
+            position: absolute; top: -6px; inset-inline-end: -6px;
+            min-width: 18px; height: 18px; padding: 0 4px;
+            background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 0 2px #fff; z-index: 2;
+        }
+    </style>
     @yield('css')
 </head>
 
@@ -154,6 +167,20 @@
         };
     </script>
     @yield('js')
+
+    {{-- ============ Real-time admin notifications (laravel-websockets) ============ --}}
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <script>
+        window.OXFORD_RT = {
+            key:     @json(config('broadcasting.connections.pusher.key')),
+            // Empty host = Pusher Cloud mode; a host = self-hosted laravel-websockets.
+            host:    @json(config('broadcasting.connections.pusher.options.host', '')),
+            port:    {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
+            scheme:  @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
+            cluster: @json(config('broadcasting.connections.pusher.options.cluster', 'mt1'))
+        };
+    </script>
+    <script src="{{ asset('js/realtime-notifications.js') }}?v=4"></script>
 </body>
 
 </html>

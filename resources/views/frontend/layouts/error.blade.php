@@ -29,8 +29,12 @@
                     <i class="fa {{ $icon }}"></i>
                 </div>
                 <div class="alert-content">
-                    @if(is_object($message))
+                    @if(is_object($message) && method_exists($message, 'all'))
                         @foreach ($message->all(':message') as $m)
+                            <div class="alert-text">{{ $m }}</div>
+                        @endforeach
+                    @elseif(is_array($message))
+                        @foreach ($message as $m)
                             <div class="alert-text">{{ $m }}</div>
                         @endforeach
                     @else

@@ -48,6 +48,9 @@
                         @if(($total_notify_count ?? 0) > 0)
                             <span class="bullet bullet-dot bg-danger h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink"></span>
                         @endif
+                        {{-- Live numeric badge — updated in real time by realtime-notifications.js --}}
+                        <span class="rt-bell-badge" data-counter="notify-total"
+                              style="{{ ($total_notify_count ?? 0) > 0 ? '' : 'display:none;' }}">{{ $total_notify_count ?? 0 }}</span>
                     </div>
                     
                     <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">

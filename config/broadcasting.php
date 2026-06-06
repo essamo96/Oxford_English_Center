@@ -35,9 +35,20 @@ return [
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
-                //
-            ],
+            // Two switchable modes — controlled purely by .env:
+            //  • SELF-HOSTED (local/VPS laravel-websockets): set PUSHER_HOST in .env
+            //    => host/port/scheme are added below and traffic goes to your server.
+            //  • PUSHER CLOUD (recommended for shared cPanel): leave PUSHER_HOST empty
+            //    => only cluster/useTLS are sent and the SDK targets pusher.com.
+            'options' => array_merge([
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'useTLS'  => env('PUSHER_SCHEME', 'https') === 'https',
+            ], env('PUSHER_HOST') ? [
+                'host'      => env('PUSHER_HOST'),
+                'port'      => (int) env('PUSHER_PORT', 6001),
+                'scheme'    => env('PUSHER_SCHEME', 'http'),
+                'encrypted' => env('PUSHER_SCHEME', 'http') === 'https',
+            ] : []),
         ],
 
         'redis' => [

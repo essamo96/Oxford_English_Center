@@ -60,10 +60,13 @@ class AdminController extends BaseController
         self::$data['BirthdaysCount'] =  $BirthdaysCount;
         self::$data['Closed_Classes_count'] =  Closed_Classes::where('seen', 0)->whereNull('deleted_at')->count();
         self::$data['Unseen_Students_Count'] = Students::where('seen', 0)->where('status', 0)->whereNull('deleted_at')->count();
+        self::$data['Unseen_Contacts_Count'] = \App\Support\NotifyCounts::unreadContacts();
 
-        // Calculate grand total for header bell
+        // Calculate grand total for header bell (kept in sync with the live
+        // broadcast counter via App\Support\NotifyCounts).
         self::$data['total_notify_count'] = self::$data['Closed_Classes_count'] +
             self::$data['Unseen_Students_Count'] +
+            self::$data['Unseen_Contacts_Count'] +
             self::$data['Unread_measges_student'] +
             self::$data['Unread_measges_teacher'];
 
