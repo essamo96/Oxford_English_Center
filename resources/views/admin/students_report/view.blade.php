@@ -280,48 +280,72 @@
 </div>
 
 {{-- ══════════════════ GRADES TABLE ══════════════════ --}}
-<div class="sr-table-card">
-    <div class="sr-table-header">
-        <div>
-            <h5 class="sr-table-title">
-                <i class="ki-duotone ki-chart-line-up fs-4 text-primary me-2">
+<div class="card card-flush">
+
+    {{-- Header --}}
+    <div class="card-header pt-6 pb-4 border-bottom border-gray-200">
+        <div class="card-title flex-column gap-1">
+            <h3 class="fw-bolder mb-0 d-flex align-items-center gap-2">
+                <i class="ki-duotone ki-chart-line-up fs-3 text-primary">
                     <span class="path1"></span><span class="path2"></span>
                 </i>
                 Grades Overview
-            </h5>
-            <div class="sr-table-subtitle mt-1">All student course records — filter by searching above</div>
+            </h3>
+            <span class="text-muted fw-semibold fs-7">Search a student above to load their course records</span>
         </div>
-        <div class="d-flex align-items-center position-relative">
-            <i class="ki-duotone ki-magnifier fs-4 position-absolute ms-3 text-gray-400">
-                <span class="path1"></span><span class="path2"></span>
-            </i>
-            <input type="text"
-                   data-kt-table-filter="search"
-                   class="form-control form-control-sm form-control-solid w-220px ps-10"
-                   placeholder="Filter table…" />
+        <div class="card-toolbar">
+            <div class="d-flex align-items-center position-relative">
+                <i class="ki-duotone ki-magnifier fs-4 position-absolute ms-3 text-muted">
+                    <span class="path1"></span><span class="path2"></span>
+                </i>
+                <input type="text"
+                       data-kt-table-filter="search"
+                       class="form-control form-control-sm form-control-solid w-200px ps-10"
+                       placeholder="Filter table…" />
+            </div>
         </div>
     </div>
-    <div class="card-body pt-0">
+
+    {{-- Body --}}
+    <div class="card-body py-4">
         @include('admin.layout.error')
-        <div class="table-responsive">
+
+        {{-- Default empty state — shown until first search --}}
+        <div id="srTableEmpty" class="text-center py-15">
+            <img src="{{ url('assets/media/illustrations/sketchy-1/5.png') }}"
+                 alt="Search a student"
+                 class="mw-200px mb-6 opacity-75"
+                 onerror="this.style.display='none';document.getElementById('srTableEmptyIcon').style.display='block';">
+            <div id="srTableEmptyIcon" style="display:none;" class="mb-6">
+                <i class="ki-duotone ki-search-list fs-5x text-muted">
+                    <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                </i>
+            </div>
+            <div class="fs-5 fw-bold text-gray-600 mb-2">No Student Selected</div>
+            <div class="fs-7 text-muted">Use the search box above to find a student and load their grades.</div>
+        </div>
+
+        {{-- DataTable — hidden until search --}}
+        <div id="srTableWrapper" class="table-responsive" style="display:none;">
             <table class="table table-row-dashed table-row-gray-200 align-middle gs-0 gy-4 fs-7" id="pages_table">
                 <thead>
-                    <tr class="fw-bold text-gray-400 text-uppercase fs-8 border-bottom border-gray-200">
-                        <th class="w-30px text-start ps-3">#</th>
-                        <th class="min-w-180px">Student</th>
+                    <tr class="fw-bold text-muted text-uppercase fs-8 border-bottom border-gray-200">
+                        <th class="w-30px text-start">#</th>
+                        <th class="min-w-160px">Student</th>
                         <th class="min-w-120px">Group</th>
-                        <th class="min-w-65px text-center">Test 1</th>
-                        <th class="min-w-65px text-center">Test 2</th>
-                        <th class="min-w-65px text-center">Test 3</th>
-                        <th class="min-w-75px text-center">Final</th>
-                        <th class="min-w-65px text-center">Act.</th>
-                        <th class="min-w-65px text-center">WB</th>
-                        <th class="min-w-90px text-center">Total</th>
+                        <th class="min-w-60px text-center">T1</th>
+                        <th class="min-w-60px text-center">T2</th>
+                        <th class="min-w-60px text-center">T3</th>
+                        <th class="min-w-70px text-center">Final</th>
+                        <th class="min-w-60px text-center">Act.</th>
+                        <th class="min-w-60px text-center">WB</th>
+                        <th class="min-w-85px text-center">Total</th>
                     </tr>
                 </thead>
                 <tbody class="fw-semibold text-gray-600"></tbody>
             </table>
         </div>
+
     </div>
 </div>
 
@@ -377,6 +401,12 @@ $(document).ready(function () {
         oTable.search($(this).val()).draw();
     });
 
+    /* ── Show table only after first search ────────────── */
+    function showTable() {
+        $('#srTableEmpty').hide();
+        $('#srTableWrapper').show();
+    }
+
     /* ── Student detail panel ──────────────────────────── */
     var searchTimer;
 
@@ -412,17 +442,22 @@ $(document).ready(function () {
 
     $('.searchable').on('input', function () {
         var val = $(this).val();
+        if (val.length >= 3) showTable();
         oTable.draw();
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () { loadStudentPanel(val); }, 400);
     });
 
     $('#srSearchBtn').on('click', function () {
+        if ($('#title').val().length >= 3) showTable();
         loadStudentPanel($('#title').val());
     });
 
     $('#title').on('keydown', function (e) {
-        if (e.key === 'Enter') loadStudentPanel($(this).val());
+        if (e.key === 'Enter') {
+            if ($(this).val().length >= 3) showTable();
+            loadStudentPanel($(this).val());
+        }
     });
 
 });
