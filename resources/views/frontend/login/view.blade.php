@@ -64,27 +64,6 @@
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Particles.js Initialization
-        if (typeof particlesJS !== 'undefined') {
-            particlesJS('particles-js', {
-                "particles": {
-                    "number": { "value": 70, "density": { "enable": true, "value_area": 1000 } },
-                    "color": { "value": "#ffffff" },
-                    "shape": { "type": "star" },
-                    "opacity": { "value": 0.5, "random": true },
-                    "size": { "value": 5, "random": true },
-                    "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.2, "width": 1 },
-                    "move": { "enable": true, "speed": 1 }
-                },
-                "interactivity": {
-                    "detect_on": "canvas",
-                    "events": { "onhover": { "enable": true, "mode": "bubble" }, "onclick": { "enable": true, "mode": "repulse" }, "resize": true },
-                    "modes": { "bubble": { "distance": 200, "size": 8, "duration": 2, "opacity": 0.9, "speed": 3 } }
-                },
-                "retina_detect": true
-            });
-        }
-
         // Password Toggle
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#passwordInput');
