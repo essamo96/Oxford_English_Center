@@ -91,7 +91,7 @@
                                                 <span class="symbol-label bg-light-primary text-primary fw-bold">{{ mb_substr($st->name, 0, 1) }}</span>
                                             </div>
                                             <div class="mb-0 me-2">
-                                                <a href="{{ route('dashboard.view.membership') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">طلب عضوية: {{ $st->name }}</a>
+                                                <a href="{{ route('notifications.mark_read', ['type' => 'booking', 'id' => $st->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">طلب عضوية: {{ $st->name }}</a>
                                                 <div class="text-gray-400 fs-7">طالب جديد ينتظر التفعيل</div>
                                             </div>
                                         </div>
@@ -109,7 +109,7 @@
                                                 </span>
                                             </div>
                                             <div class="mb-0 me-2">
-                                                <a href="{{ route('closed_classes.view') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">إغلاق مجموعة: {{ $cl->Groups->name ?? 'مجموعة' }}</a>
+                                                <a href="{{ route('notifications.mark_read', ['type' => 'closed_class', 'id' => $cl->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">إغلاق مجموعة: {{ $cl->Groups->name ?? 'مجموعة' }}</a>
                                                 <div class="text-gray-400 fs-7">قام المدرس <strong>{{ $cl->Teacher->name ?? 'غير معروف' }}</strong> بإغلاق المجموعة بتاريخ {{ $cl->closed_date }}</div>
                                             </div>
                                         </div>
@@ -173,7 +173,7 @@
                                                 </span>
                                             </div>
                                             <div class="mb-0 me-2">
-                                                <a href="{{ route('students.messages') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ms->student->name ?? 'طالب' }}</a>
+                                                <a href="{{ route('notifications.mark_read', ['type' => 'student_message', 'id' => $ms->student_id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ms->student->name ?? 'طالب' }}</a>
                                                 <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $ms->content }}</div>
                                             </div>
                                         </div>
@@ -191,7 +191,7 @@
                                                 </span>
                                             </div>
                                             <div class="mb-0 me-2">
-                                                <a href="{{ route('teachers.messages') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $mt->teacher->name ?? 'معلم' }}</a>
+                                                <a href="{{ route('notifications.mark_read', ['type' => 'teacher_message', 'id' => $mt->teacher_id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $mt->teacher->name ?? 'معلم' }}</a>
                                                 <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $mt->content }}</div>
                                             </div>
                                         </div>
@@ -209,7 +209,7 @@
                                                 </span>
                                             </div>
                                             <div class="mb-0 me-2">
-                                                <a href="{{ route('contacts.view') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ct->name ?? 'زائر' }}</a>
+                                                <a href="{{ route('notifications.mark_read', ['type' => 'contact', 'id' => $ct->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ct->name ?? 'زائر' }}</a>
                                                 <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $ct->subject ?? 'رسالة اتصل بنا' }}</div>
                                             </div>
                                         </div>

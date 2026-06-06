@@ -32,13 +32,22 @@
     
     <div class="card-body">
         @include('admin.layout.masterLayouts.error')
+        <!-- Auto save notice -->
+        <div class="alert alert-success d-flex align-items-center mb-6 p-4">
+            <i class="ki-duotone ki-shield-tick fs-2hx text-success me-4"><span class="path1"></span><span class="path2"></span></i>
+            <div>
+                <h4 class="mb-1 text-success fw-bold">الحفظ التلقائي مفعّل</h4>
+                <span class="fs-6">يتم حفظ الصور <strong>تلقائياً فور رفعها</strong> — لا حاجة لأي زر حفظ. الصور المرفوعة ستظهر فوراً في المعرض.</span>
+            </div>
+        </div>
+
         <!-- Upload Area -->
         <div class="fv-row mb-10">
             <div class="dropzone d-flex flex-column flex-center border-dashed border-primary hover-elevate-up" id="drop-area" style="cursor: pointer; min-height: 150px; background-color: var(--bs-primary-light);">
                 <i class="ki-duotone ki-file-up fs-3x text-primary mb-3"><span class="path1"></span><span class="path2"></span></i>
                 <div class="ms-4 text-center">
                     <h3 class="fs-5 fw-bold text-gray-900 mb-1">اسحب الصور هنا أو انقر للرفع</h3>
-                    <span class="fs-7 fw-semibold text-gray-500">يمكنك رفع عدة صور في وقت واحد</span>
+                    <span class="fs-7 fw-semibold text-gray-500">يمكنك رفع عدة صور في وقت واحد — يتم الحفظ تلقائياً</span>
                 </div>
             </div>
         </div>
@@ -159,7 +168,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var $card = $btn.closest('.col-md-3');
+                    var $card = $btn.closest('[class*="col-"]');
                     var filenme = $card.find('img').attr('src');
                     
                     var form_data = new FormData();
@@ -187,7 +196,7 @@
         $(".temp").on("click", ".feature-image", function (e) {
             e.preventDefault();
             var $link = $(this);
-            var $card = $link.closest('.col-md-3');
+            var $card = $link.closest('[class*="col-"]');
             var filenme = $card.find('img').attr('src');
             
             var form_data = new FormData();

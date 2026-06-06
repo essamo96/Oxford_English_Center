@@ -66,7 +66,14 @@ class MembershipsController extends AdminController
     }
     public function getIndex()
     {
-        Students::where('seen', 0)->update(['seen' => 1]);
+        $updated = Students::where('seen', 0)->update(['seen' => 1]);
+        if ($updated > 0) {
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                Log::error('Broadcast CountersUpdated failed in MembershipsController@getIndex: ' . $e->getMessage());
+            }
+        }
         return view('admin.' . $this->path . '.membership', parent::$data);
     }
 
@@ -142,6 +149,12 @@ class MembershipsController extends AdminController
                     }
                 }
 
+                try {
+                    broadcast(new \App\Events\CountersUpdated());
+                } catch (\Throwable $e) {
+                    Log::error('Broadcast CountersUpdated failed in MembershipsController@postStatus: ' . $e->getMessage());
+                }
+
                 return response()->json([
                     'status'         => 'success',
                     'message'        => self::ACTIVATION_SUCCESS . ($mailSent ? ' - تم إرسال الإيميل ✓' : ''),
@@ -158,6 +171,12 @@ class MembershipsController extends AdminController
             $student->status = 0;
             if (!$student->save()) {
                 throw new \Exception(self::EXECUTION_ERROR);
+            }
+
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                Log::error('Broadcast CountersUpdated failed in MembershipsController@postStatus: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -231,6 +250,12 @@ class MembershipsController extends AdminController
                     'sender_name' => 'Oxford English Centre',
                     'recipients'  => $recipients,
                 ]);
+            }
+
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                Log::error('Broadcast CountersUpdated failed in MembershipsController@postBulkStatus: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -580,7 +605,14 @@ class MembershipsController extends AdminController
         $student = Students::findOrFail($id);
         
         // Mark as seen
-        Students_Admin_Messages::where('student_id', $id)->where('seen', 0)->update(['seen' => 1]);
+        $updated = Students_Admin_Messages::where('student_id', $id)->where('seen', 0)->update(['seen' => 1]);
+        if ($updated > 0) {
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                Log::error('Broadcast CountersUpdated failed in MembershipsController@getStudentChatHistory: ' . $e->getMessage());
+            }
+        }
 
         // Incoming from student
         $incoming = Students_Admin_Messages::where('student_id', $id)
@@ -735,7 +767,14 @@ class MembershipsController extends AdminController
         $teacher = Teachers::findOrFail($id);
         
         // Mark as seen
-        Teachers_Admin_Messages::where('teacher_id', $id)->where('seen', 0)->update(['seen' => 1]);
+        $updated = Teachers_Admin_Messages::where('teacher_id', $id)->where('seen', 0)->update(['seen' => 1]);
+        if ($updated > 0) {
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                Log::error('Broadcast CountersUpdated failed in MembershipsController@getTeacherChatHistory: ' . $e->getMessage());
+            }
+        }
 
         // Incoming from teacher
         $incoming = Teachers_Admin_Messages::where('teacher_id', $id)

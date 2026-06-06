@@ -29,7 +29,14 @@ class Closed_ClassesController extends AdminController
     //////////////////////////////////////////
     public function getIndex()
     {
-        Closed_Classes::where('seen', 0)->update(['seen' => 1]);
+        $updated = Closed_Classes::where('seen', 0)->update(['seen' => 1]);
+        if ($updated > 0) {
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Broadcast CountersUpdated failed in Closed_ClassesController@getIndex: ' . $e->getMessage());
+            }
+        }
         parent::$data['teachers'] = Teachers::where('status', 1)->get();
         return view('admin.closed_classes.view', parent::$data);
     }

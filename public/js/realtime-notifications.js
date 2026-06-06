@@ -176,6 +176,76 @@
                 var n = parseInt(data.total_notify, 10);
                 if (!isNaN(n)) { el.style.display = n > 0 ? '' : 'none'; }
             });
+
+            // Also update the sidebar data-live-counters where possible based on this event:
+            if (data.type === 'booking') {
+                var closedEl = document.querySelector('[data-live-counter="closed_classes"]');
+                var currentClosed = closedEl ? (parseInt(closedEl.textContent || '0', 10) || 0) : 0;
+                var newBookings = parseInt(data.pending_bookings, 10) || 0;
+                var pendingRequests = newBookings + currentClosed;
+                
+                var updateMap = {
+                    'unread_bookings': newBookings,
+                    'pending_requests': pendingRequests
+                };
+                Object.keys(updateMap).forEach(function (key) {
+                    var val = updateMap[key];
+                    document.querySelectorAll('[data-live-counter="' + key + '"]').forEach(function (el) {
+                        NotificationManager.animateCounter(el, parseInt(el.textContent || '0', 10) || 0, val);
+                        var badgeWrapper = el.closest('.menu-badge');
+                        if (badgeWrapper) {
+                            badgeWrapper.style.display = val > 0 ? 'inline-block' : 'none';
+                        }
+                    });
+                });
+            }
+        },
+
+        updateLiveCounters: function (counters) {
+            if (!counters) return;
+
+            // 1. Update notify-total (header bell)
+            var total = parseInt(counters.total, 10) || 0;
+            document.querySelectorAll('[data-counter="notify-total"]').forEach(function (el) {
+                NotificationManager.animateCounter(el, parseInt(el.textContent || '0', 10) || 0, total);
+                el.style.display = total > 0 ? '' : 'none';
+            });
+
+            // Update header bell dot
+            document.querySelectorAll('.app-navbar-item .bullet-dot').forEach(function (el) {
+                el.style.display = total > 0 ? '' : 'none';
+            });
+
+            // Update title text in notifications dropdown
+            var titleSpan = document.querySelector('.menu-sub-dropdown h3 span');
+            if (titleSpan) {
+                titleSpan.textContent = total + ' تقارير جديدة';
+            }
+
+            // 2. Map of sidebar counter elements
+            var pendingRequests = (parseInt(counters.unread_bookings, 10) || 0) + (parseInt(counters.closed_classes, 10) || 0);
+            var totalMessages = (parseInt(counters.student_messages, 10) || 0) + (parseInt(counters.teacher_messages, 10) || 0);
+
+            var map = {
+                'pending_requests': pendingRequests,
+                'unread_bookings':  parseInt(counters.unread_bookings, 10) || 0,
+                'closed_classes':   parseInt(counters.closed_classes, 10) || 0,
+                'total_messages':   totalMessages,
+                'student_messages': parseInt(counters.student_messages, 10) || 0,
+                'teacher_messages': parseInt(counters.teacher_messages, 10) || 0
+            };
+
+            Object.keys(map).forEach(function (key) {
+                var value = map[key];
+                document.querySelectorAll('[data-live-counter="' + key + '"]').forEach(function (el) {
+                    NotificationManager.animateCounter(el, parseInt(el.textContent || '0', 10) || 0, value);
+                    
+                    var badgeWrapper = el.closest('.menu-badge');
+                    if (badgeWrapper) {
+                        badgeWrapper.style.display = value > 0 ? 'inline-block' : 'none';
+                    }
+                });
+            });
         },
 
         animateCounter: function (el, from, to) {
@@ -260,6 +330,12 @@
         // Raw pusher-js binds the exact broadcastAs name (no leading dot).
         channel.bind('new.booking', function (data) { NotificationManager.show(data); });
         channel.bind('new.contact', function (data) { NotificationManager.show(data); });
+        channel.bind('counters.updated', function (data) {
+            if (data && data.counters) {
+                console.log('[RT] counters updated', data.counters);
+                NotificationManager.updateLiveCounters(data.counters);
+            }
+        });
 
         window.OxfordPusher = pusher; // exposed for manual debugging
 

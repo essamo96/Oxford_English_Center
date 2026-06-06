@@ -69,6 +69,8 @@ class ContactController extends Controller
                     unreadContacts: \App\Support\NotifyCounts::unreadContacts(),
                     totalNotifyCount: \App\Support\NotifyCounts::total(),
                 ));
+                // Also broadcast a counters update so sidebar badges refresh in all open tabs.
+                broadcast(new \App\Events\CountersUpdated());
             } catch (\Throwable $e) {
                 Log::error('Contact broadcast failed: ' . $e->getMessage());
             }

@@ -185,10 +185,8 @@
                                     class="path1"></span><span class="path2"></span><span class="path3"></span><span
                                     class="path4"></span></i></span>
                         <span class="menu-title">الطلبات العالقة</span>
-                        @if (($count_disabled_students ?? 0) + ($Closed_Classes_count ?? 0) > 0)
-                            <span class="menu-badge"><span
-                                    class="badge badge-danger">{{ ($count_disabled_students ?? 0) + ($Closed_Classes_count ?? 0) }}</span></span>
-                        @endif
+                        <span class="menu-badge" style="display: {{ (($count_disabled_students ?? 0) + ($Closed_Classes_count ?? 0) > 0) ? 'inline-block' : 'none' }};"><span
+                                    class="badge badge-danger" data-live-counter="pending_requests">{{ ($count_disabled_students ?? 0) + ($Closed_Classes_count ?? 0) }}</span></span>
                         <span class="menu-arrow"></span>
                     </span>
                     <div class="menu-sub menu-sub-accordion">
@@ -202,10 +200,8 @@
                                     href="{{ route('dashboard.view.membership') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">العضوية</span>
-                                    @if (($count_disabled_students ?? 0) > 0)
-                                        <span class="menu-badge"><span
-                                                class="badge badge-danger">{{ $count_disabled_students }}</span></span>
-                                    @endif
+                                    <span class="menu-badge" style="display: {{ ($count_disabled_students ?? 0) > 0 ? 'inline-block' : 'none' }};"><span
+                                                class="badge badge-danger" data-live-counter="unread_bookings">{{ $count_disabled_students }}</span></span>
                                 </a>
                             </div>
                             <div class="menu-item">
@@ -213,10 +209,8 @@
                                     href="{{ route('closed_classes.view') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">المجموعات المنتهية</span>
-                                    @if (($Closed_Classes_count ?? 0) > 0)
-                                        <span class="menu-badge"><span
-                                                class="badge badge-danger">{{ $Closed_Classes_count }}</span></span>
-                                    @endif
+                                    <span class="menu-badge" style="display: {{ ($Closed_Classes_count ?? 0) > 0 ? 'inline-block' : 'none' }};"><span
+                                                class="badge badge-danger" data-live-counter="closed_classes">{{ $Closed_Classes_count }}</span></span>
                                 </a>
                             </div>
                             <div class="menu-item">
@@ -288,10 +282,8 @@
                                     class="path1"></span><span class="path2"></span><span
                                     class="path3"></span><span class="path4"></span></i></span>
                         <span class="menu-title">ادارة الاشعارات</span>
-                        @if (($total_teachers_students_measge ?? 0) > 0)
-                            <span class="menu-badge"><span
-                                    class="badge badge-danger">{{ $total_teachers_students_measge }}</span></span>
-                        @endif
+                        <span class="menu-badge" style="display: {{ ($total_teachers_students_measge ?? 0) > 0 ? 'inline-block' : 'none' }};"><span
+                                    class="badge badge-danger" data-live-counter="total_messages">{{ $total_teachers_students_measge }}</span></span>
                         <span class="menu-arrow"></span>
                     </span>
                     <div class="menu-sub menu-sub-accordion">
@@ -304,20 +296,16 @@
                                 <a class="menu-link" href="{{ route('students.messages') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">رسائل الطلاب</span>
-                                    @if (($Unread_measges_student ?? 0) > 0)
-                                        <span class="menu-badge"><span
-                                                class="badge badge-danger">{{ $Unread_measges_student }}</span></span>
-                                    @endif
+                                    <span class="menu-badge" style="display: {{ ($Unread_measges_student ?? 0) > 0 ? 'inline-block' : 'none' }};"><span
+                                                class="badge badge-danger" data-live-counter="student_messages">{{ $Unread_measges_student }}</span></span>
                                 </a>
                             </div>
                             <div class="menu-item">
                                 <a class="menu-link" href="{{ route('teachers.messages') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">رسائل المعلمين</span>
-                                    @if (($Unread_measges_teacher ?? 0) > 0)
-                                        <span class="menu-badge"><span
-                                                class="badge badge-danger">{{ $Unread_measges_teacher }}</span></span>
-                                    @endif
+                                    <span class="menu-badge" style="display: {{ ($Unread_measges_teacher ?? 0) > 0 ? 'inline-block' : 'none' }};"><span
+                                                class="badge badge-danger" data-live-counter="teacher_messages">{{ $Unread_measges_teacher }}</span></span>
                                 </a>
                             </div>
                         @endif

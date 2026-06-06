@@ -320,7 +320,7 @@ class PhotosController extends AdminController {
             $filename = uniqid() . '_' . time() . '.' . $extension;
             $request->file('file')->move($dir, $filename);
             $photo = new Images();
-            $final_name = $info->img_slug . '/' . $filename;
+            $final_name = $filename;
             $info = $photo->addPhoto($final_name, $id);
             // Image::make($dir . $filename)->resize(200, 200)->save($dir . 'thumb/' . $filename);
             return $final_name;

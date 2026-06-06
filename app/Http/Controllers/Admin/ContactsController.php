@@ -104,6 +104,12 @@ class ContactsController extends AdminController
         if ($sent) {
             // Mark as contacted.
             $contact->updateStatus($id, 1);
+            // Broadcast counter update so sidebar/bell sync instantly.
+            try {
+                broadcast(new \App\Events\CountersUpdated());
+            } catch (\Throwable $broadcastEx) {
+                \Illuminate\Support\Facades\Log::error('Broadcast CountersUpdated failed in ContactsController@postReply: ' . $broadcastEx->getMessage());
+            }
             $request->session()->flash('success', 'تم إرسال الرد عبر البريد الإلكتروني بنجاح');
             return redirect(route('contacts.view'));
         }
@@ -194,6 +200,11 @@ class ContactsController extends AdminController
             $delete = $contact->deleteContactUs($info);
             if ($delete)
             {
+                try {
+                    broadcast(new \App\Events\CountersUpdated());
+                } catch (\Throwable $broadcastEx) {
+                    \Illuminate\Support\Facades\Log::error('Broadcast CountersUpdated failed in ContactsController@postDelete: ' . $broadcastEx->getMessage());
+                }
                 return response()->json(['status' => 'success', 'message' => self::DELETE_SUCCESS]);
             }
             else
@@ -229,6 +240,11 @@ class ContactsController extends AdminController
                 $delete = $contact->updateStatus($id,1);
                 if($delete)
                 {
+                    try {
+                        broadcast(new \App\Events\CountersUpdated());
+                    } catch (\Throwable $broadcastEx) {
+                        \Illuminate\Support\Facades\Log::error('Broadcast CountersUpdated failed in ContactsController@postStatus: ' . $broadcastEx->getMessage());
+                    }
                     return response()->json(['status' => 'success', 'message' => self::ACTIVATION_SUCCESS, 'type' => 'yes']);
                 }
                 else
@@ -241,6 +257,11 @@ class ContactsController extends AdminController
                 $delete = $contact->updateStatus($id,0);
                 if($delete)
                 {
+                    try {
+                        broadcast(new \App\Events\CountersUpdated());
+                    } catch (\Throwable $broadcastEx) {
+                        \Illuminate\Support\Facades\Log::error('Broadcast CountersUpdated failed in ContactsController@postStatus: ' . $broadcastEx->getMessage());
+                    }
                     return response()->json(['status' => 'success', 'message' => self::DISABLE_SUCCESS, 'type' => 'no']);
                 }
                 else

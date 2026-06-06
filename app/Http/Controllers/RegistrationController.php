@@ -331,6 +331,8 @@ class RegistrationController extends Controller
                     todayBookings: \App\Support\NotifyCounts::todayBookings(),
                     totalNotifyCount: \App\Support\NotifyCounts::total(),
                 ));
+                // Also broadcast a counters update so sidebar badges refresh in all open tabs.
+                broadcast(new \App\Events\CountersUpdated());
             } catch (\Throwable $e) {
                 Log::error('Booking broadcast failed: ' . $e->getMessage());
             }
