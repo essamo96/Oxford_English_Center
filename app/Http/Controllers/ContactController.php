@@ -34,6 +34,8 @@ class ContactController extends Controller
         ////////////////////////////////////////////
         $name = $request->get('name');
         $email = $request->get('email');
+        $mobile = $request->get('mobile');
+        $subject = $request->get('subject');
         $details = $request->get('message');
 
         $validator = Validator::make([
@@ -56,18 +58,18 @@ class ContactController extends Controller
             $request->session()->flash('danger', $msg);
             return redirect('contact')->withInput();
         } else {
+            // Persist the submission so admins can manage it from "Contact Management"
+            (new Contacts())->addContactUs($name, $email, $mobile, $subject, $details, 0);
+
             $myarray['name'] = $name;
             $myarray['email'] = $email;
             $myarray['details'] = $details;
-            $add = $this->send_mail($myarray);
+            // best-effort notification email; the submission is already saved, and
+            // send_mail no longer throws if SMTP is unavailable.
+            $this->send_mail($myarray);
 
-            if ($add) {
-                $request->session()->flash('success', 'Successfully Sent ');
-                return redirect('contact')->withInput();
-            } else {
-                $request->session()->flash('danger', 'There is a Problem Try Again');
-                return redirect('contact')->withInput();
-            }
+            $request->session()->flash('success', 'Successfully Sent ');
+            return redirect('contact')->withInput();
         }
     }
 
@@ -294,35 +296,35 @@ class ContactController extends Controller
         $form_data = [
             'myarray' => $myarray
         ];
-        $data = [
-            'email' => 'no-replay@oxford.ps',
-            'name' => 'Oxford',
-        ];
-        Config::set('mail.driver', 'smtp');
-        Config::set('mail.host', 'mail.oxford.ps');
-        Config::set('mail.port', 465);
-        Config::set('mail.email', 'no-replay@oxford.ps');
-        Config::set('mail.encryption', 'ssl');
-        Config::set('mail.password', '10GlUmR)1nlf');
+        // Where contact notifications are delivered.
+        $to = 'no-replay@oxford.ps';
+        // SMTP credentials + sender come from .env (MAIL_*). Do NOT hardcode the
+        // password here: a stale override previously mismatched the username and
+        // caused "535 Incorrect authentication data" (SMTP 500 error).
+        $fromAddress = config('mail.from.address') ?: 'campany@oxford.ps';
+        $fromName = config('mail.from.name') ?: 'Oxford';
 
-        Mail::send('emails.send', $form_data, function ($message) use ($data, $files) {
-            $message->to($data['email'], $data['name'])->subject($data['name'])->from($data['email'], $data['name']);
-            if ($files) {
-                foreach ($files as $file) {
-                    $message->attach(
-                        $file->getRealPath(),
-                        array(
-                            'as' => $file->getClientOriginalName(), // If you want you can chnage original name to custom name
-                            'mime' => $file->getMimeType()
-                        )
-                    );
+        try {
+            Mail::send('emails.send', $form_data, function ($message) use ($to, $fromAddress, $fromName, $files) {
+                $message->to($to, 'Oxford')->subject('Oxford')->from($fromAddress, $fromName);
+                if ($files) {
+                    foreach ($files as $file) {
+                        $message->attach(
+                            $file->getRealPath(),
+                            array(
+                                'as' => $file->getClientOriginalName(),
+                                'mime' => $file->getMimeType()
+                            )
+                        );
+                    }
                 }
-            }
-        });
-        if (Mail::failures()) {
+            });
+        } catch (\Throwable $e) {
+            // Don't crash the user flow if the mail server is unreachable / misconfigured.
+            \Log::error('send_mail failed: ' . $e->getMessage());
             return FALSE;
-        } else {
-            return True;
         }
+
+        return TRUE;
     }
 }

@@ -74,6 +74,16 @@
                                         <div class="help-block with-errors"></div>
                                     </div>
                                 </div>
+                                <div class="ox-form-row">
+                                    <div class="ox-field form-group">
+                                        <label class="ox-label" for="form-phone">Phone / WhatsApp</label>
+                                        <input type="text" placeholder="e.g. +97259..." class="ox-input form-control" name="mobile" id="form-phone">
+                                    </div>
+                                    <div class="ox-field form-group">
+                                        <label class="ox-label" for="form-subject">Subject</label>
+                                        <input type="text" placeholder="Subject" class="ox-input form-control" name="subject" id="form-subject">
+                                    </div>
+                                </div>
                                 <div class="ox-field form-group">
                                     <label class="ox-label" for="form-message">Message</label>
                                     <textarea placeholder="How can we help you?" class="ox-textarea textarea form-control" name="message" id="form-message" rows="8" cols="20" data-error="Message field is required" required=""></textarea>

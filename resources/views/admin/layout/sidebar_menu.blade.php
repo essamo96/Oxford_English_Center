@@ -270,6 +270,17 @@
                     </div>
                 </div>
 
+                @if (auth()->user()->can('admin.contact.view') || auth()->user()->can('admin.contact.reply') || auth()->user()->can('admin.contact.delete') || auth()->user()->can('admin.contact.status'))
+                    <div class="menu-item">
+                        <a class="menu-link {{ (isset($active_menu) ? $active_menu : '') == 'contacts' ? 'active' : '' }}"
+                            href="{{ route('contacts.view') }}">
+                            <span class="menu-icon"><i class="ki-duotone ki-sms fs-1 text-info"><span
+                                        class="path1"></span><span class="path2"></span></i></span>
+                            <span class="menu-title">ادارة جهات الاتصال</span>
+                        </a>
+                    </div>
+                @endif
+
                 <div data-kt-menu-trigger="click"
                     class="menu-item {{ in_array(isset($active_menu) ? $active_menu : '', ['messages_students', 'messages_teachers']) ? 'here show' : '' }} menu-accordion">
                     <span class="menu-link">

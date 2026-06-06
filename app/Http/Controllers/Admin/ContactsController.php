@@ -63,6 +63,87 @@ class ContactsController extends AdminController
         }
     }
     ////////////////////////////////////////////////////
+    public function postReply(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id'      => 'required',
+            'subject' => 'required',
+            'body'    => 'required',
+        ], [
+            'subject.required' => 'يرجى إدخال موضوع الرسالة',
+            'body.required'    => 'يرجى إدخال نص الرد',
+        ]);
+
+        if ($validator->fails()) {
+            $request->session()->flash('danger', $validator->errors()->all());
+            return redirect()->back()->withInput();
+        }
+
+        try {
+            $id = Crypt::decrypt($request->get('id'));
+        } catch (DecryptException $e) {
+            $request->session()->flash('danger', self::NOT_FOUND);
+            return redirect(route('contacts.view'));
+        }
+
+        $contact = new Contacts();
+        $info = $contact->getContacts($id);
+
+        if (!$info) {
+            $request->session()->flash('danger', self::NOT_FOUND);
+            return redirect(route('contacts.view'));
+        }
+
+        if (empty($info->email)) {
+            $request->session()->flash('danger', 'لا يوجد بريد إلكتروني لهذا المرسل');
+            return redirect()->back()->withInput();
+        }
+
+        $sent = $this->sendReplyMail($info, $request->get('subject'), $request->get('body'));
+
+        if ($sent) {
+            // Mark as contacted.
+            $contact->updateStatus($id, 1);
+            $request->session()->flash('success', 'تم إرسال الرد عبر البريد الإلكتروني بنجاح');
+            return redirect(route('contacts.view'));
+        }
+
+        $request->session()->flash('danger', 'تعذر إرسال البريد الإلكتروني، يرجى المحاولة لاحقاً');
+        return redirect()->back()->withInput();
+    }
+
+    /**
+     * Send a reply email to the contact's address using the configured (.env) SMTP credentials.
+     * Never throws: returns false and logs on failure so the admin flow degrades gracefully.
+     */
+    private function sendReplyMail($info, $subject, $body)
+    {
+        $data = [
+            'contactName'     => $info->name,
+            'originalSubject' => $info->subject,
+            'originalMessage' => $info->message,
+            'replyBody'       => $body,
+            'mysettings'      => parent::$data['mysettings'],
+            'social'          => parent::$data['social'],
+        ];
+
+        $fromAddress = config('mail.from.address') ?: 'campany@oxford.ps';
+        $fromName    = config('mail.from.name') ?: 'Oxford English Centre';
+
+        try {
+            \Illuminate\Support\Facades\Mail::send('emails.contact_reply', $data, function ($message) use ($info, $subject, $fromAddress, $fromName) {
+                $message->to($info->email, $info->name)
+                        ->subject($subject)
+                        ->from($fromAddress, $fromName);
+            });
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Contact reply mail failed: ' . $e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+    ////////////////////////////////////////////////////
     public function getList(Request $request)
     {
         $contact = new Contacts();
@@ -82,6 +163,8 @@ class ContactsController extends AdminController
 
         $datatable->addColumn('actions', function ($row) {
             $data['id'] = $row->id;
+            $data['mobile'] = $row->mobile;
+            $data['email'] = $row->email;
             $data['btn_class'] = parent::$data['btn_class'];
 
             return view('admin.contacts.parts.actions', $data)->render();
@@ -105,7 +188,7 @@ class ContactsController extends AdminController
         }
         /////////////////////////////////////
         $contact = new Contacts();
-        $info = $contact->getContactUs($id);
+        $info = $contact->getContacts($id);
         if ($info)
         {
             $delete = $contact->deleteContactUs($info);
