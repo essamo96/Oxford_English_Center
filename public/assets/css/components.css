@@ -265,7 +265,7 @@
 .ox-topbar__cta { display: flex; align-items: center; gap: var(--ox-s-2); list-style: none; margin: 0; padding: 0; }
 .ox-toplink {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; border-radius: var(--ox-radius-pill);
+    padding: 10px 19px; border-radius: var(--ox-radius-pill);
     font-weight: 600; font-size: var(--ox-fs-xs);
     background: rgba(255,255,255,.08);
     transition: background var(--ox-dur-fast) var(--ox-ease), transform var(--ox-dur-fast) var(--ox-ease);
