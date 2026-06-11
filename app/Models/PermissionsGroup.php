@@ -9,7 +9,7 @@ class PermissionsGroup extends Model
 
     protected $table = 'permissions_group';
     protected $fillable = [
-        'name', 'name_ar', 'name_en', 'icon', 'sort', 'status', 'parent_id',
+        'name', 'name_ar', 'name_en', 'icon', 'color', 'sort', 'status', 'parent_id',
     ];
     protected $hidden = [
         '',
@@ -83,8 +83,12 @@ class PermissionsGroup extends Model
     ////////////////////////////////////////
     function getAllParentPermissionGroup()
     {
-        return $this->where('parent_id', 0)->where('status', 1)->orderBy('sort', 'asc')->get();
-        // return $this->all();
+        return $this->where('parent_id', 0)
+            ->where('status', 1)
+            ->where('name', '!=', 'dashboard')
+            ->orderByRaw('COALESCE(sort, 9999) ASC')
+            ->with(['mychild' => fn($q) => $q->where('status', 1)->orderBy('sort')])
+            ->get();
     }
 
     //////////////////////////////////////////////

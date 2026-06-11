@@ -103,8 +103,19 @@ class AdminController extends BaseController
         self::$data['activeBranch'] = app(\App\Services\BranchContext::class)->getBranch();
         self::$data['isBranchScoped'] = app(\App\Services\BranchContext::class)->isScoped();
 
-        // Site settings (cached) — available in all admin views
-        $siteSettings = \Cache::remember('site_settings', 300, fn() => \App\Models\Settings::find(1));
-        self::$data['siteSettings'] = $siteSettings;
+        // Site settings (cached) — siteSettings is overridden per-user via
+        // the View Composer in AppServiceProvider (runs after auth middleware).
+        self::$data['siteSettings'] = \Cache::remember('site_settings', 300,
+            fn() => \App\Models\Settings::find(1)
+        );
+
+        // Dynamic sidebar (parent groups + their children, ordered by sort)
+        $permissionGroup = new PermissionsGroup();
+        self::$data['sidebar'] = $permissionGroup->getAllParentPermissionGroup();
+
+        // Dashboard group (color-controllable from sidebar manager)
+        self::$data['dashboardGroup'] = \Cache::remember('sidebar_dashboard_group', 300,
+            fn() => PermissionsGroup::where('name', 'dashboard')->first()
+        );
     }
 }

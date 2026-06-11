@@ -10,10 +10,10 @@
                     لوحة التحكم
                 </a>
             </li>
-            @can('admin.financial.view')
+            @can('admin.financial_dashboard.view')
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center {{ $tab === 'financial' ? 'active' : '' }}"
-                       href="{{ route('dashboard.financial') }}">
+                       href="{{ route('financial_dashboard.view') }}">
                         <i class="ki-duotone ki-chart-line-up fs-2 me-2 {{ $tab === 'financial' ? 'text-success' : '' }}"><span class="path1"></span><span class="path2"></span></i>
                         المركز المالي
                         <span class="badge badge-light-success ms-2 fs-9">Financial Center</span>

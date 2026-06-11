@@ -750,7 +750,7 @@ class FinancialController extends AdminController
 
     public function invoicesLedger()
     {
-        parent::$data['active_menu'] = 'financial_invoices';
+        parent::$data['active_menu'] = 'financial';
 
         $stats = $this->financialService->getGlobalStats();
 

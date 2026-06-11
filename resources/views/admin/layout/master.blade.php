@@ -53,13 +53,36 @@
         }
     </style>
     @yield('css')
+    @php
+        $sidebarLayout      = $siteSettings->sidebar_layout      ?? 'dark-sidebar';
+        $sidebarBgColor     = $siteSettings->sidebar_bg_color    ?? '';
+        $sidebarTextColor   = $siteSettings->sidebar_text_color  ?? '';
+        $sidebarActiveColor = $siteSettings->sidebar_active_color ?? '';
+        $isHeaderLayout     = in_array($sidebarLayout, ['dark-header', 'light-header']);
+    @endphp
+    <style>
+    @if($sidebarBgColor)
+        #kt_app_sidebar { background-color: {{ $sidebarBgColor }} !important; }
+    @endif
+    @if($sidebarTextColor)
+        .app-sidebar .menu-title,
+        .app-sidebar .menu-link .menu-title,
+        .app-sidebar .menu-section .menu-content { color: {{ $sidebarTextColor }} !important; }
+        .app-sidebar .menu-link:hover .menu-title { color: {{ $sidebarTextColor }} !important; opacity:.85; }
+        .app-sidebar .menu-arrow:after { border-color: {{ $sidebarTextColor }} !important; }
+    @endif
+    @if($sidebarActiveColor)
+        .app-sidebar .menu-item.show > .menu-link .menu-title,
+        .app-sidebar .menu-item .menu-link.active .menu-title { color: {{ $sidebarActiveColor }} !important; opacity:1; }
+        .app-sidebar .menu-item.show > .menu-link .menu-icon i,
+        .app-sidebar .menu-item.show > .menu-link .menu-icon svg path,
+        .app-sidebar .menu-item .menu-link.active .menu-icon i,
+        .app-sidebar .menu-item .menu-link.active .menu-icon svg path { color: {{ $sidebarActiveColor }} !important; fill: {{ $sidebarActiveColor }} !important; }
+        .app-sidebar .menu-item .menu-link.active { background-color: {{ $sidebarActiveColor }}22 !important; }
+    @endif
+    </style>
 </head>
-
-<body id="kt_app_body" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true"
-    data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true"
-    data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true"
-    data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default" dir="rtl"
-    direction="rtl" style="direction:rtl;">
+<body id="kt_app_body" data-kt-app-layout="{{ $sidebarLayout }}" data-kt-app-header-fixed="true" data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true" data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default" dir="rtl" direction="rtl" style="direction:rtl;">
     <script>
         var defaultThemeMode = "light";
         var themeMode;
@@ -157,7 +180,7 @@
         };
 
         window.openMetronicFileManager = function(type, targetId) {
-            var route = "{{ route('admin.file_manager') }}";
+            var route = "{{ route('file_manager.view') }}";
             var url = route + "?type=" + type + "&target=" + targetId;
             var w = 1000;
             var h = 700;

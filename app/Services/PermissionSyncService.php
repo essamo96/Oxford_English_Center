@@ -79,11 +79,30 @@ class PermissionSyncService
             ],
             [
                 'type'    => 'custom',
-                'name'    => 'financial',
-                'name_ar' => 'المالية',
+                'name'    => 'financial_dashboard',
+                'name_ar' => 'السجل المالي',
+                'name_en' => 'Financial Dashboard',
                 'parent'  => 'financial_management',
                 'sort'    => 21,
                 'actions' => ['view', 'verify', 'refund'],
+            ],
+            [
+                'type'    => 'custom',
+                'name'    => 'financial_pending',
+                'name_ar' => 'الطلبات المالية العالقة',
+                'name_en' => 'Financial Pending Orders',
+                'parent'  => 'financial_management',
+                'sort'    => 22,
+                'actions' => ['view', 'verify', 'refund'],
+            ],
+            [
+                'type'    => 'custom',
+                'name'    => 'financial_expenses',
+                'name_ar' => 'المصروفات',
+                'name_en' => 'Expenses',
+                'parent'  => 'financial_management',
+                'sort'    => 23,
+                'actions' => ['view', 'add', 'edit', 'delete'],
             ],
 
             // ══════════════════════════════════════════════════════════════════
@@ -192,6 +211,15 @@ class PermissionSyncService
                 'sort'    => 93,
                 'actions' => ['view', 'edit'],
             ],
+            [
+                'type'    => 'custom',
+                'name'    => 'attendance_settings',
+                'name_ar' => 'إعدادات الحضور والغياب',
+                'name_en' => 'Attendance Settings',
+                'parent'  => 'hr_teachers',
+                'sort'    => 94,
+                'actions' => ['view', 'edit'],
+            ],
 
             // ══════════════════════════════════════════════════════════════════
             //  إدارة الموقع الخارجي
@@ -222,7 +250,16 @@ class PermissionSyncService
                 'icon'    => 'ki-duotone ki-picture',
                 'sort'    => 110,
             ],
-            ['type' => 'child', 'name' => 'file_manager', 'name_ar' => 'مدير الملفات', 'parent' => 'media_management', 'sort' => 111],
+            [
+                'type'    => 'custom',
+                'name'    => 'file_manager',
+                'name_ar' => 'مدير الملفات',
+                'name_en' => 'File Manager',
+                'parent'  => 'media_management',
+                'sort'    => 111,
+                'actions' => ['view'],
+            ],
+            ['type' => 'child', 'name' => 'files', 'name_ar' => 'مكتبة الملفات', 'parent' => 'media_management', 'sort' => 112],
 
             // ══════════════════════════════════════════════════════════════════
             //  ادارة الموقع  (settings / users / roles)
@@ -235,10 +272,20 @@ class PermissionSyncService
                 'icon'    => 'ki-duotone ki-setting-2',
                 'sort'    => 120,
             ],
-            ['type' => 'child', 'name' => 'settings', 'name_ar' => 'الإعدادات',          'parent' => 'site_admin', 'sort' => 121],
-            ['type' => 'child', 'name' => 'social',   'name_ar' => 'الشبكات الإجتماعية', 'parent' => 'site_admin', 'sort' => 122],
-            ['type' => 'child', 'name' => 'users',    'name_ar' => 'المستخدمين',          'parent' => 'site_admin', 'sort' => 123],
-            ['type' => 'child', 'name' => 'roles',    'name_ar' => 'الصلاحيات',           'parent' => 'site_admin', 'sort' => 124],
+            ['type' => 'child', 'name' => 'settings',        'name_ar' => 'الإعدادات',               'parent' => 'site_admin', 'sort' => 121],
+            ['type' => 'child', 'name' => 'social',          'name_ar' => 'الشبكات الإجتماعية',      'parent' => 'site_admin', 'sort' => 122],
+            ['type' => 'child', 'name' => 'users',           'name_ar' => 'المستخدمين',               'parent' => 'site_admin', 'sort' => 123],
+            ['type' => 'child', 'name' => 'roles',           'name_ar' => 'الصلاحيات',                'parent' => 'site_admin', 'sort' => 124],
+            [
+                'type'    => 'custom',
+                'name'    => 'sidebar_manager',
+                'name_ar' => 'إدارة القائمة الجانبية',
+                'name_en' => 'Sidebar Manager',
+                'icon'    => 'ki-duotone ki-menu',
+                'parent'  => 'site_admin',
+                'sort'    => 125,
+                'actions' => ['view'],
+            ],
 
             // ══════════════════════════════════════════════════════════════════
             //  صفحات مستقلة

@@ -22,7 +22,7 @@
 @endsection
 
 @section('page-content')
-@php $active_menu = 'financial_invoices'; @endphp
+@php $active_menu = 'financial'; @endphp
 
 {{-- ===== TOP STATS CARDS ===== --}}
 <div class="row g-5 g-xl-10 mb-5 mb-xl-10">

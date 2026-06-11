@@ -13,6 +13,7 @@ class Settings extends Model {
     protected $fillable = [
         'title', 'description', 'logo', 'tags', 'email', 'email_password', 'smtp_host', 'smtp_port', 'smtp_timeout', 'smtp_crypto', 'contact_email',
         'payment_required', 'registration_open', 'registration_closed_message',
+        'sidebar_layout', 'sidebar_bg_color', 'sidebar_text_color',
     ];
 
     //////////////////////////////////

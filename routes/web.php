@@ -236,8 +236,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // Route
     Route::get('dashboard', ['as' => 'dashboard.view', 'uses' => 'DashboardController@getIndex']);
     // Financial Center dashboard (tab beside the main dashboard)
-    Route::get('financial-center', ['as' => 'dashboard.financial', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialDashboardController@getIndex']);
-    Route::get('financial-center/data', ['as' => 'dashboard.financial.data', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialDashboardController@getData']);
+    Route::get('financial-center', ['as' => 'financial_dashboard.view', 'middleware' => ['permission:admin.financial_dashboard.view|admin.financial.view'], 'uses' => 'FinancialDashboardController@getIndex']);
+    Route::get('financial-center/data', ['as' => 'dashboard.financial.data', 'middleware' => ['permission:admin.financial_dashboard.view|admin.financial.view'], 'uses' => 'FinancialDashboardController@getData']);
     Route::get('profile', ['as' => 'dashboard.profile', 'uses' => 'DashboardController@getProfile']);
     Route::get('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@getPassword']);
     Route::post('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@postPassword']);
@@ -285,6 +285,13 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('students_report', ['as' => 'students_report.view', 'middleware' => ['permission:admin.students_report.view|admin.students_report.add|admin.students_report.edit|admin.students_report.delete|admin.students_report.status'], 'uses' => 'Students_ReportController@getIndex']);
     Route::get('students_report/list', ['as' => 'students_report.list', 'middleware' => ['permission:admin.students_report.view|admin.students_report.add|admin.students_report.edit|admin.students_report.delete|admin.students_report.status'], 'uses' => 'Students_ReportController@getList']);
     Route::post('students_report/showtopinfos', ['as' => 'students_report.showtopinfos', 'middleware' => ['permission:admin.students_report.view'], 'uses' => 'Students_ReportController@topStuudentInfos']);
+
+    // Sidebar manager (drag & drop order + colors)
+    Route::get('sidebar-manager', ['as' => 'sidebar_manager.view', 'uses' => 'SidebarManagerController@getIndex']);
+    Route::post('sidebar-manager/reorder', ['as' => 'sidebar_manager.reorder', 'uses' => 'SidebarManagerController@postReorder']);
+    Route::post('sidebar-manager/color', ['as' => 'sidebar_manager.color', 'uses' => 'SidebarManagerController@postColor']);
+    Route::get('sidebar-manager/partial', ['as' => 'sidebar_manager.partial', 'uses' => 'SidebarManagerController@getPartial']);
+    Route::post('sidebar-manager/appearance', ['as' => 'sidebar_manager.appearance', 'uses' => 'SidebarManagerController@postAppearance']);
 
     Route::get('roles', ['as' => 'roles.view', 'middleware' => ['permission:admin.roles.view|admin.roles.add|admin.roles.edit|admin.roles.delete|admin.roles.status|admin.roles.permissions'], 'uses' => 'RolesController@getIndex']);
     Route::get('roles/list', ['as' => 'roles.list', 'middleware' => ['permission:admin.roles.view|admin.roles.add|admin.roles.edit|admin.roles.delete|admin.roles.status|admin.roles.permissions'], 'uses' => 'RolesController@getList']);
@@ -630,8 +637,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('financial/pending/list', ['as' => 'admin.financial.pending.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingList']);
     Route::get('financial/pending/student/{id}', ['as' => 'admin.financial.pending.student', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingStudentDetails']);
     Route::get('financial/pending/financials/{feeId}', ['as' => 'admin.financial.pending.financials', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@getPendingFinancials']);
-    // Financial Ledger (Invoices)
-    Route::get('financial/invoices', ['as' => 'admin.financial.invoices', 'uses' => 'FinancialController@invoicesLedger']);
+    // Financial Ledger (Invoices) — financial.view used by sidebar
+    Route::get('financial/invoices', ['as' => 'financial.view', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@invoicesLedger']);
     Route::get('financial/invoices/list', ['as' => 'admin.financial.invoices.list', 'uses' => 'FinancialController@getInvoicesLedgerList']);
     Route::get('financial/invoices/student/{studentId}', ['as' => 'admin.financial.invoices.student', 'uses' => 'FinancialController@getStudentInvoices']);
     Route::get('financial/groups/{programId}', ['as' => 'admin.financial.groups_by_program', 'uses' => 'FinancialController@getActualGroupsByProgram']);
@@ -658,5 +665,19 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('financial/fee-types', ['as' => 'admin.financial.fee_types.list', 'uses' => 'FinancialController@getFeeTypes']);
     Route::post('financial/fee-types/store', ['as' => 'admin.financial.fee_types.store', 'uses' => 'FinancialController@storeFeeType']);
     Route::delete('financial/fee-types/delete/{id}', ['as' => 'admin.financial.fee_types.delete', 'uses' => 'FinancialController@deleteFeeType']);
+
+    // ── Sidebar-compatible .view aliases ────────────────────────────────────
+    // financial_pending → الطلبات المالية العالقة
+    Route::get('financial/pending', ['as' => 'financial_pending.view', 'middleware' => ['permission:admin.financial_pending.view'], 'uses' => 'FinancialController@pendingOrders']);
+    // financial_expenses → المصروفات
+    Route::get('financial/expenses', ['as' => 'financial_expenses.view', 'middleware' => ['permission:admin.financial_expenses.view'], 'uses' => 'ExpensesController@index']);
+    // file_manager → مدير الملفات
+    Route::get('file-manager', ['as' => 'file_manager.view', 'middleware' => ['permission:admin.file_manager.view'], 'uses' => 'FileManagerController@index']);
+    // attendance_settings → إعدادات الحضور
+    Route::get('attendance/settings', ['as' => 'attendance_settings.view', 'middleware' => ['permission:admin.attendance_settings.view'], 'uses' => 'AttendanceSettingController@getIndex']);
+    // teacher_salaries view alias
+    Route::get('teacher-salaries', ['as' => 'teacher_salaries.view', 'middleware' => ['permission:admin.teacher_salaries.view'], 'uses' => 'TeacherSalaryController@getIndex']);
+    // pending_orders alias — same page as dashboard.view.membership (different permission check)
+    Route::get('home/membership-orders', ['as' => 'pending_orders.view', 'middleware' => ['permission:admin.memberships.view'], 'uses' => 'MembershipsController@getIndex']);
 
 });
