@@ -96,6 +96,11 @@
                     عرض طلاب المجموعة: <span class="text-primary">{{ $grope_teacher_name }}</span> للمدرس: <span
                         class="text-primary">{{ $teacher_name }}</span>
                 </span>
+                @if(isset($group_branch) && $group_branch)
+                <span class="badge badge-light-info fw-bold fs-7 px-4 py-2 ms-3 d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-geo-fill text-info"></i> {{ $group_branch->name_ar }}
+                </span>
+                @endif
             </div>
             <div class="card-toolbar">
                 <a href="{{ URL::previous() }}" class="btn btn-light btn-sm">
@@ -115,6 +120,7 @@
                             <th class="text-center">اسم الطالب/ة </th>
                             <th class="text-center"> رقم الموبايل </th>
                             <th class="text-center"> الايميل </th>
+                            <th class="text-center">الفرع</th>
                             <th class="text-center">تاريخ الميلاد</th>
                             <th class="text-center">التخصص</th>
                             <th class="text-center">الحالة</th>
@@ -131,6 +137,15 @@
                                 <td>{{ $i++ }}</td>
                                 <td>{{ $info->name ? $info->name : 'لايوجد' }}</td>
                                 <td>{{ $info->mobile ? $info->mobile : 'لايوجد' }}</td>
+                                <td>
+                                    @if($info->branch)
+                                        <span class="badge badge-light-info fw-bold px-3 py-2">
+                                            <i class="bi bi-geo-fill me-1"></i>{{ $info->branch->name_ar }}
+                                        </span>
+                                    @else
+                                        <span class="badge badge-light-secondary text-muted px-3 py-2">—</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if (isset($info->email))
                                         {{ $info->email }}

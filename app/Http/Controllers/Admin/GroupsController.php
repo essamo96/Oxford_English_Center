@@ -685,9 +685,10 @@ class GroupsController extends AdminController
         $opj = new GroupStudents();
         $ids = $opj->getGroupStudents($id);
         parent::$data['teacher_st'] = Students::whereIn('id', $ids)->where('delaying', 0)->get();
-        $dataa = Groups::where('id', '=', $id)->first();
+        $dataa = Groups::withoutGlobalScopes()->with(['teacher', 'branch'])->where('id', $id)->first();
         parent::$data['grope_teacher_name'] = $dataa->name ?? 'non';
         parent::$data['teacher_name'] = $dataa->teacher->name ?? 'non';
+        parent::$data['group_branch'] = $dataa->branch ?? null;
         $currentDate = Carbon::now()->format('d-m-Y');
         parent::$data['Date'] = $currentDate;
         return view('admin.groups.parts.teacher_student', parent::$data);
@@ -710,9 +711,11 @@ class GroupsController extends AdminController
         $date_from = $request->get('date_from', NULL);
         $date_to = $request->get('date_to', NULL);
         $date_id = $request->get('date_id', NULL);
+        $branch_id = app(\App\Services\BranchContext::class)->getId()
+                  ?? ($request->get('branch_id') ?: null);
 
         $groups = new Groups();
-        $info = $groups->getSearchGroups($title, $program_id, $activeG, $teacher_id, $student_name, $is_today, $date_from, $date_to, $date_id);
+        $info = $groups->getSearchGroups($title, $program_id, $activeG, $teacher_id, $student_name, $is_today, $date_from, $date_to, $date_id, $branch_id);
         $datatable = Datatables::of($info);
 
         $datatable->editColumn('name', function ($row) {
@@ -799,6 +802,16 @@ class GroupsController extends AdminController
             } else {
                 return '<span class="text-danger"><i class="bi bi-exclamation-circle text-danger me-1"></i>لا يوجد</span>';
             }
+        });
+
+        $datatable->addColumn('branch_name', function ($row) {
+            if ($row->branch) {
+                return '<span class="badge badge-light-info fw-bold px-3 py-2">'
+                    . '<i class="bi bi-geo-fill me-1"></i>'
+                    . e($row->branch->name_ar)
+                    . '</span>';
+            }
+            return '<span class="badge badge-light-secondary fw-bold px-3 py-2">—</span>';
         });
 
         $datatable->editColumn('status', function ($row) {
@@ -971,7 +984,11 @@ class GroupsController extends AdminController
             $groups = new Groups();
             $add = $groups->addGroup($name, $program_id, $teacher_id, $date_id, $start_date, $end_date, $subjects, $status, $zoom, $image, $drive);
             if ($add) {
-
+                $branchId = $request->get('branch_id') ?: auth()->guard('admin')->user()->branch_id;
+                if ($branchId) {
+                    $add->branch_id = $branchId;
+                    $add->save();
+                }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('groups.view'));
             } else {
@@ -1044,9 +1061,12 @@ class GroupsController extends AdminController
                 return redirect(route('groups.edit', ['id' => $encrypted_id]))->withInput();
             } else {
                 $update = $groups->updateGroup($info, $name, $program_id, $teacher_id, $date_id, $start_date, $end_date, $subjects, $status, $zoom, $image, $drive);
-
-
                 if ($update) {
+                    $branchId = $request->get('branch_id') ?: auth()->guard('admin')->user()->branch_id;
+                    if ($branchId) {
+                        $info->branch_id = $branchId;
+                        $info->save();
+                    }
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('groups.view'));
                 } else {

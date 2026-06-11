@@ -253,6 +253,9 @@ class ProgramsController extends AdminController
             $add = $programs->addProgram($title, $short, $exam, $status, $image);
             if ($add) {
                 if (is_object($add) && isset($add->id)) {
+                    $add->registration_start = $request->get('registration_start') ?: null;
+                    $add->registration_end   = $request->get('registration_end') ?: null;
+                    $add->save();
                     $this->applyPlacementDefault($request, $add->id);
                 }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
@@ -335,6 +338,9 @@ class ProgramsController extends AdminController
             } else {
                 $update = $programs->updateProgram($info, $title, $short, $exam, $status, $image);
                 if ($update) {
+                    $info->registration_start = $request->get('registration_start') ?: null;
+                    $info->registration_end   = $request->get('registration_end') ?: null;
+                    $info->save();
                     $this->applyPlacementDefault($request, $id);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('programs.view'));

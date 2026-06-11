@@ -41,10 +41,11 @@ class TeacherController extends AdminController {
 
     //////////////////////////////////////////////
     public function getList(Request $request) {
-        $title = $request->get('title', NULL);
-        $activeT = $request->get('activeT',NULL);
+        $title    = $request->get('title', NULL);
+        $activeT  = $request->get('activeT', NULL);
+        $branchId = $request->get('branch_id', NULL);
         $teachers = new Teachers();
-        $info = $teachers->getSearchTeachers($title,$activeT);
+        $info = $teachers->getSearchTeachers($title, $activeT, $branchId);
         $datatable = Datatables::of($info);
 
         $datatable->editColumn('company_name', function ($row) {
@@ -74,6 +75,16 @@ class TeacherController extends AdminController {
                         </div>';
             }
             return '';
+        });
+
+        $datatable->addColumn('branch_name', function ($row) {
+            if ($row->branch) {
+                return '<span class="badge badge-light-info fw-bold px-3 py-2">'
+                    . '<i class="bi bi-geo-fill me-1"></i>'
+                    . e($row->branch->name_ar)
+                    . '</span>';
+            }
+            return '<span class="badge badge-light-secondary fw-bold px-3 py-2 text-muted">كل الفروع</span>';
         });
 
         $datatable->addColumn('actions', function ($row) {
@@ -124,7 +135,11 @@ class TeacherController extends AdminController {
             $add = $teachers->addTeacher($name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
             if ($add) {
                 if (is_object($add) && isset($add->id)) {
-                    Teachers::where('id', $add->id)->update(['lecture_rate' => (float) $request->get('lecture_rate', 0)]);
+                    $branchId = $request->get('branch_id') ?: auth()->guard('admin')->user()->branch_id;
+                    Teachers::withoutGlobalScopes()->where('id', $add->id)->update([
+                        'lecture_rate' => (float) $request->get('lecture_rate', 0),
+                        'branch_id'    => $branchId ?: null,
+                    ]);
                 }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('teachers.view'));
@@ -199,7 +214,11 @@ class TeacherController extends AdminController {
             } else {
                 $update = $teachers->updateTeacher($info, $name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
                 if ($update) {
-                    Teachers::where('id', $id)->update(['lecture_rate' => (float) $request->get('lecture_rate', 0)]);
+                    $branchId = $request->get('branch_id');
+                    Teachers::withoutGlobalScopes()->where('id', $id)->update([
+                        'lecture_rate' => (float) $request->get('lecture_rate', 0),
+                        'branch_id'    => $branchId ?: null,
+                    ]);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
                     return redirect(route('teachers.view'));
                 } else {

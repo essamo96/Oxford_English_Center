@@ -35,6 +35,27 @@
             <form role="form" method="post" action="" class="form d-flex flex-column gap-7" enctype="multipart/form-data">
                 {{ csrf_field() }}
 
+                {{-- Branch selector --}}
+                @if(!$isBranchScoped)
+                <div class="row g-9 mb-6">
+                    <div class="col-md-6 fv-row">
+                        <label class="fs-6 fw-semibold mb-2">
+                            <i class="bi bi-geo-fill text-info me-1"></i> الفرع
+                        </label>
+                        <select name="branch_id" class="form-select form-select-solid" data-control="select2" data-placeholder="بدون فرع محدد">
+                            <option value="">بدون فرع — يظهر في كل الفروع</option>
+                            @foreach($allBranches as $branch)
+                                <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name_ar }} ({{ $branch->name_en }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                @else
+                    <input type="hidden" name="branch_id" value="{{ auth()->guard('admin')->user()->branch_id }}">
+                @endif
+
                 <div class="row g-9 mb-8">
                     <div class="col-md-6 fv-row">
                         <label class="fs-6 fw-semibold mb-2 required">الاسم</label>

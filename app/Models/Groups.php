@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Scopes\BranchScope;
 use DB;
 
 class Groups extends Model {
@@ -12,13 +13,22 @@ class Groups extends Model {
 
     protected $table = 'groups';
     protected $fillable = [
-        'title', 'descs', 'image', 'status', 'user_id', 'start_date', 'end_date', 'zoom', 'image', 'drive', 'progress_at'
+        'title', 'descs', 'image', 'status', 'user_id', 'start_date', 'end_date', 'zoom', 'image', 'drive', 'progress_at', 'branch_id'
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new BranchScope());
+    }
     protected $hidden = [
         '',
     ];
 
     //////////////////////////////////////////////
+    public function branch() {
+        return $this->belongsTo(\App\Models\Branch::class, 'branch_id');
+    }
+
     public function teacher() {
         return $this->belongsTo('App\Models\Teachers', 'teacher_id');
     }
@@ -128,7 +138,7 @@ class Groups extends Model {
     }
 
 //////////////////////////////////////////////
-    function getSearchGroups($title, $program_id, $activeG, $teacher_id = null, $student_name = null, $is_today = null, $date_from = null, $date_to = null, $date_id = null) {
+    function getSearchGroups($title, $program_id, $activeG, $teacher_id = null, $student_name = null, $is_today = null, $date_from = null, $date_to = null, $date_id = null, $branch_id = null) {
         $query = $this->with(['ctime', 'teacher', 'program']);
 
         if ($title) {
@@ -178,6 +188,10 @@ class Groups extends Model {
 
         if ($date_to) {
             $query->where('end_date', '<=', $date_to);
+        }
+
+        if ($branch_id) {
+            $query->where('groups.branch_id', $branch_id);
         }
 
         return $query->whereNull('deleted_at')->orderBy('id', 'desc')->get();

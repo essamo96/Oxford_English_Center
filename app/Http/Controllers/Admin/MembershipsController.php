@@ -289,6 +289,13 @@ class MembershipsController extends AdminController
         // Custom logic for today filter if provided
         $query = Students::askJoinQuery($filters);
 
+        // Branch filter — auto from BranchScope or explicit from UI (super admin)
+        $branchId = app(\App\Services\BranchContext::class)->getId()
+                 ?? ($request->get('branch_id') ?: null);
+        if ($branchId) {
+            $query->where('students.branch_id', $branchId);
+        }
+
         // Program-type filter: combine stored value with age-based truth so
         // mis-stored records (e.g. a child saved as adult) still filter correctly.
         if ($filters['program_type']) {
@@ -447,6 +454,19 @@ class MembershipsController extends AdminController
             return view('admin.dashboard.parts.status_askmembership', $data)->render();
         });
 
+        // Branch column
+        $datatable->addColumn('branch_name', function ($row) {
+            if ($row->branch) {
+                $colors = ['info', 'primary', 'success', 'warning'];
+                $color  = $colors[$row->branch->id % count($colors)];
+                return '<span class="badge badge-light-' . $color . ' fw-bold px-3 py-2">'
+                    . '<i class="bi bi-geo-fill me-1"></i>'
+                    . e($row->branch->name_ar)
+                    . '</span>';
+            }
+            return '<span class="badge badge-light-secondary text-muted px-3 py-2">—</span>';
+        });
+
         // Add actions column
         $datatable->addColumn('actions', function ($row) {
             $data['id'] = $row->id;
@@ -470,7 +490,7 @@ class MembershipsController extends AdminController
             return '';
         });
 
-        $datatable->rawColumns(['name', 'status', 'actions', 'checkbox', 'dob', 'join_date_fmt']);
+        $datatable->rawColumns(['name', 'status', 'actions', 'checkbox', 'dob', 'join_date_fmt', 'branch_name']);
 
         return $datatable->make(true);
     }

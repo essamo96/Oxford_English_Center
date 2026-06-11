@@ -30,6 +30,17 @@
                     <input class="form-check-input" type="checkbox" id="filter_placement_graded" name="placement_graded" value="1">
                     <span class="ms-2 fw-bold text-success fs-7"><i class="bi bi-award me-1"></i> تم رصد العلامة</span>
                 </label>
+                @if(!($isBranchScoped ?? false))
+                <div class="d-flex align-items-center gap-2 bg-light-primary px-3 py-2 rounded border border-primary border-dashed">
+                    <i class="bi bi-geo-fill text-primary fs-7"></i>
+                    <select id="branch_id_filter" class="form-select form-select-sm form-select-solid border-0 bg-transparent fw-bold text-primary" style="min-width:150px;" data-control="select2">
+                        <option value="">كل الفروع</option>
+                        @foreach($allBranches ?? [] as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -40,6 +51,7 @@
                 <tr class="text-center text-muted fw-bold fs-7 text-uppercase gs-0">
                     <th class="text-center w-50px"> # </th>
                     <th class="text-center"> الطالب </th>
+                    <th class="text-center"> الفرع </th>
                     <th class="text-center"> نوع الطلب </th>
                     <th class="text-center"> البرنامج / المجموعة </th>
                     <th class="text-center"> إجمالي المستحق </th>
@@ -310,7 +322,7 @@
 <script>
     var table;
     var tableId = 'pending_financial_table';
-    var filterFields = ['#filter_placement_only', '#filter_placement_graded'];
+    var filterFields = ['#filter_placement_only', '#filter_placement_graded', '#branch_id_filter'];
     // map: front id → backend param
     var filterParamMap = {
         'filter_placement_only': 'placement_test_only',
@@ -324,6 +336,7 @@
         { data: "total_due_amount", name: "total_due_amount", render: function(d){ return '<span class="fw-bold text-dark">'+d+' ILS</span>'; } },
         { data: "student_fee_paid", name: "student_fee_paid", render: function(d){ return '<span class="fw-bold text-success">'+d+' ILS</span>'; } },
         { data: "receipt", name: "receipt", orderable: false, searchable: false },
+        { data: "branch_name", name: "branch_name", orderable: false, searchable: false },
         { data: "created_at", name: "created_at" },
         { data: "actions", name: "actions", orderable: false, searchable: false }
     ];

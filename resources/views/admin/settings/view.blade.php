@@ -82,6 +82,51 @@
                     </div>
                 </div>
 
+                {{-- ===== Registration & Payment Settings ===== --}}
+                <div class="separator separator-dashed my-8"></div>
+                <h4 class="fw-bold text-gray-700 mb-6 d-flex align-items-center gap-2">
+                    <i class="ki-duotone ki-setting-3 fs-3 text-warning"><span class="path1"></span><span class="path2"></span></i>
+                    إعدادات التسجيل والمدفوعات
+                </h4>
+
+                <div class="row g-9 mb-8">
+                    <div class="col-md-4 fv-row">
+                        <label class="fs-6 fw-semibold mb-3 d-block">حالة التسجيل</label>
+                        <div class="d-flex flex-column gap-2">
+                            <label class="form-check form-switch form-check-custom form-check-solid bg-light-success rounded px-4 py-3 border border-success border-dashed">
+                                <input class="form-check-input h-25px w-45px" type="checkbox" name="registration_open" value="1" id="registration_open_toggle"
+                                    {{ ($info->registration_open ?? 1) ? 'checked' : '' }}>
+                                <span class="form-check-label fw-bold text-success fs-6 ms-3" id="reg_label">
+                                    {{ ($info->registration_open ?? 1) ? 'التسجيل مفتوح' : 'التسجيل مغلق' }}
+                                </span>
+                            </label>
+                            <small class="text-muted">عند الإغلاق، يرى الزوار رسالة مخصصة بدلاً من نموذج التسجيل</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 fv-row">
+                        <label class="fs-6 fw-semibold mb-3 d-block">إشعار الدفع</label>
+                        <div class="d-flex flex-column gap-2">
+                            <label class="form-check form-switch form-check-custom form-check-solid bg-light-info rounded px-4 py-3 border border-info border-dashed">
+                                <input class="form-check-input h-25px w-45px" type="checkbox" name="payment_required" value="1" id="payment_required_toggle"
+                                    {{ ($info->payment_required ?? 1) ? 'checked' : '' }}>
+                                <span class="form-check-label fw-bold text-info fs-6 ms-3" id="pay_label">
+                                    {{ ($info->payment_required ?? 1) ? 'إشعار الدفع مطلوب' : 'إشعار الدفع اختياري' }}
+                                </span>
+                            </label>
+                            <small class="text-muted">عند التفعيل، يُجبر الطالب على رفع إيصال الدفع عند التسجيل</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-9 mb-8" id="closed_message_row" style="{{ ($info->registration_open ?? 1) ? 'display:none' : '' }}">
+                    <div class="col-md-12 fv-row">
+                        <label class="fs-6 fw-semibold mb-2">رسالة إغلاق التسجيل <span class="text-muted">(تظهر للزوار عند إغلاق التسجيل)</span></label>
+                        <textarea name="registration_closed_message" class="form-control form-control-solid" rows="3"
+                            placeholder="مثال: التسجيل مغلق حالياً، سيُعاد فتحه قريباً. شكراً لتواصلكم.">{{ $info->registration_closed_message ?? '' }}</textarea>
+                    </div>
+                </div>
+
                 <div class="text-center pt-15">
                     <button type="submit" class="btn btn-primary px-15">حفظ التغييرات</button>
                 </div>
@@ -91,7 +136,24 @@
 @stop
 
 @section('js')
-
+<script>
+    $('#registration_open_toggle').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#reg_label').text('التسجيل مفتوح').removeClass('text-danger').addClass('text-success');
+            $('#closed_message_row').hide();
+        } else {
+            $('#reg_label').text('التسجيل مغلق').removeClass('text-success').addClass('text-danger');
+            $('#closed_message_row').show();
+        }
+    });
+    $('#payment_required_toggle').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#pay_label').text('إشعار الدفع مطلوب').removeClass('text-warning').addClass('text-info');
+        } else {
+            $('#pay_label').text('إشعار الدفع اختياري').removeClass('text-info').addClass('text-warning');
+        }
+    });
+</script>
 @stop
 
 @section('modals')

@@ -637,7 +637,7 @@ function validateCurrentStep() {
     let isValid = true;
 
     if (currentStep === 1) {
-        const fieldsStep1 = ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address'];
+        const fieldsStep1 = ['name', 'name_en', 'mobile', 'email', 'dob', 'gender', 'address', 'branch_id'];
         if (selectedProgramType === 'adult') fieldsStep1.push('major');
         fieldsStep1.forEach(f => {
             const el = $(`[name="${f}"]`);

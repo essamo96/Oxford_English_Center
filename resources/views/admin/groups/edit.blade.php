@@ -37,6 +37,25 @@
             <form role="form" method="post" action="" class="form d-flex flex-column gap-7" enctype="multipart/form-data">
                 {{ csrf_field() }}
 
+                @if(!$isBranchScoped)
+                <div class="row g-9 mb-8">
+                    <div class="col-md-6 fv-row">
+                        <label class="fs-6 fw-semibold mb-2">الفرع <span class="text-danger">*</span></label>
+                        <select name="branch_id" id="branch_id" data-control="select2" data-placeholder="اختر الفرع..."
+                            class="form-select form-select-solid">
+                            <option></option>
+                            @foreach($allBranches as $branch)
+                                <option value="{{ $branch->id }}" {{ $info->branch_id == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name_ar }} ({{ $branch->name_en }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                @else
+                    <input type="hidden" name="branch_id" value="{{ auth()->guard('admin')->user()->branch_id }}">
+                @endif
+
                 <div class="row g-9 mb-8">
                     <div class="col-md-6 fv-row">
                         <label class="fs-6 fw-semibold mb-2">اسم المجموعة</label>

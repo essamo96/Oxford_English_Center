@@ -91,10 +91,20 @@ class AdminController extends BaseController
         self::$data['notify_contacts'] = \App\Models\Contacts::where('status', 0)->latest()->take(5)->get();
 
         // Original list variables (standardized names)
+        // Groups and Students are auto-scoped by BranchScope when a branch admin is logged in
         self::$data['Programs'] = Programs::whereNull('deleted_at')->get();
         self::$data['Groups'] = Groups::whereNull('deleted_at')->get();
         self::$data['teachers'] = Teachers::whereNull('deleted_at')->get();
         self::$data['Students'] = Students::whereNull('deleted_at')->get();
         self::$data['GroupStudents'] = GroupStudents::distinct('group_id')->whereNull('deleted_at')->get();
+
+        // Branch context for views
+        self::$data['allBranches'] = \App\Models\Branch::where('status', 1)->orderBy('name_ar')->get();
+        self::$data['activeBranch'] = app(\App\Services\BranchContext::class)->getBranch();
+        self::$data['isBranchScoped'] = app(\App\Services\BranchContext::class)->isScoped();
+
+        // Site settings (cached) — available in all admin views
+        $siteSettings = \Cache::remember('site_settings', 300, fn() => \App\Models\Settings::find(1));
+        self::$data['siteSettings'] = $siteSettings;
     }
 }

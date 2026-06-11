@@ -83,6 +83,27 @@
                 </div>
             </div>
 
+            {{-- Branch selector --}}
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الفرع <span class="text-danger">*</span></label>
+                    @if(isset($isBranchScoped) && $isBranchScoped)
+                        <div class="form-control form-control-solid bg-light-info d-flex align-items-center gap-2">
+                            <i class="bi bi-geo-fill text-info"></i>
+                            <span class="fw-bold text-info">{{ $activeBranch->name_ar ?? '—' }}</span>
+                        </div>
+                        <input type="hidden" name="branch_id" value="{{ auth()->guard('admin')->user()->branch_id }}">
+                    @else
+                        <select name="branch_id" data-control="select2" data-placeholder="اختر الفرع..." class="form-select form-select-solid" required>
+                            <option value="">اختر الفرع...</option>
+                            @foreach($allBranches ?? [] as $branch)
+                                <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name_ar }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+            </div>
+
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">
                     <label class="fs-6 fw-semibold mb-2">اضافة الي مجموعة<span class="text-danger"> *</span></label>

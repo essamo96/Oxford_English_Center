@@ -87,6 +87,17 @@
                 </div>
             </div>
 
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">تاريخ بدء التسجيل</label>
+                    <input type="date" name="registration_start" value="{{ old('registration_start') }}" class="form-control form-control-solid">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">تاريخ انتهاء التسجيل</label>
+                    <input type="date" name="registration_end" value="{{ old('registration_end') }}" class="form-control form-control-solid">
+                </div>
+            </div>
+
             <div class="card-footer d-flex justify-content-end py-6 px-9">
                 <a href="{{ route('programs.view') }}" class="btn btn-light btn-active-light-primary me-2">إلغاء</a>
                 <button type="submit" class="btn btn-primary">حفظ</button>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Categories;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 
 class DashboardController extends AdminController
@@ -24,11 +25,17 @@ class DashboardController extends AdminController
         $categories = new Categories();
         parent::$data['categories'] = $categories->getCategoriesWithNewsCount();
 
-        // Advanced Statistics
-        $groups = \App\Models\Groups::whereNull('deleted_at')->get();
-        $teachers = \App\Models\Teachers::whereNull('deleted_at')->get();
-        $students = \App\Models\Students::whereNull('deleted_at')->get();
-        $groupStudentsCount = \App\Models\GroupStudents::whereNull('deleted_at')->count();
+        // Advanced Statistics — scoped to branch when admin has branch_id
+        $branchId = app(\App\Services\BranchContext::class)->getId();
+
+        $groups   = \App\Models\Groups::whereNull('deleted_at')->get();   // BranchScope auto-applies
+        $teachers = \App\Models\Teachers::whereNull('deleted_at')->get(); // BranchScope auto-applies
+        $students = \App\Models\Students::whereNull('deleted_at')->get(); // BranchScope auto-applies
+
+        // GroupStudents count scoped by branch when needed
+        $groupStudentsCount = \App\Models\GroupStudents::whereNull('deleted_at')
+            ->when($branchId, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('branch_id', $branchId)))
+            ->count();
 
         parent::$data['total_groups'] = $groups->count();
         parent::$data['active_groups_count'] = $groups->where('status', 1)->count();
@@ -37,13 +44,13 @@ class DashboardController extends AdminController
         parent::$data['delayed_students_count'] = $students->where('delaying', 1)->count();
         parent::$data['inactive_students_count'] = $students->where('status', 0)->count();
         parent::$data['total_teachers_count'] = $teachers->count();
-        
+
         // Avg Students per Group
-        parent::$data['avg_students_per_group'] = parent::$data['total_groups'] > 0 
-            ? round($groupStudentsCount / parent::$data['total_groups'], 1) 
+        parent::$data['avg_students_per_group'] = parent::$data['total_groups'] > 0
+            ? round($groupStudentsCount / parent::$data['total_groups'], 1)
             : 0;
 
-        // Most Active Teacher (Teacher with most active groups)
+        // Most Active Teacher (Teacher with most active groups) — scoped
         $mostActiveTeacher = \App\Models\Groups::whereNull('deleted_at')
             ->where('status', 1)
             ->select('teacher_id', \DB::raw('count(*) as total'))
@@ -60,9 +67,8 @@ class DashboardController extends AdminController
             parent::$data['most_active_teacher_count'] = 0;
         }
 
-        // Groups Today (Requires parsing Times. Need to be smart here)
-        $todayName = \Carbon\Carbon::now()->format('l'); // e.g. "Monday"
-        // This is a bit complex due to string storage "Saturday - Monday", so we might just approximate or do a collection filter
+        // Groups Today — scoped
+        $todayName = \Carbon\Carbon::now()->format('l');
         $times = \App\Models\Times::where('status', 1)->get();
         $todayTimeIds = $times->filter(function($t) use ($todayName) {
             return stripos($t->days, $todayName) !== false;
@@ -70,7 +76,7 @@ class DashboardController extends AdminController
 
         parent::$data['groups_today_count'] = $groups->whereIn('date_id', $todayTimeIds)->where('status', 1)->count();
 
-        // Weekly Schedule Logic for Premium Dashboard
+        // Weekly Schedule — scoped via BranchScope on Groups
         $daysMapping = [
             'Monday' => 'الاثنين',
             'Tuesday' => 'الثلاثاء',
@@ -97,9 +103,10 @@ class DashboardController extends AdminController
         parent::$data['weekly_schedule'] = $weeklySchedule;
         parent::$data['all_active_groups'] = $allActiveGroups;
 
-        // Course Progress Data (Top Programs)
-        parent::$data['course_progress'] = \App\Models\Programs::withCount(['grope as active_groups_count' => function($q) {
-            $q->where('status', 1);
+        // Course Progress — scoped: count active groups per program filtered by branch
+        parent::$data['course_progress'] = \App\Models\Programs::withCount(['grope as active_groups_count' => function($q) use ($branchId) {
+            $q->where('status', 1)
+              ->when($branchId, fn($sq) => $sq->where('branch_id', $branchId));
         }])
         ->where('status', 1)
         ->orderBy('active_groups_count', 'desc')

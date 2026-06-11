@@ -192,12 +192,26 @@ class RolesController extends AdminController
         $roles = new Roles();
         $info = $roles->getRole($id);
         if ($info) {
-            parent::$data['btn_primary'] = 'btn-success';
-            $permission_group = new PermissionsGroup();
-            parent::$data['permission_group'] = $permission_group->getAllPermissionGroup();
+            // Order: view → edit → add → status → delete, then any custom actions
+            $actionOrder = "FIELD(SUBSTRING_INDEX(name, '.', -1),'view','edit','add','status','delete','verify','refund','reply')";
+
+            $permissionGroups = PermissionsGroup::where('status', 1)
+                ->where('parent_id', 0)
+                ->orderByRaw('COALESCE(sort, 9999) ASC')
+                ->with([
+                    'permissions' => fn($q) => $q->orderByRaw($actionOrder),
+                    'mychild'     => fn($q) => $q->where('status', 1)->orderBy('sort')
+                        ->with(['permissions' => fn($pq) => $pq->orderByRaw($actionOrder)]),
+                ])
+                ->get();
+
             $role_has_permissions = new RoleHasPermissions();
-            parent::$data['role_permissions'] = $role_has_permissions->getRoleHasPermissionsByRoleId($id);
-            parent::$data['info'] = $info;
+
+            parent::$data['btn_primary']      = 'btn-success';
+            parent::$data['permission_groups'] = $permissionGroups;
+            parent::$data['role_permissions']  = $role_has_permissions->getRoleHasPermissionsByRoleId($id);
+            parent::$data['info']              = $info;
+
             return view('admin.' . $this->path . '.permissions', parent::$data);
         } else {
             $request->session()->flash('danger', self::NOT_FOUND);

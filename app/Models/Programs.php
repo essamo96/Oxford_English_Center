@@ -14,6 +14,7 @@ class Programs extends Model {
     protected $fillable = [
         'title', 'short', 'exam', 'status', 'image',
         'min_payment_percent', 'min_payment_fixed',
+        'registration_start', 'registration_end',
     ];
 
     /**

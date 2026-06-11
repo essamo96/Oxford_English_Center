@@ -11,6 +11,7 @@ use App\Models\Programs;
 use App\Models\FeeSettings;
 use App\Models\PlacementTests;
 use App\Models\PaymentMethods;
+use App\Models\Branch;
 use App\Models\Times;
 use App\Models\Contacts;
 use App\Mail\WelcomeStudentMail;
@@ -29,6 +30,16 @@ class RegistrationController extends Controller
      */
     public function showRegistrationForm($type = 'adults')
     {
+        $siteSettings = \Cache::remember('site_settings', 300, fn() => \App\Models\Settings::find(1));
+        if ($siteSettings && !$siteSettings->registration_open) {
+            $message = $siteSettings->registration_closed_message
+                ?: 'التسجيل مغلق حالياً. سنعلن عن موعد إعادة الفتح قريباً.';
+            return view('frontend.contact.registration_closed', ['message' => $message]);
+        }
+
+        // Also pass payment_required flag to the booking view
+        self::$data['payment_required'] = $siteSettings ? (bool) $siteSettings->payment_required : true;
+
         self::$data['type']            = $type;
         self::$data['payment_methods'] = PaymentMethods::where('is_active', 1)
             ->get()
@@ -51,6 +62,7 @@ class RegistrationController extends Controller
                   ->where('fee_settings.amount', '>', 0);
             })
             ->get();
+        self::$data['branches']        = Branch::where('status', 1)->orderBy('name_ar')->get();
         self::$data['groups']          = Groups::where('status', 1)->get();
         self::$data['placement_times'] = Times::where('status', 1)
             ->where('is_placement_test', 1)
@@ -73,6 +85,12 @@ class RegistrationController extends Controller
     /**
      * AJAX: check if email exists in students table
      */
+    private function isPaymentReceiptRequired(): bool
+    {
+        $settings = \Cache::remember('site_settings', 300, fn() => \App\Models\Settings::find(1));
+        return $settings ? (bool) $settings->payment_required : true;
+    }
+
     public function checkEmail(Request $request)
     {
         $email = $request->query('email');
@@ -111,7 +129,9 @@ class RegistrationController extends Controller
             'health_notes' => 'required_if:health_status,yes',
             'payment_method_id' => 'required',
             'student_fee_paid' => 'required|numeric|min:0',
-            'payment_receipt' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'payment_receipt' => $this->isPaymentReceiptRequired()
+                ? 'required|file|mimes:jpeg,png,jpg,pdf|max:2048'
+                : 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
         ];
 
         // Path Specific Rules
@@ -176,6 +196,7 @@ class RegistrationController extends Controller
                 'program_type' => $effectiveProgramType,
                 'requested_program_type' => $request->program_type, // original applicant choice (before age-routing)
                 'enrollment_type' => $request->enrollment_type, // 'test' | 'course'
+                'branch_id' => $request->branch_id,
                 'health_conditions' => $request->health_notes,
                 'note' => $request->general_notes,
                 'join_date' => now()->toDateString(),

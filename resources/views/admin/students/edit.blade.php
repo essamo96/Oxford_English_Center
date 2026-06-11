@@ -29,7 +29,31 @@
         @include('admin.layout.masterLayouts.error')
         <form role="form" method="post" action="" class="form d-flex flex-column gap-7">
             {{ csrf_field() }}
-            
+
+            {{-- Branch indicator / selector --}}
+            <div class="row g-9 mb-6">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">
+                        <i class="bi bi-geo-fill text-info me-1"></i> الفرع
+                    </label>
+                    @if($isBranchScoped)
+                        <div class="form-control form-control-solid bg-light-info fw-bold d-flex align-items-center gap-2" style="color:var(--bs-info);">
+                            <i class="bi bi-geo-fill"></i> {{ $activeBranch->name_ar ?? '—' }}
+                        </div>
+                        <input type="hidden" name="branch_id" value="{{ $info->branch_id }}">
+                    @else
+                        <select name="branch_id" class="form-select form-select-solid" data-control="select2" data-placeholder="— بدون فرع —">
+                            <option value="">— بدون فرع —</option>
+                            @foreach($allBranches as $branch)
+                                <option value="{{ $branch->id }}" {{ $info->branch_id == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name_ar }} ({{ $branch->name_en }})
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+            </div>
+
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">
                     <label class="fs-6 fw-semibold mb-2">الاسم</label>

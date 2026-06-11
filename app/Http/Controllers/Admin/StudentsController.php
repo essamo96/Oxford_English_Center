@@ -151,6 +151,7 @@ class StudentsController extends AdminController
             'date_to'            => $request->get('date_to'),
             'is_today'           => $request->get('is_today'),
             'is_activated_today' => $request->get('is_activated_today'),
+            'branch_id'          => $request->get('branch_id'),
         ];
 
         $info = Students::searchReportQuery($filters);
@@ -261,6 +262,18 @@ class StudentsController extends AdminController
             return '
                 <a  onclick="addnote(' . $student_id . ')" id="addNoteBtn" data-data="' . $note . '" class="btn btn-primary btn-sm  addNoteBtn" >
                     <i class="bi bi-journal-check"></i>  ملاحظة </a>';
+        });
+
+        $datatable->addColumn('branch_name', function ($row) {
+            if ($row->branch) {
+                $colors = ['info', 'primary', 'success', 'warning'];
+                $color  = $colors[$row->branch->id % count($colors)];
+                return '<span class="badge badge-light-' . $color . ' fw-bold px-3 py-2">'
+                    . '<i class="bi bi-geo-fill me-1"></i>'
+                    . e($row->branch->name_ar)
+                    . '</span>';
+            }
+            return '<span class="badge badge-light-secondary fw-bold px-3 py-2 text-muted">—</span>';
         });
 
         $datatable->addColumn('actions', function ($row) {
@@ -404,9 +417,13 @@ class StudentsController extends AdminController
             // Safety net — re-stamp join_date + program_type after addStudent in case
             // the positional signature reset them.
             if ($add && $students->id) {
+                $branchId = app(\App\Services\BranchContext::class)->isScoped()
+                    ? auth()->guard('admin')->user()->branch_id
+                    : ($request->get('branch_id') ?: null);
                 $students->newQuery()->where('id', $students->id)->update([
                     'join_date'    => $join_date,
                     'program_type' => $programType,
+                    'branch_id'    => $branchId,
                 ]);
             }
             if ($add) {
@@ -520,11 +537,16 @@ class StudentsController extends AdminController
                 $username = $this->split_myString($mobile);
                 $password = $this->split_myString($mobile);
                 $update = $students->updateStudent($info, $name, $username, Hash::make($password), $mobile, $dob, $job, $email, $join_date, $exam_date, $exam_degree, $status);
-                // Re-stamp join_date + age-derived program_type after legacy update call
-                $students->newQuery()->where('id', $id)->update([
+                // Re-stamp join_date + age-derived program_type + branch_id after legacy update call
+                $updateData = [
                     'join_date'    => $join_date,
                     'program_type' => $programType,
-                ]);
+                ];
+                $branchId = $request->get('branch_id');
+                if (!app(\App\Services\BranchContext::class)->isScoped()) {
+                    $updateData['branch_id'] = $branchId ?: null;
+                }
+                $students->newQuery()->where('id', $id)->update($updateData);
                 if ($update) {
 
                     session()->flash('success', self::UPDATE_SUCCESS);

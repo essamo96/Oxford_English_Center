@@ -61,6 +61,17 @@
                     <option value="adult">كبار (&gt; 15 سنة)</option>
                 </select>
             </div>
+            @if(!($isBranchScoped ?? false))
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-gray-700">الفرع</label>
+                <select id="branch_id_filter" class="form-select" data-control="select2">
+                    <option value="">كل الفروع</option>
+                    @foreach($allBranches ?? [] as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div class="col-md-1 d-flex align-items-end">
                 <button type="button" class="btn btn-light-danger w-100" onclick="resetFilters()" title="مسح الفلاتر">
                     <i class="ki-duotone ki-trash fs-4"></i>
@@ -246,7 +257,7 @@
     }
     var table;
     var tableId = 'placement_tests_table';
-    var filterFields = ['#search_text', '#test_date', '#test_time', '#program_type', '#gender', '#age_group'];
+    var filterFields = ['#search_text', '#test_date', '#test_time', '#program_type', '#gender', '#age_group', '#branch_id_filter'];
     
     var columns = [
         { 

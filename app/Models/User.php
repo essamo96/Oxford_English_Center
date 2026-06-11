@@ -13,7 +13,7 @@ class User extends Authenticatable
     //////////////////////////////////////////////
     protected $table = 'users';
     protected $fillable = [
-        'username', 'name', 'email', 'role', 'created_by', 'password', 'status', 'image', 'last_login_at'
+        'username', 'name', 'email', 'role', 'created_by', 'password', 'status', 'image', 'last_login_at', 'branch_id'
     ];
     protected $hidden = [
         'password', 'remember_token',
@@ -25,6 +25,11 @@ class User extends Authenticatable
     public function user()
     {
         return $this->belongsTo('App\Models\User', 'created_by');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(\App\Models\Branch::class, 'branch_id');
     }
 
     //////////////////////////////////////////////

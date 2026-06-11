@@ -118,6 +118,19 @@
                     <label class="form-label fw-semibold fs-7">إلى تاريخ</label>
                     <input type="text" id="date_to" name="date_to" class="form-control form-control-solid form-control-sm date-picker" placeholder="اختر ...">
                 </div>
+                @if(!($isBranchScoped ?? false))
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label fw-semibold fs-7">
+                        <i class="bi bi-geo-fill text-info me-1"></i> الفرع
+                    </label>
+                    <select id="branch_id_filter" name="branch_id" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="كل الفروع">
+                        <option value="">كل الفروع</option>
+                        @foreach($allBranches ?? [] as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
             </form>
         </div>
     </div>
@@ -157,6 +170,7 @@
                             </th>
                             <th class="min-w-250px text-start align-middle"> الطالب </th>
                             <th class="min-w-125px text-center align-middle"> الجوال </th>
+                            <th class="min-w-110px text-center align-middle"> الفرع </th>
                             <th class="min-w-140px text-center align-middle"> تاريخ الميلاد / العمر </th>
                             <th class="min-w-140px text-center align-middle"> تاريخ الانضمام </th>
                             <th class="min-w-100px text-center align-middle"> الحالة </th>
@@ -226,13 +240,14 @@
         { data: "checkbox", name: "checkbox", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "name", name: "name", className: "text-start align-middle" },
         { data: "mobile", name: "mobile", className: "text-center align-middle" },
+        { data: "branch_name", name: "branch_name", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "dob", name: "dob", className: "text-center align-middle" },
         { data: "join_date_fmt", name: "join_date_fmt", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "status", name: "status", orderable: false, searchable: false, className: "text-center align-middle" },
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center align-middle" }
     ];
 
-    var filterFields = ['#search', '#gender', '#program_type', '#enrollment_type', '#anomaly', '#date_from', '#date_to', '#is_today'];
+    var filterFields = ['#search', '#gender', '#program_type', '#enrollment_type', '#anomaly', '#date_from', '#date_to', '#is_today', '#branch_id_filter'];
 
     $(document).ready(function() {
         // Initialize flatpickr

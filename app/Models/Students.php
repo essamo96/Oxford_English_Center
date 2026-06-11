@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Traits\HasRoles;
+use App\Scopes\BranchScope;
 use Carbon\Carbon;
 
 class Students extends Authenticatable
@@ -48,11 +49,23 @@ class Students extends Authenticatable
         'address',
         'health_conditions',
         'delay_cusess',
-        'note'
+        'note',
+        'branch_id',
     ];
     protected $hidden = [
         'password'
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new BranchScope());
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
     public function messages()
     {
         return $this->hasMany('App\Models\Students_Admin_Messages', 'student_id', 'id');
@@ -383,6 +396,7 @@ class Students extends Authenticatable
             $gender   = trim($filters['gender'] ?? '');
 
             $query = self::query()
+                ->with('branch')
                 ->where('status', 0)
                 ->whereNull('deleted_at')
                 ->select(
@@ -401,6 +415,7 @@ class Students extends Authenticatable
                     'join_date',
                     'parent_id',
                     'image',
+                    'branch_id',
                     'created_at'
                 )
                 ->orderByDesc('id');
@@ -556,6 +571,11 @@ class Students extends Authenticatable
                     });
                 }
             });
+        }
+
+        // Branch Filter
+        if (!empty($filters['branch_id'])) {
+            $query->where('students.branch_id', $filters['branch_id']);
         }
 
         return $query->orderByDesc('id');

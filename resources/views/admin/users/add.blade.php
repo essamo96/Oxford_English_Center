@@ -109,6 +109,22 @@
 
                 <div class="row g-9 mb-8">
                     <div class="col-md-6 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">الفرع</label>
+                        <select class="form-select form-select-solid" name="branch_id" data-control="select2" data-placeholder="السوبر أدمن (بدون فرع)">
+                            <option value="">السوبر أدمن — يرى جميع الفروع</option>
+                            @foreach($allBranches as $branch)
+                                <option value="{{ $branch->id }}"
+                                    {{ ($info && $info->branch_id == $branch->id) ? 'selected' : '' }}>
+                                    {{ $branch->name_ar }} ({{ $branch->name_en }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">اتركه فارغاً لمنح صلاحية الوصول لجميع الفروع</div>
+                    </div>
+                </div>
+
+                <div class="row g-9 mb-8">
+                    <div class="col-md-6 fv-row">
                         <label class="d-flex align-items-center fs-6 fw-semibold mb-2">@lang('app.status')</label>
                         <div class="form-check form-switch form-check-custom form-check-solid">
                             @php $data = $info ? $info->status : old('status'); @endphp

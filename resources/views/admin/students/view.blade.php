@@ -84,6 +84,18 @@
                     </select>
                 </div>
                 
+                @if(!$isBranchScoped)
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <label class="form-label fw-semibold text-gray-700">الفرع</label>
+                    <select class="form-select form-select-solid searchable" name="branch_id" id="branch_id_filter" data-control="select2" data-placeholder="كل الفروع">
+                        <option value="">كل الفروع</option>
+                        @foreach($allBranches as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+
                 <input type="hidden" name="is_today" id="is_today" class="searchable" value="">
                 <input type="hidden" name="is_activated_today" id="is_activated_today" class="searchable" value="">
 
@@ -138,6 +150,7 @@
                         </th>
                         <th class="min-w-100px"> الطالب </th>
                         <th class="min-w-80px text-center">الجوال</th>
+                        <th class="min-w-100px text-center">الفرع</th>
                         <th class="min-w-120px text-center">التخصص</th>
                         <th class="min-w-80px text-center"> الحالة </th>
                         <th class="min-w-80px text-center"> مؤجل </th>
@@ -204,6 +217,7 @@
         { data: "checkbox", name: "checkbox", orderable: false, searchable: false },
         { data: "name", name: "name", orderable: true },
         { data: "mobile", name: "mobile" },
+        { data: "branch_name", name: "branch_name", orderable: false, searchable: false, className: "text-center" },
         // { data: "email", name: "email" }, // Consolidated into Name column
         { data: "job", name: "job" },
         { data: "status", name: "status", orderable: true, searchable: false },
@@ -212,7 +226,7 @@
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center" }
     ];
 
-    var filterFields = ['#title', '#activeS', '#gender', '#delaying', '#teacher_id', '#group_id', '#date_from', '#date_to', '#is_today', '#is_activated_today'];
+    var filterFields = ['#title', '#activeS', '#gender', '#delaying', '#teacher_id', '#group_id', '#branch_id_filter', '#date_from', '#date_to', '#is_today', '#is_activated_today'];
 
     $(document).ready(function() {
         // Quick Filters logic

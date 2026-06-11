@@ -39,6 +39,24 @@
                         </div>
                     </div>
                 </div>
+                <!--begin::Branch Indicator-->
+                @if(isset($isBranchScoped) && $isBranchScoped && isset($activeBranch) && $activeBranch)
+                <div class="app-navbar-item ms-1 ms-md-3">
+                    <span class="badge badge-light-info fs-7 fw-bold px-4 py-2 d-flex align-items-center gap-2">
+                        <i class="ki-duotone ki-geolocation fs-5 text-info"><span class="path1"></span><span class="path2"></span></i>
+                        {{ $activeBranch->name_ar }}
+                    </span>
+                </div>
+                @elseif(!isset($isBranchScoped) || !$isBranchScoped)
+                <div class="app-navbar-item ms-1 ms-md-3">
+                    <span class="badge badge-light-success fs-7 fw-bold px-4 py-2 d-flex align-items-center gap-2" title="تعرض جميع الفروع">
+                        <i class="ki-duotone ki-geolocation fs-5 text-success"><span class="path1"></span><span class="path2"></span></i>
+                        كل الفروع
+                    </span>
+                </div>
+                @endif
+                <!--end::Branch Indicator-->
+
                 <!--begin::Notifications-->
                 <div class="app-navbar-item ms-1 ms-md-3">
                     <div class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-30px h-30px w-md-40px h-md-40px position-relative" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Scopes\BranchScope;
 
 class Teachers extends Authenticatable {
 
@@ -15,11 +16,21 @@ class Teachers extends Authenticatable {
 
     protected $table = 'teachers';
     protected $fillable = [
-        'title', 'img', 'url', 'status', 'user_id', 'image', 'evaluations'
+        'title', 'img', 'url', 'status', 'user_id', 'image', 'evaluations', 'branch_id'
     ];
     protected $hidden = [
         '',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new BranchScope());
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(\App\Models\Branch::class, 'branch_id');
+    }
     // public function groups()
     // {
     //     return $this->belongsTo('App\Models\Groups', 'id', 'teacher_id');
@@ -116,20 +127,13 @@ class Teachers extends Authenticatable {
 
 //////////////////////////////////////////////
     //////////////////////////////////////////////
-    function getSearchTeachers($title,$activeT) {
+    function getSearchTeachers($title, $activeT, $branchId = null) {
         return $this
-        ->where(function($query) use ($title) {
-                            if ($title != "") {
-                                $query->where('name', 'LIKE', '%' . $title . '%');
-                            }
-                        })
-        ->where(function($query) use ($activeT) {
-                            if ($activeT != "") {
-                                $query->where('status', $activeT);
-                            }
-                        })
-                        ->orderBy('id', 'desc')
-                        ->get();
+            ->when($title, fn($q) => $q->where('name', 'LIKE', '%' . $title . '%'))
+            ->when($activeT !== null && $activeT !== '', fn($q) => $q->where('status', $activeT))
+            ->when($branchId, fn($q) => $q->where('teachers.branch_id', $branchId))
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     public function messages()

@@ -64,6 +64,19 @@
                     </select>
                 </div>
 
+                <!-- Branch Filter (Super Admin only) -->
+                @if(isset($isBranchScoped) && !$isBranchScoped)
+                <div class="col-lg-3 col-md-6 fv-row">
+                    <label class="form-label fw-bold">الفرع</label>
+                    <select id="branch_id_filter" name="branch_id" class="form-select form-select-solid" data-control="select2" data-placeholder="كل الفروع">
+                        <option value=""></option>
+                        @foreach($allBranches ?? [] as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+
                 <!-- Date Range & Time -->
                 <div class="col-lg-6 col-md-12 fv-row">
                     <label class="form-label fw-bold">تاريخ البدء & الوقت</label>
@@ -174,6 +187,7 @@
                                 </div>
                             </th>
                             <th class="min-w-120px"> اسم المجموعة </th>
+                            <th class="min-w-100px"> الفرع </th>
                             <th class="min-w-120px"> المدرس </th>
                             <th class="min-w-120px"> البرنامج </th>
                             <th class="min-w-130px"> الطلاب </th>
@@ -1032,6 +1046,11 @@
                 orderable: true
             },
             {
+                data: "branch_name",
+                name: "branch_name",
+                title: "الفرع"
+            },
+            {
                 data: "teacher_name",
                 name: "teacher_name"
             },
@@ -1069,7 +1088,7 @@
             }
         ];
 
-        var filterFields = ['#title', '#activeG', '#program_id', '#teacher_id', '#student_name', '#is_today', '#date_from', '#date_to', '#date_id'];
+        var filterFields = ['#title', '#activeG', '#program_id', '#teacher_id', '#student_name', '#is_today', '#date_from', '#date_to', '#date_id', '#branch_id_filter'];
 
         $(document).ready(function() {
             // Select2 with Images Utility

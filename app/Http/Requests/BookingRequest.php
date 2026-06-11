@@ -20,6 +20,7 @@ class BookingRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'branch_id'    => 'required|exists:branches,id',
             'program_type' => 'required|in:adult,kids',
             'name' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -60,6 +61,8 @@ class BookingRequest extends FormRequest
         return [
             'name.required' => 'الاسم الرباعي بالعربي مطلوب',
             'name_en.required' => 'الاسم الرباعي بالإنجليزي مطلوب',
+            'branch_id.required'    => 'يرجى اختيار الفرع',
+            'branch_id.exists'      => 'الفرع المختار غير صالح',
             'program_type.required' => 'يرجى اختيار البرنامج',
             'payment_receipt.mimes' => 'يجب أن يكون الملف صورة (jpg, png, webp) أو ملف PDF',
             'payment_receipt.max' => 'حجم الملف يجب أن لا يتجاوز 5 ميجابايت',

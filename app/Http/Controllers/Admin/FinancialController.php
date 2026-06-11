@@ -58,6 +58,13 @@ class FinancialController extends AdminController
             $query->where('student_paid_type', 'like', '%Placement Test%');
         }
 
+        // Branch filter
+        $branchId = app(\App\Services\BranchContext::class)->getId()
+                 ?? ($request->get('branch_id') ?: null);
+        if ($branchId) {
+            $query->whereHas('student', fn($q) => $q->where('branch_id', $branchId));
+        }
+
         return DataTables::of($query)
             ->addColumn('student', function ($row) {
                 return $row->student ? $row->student->name : 'N/A';
@@ -137,6 +144,18 @@ class FinancialController extends AdminController
                     return $row->created_at;
                 }
             })
+            ->addColumn('branch_name', function ($row) {
+                $branch = $row->student->branch ?? null;
+                if ($branch) {
+                    $colors = ['info', 'primary', 'success', 'warning'];
+                    $color  = $colors[$branch->id % count($colors)];
+                    return '<span class="badge badge-light-' . $color . ' fw-bold px-2 py-1">'
+                        . '<i class="bi bi-geo-fill me-1"></i>'
+                        . e($branch->name_ar)
+                        . '</span>';
+                }
+                return '<span class="badge badge-light-secondary text-muted px-2 py-1">—</span>';
+            })
             ->addColumn('actions', function ($row) {
                 // Pick the program the applicant actually chose at registration time.
                 // Stored directly on the fee row now; fall back to the student record for legacy data.
@@ -149,7 +168,7 @@ class FinancialController extends AdminController
                 return '<button data-id="'.$row->id.'" data-claimed="'.$row->student_fee_paid.'" data-total="'.$row->total_due_amount.'" data-program="'.$pId.'" data-group="'.$gId.'" data-group-name="'.$gName.'" data-payment="'.$pmId.'" data-student="'.$sId.'" data-type="'.e($type).'" class="btn btn-sm btn-success btn-verify">تأكيد</button>
                         <button data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-refund">رفض</button>';
             })
-            ->rawColumns(['receipt','student', 'actions', 'created_at', 'program_group'])
+            ->rawColumns(['receipt','student', 'actions', 'created_at', 'program_group', 'branch_name'])
             ->make(true);
     }
 

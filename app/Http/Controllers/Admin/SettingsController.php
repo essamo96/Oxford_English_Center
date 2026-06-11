@@ -62,6 +62,9 @@ class SettingsController extends AdminController {
             $happy = $request->get('happy');
             $tickects = $request->get('tickects');
             $contact_email = $request->get('contact_email');
+            $payment_required = $request->get('payment_required', 0) ? 1 : 0;
+            $registration_open = $request->get('registration_open', 0) ? 1 : 0;
+            $registration_closed_message = $request->get('registration_closed_message');
 
             $validator = Validator::make([
                         'title' => $title,
@@ -91,9 +94,10 @@ class SettingsController extends AdminController {
                 $request->session()->flash('danger', $validator->messages());
                 return redirect(route('settings.view'))->withInput();
             } else {
-                $update = $settings->updateSettings($info, $title, $description, $more_desc, $tags, $mobile, $address, $donars, $clients, $happy, $tickects, $contact_email);
+                $update = $settings->updateSettings($info, $title, $description, $more_desc, $tags, $mobile, $address, $donars, $clients, $happy, $tickects, $contact_email, $payment_required, $registration_open, $registration_closed_message);
                 if ($update) {
                     Cache::forget('settings');
+                    Cache::forget('site_settings');
                     $info = $settings->getSetting(1);
                     Cache::forever('mysettings', $info);
                     ////////////////////////////////////////////

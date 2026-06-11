@@ -149,6 +149,11 @@ class UsersController extends AdminController
             $user = new User();
             $add = $user->addUser($username, $name, $email, $role, Auth::guard('admin')->user()->id, Hash::make($password), $status, $imagePath);
             if ($add) {
+                $branchId = $request->get('branch_id') ?: null;
+                if ($branchId) {
+                    $add->branch_id = $branchId;
+                    $add->save();
+                }
                 $roles = new Roles();
                 $new_info = $roles->getRole($role);
                 if ($new_info) {
@@ -251,6 +256,9 @@ class UsersController extends AdminController
 
                 $update = $user->updateUser($info, $username, $name, $email, $role, $status, $imagePath);
                 if ($update) {
+                    $branchId = $request->get('branch_id');
+                    $info->branch_id = $branchId ?: null;
+                    $info->save();
                     $roles = new Roles();
                     $new_info = $roles->getRole($role);
                     if ($new_info) {

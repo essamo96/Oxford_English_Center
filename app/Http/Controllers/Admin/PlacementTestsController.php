@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\PlacementTests;
 use App\Mail\PlacementTestMail;
 use App\Mail\PaymentConfirmationMail;
@@ -10,19 +9,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
 
-class PlacementTestsController extends Controller
+class PlacementTestsController extends AdminController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        parent::$data['active_menu'] = 'placement_tests';
+    }
+
     public function getIndex()
     {
-        return view('admin.placement_tests.index');
+        return view('admin.placement_tests.index', parent::$data);
     }
 
     public function getList(Request $request)
     {
+        $branchId = app(\App\Services\BranchContext::class)->getId()
+                 ?? ($request->get('branch_id') ?: null);
+
         $tests = PlacementTests::with(['student', 'paymentMethod'])
             ->select('placement_tests.*')
             ->join('students', 'placement_tests.student_id', '=', 'students.id')
-            ->whereNull('students.deleted_at');
+            ->whereNull('students.deleted_at')
+            ->when($branchId, fn($q) => $q->where('students.branch_id', $branchId));
 
         // Apply Filters
         if ($request->has('test_date') && $request->test_date != '') {

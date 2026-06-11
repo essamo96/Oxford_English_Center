@@ -30,12 +30,12 @@
         </div>
         <div class="card-body py-4">
             <form id="filter_form" class="row g-5">
-                <div class="col-md-6 mb-4">
+                <div class="col-md-4 mb-4">
                     <label class="form-label fw-semibold">الاسم</label>
                     <input type="text" name="title" id="title" class="form-control form-control-solid"
                         placeholder="ابحث عن اسم المدرس...">
                 </div>
-                <div class="col-md-6 mb-4">
+                <div class="col-md-4 mb-4">
                     <label class="form-label fw-semibold">الحالة</label>
                     <select name="activeT" id="activeT" class="form-select form-select-solid" data-control="select2"
                         data-placeholder="اختر الحالة">
@@ -44,6 +44,18 @@
                         <option value="2">غير مفعل</option>
                     </select>
                 </div>
+                @if(!$isBranchScoped)
+                <div class="col-md-4 mb-4">
+                    <label class="form-label fw-semibold">الفرع</label>
+                    <select name="branch_id" id="branch_id_filter" class="form-select form-select-solid" data-control="select2"
+                        data-placeholder="كل الفروع">
+                        <option value="">كل الفروع</option>
+                        @foreach($allBranches as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name_ar }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
             </form>
         </div>
     </div>
@@ -88,6 +100,7 @@
                             <th class="min-w-150px text-center"> الاسم </th>
                             <th class="min-w-125px text-center"> رقم الجوال </th>
                             <th class="min-w-150px text-center"> البريد الإلكتروني </th>
+                            <th class="min-w-110px text-center"> الفرع </th>
                             <th class="min-w-100px text-center"> الحالة </th>
                             <th class="min-w-100px text-center"> التقييمات </th>
                             <th class="text-center min-w-150px"> العمليات </th>
@@ -138,6 +151,13 @@
                 name: "email"
             },
             {
+                data: "branch_name",
+                name: "branch_name",
+                orderable: false,
+                searchable: false,
+                className: "text-center"
+            },
+            {
                 data: "status",
                 name: "status",
                 className: "text-center"
@@ -156,7 +176,7 @@
             }
         ];
 
-        var filterFields = ['#title', '#activeT'];
+        var filterFields = ['#title', '#activeT', '#branch_id_filter'];
 
         $(document).ready(function() {
             $('#select-all').on('click', function() {

@@ -1168,6 +1168,203 @@
             color: var(--gold) !important;
         }
 
+        /* ============ Target Program Cards (Step 3) ============ */
+        .target-programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 8px;
+        }
+        .target-program-card {
+            position: relative;
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            cursor: pointer;
+            border: 2.5px solid var(--rule);
+            background: var(--surface);
+            transition: border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: var(--sh-1);
+        }
+        .target-program-card:hover {
+            border-color: var(--ink-3);
+            box-shadow: var(--sh-2);
+            transform: translateY(-4px);
+        }
+        .target-program-card.selected {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 4px rgba(0,51,102,0.12), var(--sh-2);
+            transform: translateY(-4px);
+        }
+        /* Image area */
+        .tpc-image-wrap {
+            position: relative;
+            height: 160px;
+            overflow: hidden;
+            background: var(--ink);
+        }
+        .tpc-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+            display: block;
+        }
+        .target-program-card:hover .tpc-image-wrap img,
+        .target-program-card.selected .tpc-image-wrap img {
+            transform: scale(1.05);
+        }
+        .tpc-image-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(0,51,102,0.08) 0%,
+                rgba(0,51,102,0.55) 100%
+            );
+            pointer-events: none;
+        }
+        /* Selection checkmark badge */
+        .tpc-check {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .target-program-card.selected .tpc-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+        [dir="rtl"] .tpc-check { right: auto; left: 12px; }
+        /* Body */
+        .tpc-body {
+            padding: 18px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .tpc-name {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-style: italic;
+            font-size: 1.22rem;
+            color: var(--ink);
+            letter-spacing: -0.015em;
+            line-height: 1.25;
+        }
+        .tpc-desc {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Date badge row */
+        .tpc-dates {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .tpc-date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--gold-soft);
+            border: 1px solid rgba(255,204,0,0.4);
+            border-radius: var(--r-pill);
+            padding: 4px 10px;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--ink);
+            white-space: nowrap;
+        }
+        .tpc-date-badge i {
+            font-size: 0.82rem;
+            color: var(--ink-3);
+        }
+        .tpc-date-sep {
+            font-size: 0.78rem;
+            color: var(--ink-faint);
+            font-weight: 600;
+        }
+        .tpc-date-unset {
+            background: var(--rule-2) !important;
+            border-color: var(--rule) !important;
+            color: var(--ink-faint) !important;
+            font-style: italic;
+        }
+        .tpc-date-unset i { color: var(--ink-faint) !important; }
+        /* Bottom bar accent */
+        .target-program-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .target-program-card:hover::before,
+        .target-program-card.selected::before {
+            opacity: 1;
+        }
+        /* No-image fallback */
+        .tpc-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--ink) 0%, var(--ink-3) 100%);
+            color: rgba(255,204,0,0.5);
+            font-size: 3rem;
+        }
+        /* Empty state */
+        .tpc-empty-state {
+            grid-column: 1 / -1;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--ink-soft);
+            font-family: var(--font-body);
+        }
+        @media (max-width: 768px) {
+            .target-programs-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+            .tpc-image-wrap { height: 130px; }
+            .tpc-name { font-size: 1.05rem; }
+            .tpc-body { padding: 14px 14px 12px; }
+        }
+        @media (max-width: 480px) {
+            .target-programs-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
         /* ============ Enrollment type cards ============ */
         .enroll-type-card {
             border: 1.5px solid var(--rule) !important;
@@ -1517,6 +1714,15 @@
                                 <label class="form-label"><i class="bi bi-geo-alt"></i>Address (العنوان) *</label>
                                 <textarea name="address" class="form-control" rows="2" placeholder="Full Address Details" required></textarea>
                             </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label"><i class="bi bi-geo-fill"></i>Branch (الفرع) *</label>
+                                <select name="branch_id" id="branch_id_select" class="form-control" required>
+                                    <option value="">— اختر الفرع —</option>
+                                    @foreach($branches ?? [] as $branch)
+                                        <option value="{{ $branch->id }}">{{ $branch->name_ar }} ({{ $branch->name_en }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-4" id="major-in-step1" style="display: none;">
                                 <label class="form-label"><i class="bi bi-mortarboard"></i>Major/Profession (التخصص/المهنة) *</label>
                                 <input type="text" name="major" class="form-control" placeholder="e.g. Engineering, Student">
@@ -1596,40 +1802,125 @@
                         <input type="hidden" name="take_test" id="take_test_hidden">
                         <div id="test-options-container" style="display: none;"></div>
 
-                        <!-- Target Program & Level Selection -->
-                        <div class="interaction-card p-5 mb-5">
-                            <div class="row align-items-center">
-                                <div class="col-lg-6 border-end-lg pe-lg-5">
-                                    <label class="form-label fw-bold fs-5 mb-3"><i class="bi bi-mortarboard-fill me-3 text-primary"></i>Target Program (البرنامج المستهدف) *</label>
-                                    <select name="program_id" id="program_id_select" class="form-control form-control-lg select2 shadow-none border-2" onchange="handleProgramChange()">
-                                        <option value="">Choose your program...</option>
-                                        @foreach($programs as $p)
-                                            @php
-                                                $title = strtolower($p->title);
-                                                $isKids = str_contains($title, 'kids') || str_contains($p->title, 'أطفال');
-                                                $isAdult = str_contains($title, 'adult') || str_contains($p->title, 'كبار');
-                                                // If it's a general program like "Levels", show it for both
-                                                $isGeneral = str_contains($title, 'مستويات') || str_contains($title, 'level');
-                                                
-                                                $type = 'Both';
-                                                if ($isKids && !$isAdult) $type = 'Kids';
-                                                elseif ($isAdult && !$isKids) $type = 'Adults';
-                                                elseif ($isGeneral) $type = 'Both';
-                                            @endphp
-                                            <option value="{{ $p->id }}" data-type="{{ $type }}">
-                                                {{ $p->title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div id="program-info-preview" class="mt-3 small text-muted p-2 bg-light rounded" style="display: none;">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span id="program-preview-text"></span>
+                        <!-- Target Program Cards + Level/Test Selection -->
+                        <div class="mb-5">
+                            <label class="form-label mb-4 d-block">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                Target Program (البرنامج المستهدف) *
+                            </label>
+
+                            {{-- Hidden select kept for JS compatibility (handleProgramChange etc.) --}}
+                            <select name="program_id" id="program_id_select" style="display:none;" onchange="handleProgramChange()">
+                                <option value=""></option>
+                                @foreach($programs as $p)
+                                    @php
+                                        $title = strtolower($p->title);
+                                        $isKids = str_contains($title, 'kids') || str_contains($p->title, 'أطفال');
+                                        $isAdult = str_contains($title, 'adult') || str_contains($p->title, 'كبار');
+                                        $isGeneral = str_contains($title, 'مستويات') || str_contains($title, 'level');
+                                        $type = 'Both';
+                                        if ($isKids && !$isAdult) $type = 'Kids';
+                                        elseif ($isAdult && !$isKids) $type = 'Adults';
+                                        elseif ($isGeneral) $type = 'Both';
+                                    @endphp
+                                    <option value="{{ $p->id }}" data-type="{{ $type }}">{{ $p->title }}</option>
+                                @endforeach
+                            </select>
+
+                            {{-- Program Cards Grid (excludes placement-test-only programs) --}}
+                            <div class="target-programs-grid" id="target-programs-grid">
+                                @forelse($programs->where('is_placement_test_default', '!=', 1) as $p)
+                                    @php
+                                        $title = strtolower($p->title);
+                                        $isKids = str_contains($title, 'kids') || str_contains($p->title, 'أطفال');
+                                        $isAdult = str_contains($title, 'adult') || str_contains($p->title, 'كبار');
+                                        $isGeneral = str_contains($title, 'مستويات') || str_contains($title, 'level');
+                                        $type = 'Both';
+                                        if ($isKids && !$isAdult) $type = 'Kids';
+                                        elseif ($isAdult && !$isKids) $type = 'Adults';
+                                        elseif ($isGeneral) $type = 'Both';
+                                        $hasStart = !empty($p->registration_start);
+                                        $hasEnd   = !empty($p->registration_end);
+                                    @endphp
+                                    <div class="target-program-card"
+                                         data-program-id="{{ $p->id }}"
+                                         data-type="{{ $type }}"
+                                         onclick="selectTargetProgram({{ $p->id }}, this)">
+                                        @php
+                                            $imgSrc = null;
+                                            if ($p->image) {
+                                                // Already a full URL (legacy data) → use as-is
+                                                if (str_starts_with($p->image, 'http://') || str_starts_with($p->image, 'https://')) {
+                                                    $imgSrc = $p->image;
+                                                } else {
+                                                    $imgSrc = asset('uploads/' . ltrim($p->image, '/'));
+                                                }
+                                            }
+                                        @endphp
+                                        <div class="tpc-image-wrap">
+                                            @if($imgSrc)
+                                                <img src="{{ $imgSrc }}" alt="{{ $p->title }}" loading="lazy">
+                                            @else
+                                                <div class="tpc-image-placeholder"><i class="bi bi-mortarboard"></i></div>
+                                            @endif
+                                        </div>
+                                        <span class="tpc-check"><i class="bi bi-check-lg"></i></span>
+                                        <div class="tpc-body">
+                                            <div class="tpc-name">{{ $p->title }}</div>
+                                            @if($p->short)
+                                                <div class="tpc-desc">{{ $p->short }}</div>
+                                            @endif
+                                            <div class="tpc-dates">
+                                                <i class="bi bi-calendar-range" style="color: var(--ink-3); font-size:0.9rem; flex-shrink:0;"></i>
+                                                @if($hasStart)
+                                                    <span class="tpc-date-badge">
+                                                        <i class="bi bi-play-circle"></i>
+                                                        {{ \Carbon\Carbon::parse($p->registration_start)->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="tpc-date-badge tpc-date-unset">
+                                                        <i class="bi bi-calendar-plus"></i>
+                                                        بداية التسجيل
+                                                    </span>
+                                                @endif
+                                                <span class="tpc-date-sep">→</span>
+                                                @if($hasEnd)
+                                                    <span class="tpc-date-badge">
+                                                        <i class="bi bi-stop-circle"></i>
+                                                        {{ \Carbon\Carbon::parse($p->registration_end)->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="tpc-date-badge tpc-date-unset">
+                                                        <i class="bi bi-calendar-x"></i>
+                                                        نهاية التسجيل
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
+                                @empty
+                                    <div class="tpc-empty-state">
+                                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                        No programs available at this time.
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <div id="program-info-preview" class="mt-3 small text-muted p-2 bg-light rounded" style="display: none;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <span id="program-preview-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- Level / Test Date Selection (appears after program chosen) -->
+                        <div class="interaction-card mb-5" id="placement-options-panel" style="display:none;">
+                            <div class="row">
+                                <div class="col-12">
                                     <div id="skip-test-level-selection" style="display: none;">
-                                        <label class="form-label fw-bold fs-5 mb-3 text-info"><i class="bi bi-graph-up-arrow"></i>Current Level (المستوى الحالي) *</label>
+                                        <label class="form-label mb-3 d-block">
+                                            <i class="bi bi-graph-up-arrow"></i>
+                                            Current Level (المستوى الحالي) *
+                                        </label>
                                         <div class="level-radio-group d-flex flex-wrap gap-2">
                                             @foreach(['A0', 'A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'C1'] as $lvl)
                                             <div class="level-radio-item">
@@ -1640,12 +1931,15 @@
                                         </div>
                                     </div>
                                     <div id="test-date-selection" style="display: none;">
-                                        <label class="form-label fw-bold fs-5 mb-3"><i class="bi bi-calendar-event me-3 text-primary"></i>Preferred Date (التاريخ المفضل) *</label>
+                                        <label class="form-label mb-3 d-block">
+                                            <i class="bi bi-calendar-event"></i>
+                                            Preferred Date (التاريخ المفضل) *
+                                        </label>
                                         <input type="date" name="test_date" class="form-control"
                                             min="{{ date('Y-m-d') }}">
                                         <small class="d-block mt-2 text-muted"><i class="bi bi-info-circle me-1"></i>اختر اليوم الذي يناسبك لإجراء امتحان تحديد المستوى.</small>
                                     </div>
-                                    <div id="test-info-placeholder" class="text-center p-4 border rounded-4 border-dashed bg-light text-muted">
+                                    <div id="test-info-placeholder" class="text-center p-4 text-muted">
                                         <i class="bi bi-clipboard-data fs-2 mb-2 d-block"></i>
                                         Select a program to see level options or scheduling
                                     </div>
@@ -1823,9 +2117,17 @@
                                 </div>
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-bold">Upload Payment Receipt (رفع إيصال الدفع) *</label>
+                                <label class="form-label fw-bold">
+                                    Upload Payment Receipt (رفع إيصال الدفع)
+                                    @if(isset($payment_required) && $payment_required)
+                                        <span class="text-danger">*</span>
+                                    @else
+                                        <span class="text-muted fs-7">(اختياري)</span>
+                                    @endif
+                                </label>
                                 <div class="file-upload-container p-4 border-2 border-dashed rounded-4 text-center cursor-pointer" id="receipt-dropzone" onclick="document.getElementById('receipt_input').click()">
-                                    <input type="file" name="payment_receipt" id="receipt_input" accept="image/*,.pdf" style="display: none;" onchange="updateFileName(this)" required>
+                                    <input type="file" name="payment_receipt" id="receipt_input" accept="image/*,.pdf" style="display: none;" onchange="updateFileName(this)"
+                                        {{ (isset($payment_required) && $payment_required) ? 'required' : '' }}>
                                     <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2"></i>
                                     <p class="mb-1" style="font-size: 1.1rem; font-weight: 700; color: var(--ink); font-family: var(--font-display); font-style: italic;">اضغط لرفع إيصال الدفع</p>
                                     <p class="mb-0 text-muted" style="font-size: 0.95rem;">Click to upload — PNG, JPG, or PDF (الحد الأقصى 2MB)</p>
@@ -1886,6 +2188,56 @@
     <script src="{{ asset('js/particles-hero.js') }}"></script>
     <script src="{{ asset('assets/oxford/js/wizard.js') }}"></script>
     <script>
+        /* ---- Target Program Card Selection ---- */
+        window.selectTargetProgram = function(programId, cardEl) {
+            // Deselect all cards
+            document.querySelectorAll('.target-program-card').forEach(c => c.classList.remove('selected'));
+            // Select clicked card
+            cardEl.classList.add('selected');
+            // Sync hidden select
+            var sel = document.getElementById('program_id_select');
+            sel.value = String(programId);
+            // Show placement options panel
+            var panel = document.getElementById('placement-options-panel');
+            if (panel) panel.style.display = 'block';
+            // Trigger fee fetch + show/hide level or test-date fields
+            if (typeof handleProgramChange === 'function') handleProgramChange();
+        };
+
+        /* ---- Filter cards by program type when user picks Adult/Kids ---- */
+        function filterProgramCards(type) {
+            document.querySelectorAll('.target-program-card').forEach(function(card) {
+                var cardType = card.getAttribute('data-type') || 'Both';
+                var show = !type || cardType === 'Both' || cardType.toLowerCase().startsWith(type.toLowerCase());
+                card.style.display = show ? '' : 'none';
+            });
+            document.querySelectorAll('.target-program-card').forEach(c => c.classList.remove('selected'));
+            var sel = document.getElementById('program_id_select');
+            if (sel) sel.value = '';
+            var panel = document.getElementById('placement-options-panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        /* Patch handleProgramSelection to also filter cards */
+        document.addEventListener('DOMContentLoaded', function() {
+            var _orig = window.handleProgramSelection;
+            window.handleProgramSelection = function(type) {
+                filterProgramCards(type);
+                if (typeof _orig === 'function') _orig(type);
+            };
+
+            /* Patch handleProgramChange to auto-show placement-options-panel */
+            var _origProgramChange = window.handleProgramChange;
+            window.handleProgramChange = function() {
+                var sel = document.getElementById('program_id_select');
+                if (sel && sel.value) {
+                    var panel = document.getElementById('placement-options-panel');
+                    if (panel) panel.style.display = 'block';
+                }
+                if (typeof _origProgramChange === 'function') _origProgramChange();
+            };
+        });
+
         window.registrationRoute = '{{ route('contact.book.post') }}';
         window.apiCheckEmail = '{{ url("api/check-email") }}';
         window.apiCheckMobile = '{{ url("api/check-mobile") }}';

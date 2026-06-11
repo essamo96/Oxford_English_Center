@@ -159,6 +159,17 @@ Route::prefix('emails')->group(function () {
 });
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web', 'auth:admin']], function () {
 
+    Route::get('debug-branch', function() {
+        $ctx = app(\App\Services\BranchContext::class);
+        return response()->json([
+            'auth_check'  => auth()->guard('admin')->check(),
+            'user_id'     => auth()->guard('admin')->id(),
+            'branch_id_raw' => auth()->guard('admin')->user()?->branch_id,
+            'ctx_getId'   => $ctx->getId(),
+            'ctx_isScoped'=> $ctx->isScoped(),
+        ]);
+    });
+
     Route::get('notifications/mark-read', ['as' => 'notifications.mark_read', 'uses' => 'MarkNotificationReadController@markAsReadAndRedirect']);
     Route::get('lang/{lang}', ['as' => 'dashboard.lang', 'uses' => 'DashboardController@getLang']);
 
@@ -387,6 +398,16 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('partners/edit/{id}', ['as' => 'partners.edit', 'middleware' => ['permission:admin.partners.edit'], 'uses' => 'PartnersController@postEdit']);
     Route::post('partners/delete', ['as' => 'partners.delete', 'middleware' => ['permission:admin.partners.delete'], 'uses' => 'PartnersController@postDelete']);
     Route::post('partners/status', ['as' => 'partners.status', 'middleware' => ['permission:admin.partners.status'], 'uses' => 'PartnersController@postStatus']);
+
+    // Branches Routes
+    Route::get('branches',           ['as' => 'branches.view',   'middleware' => ['permission:admin.branches.view|admin.branches.add|admin.branches.edit|admin.branches.delete|admin.branches.status'], 'uses' => 'BranchesController@getIndex']);
+    Route::get('branches/list',      ['as' => 'branches.list',   'middleware' => ['permission:admin.branches.view|admin.branches.add|admin.branches.edit|admin.branches.delete|admin.branches.status'], 'uses' => 'BranchesController@getList']);
+    Route::get('branches/add',       ['as' => 'branches.add',    'middleware' => ['permission:admin.branches.add'],    'uses' => 'BranchesController@getAdd']);
+    Route::post('branches/add',      ['as' => 'branches.add',    'middleware' => ['permission:admin.branches.add'],    'uses' => 'BranchesController@postAdd']);
+    Route::get('branches/edit/{id}', ['as' => 'branches.edit',   'middleware' => ['permission:admin.branches.edit'],   'uses' => 'BranchesController@getEdit']);
+    Route::post('branches/edit/{id}',['as' => 'branches.edit',   'middleware' => ['permission:admin.branches.edit'],   'uses' => 'BranchesController@postEdit']);
+    Route::post('branches/delete',   ['as' => 'branches.delete', 'middleware' => ['permission:admin.branches.delete'], 'uses' => 'BranchesController@postDelete']);
+    Route::post('branches/status',   ['as' => 'branches.status', 'middleware' => ['permission:admin.branches.status'], 'uses' => 'BranchesController@postStatus']);
 
     //services Route
     Route::get('programs', ['as' => 'programs.view', 'middleware' => ['permission:admin.programs.view|admin.programs.add|admin.programs.edit|admin.programs.delete|admin.programs.status'], 'uses' => 'ProgramsController@getIndex']);
