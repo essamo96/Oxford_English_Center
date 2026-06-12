@@ -778,7 +778,8 @@ class FinancialController extends AdminController
             ->join('students', 'group_students_fees.student_id', '=', 'students.id')
             ->leftJoin('group_students', function($join) {
                 $join->on('group_students.student_id', '=', 'group_students_fees.student_id')
-                     ->on('group_students.group_id', '=', 'group_students_fees.group_id');
+                     ->on('group_students.group_id', '=', 'group_students_fees.group_id')
+                     ->whereNull('group_students.deleted_at'); // exclude soft-deleted memberships to avoid duplicate rows
             })
             ->leftJoin('groups as fg', 'fg.id', '=', 'group_students_fees.group_id')
             ->orderBy('group_students_fees.created_at', 'desc'); // newest entries first (incl. credit/refund)

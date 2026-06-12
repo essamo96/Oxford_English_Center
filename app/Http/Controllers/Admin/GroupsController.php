@@ -364,17 +364,9 @@ class GroupsController extends AdminController
                 GroupStudents::where('student_id', $sid)
                     ->where('group_id', $request->group_id)
                     ->whereNull('deleted_at')
-                    ->delete(); // soft delete
-
-                // Soft-delete only the course fees tied to this group, NOT placement-test fees
-                \App\Models\GroupStudentsFees::where('student_id', $sid)
-                    ->where('group_id', $request->group_id)
-                    ->where(function ($q) {
-                        $q->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
-                          ->orWhereNull('student_paid_type');
-                    })
-                    ->whereNull('deleted_at')
                     ->delete();
+
+                $this->detachStudentFees((int) $sid, (int) $request->group_id);
 
                 $removed++;
             }
@@ -1345,10 +1337,10 @@ class GroupsController extends AdminController
         } catch (DecryptException $e) {
             return response()->json(['status' => 'error', 'message' => 'Error Decode']);
         }
-        /////////////////////////////////////
         $students = new GroupStudents();
         $info = $students->getStudent($id);
         if ($info) {
+            $this->detachStudentFees($info->student_id, $info->group_id);
             $delete = $students->deleteStudent($info);
             if ($delete) {
                 return response()->json(['status' => 'success', 'message' => self::DELETE_SUCCESS]);
@@ -1367,10 +1359,10 @@ class GroupsController extends AdminController
         } catch (DecryptException $e) {
             return response()->json(['status' => 'error', 'message' => 'Error Decode']);
         }
-        /////////////////////////////////////
         $students = new GroupStudents();
         $info = $students->getStudent($id);
         if ($info) {
+            $this->detachStudentFees($info->student_id, $info->group_id);
             $delete = $students->deleteStudent($info);
             if ($delete) {
                 return response()->json(['status' => 'success', 'message' => self::DELETE_SUCCESS]);
@@ -1380,6 +1372,44 @@ class GroupsController extends AdminController
         } else {
             return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
         }
+    }
+
+    /**
+     * Detach a student's fee records from a group on removal:
+     * - Verified/confirmed fees → set group_id=null (become program-level credit, picked up on re-enroll)
+     * - Pending/unverified fees → soft-delete (no money received)
+     */
+    private function detachStudentFees(int $studentId, int $groupId): void
+    {
+        // Preserve confirmed payments — set group_id=null so adoptProgramPayment() can re-link them
+        \App\Models\GroupStudentsFees::where('student_id', $studentId)
+            ->where('group_id', $groupId)
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->where('audit_status', 'verified')
+                  ->orWhere('status', 'confirmed')
+                  ->orWhere('admin_verified_amount', '>', 0);
+            })
+            ->where(function ($q) {
+                $q->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
+                  ->orWhereNull('student_paid_type');
+            })
+            ->update(['group_id' => null]);
+
+        // Delete unconfirmed fees — no money was received
+        \App\Models\GroupStudentsFees::where('student_id', $studentId)
+            ->where('group_id', $groupId)
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->where('student_paid_type', 'NOT LIKE', '%Placement Test%')
+                  ->orWhereNull('student_paid_type');
+            })
+            ->where('audit_status', '!=', 'verified')
+            ->where(function ($q) {
+                $q->where('admin_verified_amount', 0)
+                  ->orWhereNull('admin_verified_amount');
+            })
+            ->delete();
     }
     public function getStudentAxiosDelete(Request $request, $student_id)
     {

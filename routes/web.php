@@ -677,6 +677,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('attendance/settings', ['as' => 'attendance_settings.view', 'middleware' => ['permission:admin.attendance_settings.view'], 'uses' => 'AttendanceSettingController@getIndex']);
     // teacher_salaries view alias
     Route::get('teacher-salaries', ['as' => 'teacher_salaries.view', 'middleware' => ['permission:admin.teacher_salaries.view'], 'uses' => 'TeacherSalaryController@getIndex']);
+    // memberships.view — sidebar child route for العضوية under الطلبات العالقة
+    Route::get('home/memberships', ['as' => 'memberships.view', 'middleware' => ['permission:admin.memberships.view'], 'uses' => 'MembershipsController@getIndex']);
     // pending_orders alias — same page as dashboard.view.membership (different permission check)
     Route::get('home/membership-orders', ['as' => 'pending_orders.view', 'middleware' => ['permission:admin.memberships.view'], 'uses' => 'MembershipsController@getIndex']);
 

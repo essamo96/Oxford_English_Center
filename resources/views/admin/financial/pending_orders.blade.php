@@ -15,6 +15,24 @@
 @section('page-content')
 @php $active_menu = 'financial'; @endphp
 
+{{-- Nav Tabs --}}
+<ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-5 fs-6 fw-bold border-0" id="pendingTabs">
+    <li class="nav-item">
+        <a class="nav-link active text-gray-800" data-bs-toggle="tab" href="#tab_financial">
+            <i class="bi bi-cash-coin me-2 text-success"></i> الطلبات المالية العالقة
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-gray-800" data-bs-toggle="tab" href="#tab_membership">
+            <i class="bi bi-person-plus-fill me-2 text-primary"></i> طلبات العضوية الجديدة
+            <span class="badge badge-light-primary ms-2" id="membership_count_badge">...</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+{{-- Tab 1: Financial Pending Orders --}}
+<div class="tab-pane fade show active" id="tab_financial">
 <div class="card">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
@@ -65,6 +83,117 @@
         </table>
     </div>
 </div>
+</div>
+
+{{-- Tab 2: New Membership Requests --}}
+<div class="tab-pane fade" id="tab_membership">
+<div class="card mb-7 shadow-sm">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <span class="card-label fw-bold fs-3 mb-1 text-info">
+                <i class="ki-duotone ki-magnifier fs-4 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                البحث والفلاتر
+            </span>
+        </div>
+        <div class="card-toolbar">
+            <div class="d-flex flex-wrap justify-content-end gap-2 text-nowrap">
+                <button type="button" id="mem_todayBtn" class="btn btn-sm btn-light-success">
+                    <i class="ki-duotone ki-calendar fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> طلاب اليوم
+                </button>
+                <button type="button" id="mem_showAllBtn" class="btn btn-sm btn-light-primary">
+                    <i class="ki-duotone ki-eye fs-4 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> عرض الكل
+                </button>
+                <button type="reset" id="mem_resetFilter" class="btn btn-sm btn-light-danger">
+                    <i class="ki-duotone ki-arrows-loop fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> تصفية
+                </button>
+                <button type="button" class="btn btn-sm btn-success mem_BulkActivate">
+                    <i class="ki-duotone ki-user-tick fs-4 me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> تفعيل وإرسال
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body py-4">
+        <form id="mem_filter_form" class="row g-3 align-items-end">
+            <input type="hidden" id="mem_is_today" name="is_today" value="">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold fs-7">الاسم / الجوال / الإيميل</label>
+                <input type="text" id="mem_search" name="search" class="form-control form-control-solid form-control-sm" placeholder="بحث ...">
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label class="form-label fw-semibold fs-7">نوع البرنامج</label>
+                <select id="mem_program_type" name="program_type" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- الكل --">
+                    <option value=""></option>
+                    <option value="adult">الكبار (Adult)</option>
+                    <option value="kids">الأطفال (Kids)</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label class="form-label fw-semibold fs-7">نوع التسجيل</label>
+                <select id="mem_enrollment_type" name="enrollment_type" class="form-select form-select-solid form-select-sm" data-control="select2" data-placeholder="-- الكل --">
+                    <option value=""></option>
+                    <option value="test">اختبار تحديد المستوى</option>
+                    <option value="course">تسجيل مباشر</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label fw-semibold fs-7">من تاريخ</label>
+                <input type="text" id="mem_date_from" name="date_from" class="form-control form-control-solid form-control-sm mem-date-picker" placeholder="اختر ...">
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label fw-semibold fs-7">إلى تاريخ</label>
+                <input type="text" id="mem_date_to" name="date_to" class="form-control form-control-solid form-control-sm mem-date-picker" placeholder="اختر ...">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <span class="card-label fw-bold fs-3 mb-1 text-primary">
+                <i class="bi bi-person-plus-fill fs-4 text-primary me-2"></i>
+                طلبات العضوية الجديدة
+            </span>
+        </div>
+        <div class="card-toolbar gap-3">
+            @php
+                $membershipRouteUrl = \Route::has('dashboard.view.membership')
+                    ? route('dashboard.view.membership')
+                    : (\Route::has('membership.view') ? route('membership.view') : null);
+            @endphp
+            @if($membershipRouteUrl)
+            <a href="{{ $membershipRouteUrl }}" class="btn btn-light-primary btn-sm">
+                <i class="bi bi-box-arrow-up-right me-1"></i> فتح الشاشة الكاملة
+            </a>
+            @endif
+        </div>
+    </div>
+    <div class="card-body py-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center" id="mem_kt_table">
+                <thead>
+                    <tr class="text-center text-muted fw-bold fs-7 text-uppercase gs-0">
+                        <th class="w-50px text-center align-middle"> # </th>
+                        <th class="w-50px text-center align-middle">
+                            <div class="form-check form-check-custom form-check-solid d-flex justify-content-center">
+                                <input class="form-check-input h-20px w-20px" type="checkbox" id="mem_selectAll" />
+                            </div>
+                        </th>
+                        <th class="min-w-250px text-start align-middle"> الطالب </th>
+                        <th class="min-w-125px text-center align-middle"> الجوال </th>
+                        <th class="min-w-140px text-center align-middle"> تاريخ الميلاد / العمر </th>
+                        <th class="min-w-140px text-center align-middle"> تاريخ الانضمام </th>
+                        <th class="min-w-100px text-center align-middle"> الحالة </th>
+                        <th class="text-center min-w-125px align-middle"> العمليات </th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 fw-semibold text-center align-middle"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+</div>{{-- end tab-content --}}
 
 <!-- Verification Modal -->
 <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
@@ -858,4 +987,132 @@
     'active_menu' => 'financial',
     'customAjaxUrl' => route('admin.financial.pending.list')
 ])
+
+<script>
+(function () {
+    var memTable = null;
+
+    function initMembershipTable() {
+        if (memTable) return; // already initialized
+        memTable = $('#mem_kt_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("membership.list") }}',
+                type: 'GET',
+                data: function(d) {
+                    d.search     = $('#mem_search').val();
+                    d.program_type    = $('#mem_program_type').val();
+                    d.enrollment_type = $('#mem_enrollment_type').val();
+                    d.date_from  = $('#mem_date_from').val();
+                    d.date_to    = $('#mem_date_to').val();
+                    d.is_today   = $('#mem_is_today').val();
+                }
+            },
+            columns: [
+                { data: 'id', name: 'id', orderable: false, searchable: false, render: function(data, type, row, meta){ return meta.row + meta.settings._iDisplayStart + 1; } },
+                { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center align-middle' },
+                { data: 'name', name: 'name', className: 'text-start align-middle' },
+                { data: 'mobile', name: 'mobile', className: 'text-center align-middle' },
+                { data: 'dob', name: 'dob', className: 'text-center align-middle' },
+                { data: 'join_date_fmt', name: 'join_date_fmt', orderable: false, searchable: false, className: 'text-center align-middle' },
+                { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center align-middle' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center align-middle' }
+            ],
+            language: { url: '{{ asset("assets/admin/plugins/datatables/Arabic.json") }}' },
+            order: [[0, 'desc']],
+            pageLength: 15,
+            responsive: true,
+            drawCallback: function() {
+                // Update badge count
+                var info = this.api().page.info();
+                $('#membership_count_badge').text(info.recordsFiltered);
+            }
+        });
+
+        // Initialize flatpickr for membership tab date pickers
+        $('.mem-date-picker').flatpickr({ dateFormat: 'Y-m-d' });
+
+        // Select all
+        $('#mem_selectAll').on('change', function() {
+            $('#mem_kt_table .checkboxes').prop('checked', this.checked);
+        });
+
+        // Filter on input change
+        ['#mem_search', '#mem_program_type', '#mem_enrollment_type', '#mem_date_from', '#mem_date_to'].forEach(function(sel) {
+            $(document).on('change keyup', sel, function() {
+                if (memTable) memTable.draw();
+            });
+        });
+
+        $('#mem_todayBtn').on('click', function() {
+            $('#mem_is_today').val('1');
+            $('#mem_filter_form')[0].reset();
+            $('#mem_filter_form select').val('').trigger('change');
+            memTable.draw();
+        });
+        $('#mem_showAllBtn').on('click', function() {
+            $('#mem_is_today').val('all');
+            $('#mem_filter_form')[0].reset();
+            $('#mem_filter_form select').val('').trigger('change');
+            memTable.draw();
+        });
+        $('#mem_resetFilter').on('click', function() {
+            $('#mem_is_today').val('');
+            $('#mem_filter_form')[0].reset();
+            $('#mem_filter_form select').val('').trigger('change');
+            memTable.draw();
+        });
+    }
+
+    // Initialize table when tab is shown
+    $('a[href="#tab_membership"]').on('shown.bs.tab', function() {
+        initMembershipTable();
+    });
+
+    // Bulk activate for membership tab
+    $(document).on('click', '.mem_BulkActivate', function() {
+        var selectedIds = [];
+        $('#mem_kt_table .checkboxes:checked').each(function() {
+            selectedIds.push($(this).attr('data-id'));
+        });
+        if (selectedIds.length === 0) {
+            Swal.fire({ text: 'يجب اختيار طالب واحد على الأقل!', icon: 'warning', buttonsStyling: false, confirmButtonText: 'حسناً', customClass: { confirmButton: 'btn btn-primary' } });
+            return;
+        }
+        Swal.fire({
+            title: 'تأكيد التفعيل الجماعي',
+            text: 'هل أنت متأكد من تفعيل ' + selectedIds.length + ' من الحسابات وإرسال بيانات الدخول؟',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'نعم، تفعيل الكل',
+            cancelButtonText: 'إلغاء',
+            customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-light' },
+            buttonsStyling: false,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return $.ajax({
+                    url: '{{ route("students.bulk.status.membership") }}',
+                    method: 'POST',
+                    data: { ids: selectedIds, _token: '{{ csrf_token() }}' }
+                }).catch(function(err) {
+                    Swal.showValidationMessage(err.responseJSON ? err.responseJSON.message : 'حدث خطأ');
+                });
+            }
+        }).then(function(result) {
+            if (result.isConfirmed && result.value) {
+                Swal.fire({ title: 'تم!', text: result.value.message, icon: 'success', buttonsStyling: false, confirmButtonText: 'حسناً', customClass: { confirmButton: 'btn btn-primary' } });
+                if (memTable) memTable.draw();
+            }
+        });
+    });
+
+    // Load initial count for badge without drawing the full table
+    $.get('{{ route("membership.list") }}', { length: 1, start: 0 }, function(res) {
+        if (res && res.recordsFiltered !== undefined) {
+            $('#membership_count_badge').text(res.recordsFiltered);
+        }
+    });
+})();
+</script>
 @stop
