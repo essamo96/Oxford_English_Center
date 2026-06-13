@@ -56,6 +56,8 @@ class AdminController extends BaseController
         $permission_group = new PermissionsGroup();
         self::$data['sidebar'] = $permission_group->getAllParentPermissionGroup();
         self::$data['settings'] = Settings::where('id', 1)->first();
+        self::$data['activeBranch'] = app(\App\Services\BranchContext::class)->getBranch();
+        self::$data['isBranchScoped'] = app(\App\Services\BranchContext::class)->isScoped();
         $route_name = Route::currentRouteName();
         $route_data = explode('.', $route_name);
         $current_route = $route_data[0];

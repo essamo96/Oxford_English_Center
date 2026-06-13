@@ -195,12 +195,12 @@
     <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
     <script>
         window.OXFORD_RT = {
-            key:     @json(config('broadcasting.connections.pusher.key')),
-            // Empty host = Pusher Cloud mode; a host = self-hosted laravel-websockets.
-            host:    @json(config('broadcasting.connections.pusher.options.host', '')),
-            port:    {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
-            scheme:  @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
-            cluster: @json(config('broadcasting.connections.pusher.options.cluster', 'mt1'))
+            key:       @json(config('broadcasting.connections.pusher.key')),
+            host:      @json(config('broadcasting.connections.pusher.options.host', '')),
+            port:      {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
+            scheme:    @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
+            cluster:   @json(config('broadcasting.connections.pusher.options.cluster', 'mt1')),
+            branch_id: @json(auth()->guard('admin')->user()?->branch_id)
         };
     </script>
     <script src="{{ asset('js/realtime-notifications.js') }}?v=4"></script>

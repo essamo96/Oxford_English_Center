@@ -14,17 +14,21 @@ class CountersUpdated implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public array $counters;
+    private ?int $branchId;
 
-    public function __construct()
+    public function __construct(?int $branchId = null)
     {
-        $this->counters = NotificationCounterService::getAllCounters();
+        $this->branchId = $branchId;
+        $this->counters = NotificationCounterService::getAllCounters($branchId);
     }
 
     public function broadcastOn(): array
     {
-        return [
-            new Channel('admin-notifications'),
-        ];
+        if ($this->branchId) {
+            return [new Channel('admin-notifications-branch-' . $this->branchId)];
+        }
+
+        return [new Channel('admin-notifications')];
     }
 
     public function broadcastAs(): string

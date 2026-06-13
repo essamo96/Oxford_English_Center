@@ -79,12 +79,11 @@ class Absent_Teacher extends Model
             ->select('teacher_id')
             ->selectRaw('COUNT(days) as days_count')
             ->selectRaw('COUNT(DISTINCT group_id) as groups_count')
-            ->where(function ($query) use ($name) {
+            ->whereHas('teacher', function ($q) use ($name) {
                 if ($name != "") {
-                    $query->whereHas('teacher', function ($q) use ($name) {
-                        $q->where('name', 'LIKE', '%' . $name . '%');
-                    });
+                    $q->where('name', 'LIKE', '%' . $name . '%');
                 }
+                // BranchScope on Teachers model auto-filters by branch here
             })
             ->groupBy('teacher_id');
     }

@@ -34,9 +34,13 @@ class NewBookingEvent implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
-        return [
-            new Channel('admin-notifications'),
-        ];
+        $channels = [new Channel('admin-notifications')];
+
+        if ($this->student->branch_id) {
+            $channels[] = new Channel('admin-notifications-branch-' . $this->student->branch_id);
+        }
+
+        return $channels;
     }
 
     public function broadcastAs(): string

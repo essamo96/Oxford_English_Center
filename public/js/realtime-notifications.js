@@ -323,11 +323,16 @@
                 + CFG.port + '?', err);
         });
 
-        var channel = pusher.subscribe('admin-notifications');
+        // Branch admins subscribe to their branch channel only.
+        // Super admins (no branch_id) subscribe to the global channel.
+        var channelName = CFG.branch_id
+            ? 'admin-notifications-branch-' + CFG.branch_id
+            : 'admin-notifications';
+
+        var channel = pusher.subscribe(channelName);
         channel.bind('pusher:subscription_succeeded', function () {
-            console.log('[RT] subscribed to admin-notifications');
+            console.log('[RT] subscribed to ' + channelName);
         });
-        // Raw pusher-js binds the exact broadcastAs name (no leading dot).
         channel.bind('new.booking', function (data) { NotificationManager.show(data); });
         channel.bind('new.contact', function (data) { NotificationManager.show(data); });
         channel.bind('counters.updated', function (data) {

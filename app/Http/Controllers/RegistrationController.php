@@ -346,14 +346,24 @@ class RegistrationController extends Controller
             // Real-time notification to the admin dashboard (laravel-websockets).
             // Wrapped so a websocket outage can never break the registration flow.
             try {
+                $branchId = $student->branch_id ?: null;
+
+                // Notify branch admins with branch-scoped counts (NewBookingEvent broadcasts
+                // on both admin-notifications AND admin-notifications-branch-{id}).
                 broadcast(new \App\Events\NewBookingEvent(
                     student: $student,
-                    pendingBookings: \App\Support\NotifyCounts::pendingBookings(),
-                    todayBookings: \App\Support\NotifyCounts::todayBookings(),
-                    totalNotifyCount: \App\Support\NotifyCounts::total(),
+                    pendingBookings: \App\Support\NotifyCounts::pendingBookings($branchId),
+                    todayBookings: \App\Support\NotifyCounts::todayBookings($branchId),
+                    totalNotifyCount: \App\Support\NotifyCounts::total($branchId),
                 ));
-                // Also broadcast a counters update so sidebar badges refresh in all open tabs.
-                broadcast(new \App\Events\CountersUpdated());
+
+                // Counters update for branch channel (branch-scoped numbers).
+                if ($branchId) {
+                    broadcast(new \App\Events\CountersUpdated($branchId));
+                }
+
+                // Counters update for global channel (super admin sees all branches).
+                broadcast(new \App\Events\CountersUpdated(null));
             } catch (\Throwable $e) {
                 Log::error('Booking broadcast failed: ' . $e->getMessage());
             }
