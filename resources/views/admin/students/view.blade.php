@@ -125,7 +125,13 @@
                 <i class="ki-duotone ki-people fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> إدارة سجلات الطلاب
             </span>
         </div>
-        <div class="card-toolbar gap-2">
+        <div class="card-toolbar gap-2 flex-wrap">
+            <button type="button" id="sms" class="btn btn-success btn-sm">
+                <i class="ki-duotone ki-message-text-2 fs-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> إرسال SMS
+            </button>
+            <button type="button" id="CEmail" class="btn btn-warning btn-sm">
+                <i class="ki-duotone ki-sms fs-4"><span class="path1"></span><span class="path2"></span></i> إرسال بريد
+            </button>
             @can('admin.students.add')
                 <a href="{{ route('students.add') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i> إضافة طالب

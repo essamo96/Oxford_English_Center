@@ -236,14 +236,14 @@
                         <input type="text" id="claimed_amount" class="form-control bg-light" readonly>
                     </div>
 
-                    {{-- Credit-balance breakdown (shown when part of the due was paid from credit) --}}
-                    {{-- Uses Metronic theme utilities so it adapts to BOTH dark & light themes --}}
+                    {{-- Prior-payment / credit breakdown — shown when student has existing verified payments --}}
+                    {{-- Two modes: (A) actual credit-balance overpayment, (B) completing a partial payment --}}
                     <div id="credit_breakdown_box" class="mb-4 p-4 rounded bg-light-primary border border-primary border-dashed" style="display:none;">
-                        <div class="fw-bold text-primary mb-3"><i class="bi bi-piggy-bank-fill me-1"></i> تسوية من الرصيد الدائن</div>
+                        <div class="fw-bold text-primary mb-3" id="cb_box_title"><i class="bi bi-piggy-bank-fill me-1"></i> تسوية من الرصيد الدائن</div>
                         <div class="row g-2 fs-8 text-center">
                             <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">إجمالي الرسوم</div><div class="fw-bold text-gray-900" id="cb_total">0</div></div></div>
-                            <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">مخصوم من الرصيد</div><div class="fw-bold text-info" id="cb_credit">0</div></div></div>
-                            <div class="col-4"><div class="p-2 rounded bg-body"><div class="text-muted">الحد الأدنى للدفعة</div><div class="fw-bold text-gray-900" id="cb_min">0</div></div></div>
+                            <div class="col-4" id="cb_credit_col"><div class="p-2 rounded bg-body"><div class="text-muted" id="cb_credit_lbl">مخصوم من الرصيد</div><div class="fw-bold text-info" id="cb_credit">0</div></div></div>
+                            <div class="col-4" id="cb_min_col"><div class="p-2 rounded bg-body"><div class="text-muted">الحد الأدنى للدفعة</div><div class="fw-bold text-gray-900" id="cb_min">0</div></div></div>
                         </div>
                         <div id="cb_note" class="mb-0 mt-3 py-2 px-3 fs-8 rounded d-flex align-items-start gap-2"></div>
                     </div>
@@ -594,9 +594,38 @@
                     $('#cb_credit').text(Number(f.paid_from_credit).toFixed(2));
                     $('#cb_min').text(Number(f.min_payment).toFixed(2));
 
+                    // Distinguish two scenarios:
+                    // (A) Actual credit balance (student overpaid before → credit auto-applied)
+                    // (B) Completing payment (student paid partially before via verified payments,
+                    //     no actual credit balance, just paying the remaining balance)
+                    const hasRealCredit = (f.credit_available || 0) > 0.009;
+                    const isCompleting  = !hasRealCredit && (f.paid_from_credit || 0) > 0.009;
+
+                    if (isCompleting) {
+                        // Scenario B: rename labels to avoid confusion
+                        $('#cb_box_title').html('<i class="bi bi-check2-all me-1"></i> دفعات سابقة مؤكدة');
+                        $('#cb_credit_lbl').text('مدفوع مسبقاً');
+                        $('#cb_min_col').hide(); // min threshold is irrelevant — student is completing
+                    } else {
+                        // Scenario A: restore to default credit-balance labels
+                        $('#cb_box_title').html('<i class="bi bi-piggy-bank-fill me-1"></i> تسوية من الرصيد الدائن');
+                        $('#cb_credit_lbl').text('مخصوم من الرصيد');
+                        $('#cb_min_col').show();
+                    }
+
                     // Theme-aware note colours (bg-light-* / text-* adapt to dark & light themes)
                     let noteCls, noteHtml;
-                    if (f.min_cash_now > 0.009) {
+                    if (isCompleting) {
+                        // Completing payment: show clear, non-credit wording
+                        noteCls = 'bg-light-success text-success';
+                        noteHtml = '<i class="bi bi-check-circle-fill"></i><div>'
+                            + 'الطالب يُكمل سداد رسومه — مدفوع ومؤكد مسبقاً: <strong>'
+                            + Number(f.paid_from_credit).toFixed(2) + ' ILS</strong>'
+                            + (f.remaining > 0.009
+                                ? '، المتبقّي بعد هذه الدفعة: <strong>' + Number(f.remaining).toFixed(2) + ' ILS</strong>'
+                                : ' — <strong>يُغطّي الرسوم بالكامل</strong>')
+                            + '.</div>';
+                    } else if (f.min_cash_now > 0.009) {
                         noteCls = 'bg-light-warning text-warning';
                         noteHtml = '<i class="bi bi-exclamation-triangle-fill"></i><div>الرصيد الدائن لا يغطّي الحد الأدنى. <strong>يجب دفع ' + Number(f.min_cash_now).toFixed(2) + ' ILS نقدًا على الأقل الآن</strong>، والمتبقّي الكلّي ' + Number(f.remaining).toFixed(2) + ' ILS لإكمال السداد.</div>';
                     } else {
@@ -606,13 +635,18 @@
                     $('#cb_note').attr('class', 'mb-0 mt-3 py-2 px-3 fs-8 rounded d-flex align-items-start gap-2 ' + noteCls).html(noteHtml);
                     $('#credit_breakdown_box').show();
 
-                    if (f.min_cash_now > 0.009) {
+                    if (isCompleting) {
+                        // Admin must verify the cash the student is submitting now
+                        $('#verified_amount_block').show();
+                        $('#verified_amount').prop('required', true).val(Number(f.remaining > 0.009 ? f.remaining : 0).toFixed(2));
+                        refreshCashHint();
+                    } else if (f.min_cash_now > 0.009) {
                         // Minimum NOT covered → admin must collect cash now
                         $('#verified_amount_block').show();
                         $('#verified_amount').prop('required', true).val(Number(f.min_cash_now).toFixed(2));
                         refreshCashHint();
                     } else {
-                        // Minimum fully covered by credit → no cash needed; hide the field
+                        // Minimum fully covered by credit → no additional cash needed
                         $('#verified_amount_block').hide();
                         $('#verified_amount').prop('required', false).val('0');
                         $('#cash_remaining_hint').hide();

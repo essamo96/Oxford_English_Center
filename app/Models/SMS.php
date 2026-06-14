@@ -8,9 +8,9 @@ class SMS extends Model
 {
     function sendSMS($numbers, $message)
     {
-        
         $res = new \stdClass();
-        $status = file_get_contents("https://www.alqudwasms.com/api.php?comm=sendsms&user=Oxford.E.C&pass=1929459&to=". $numbers ."&message=" . urlencode($message) . "&sender=Oxford.E.C");
+        $result = app(\App\Services\SmsService::class)->send($numbers, $message);
+        $status = $result['success'] ? 1 : $result['status'];
         // $status = file_get_contents("http://www.alqudwasms.com/api.php?user=OXFORD.E.C&pass=1929459&to=" . $numbers .
         // "&message=" . urlencode($message) . "&sender=OXFORD.E.C");
         if ($status == -999) {

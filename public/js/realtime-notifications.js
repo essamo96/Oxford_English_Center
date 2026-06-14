@@ -306,7 +306,14 @@
      * ------------------------------------------------------------------ */
     function initRealtime() {
         if (!CFG.key) {
-            console.warn('[RT] Missing OXFORD_RT config — notifications disabled.');
+            console.warn('[RT] OXFORD_RT.key is empty — check PUSHER_APP_KEY in .env');
+            return;
+        }
+        if (CFG.broadcast_driver && CFG.broadcast_driver !== 'pusher') {
+            console.warn(
+                '[RT] BROADCAST_DRIVER="' + CFG.broadcast_driver + '" — server will NOT broadcast events. ' +
+                'Set BROADCAST_DRIVER=pusher in .env and run: php artisan config:clear'
+            );
             return;
         }
         if (typeof window.Pusher === 'undefined') {
@@ -390,6 +397,36 @@
         });
 
         window.OxfordPusher = pusher; // exposed for manual debugging
+
+        // Diagnostic: OxfordRTdiag() — prints full config + connection state to console
+        window.OxfordRTdiag = function () {
+            var state = pusher.connection.state;
+            var ok = state === 'connected';
+            console.group('%c[RT] Oxford Real-time Diagnostic', 'font-weight:bold;color:' + (ok ? '#10b981' : '#ef4444'));
+            console.log('BROADCAST_DRIVER:', CFG.broadcast_driver || '(not set)');
+            console.log('Pusher key:', CFG.key ? CFG.key.slice(0, 6) + '****' : '(empty)');
+            console.log('Host:', CFG.host || '(Pusher Cloud)');
+            console.log('Port:', CFG.port);
+            console.log('Scheme:', CFG.scheme);
+            console.log('Cluster:', CFG.cluster);
+            console.log('Branch:', CFG.branch_id || '(super admin)');
+            console.log('Channel:', channelName);
+            console.log('Connection state:', state);
+            if (!ok) {
+                console.warn('⚠️  Not connected! Common fixes:');
+                console.warn('  1. Set BROADCAST_DRIVER=pusher in .env');
+                console.warn('  2. Set valid PUSHER_APP_KEY / PUSHER_APP_SECRET in .env');
+                if (CFG.host) {
+                    console.warn('  3. Run: php artisan websockets:serve (self-hosted mode)');
+                } else {
+                    console.warn('  3. Verify Pusher Cloud credentials at https://dashboard.pusher.com');
+                }
+                console.warn('  4. Run: php artisan config:clear && php artisan cache:clear');
+            } else {
+                console.log('%c✅ Connected — if events are not arriving, check BROADCAST_DRIVER=pusher in .env', 'color:#10b981');
+            }
+            console.groupEnd();
+        };
 
         // Manual UI self-test (sound + toast + counter) without sending real data:
         //   OxfordRTtest('contact')  or  OxfordRTtest('booking')

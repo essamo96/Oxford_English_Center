@@ -195,15 +195,16 @@
     <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
     <script>
         window.OXFORD_RT = {
-            key:       @json(config('broadcasting.connections.pusher.key')),
-            host:      @json(config('broadcasting.connections.pusher.options.host', '')),
-            port:      {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
-            scheme:    @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
-            cluster:   @json(config('broadcasting.connections.pusher.options.cluster', 'mt1')),
-            branch_id: @json(auth()->guard('admin')->user()?->branch_id)
+            key:              @json(config('broadcasting.connections.pusher.key')),
+            host:             @json(config('broadcasting.connections.pusher.options.host', '')),
+            port:             {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
+            scheme:           @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
+            cluster:          @json(config('broadcasting.connections.pusher.options.cluster', 'mt1')),
+            branch_id:        @json(auth()->guard('admin')->user()?->branch_id),
+            broadcast_driver: @json(config('broadcasting.default'))
         };
     </script>
-    <script src="{{ asset('js/realtime-notifications.js') }}?v=4"></script>
+    <script src="{{ asset('js/realtime-notifications.js') }}?v=5"></script>
 </body>
 
 </html>
