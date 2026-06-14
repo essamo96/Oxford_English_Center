@@ -567,11 +567,13 @@
                 });
             }
 
-            // Reset + load the credit/min breakdown for this pending order
+            // Reset modal state before loading financial data
             $('#credit_breakdown_box').hide();
             $('#cash_remaining_hint').hide();
-            $('#verified_amount_block').show();              // default: cash field visible & required
+            $('#verified_amount_block').show();
             $('#verified_amount').prop('required', true);
+            $('#program_group_box').show();          // always visible by default
+            $('#completing_payment_notice').hide();  // hidden until isCompleting is confirmed
             window._pendingFin = null;
             $.get('{{ url("admin/financial/pending/financials") }}/' + id, function (f) {
                 if (!f || !f.success) return;
@@ -602,15 +604,32 @@
                     const isCompleting  = !hasRealCredit && (f.paid_from_credit || 0) > 0.009;
 
                     if (isCompleting) {
-                        // Scenario B: rename labels to avoid confusion
+                        // Scenario B: student is completing a partial payment — not a first-time enrollment
                         $('#cb_box_title').html('<i class="bi bi-check2-all me-1"></i> دفعات سابقة مؤكدة');
                         $('#cb_credit_lbl').text('مدفوع مسبقاً');
-                        $('#cb_min_col').hide(); // min threshold is irrelevant — student is completing
+                        $('#cb_min_col').hide();
+                        // Hide program/group selectors — already enrolled, no need to re-assign
+                        $('#program_group_box').hide();
+                        $('#already_seated_notice').hide();
+                        // Show a clean informational notice instead
+                        if (!$('#completing_payment_notice').length) {
+                            $('#program_group_box').after(
+                                '<div id="completing_payment_notice" class="alert alert-light-primary border border-primary border-dashed d-flex align-items-center gap-2 mt-2">'
+                                + '<i class="bi bi-info-circle-fill text-primary fs-5"></i>'
+                                + '<div>الطالب مُسجَّل بالفعل في برنامجه ومجموعته — هذه الدفعة لاستكمال السداد فقط، لا يلزم تغيير التسكين.</div>'
+                                + '</div>'
+                            );
+                        } else {
+                            $('#completing_payment_notice').show();
+                        }
                     } else {
                         // Scenario A: restore to default credit-balance labels
                         $('#cb_box_title').html('<i class="bi bi-piggy-bank-fill me-1"></i> تسوية من الرصيد الدائن');
                         $('#cb_credit_lbl').text('مخصوم من الرصيد');
                         $('#cb_min_col').show();
+                        // Restore program/group selectors
+                        $('#program_group_box').show();
+                        $('#completing_payment_notice').hide();
                     }
 
                     // Theme-aware note colours (bg-light-* / text-* adapt to dark & light themes)
