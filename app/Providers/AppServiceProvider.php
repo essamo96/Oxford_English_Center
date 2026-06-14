@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Channels\TweetSmsChannel;
+use App\Services\SmsService;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -76,5 +79,11 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(\App\Services\BranchContext::class);
+        $this->app->singleton(SmsService::class);
+
+        // Register the 'tweetsms' driver with Laravel's notification system.
+        $this->app->resolving(ChannelManager::class, function (ChannelManager $manager) {
+            $manager->extend('tweetsms', fn () => new TweetSmsChannel(app(SmsService::class)));
+        });
     }
 }
