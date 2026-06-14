@@ -642,10 +642,12 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('file_manager/delete', ['uses' => 'FileManagerController@delete']); // Fallback underscore
 
     // Student Payment Requests (submitted by students)
-    Route::get('financial/student-payments', ['as' => 'admin.financial.student-payments', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'StudentPaymentRequestsController@index']);
-    Route::get('financial/student-payments/list', ['as' => 'admin.financial.student-payments.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'StudentPaymentRequestsController@getList']);
-    Route::post('financial/student-payments/{id}/approve', ['as' => 'admin.financial.student-payments.approve', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'StudentPaymentRequestsController@approve']);
-    Route::post('financial/student-payments/{id}/reject',  ['as' => 'admin.financial.student-payments.reject',  'middleware' => ['permission:admin.financial.verify'], 'uses' => 'StudentPaymentRequestsController@reject']);
+    // student_payments.view alias lets the dynamic sidebar resolve the route by group name
+    Route::get('financial/student-payments', ['as' => 'admin.financial.student-payments', 'middleware' => ['permission:admin.student_payments.view'], 'uses' => 'StudentPaymentRequestsController@index']);
+    Route::get('financial/student-payments', ['as' => 'student_payments.view',            'middleware' => ['permission:admin.student_payments.view'], 'uses' => 'StudentPaymentRequestsController@index']);
+    Route::get('financial/student-payments/list', ['as' => 'admin.financial.student-payments.list', 'middleware' => ['permission:admin.student_payments.view'], 'uses' => 'StudentPaymentRequestsController@getList']);
+    Route::post('financial/student-payments/{id}/approve', ['as' => 'admin.financial.student-payments.approve', 'middleware' => ['permission:admin.student_payments.approve'], 'uses' => 'StudentPaymentRequestsController@approve']);
+    Route::post('financial/student-payments/{id}/reject',  ['as' => 'admin.financial.student-payments.reject',  'middleware' => ['permission:admin.student_payments.reject'],  'uses' => 'StudentPaymentRequestsController@reject']);
 
     // Financial Routes
     Route::get('financial/pending', ['as' => 'admin.financial.pending', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@pendingOrders']);

@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(FeeTypeSeeder::class);
+        $this->call(SidebarSeeder::class);
         // 1. Create Admin Role
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'admin']);
 
