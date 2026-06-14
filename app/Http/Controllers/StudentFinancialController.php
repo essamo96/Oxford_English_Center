@@ -198,6 +198,23 @@ class StudentFinancialController extends Controller
     }
 
     /**
+     * GET AJAX: Return updated balance for a single invoice bucket.
+     * Called by invoices.blade.php Pusher handler after payment approval.
+     */
+    public function bucketStatus(Request $request)
+    {
+        $student = Auth::guard('students')->user();
+        $groupId = $request->filled('group_id') ? (int) $request->group_id : null;
+        $ledger  = $this->financialService->getStudentLedger($student->id, $groupId);
+
+        return response()->json([
+            'remaining'  => $ledger ? round((float) $ledger['remaining_balance'], 2) : 0.0,
+            'total_paid' => $ledger ? round((float) $ledger['total_paid'], 2)         : 0.0,
+            'label'      => '',
+        ]);
+    }
+
+    /**
      * DELETE: Student cancels a pending submission.
      */
     public function cancelSubmission(int $id)

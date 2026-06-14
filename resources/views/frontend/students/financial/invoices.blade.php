@@ -268,22 +268,23 @@
         $pending   = $pendingSubmissions[$bucketKey] ?? null;
         $hasBalance = $bucket['remaining'] > 0;
     @endphp
-    <div class="inv-bucket {{ $hasBalance ? 'has-balance' : '' }}">
+    <div class="inv-bucket {{ $hasBalance ? 'has-balance' : '' }}"
+         data-bucket-key="{{ $bucketKey }}">
         <div class="inv-bucket-title">
             <i class="bi bi-folder2-open"></i>
             {{ $bucket['label'] }}
         </div>
-        <div class="balance-grid">
+        <div class="balance-grid" data-bucket-balance>
             <div class="balance-cell">
                 <div class="val kpi-blue">₪ {{ number_format($bucket['total_fee'], 2) }}</div>
                 <div class="lbl">المستحق الكلي</div>
             </div>
             <div class="balance-cell">
-                <div class="val kpi-green">₪ {{ number_format($bucket['paid'], 2) }}</div>
+                <div class="val kpi-green" data-bucket-paid>₪ {{ number_format($bucket['paid'], 2) }}</div>
                 <div class="lbl">المدفوع المؤكد</div>
             </div>
             <div class="balance-cell">
-                <div class="val kpi-red">₪ {{ number_format($bucket['remaining'], 2) }}</div>
+                <div class="val kpi-red" data-bucket-remaining>₪ {{ number_format($bucket['remaining'], 2) }}</div>
                 <div class="lbl">المتبقي</div>
             </div>
             @if($bucket['credit'] > 0)
@@ -307,15 +308,20 @@
                     <button type="submit" class="btn-cancel-small"><i class="bi bi-x"></i> إلغاء</button>
                 </form>
             </div>
+            <div data-bucket-action style="display:none;"></div>
         @elseif($hasBalance)
-            <button type="button" class="btn-pay js-open-pay"
-                    data-group-id="{{ $bucket['group_id'] ?? '' }}"
-                    data-label="{{ addslashes($bucket['label']) }}"
-                    data-remaining="{{ $bucket['remaining'] }}">
-                <i class="bi bi-credit-card"></i>دفع الفاتورة
-            </button>
+            <div data-bucket-action>
+                <button type="button" class="btn-pay js-open-pay"
+                        data-group-id="{{ $bucket['group_id'] ?? '' }}"
+                        data-label="{{ addslashes($bucket['label']) }}"
+                        data-remaining="{{ $bucket['remaining'] }}">
+                    <i class="bi bi-credit-card"></i>دفع الفاتورة
+                </button>
+            </div>
         @else
-            <span class="badge-paid-full"><i class="bi bi-check-circle-fill"></i>مدفوع بالكامل</span>
+            <div data-bucket-action>
+                <span class="badge-paid-full"><i class="bi bi-check-circle-fill"></i>مدفوع بالكامل</span>
+            </div>
         @endif
     </div>
     @endforeach
@@ -752,7 +758,73 @@
         if (ch) {
             ch.bind('student.notification', function (data) {
                 if ((data.type || '') === 'new_invoice') return; // handled globally in dashboard
-                showToast(data.title || 'إشعار', data.message || '', data.status === 'approved');
+
+                var type     = data.type || '';
+                var approved = data.status === 'approved';
+
+                // Show toast notification
+                showToast(data.title || 'إشعار', data.message || '', approved);
+
+                // Update invoice bucket DOM when payment is approved or rejected
+                if (type === 'payment_status_updated') {
+                    var key    = data.group_id ? String(data.group_id) : 'pre_group';
+                    var bucket = document.querySelector('[data-bucket-key="' + key + '"]');
+
+                    if (!bucket) {
+                        // Bucket not visible on page — reload after toast
+                        setTimeout(function () { location.reload(); }, 2000);
+                        return;
+                    }
+
+                    // Remove pending-review-status
+                    var prv = bucket.querySelector('.pending-review-status');
+                    if (prv) prv.remove();
+
+                    var actionArea = bucket.querySelector('[data-bucket-action]');
+
+                    if (approved) {
+                        // Fetch updated balance from server to show correct next state
+                        var url = '/student/financial/bucket-status'
+                            + (data.group_id ? '?group_id=' + data.group_id : '');
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(function (r) { return r.ok ? r.json() : null; })
+                            .then(function (d) {
+                                if (!d || !actionArea) return;
+                                actionArea.style.display = '';
+                                if (d.remaining > 0.009) {
+                                    actionArea.innerHTML =
+                                        '<button type="button" class="btn-pay js-open-pay"'
+                                        + ' data-group-id="' + (data.group_id || '') + '"'
+                                        + ' data-label="' + (d.label || '') + '"'
+                                        + ' data-remaining="' + d.remaining + '">'
+                                        + '<i class="bi bi-credit-card"></i>دفع الفاتورة</button>';
+                                    actionArea.querySelector('.js-open-pay').addEventListener('click', function () {
+                                        openPay(this.dataset.groupId, this.dataset.label, this.dataset.remaining);
+                                    });
+                                    // Update "المتبقي" cell
+                                    var remCell = bucket.querySelector('[data-bucket-remaining]');
+                                    if (remCell) remCell.textContent = '₪ ' + parseFloat(d.remaining).toFixed(2);
+                                } else {
+                                    actionArea.innerHTML =
+                                        '<span class="badge-paid-full"><i class="bi bi-check-circle-fill"></i>مدفوع بالكامل</span>';
+                                    var remCell = bucket.querySelector('[data-bucket-remaining]');
+                                    if (remCell) { remCell.textContent = '₪ 0.00'; remCell.classList.remove('kpi-red'); remCell.classList.add('kpi-green'); }
+                                    bucket.classList.remove('has-balance');
+                                }
+                                // Update paid cell
+                                if (d.total_paid) {
+                                    var paidCell = bucket.querySelector('[data-bucket-paid]');
+                                    if (paidCell) paidCell.textContent = '₪ ' + parseFloat(d.total_paid).toFixed(2);
+                                }
+                            })
+                            .catch(function () {
+                                setTimeout(function () { location.reload(); }, 1500);
+                            });
+                    } else {
+                        // Rejected: restore pay button (reload to get fresh state)
+                        setTimeout(function () { location.reload(); }, 2000);
+                    }
+                }
             });
         }
     })();

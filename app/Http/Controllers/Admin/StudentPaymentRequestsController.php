@@ -180,10 +180,28 @@ class StudentPaymentRequestsController extends AdminController
             }
         });
 
-        // Notify student
+        // Notify student (database — queued, async)
         $submission->student->notify(new PaymentStatusUpdatedNotification($submission, 'approved'));
 
-        // Update admin counters
+        // Real-time broadcast to student channel — fired synchronously here (NOT inside the
+        // queued notification) so the student gets the Pusher event immediately.
+        try {
+            broadcast(new \App\Events\StudentNotificationBroadcast(
+                $submission->student_id,
+                [
+                    'type'          => 'payment_status_updated',
+                    'status'        => 'approved',
+                    'title'         => 'تمت الموافقة على دفعتك',
+                    'message'       => 'تمت الموافقة على دفعتك بمبلغ ' . number_format((float) $submission->amount_paid, 2) . ' بنجاح.',
+                    'amount_paid'   => (float) $submission->amount_paid,
+                    'group_id'      => $submission->group_id,
+                    'submission_id' => $submission->id,
+                    'admin_notes'   => $submission->admin_notes,
+                ]
+            ));
+        } catch (\Throwable) {}
+
+        // Update admin sidebar counters
         try {
             broadcast(new CountersUpdated($submission->student?->branch_id));
         } catch (\Throwable) {}
@@ -209,8 +227,25 @@ class StudentPaymentRequestsController extends AdminController
             'reviewed_at' => now(),
         ]);
 
-        // Notify student
+        // Notify student (database — queued, async)
         $submission->student->notify(new PaymentStatusUpdatedNotification($submission, 'rejected'));
+
+        // Real-time broadcast to student channel — synchronous
+        try {
+            broadcast(new \App\Events\StudentNotificationBroadcast(
+                $submission->student_id,
+                [
+                    'type'          => 'payment_status_updated',
+                    'status'        => 'rejected',
+                    'title'         => 'تم رفض دفعتك',
+                    'message'       => 'تم رفض دفعتك. السبب: ' . ($submission->admin_notes ?? 'لم يُحدد سبب.'),
+                    'amount_paid'   => (float) $submission->amount_paid,
+                    'group_id'      => $submission->group_id,
+                    'submission_id' => $submission->id,
+                    'admin_notes'   => $submission->admin_notes,
+                ]
+            ));
+        } catch (\Throwable) {}
 
         try {
             broadcast(new CountersUpdated($submission->student?->branch_id));

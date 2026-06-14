@@ -132,6 +132,7 @@ Route::group(['middleware' => ['auth:students']], function () {
     Route::get('student/financial/invoices',           ['as' => 'student.financial.invoices',     'uses' => 'StudentFinancialController@invoices']);
     Route::post('student/financial/submit-payment',    ['as' => 'student.financial.submit-payment','uses' => 'StudentFinancialController@submitPayment']);
     Route::delete('student/financial/cancel/{id}',     ['as' => 'student.financial.cancel',       'uses' => 'StudentFinancialController@cancelSubmission']);
+    Route::get('student/financial/bucket-status',      ['as' => 'student.financial.bucket-status','uses' => 'StudentFinancialController@bucketStatus']);
     Route::get('student/financial/notifications',      ['as' => 'student.financial.notifications','uses' => 'StudentFinancialController@notifications']);
     Route::post('student/financial/notifications/{id}/read', ['as' => 'student.financial.mark-read',    'uses' => 'StudentFinancialController@markRead']);
     Route::post('student/financial/notifications/read-all',  ['as' => 'student.financial.mark-all-read','uses' => 'StudentFinancialController@markAllRead']);

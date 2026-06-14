@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Events\StudentNotificationBroadcast;
 use App\Models\StudentPaymentSubmission;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +25,10 @@ class PaymentStatusUpdatedNotification extends Notification implements ShouldQue
     {
         $approved = $this->status === 'approved';
 
-        $data = [
+        // NOTE: broadcast() is NOT called here — this method runs inside a queue job
+        // and the broadcast would be lost if no queue worker is running.
+        // The controller (StudentPaymentRequestsController) fires the broadcast directly.
+        return [
             'type'          => 'payment_status_updated',
             'status'        => $this->status,
             'title'         => $approved ? 'تمت الموافقة على دفعتك' : 'تم رفض دفعتك',
@@ -34,13 +36,9 @@ class PaymentStatusUpdatedNotification extends Notification implements ShouldQue
                 ? 'تمت الموافقة على دفعتك بمبلغ ' . number_format((float) $this->submission->amount_paid, 2) . ' بنجاح.'
                 : 'تم رفض دفعتك. السبب: ' . ($this->submission->admin_notes ?? 'لم يُحدد سبب.'),
             'amount_paid'   => (float) $this->submission->amount_paid,
+            'group_id'      => $this->submission->group_id,
             'submission_id' => $this->submission->id,
             'admin_notes'   => $this->submission->admin_notes,
         ];
-
-        // Real-time push to student channel
-        broadcast(new StudentNotificationBroadcast($this->submission->student_id, $data));
-
-        return $data;
     }
 }
