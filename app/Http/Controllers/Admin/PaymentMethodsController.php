@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\PaymentMethods;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
-class PaymentMethodsController extends Controller
+class PaymentMethodsController extends AdminController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        parent::$data['active_menu'] = 'payment_methods';
+    }
+
     public function getIndex()
     {
-        return view('admin.payment_methods.index');
+        return view('admin.payment_methods.index', parent::$data);
     }
 
     public function getList()
@@ -55,7 +60,7 @@ class PaymentMethodsController extends Controller
 
     public function getAdd()
     {
-        return view('admin.payment_methods.add');
+        return view('admin.payment_methods.add', parent::$data);
     }
 
     public function postAdd(Request $request)
@@ -88,7 +93,7 @@ class PaymentMethodsController extends Controller
     public function getEdit($id)
     {
         $method = PaymentMethods::findOrFail($id);
-        return view('admin.payment_methods.edit', compact('method'));
+        return view('admin.payment_methods.edit', parent::$data + compact('method'));
     }
 
     public function postEdit(Request $request, $id)

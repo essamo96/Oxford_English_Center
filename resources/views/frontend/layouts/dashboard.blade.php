@@ -65,6 +65,82 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script src="{{ url('assets/js/dashboard.js?v=1') }}"></script>
+
+        {{-- ── Student real-time notifications (Pusher) ─────────────────── --}}
+        @if($isStudent)
+        <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+        @auth('students')
+        <script>
+        (function () {
+            var key     = '{{ config("broadcasting.connections.pusher.key") }}';
+            var cluster = '{{ config("broadcasting.connections.pusher.options.cluster", "mt1") }}';
+            var host    = '{{ config("broadcasting.connections.pusher.options.host", "") }}';
+            var port    = {{ (int) config("broadcasting.connections.pusher.options.port", 443) }};
+            var scheme  = '{{ config("broadcasting.connections.pusher.options.scheme", "https") }}';
+            var sid     = {{ Auth::guard('students')->id() }};
+            if (!key || typeof Pusher === 'undefined') return;
+
+            var useTLS = scheme === 'https';
+            var opts   = { cluster: cluster, forceTLS: useTLS, disableStats: true };
+            if (host) {
+                opts.wsHost           = host;
+                opts.wsPort           = port;
+                opts.wssPort          = port;
+                opts.enabledTransports = useTLS ? ['ws', 'wss'] : ['ws'];
+            }
+            var pusher = new Pusher(key, opts);
+            var ch = pusher.subscribe('student-notifications-' + sid);
+
+            // Show toast only for enrollment notification (new_invoice) on any student page.
+            // Payment status toasts are handled by each financial page individually.
+            ch.bind('student.notification', function (data) {
+                if ((data.type || '') !== 'new_invoice') return;
+                _showStudentToast(data);
+            });
+
+            window.studentPusher  = pusher;
+            window.studentChannel = ch;
+
+            function _showStudentToast(data) {
+                var t = document.createElement('div');
+                t.style.cssText = 'position:fixed;bottom:24px;left:24px;z-index:99999;'
+                    + 'min-width:300px;max-width:380px;'
+                    + 'background:linear-gradient(135deg,#1e3a5f,#1e3a5fcc);'
+                    + 'border:1px solid #3b82f6;border-left:4px solid #3b82f6;'
+                    + 'border-radius:12px;padding:16px;color:#fff;'
+                    + 'font-family:Cairo,sans-serif;direction:rtl;text-align:right;'
+                    + 'box-shadow:0 8px 32px rgba(0,0,0,.4);'
+                    + 'opacity:0;transform:translateX(-60px);'
+                    + 'transition:opacity .35s ease,transform .35s ease;';
+                var amount = data.total_due || data.remaining;
+                t.innerHTML = '<div style="font-weight:700;font-size:.95rem;margin-bottom:4px;">📋 '
+                    + _esc(data.title || 'فاتورة جديدة') + '</div>'
+                    + (data.message ? '<div style="font-size:.82rem;opacity:.9;margin-bottom:6px;line-height:1.4;">'
+                        + _esc(data.message) + '</div>' : '')
+                    + (amount ? '<div style="font-size:.88rem;font-weight:700;background:rgba(255,255,255,.15);'
+                        + 'border-radius:6px;padding:3px 10px;display:inline-block;">₪ '
+                        + parseFloat(amount).toFixed(2) + '</div>' : '');
+                document.body.appendChild(t);
+                requestAnimationFrame(function () {
+                    t.style.opacity = '1'; t.style.transform = 'translateX(0)';
+                });
+                setTimeout(function () {
+                    t.style.opacity = '0'; t.style.transform = 'translateX(-60px)';
+                    setTimeout(function () { if (t.parentNode) t.remove(); }, 400);
+                }, 7000);
+            }
+
+            function _esc(s) {
+                return String(s).replace(/[&<>"']/g, function(m) {
+                    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+                });
+            }
+        })();
+        </script>
+        @endauth
+        @endif
+        {{-- ──────────────────────────────────────────────────────────────── --}}
+
         @yield('js')
     </body>
 </html>

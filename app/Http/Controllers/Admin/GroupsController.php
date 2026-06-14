@@ -382,8 +382,29 @@ class GroupsController extends AdminController
                     $skipped++; continue;
                 }
                 try {
-                    $svc->enroll((int) $sid, $group, $adminId);
+                    $result = $svc->enroll((int) $sid, $group, $adminId);
                     $added++;
+
+                    // Notify the student about the new invoice (non-fatal)
+                    if (!empty($result['new_program']) && !empty($result['pending_created'])) {
+                        try {
+                            $student = \App\Models\Students::find($sid);
+                            if ($student) {
+                                $programTitle = optional(\App\Models\Programs::find($group->program_id))->title ?? '';
+                                $student->notify(new \App\Notifications\NewInvoiceNotification(
+                                    studentId:    (int) $sid,
+                                    groupId:      (int) $group->id,
+                                    totalDue:     (float) $result['fee'],
+                                    remaining:    (float) $result['remaining'],
+                                    creditApplied:(float) $result['credit_applied'],
+                                    programTitle: $programTitle,
+                                    groupName:    $group->name ?? '',
+                                ));
+                            }
+                        } catch (\Throwable) {
+                            // Non-fatal — don't fail enrollment if notification fails
+                        }
+                    }
                 } catch (\App\Exceptions\EnrollmentException $e) {
                     $blocked[] = ['name' => ($vNames[$sid] ?? ('#' . $sid)), 'reasons' => $e->errors];
                 }

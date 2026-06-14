@@ -126,6 +126,15 @@ Route::group(['middleware' => ['auth:students']], function () {
     Route::get('students/subjects/{id}', ['as' => 'student.group.subjects', 'uses' => 'GroupsController@getFiles']);
     Route::post('student/grope/info', ['as' => 'students.showGroue_info', 'uses' => 'GroupsController@postShowGroueInfo']);
     Route::get('student/notifications', ['as' => 'student.notifications', 'uses' => 'StudentsController@indexStudentNotify']);
+
+    // Student Financial Module
+    Route::get('student/financial/history',            ['as' => 'student.financial.history',      'uses' => 'StudentFinancialController@history']);
+    Route::get('student/financial/invoices',           ['as' => 'student.financial.invoices',     'uses' => 'StudentFinancialController@invoices']);
+    Route::post('student/financial/submit-payment',    ['as' => 'student.financial.submit-payment','uses' => 'StudentFinancialController@submitPayment']);
+    Route::delete('student/financial/cancel/{id}',     ['as' => 'student.financial.cancel',       'uses' => 'StudentFinancialController@cancelSubmission']);
+    Route::get('student/financial/notifications',      ['as' => 'student.financial.notifications','uses' => 'StudentFinancialController@notifications']);
+    Route::post('student/financial/notifications/{id}/read', ['as' => 'student.financial.mark-read',    'uses' => 'StudentFinancialController@markRead']);
+    Route::post('student/financial/notifications/read-all',  ['as' => 'student.financial.mark-all-read','uses' => 'StudentFinancialController@markAllRead']);
     Route::post('students/grope/marks', ['as' => 'student.showGroueMarks', 'uses' => 'StudentsController@getStudentGroueMarks']);
     Route::post('students/grope/Progress', ['as' => 'student.showGroueProgress', 'uses' => 'StudentsController@getStudentGroueProgress']);
     Route::post('grope/Exam/{student_id}', ['as' => 'student.ExamDates', 'uses' => 'StudentsController@getGroupStudentExamDates']);
@@ -631,6 +640,12 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('file_manager/rename', ['uses' => 'FileManagerController@rename']); // Fallback underscore
     Route::post('file-manager/delete', ['as' => 'admin.file_manager.delete', 'uses' => 'FileManagerController@delete']);
     Route::post('file_manager/delete', ['uses' => 'FileManagerController@delete']); // Fallback underscore
+
+    // Student Payment Requests (submitted by students)
+    Route::get('financial/student-payments', ['as' => 'admin.financial.student-payments', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'StudentPaymentRequestsController@index']);
+    Route::get('financial/student-payments/list', ['as' => 'admin.financial.student-payments.list', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'StudentPaymentRequestsController@getList']);
+    Route::post('financial/student-payments/{id}/approve', ['as' => 'admin.financial.student-payments.approve', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'StudentPaymentRequestsController@approve']);
+    Route::post('financial/student-payments/{id}/reject',  ['as' => 'admin.financial.student-payments.reject',  'middleware' => ['permission:admin.financial.verify'], 'uses' => 'StudentPaymentRequestsController@reject']);
 
     // Financial Routes
     Route::get('financial/pending', ['as' => 'admin.financial.pending', 'middleware' => ['permission:admin.financial.view'], 'uses' => 'FinancialController@pendingOrders']);

@@ -588,7 +588,7 @@
             @if (auth()->user()->can('admin.financial.view') ||
                 auth()->user()->can('admin.financial.verify') ||
                 auth()->user()->can('admin.financial.refund'))
-            <li class="nav-item {{ in_array($active_menu, ['financial', 'financial_fees']) ? 'active' : '' }}">
+            <li class="nav-item {{ in_array($active_menu, ['financial', 'financial_fees', 'student_payments']) ? 'active' : '' }}">
                 <a href="javascript:void(0);" class="nav-link nav-toggle">
                     <i class="bi bi-cash-stack"></i>
                     <span class="title">الإدارة المالية</span>
@@ -600,6 +600,23 @@
                         <a href="{{ route('admin.financial.pending') }}" class="nav-link nav-toggle">
                             <i class="bi bi-hourglass-split"></i>
                             <span class="title">الطلبات المالية المعلقة</span>
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item {{ $active_menu == 'student_payments' ? 'active' : '' }}">
+                        <a href="{{ route('admin.financial.student-payments') }}" class="nav-link nav-toggle">
+                            <i class="bi bi-credit-card-2-front"></i>
+                            <span class="title">دفعات الطلاب</span>
+                            @php $pendingPay = \App\Support\NotifyCounts::pendingStudentPayments(auth()->user()->branch_id ?? null); @endphp
+                            @if($pendingPay > 0)
+                            <span class="menu-badge" style="display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:0 5px;margin-right:6px;">
+                                <span data-live-counter="pending_student_payments">{{ $pendingPay }}</span>
+                            </span>
+                            @else
+                            <span class="menu-badge" style="display:none;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:0 5px;margin-right:6px;">
+                                <span data-live-counter="pending_student_payments">0</span>
+                            </span>
+                            @endif
                             <span class="arrow"></span>
                         </a>
                     </li>

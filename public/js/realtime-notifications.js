@@ -226,13 +226,16 @@
             var pendingRequests = (parseInt(counters.unread_bookings, 10) || 0) + (parseInt(counters.closed_classes, 10) || 0);
             var totalMessages = (parseInt(counters.student_messages, 10) || 0) + (parseInt(counters.teacher_messages, 10) || 0);
 
+            var pendingPayments = parseInt(counters.pending_student_payments, 10) || 0;
+
             var map = {
-                'pending_requests': pendingRequests,
-                'unread_bookings':  parseInt(counters.unread_bookings, 10) || 0,
-                'closed_classes':   parseInt(counters.closed_classes, 10) || 0,
-                'total_messages':   totalMessages,
-                'student_messages': parseInt(counters.student_messages, 10) || 0,
-                'teacher_messages': parseInt(counters.teacher_messages, 10) || 0
+                'pending_requests':        pendingRequests,
+                'unread_bookings':         parseInt(counters.unread_bookings, 10) || 0,
+                'closed_classes':          parseInt(counters.closed_classes, 10) || 0,
+                'total_messages':          totalMessages,
+                'student_messages':        parseInt(counters.student_messages, 10) || 0,
+                'teacher_messages':        parseInt(counters.teacher_messages, 10) || 0,
+                'pending_student_payments': pendingPayments
             };
 
             Object.keys(map).forEach(function (key) {
@@ -340,6 +343,48 @@
                 console.log('[RT] counters updated', data.counters);
                 NotificationManager.updateLiveCounters(data.counters);
             }
+        });
+        channel.bind('student.payment.submitted', function (data) {
+            SoundManager.play('booking');
+            var colors = { bg: '#1e40af', border: '#3b82f6' };
+            var toast = document.createElement('div');
+            toast.setAttribute('data-toast', '');
+            toast.style.cssText =
+                'background:linear-gradient(135deg,' + colors.bg + ',' + colors.bg + 'dd);'
+                + 'border:1px solid ' + colors.border + ';border-right:4px solid ' + colors.border + ';'
+                + 'border-radius:12px;padding:16px;color:#fff;font-family:Cairo,sans-serif;'
+                + 'box-shadow:0 20px 60px rgba(0,0,0,.4);opacity:0;'
+                + 'transform:translateX(-100px) scale(.9);'
+                + 'transition:all .4s cubic-bezier(.175,.885,.32,1.275);'
+                + 'cursor:pointer;position:relative;overflow:hidden;direction:rtl;';
+            var name   = data.student_name || 'طالب';
+            var amount = data.amount ? '₪ ' + parseFloat(data.amount).toFixed(2) : '';
+            toast.innerHTML =
+                '<div style="position:absolute;top:0;right:0;left:0;height:2px;background:' + colors.border + ';'
+                + 'animation:rtProgress 6.5s linear forwards;"></div>'
+                + '<div style="display:flex;align-items:flex-start;gap:12px;">'
+                + '<div style="font-size:28px;line-height:1;">💳</div>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">دفعة مالية جديدة بانتظار المراجعة</div>'
+                + '<div style="font-size:12px;opacity:.85;">' + name + (amount ? ' — ' + amount : '') + '</div>'
+                + '</div>'
+                + '<button type="button" data-close style="background:rgba(255,255,255,.15);border:none;'
+                + 'color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:12px;'
+                + 'display:flex;align-items:center;justify-content:center;flex:none;">✕</button>'
+                + '</div>';
+            NotificationManager.container.prepend(toast);
+            requestAnimationFrame(function () {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0) scale(1)';
+            });
+            toast.querySelector('[data-close]').addEventListener('click', function (e) {
+                e.stopPropagation();
+                NotificationManager.dismiss(toast);
+            });
+            if (data.link) {
+                toast.addEventListener('click', function () { window.location.href = data.link; });
+            }
+            setTimeout(function () { NotificationManager.dismiss(toast); }, 6500);
         });
 
         window.OxfordPusher = pusher; // exposed for manual debugging

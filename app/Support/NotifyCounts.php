@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Closed_Classes;
 use App\Models\Contacts;
 use App\Models\Groups;
+use App\Models\StudentPaymentSubmission;
 use App\Models\Students;
 use App\Models\Students_Admin_Messages;
 use App\Models\Teachers_Admin_Messages;
@@ -65,6 +66,16 @@ class NotifyCounts
         return $q->count();
     }
 
+    /** Pending student payment submissions awaiting admin review. */
+    public static function pendingStudentPayments(?int $branchId = null): int
+    {
+        $q = StudentPaymentSubmission::where('status', 'pending')->whereNull('deleted_at');
+        if ($branchId) {
+            $q->whereHas('student', fn($s) => $s->where('branch_id', $branchId));
+        }
+        return $q->count();
+    }
+
     /** Grand total shown on the header bell badge. */
     public static function total(?int $branchId = null): int
     {
@@ -72,7 +83,8 @@ class NotifyCounts
             + self::pendingBookings($branchId)
             + self::unreadContacts()
             + self::unreadStudentMessages($branchId)
-            + self::unreadTeacherMessages($branchId);
+            + self::unreadTeacherMessages($branchId)
+            + self::pendingStudentPayments($branchId);
     }
 
     /** All notification data needed by the header dropdown (lists + counts). */

@@ -8,131 +8,202 @@
         @page {
             margin: 0;
             padding: 0;
+            background-image: url('{{ $imagePath }}');
+            background-image-resize: 6;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-size: 0;
+            line-height: 0;
         }
 
-        .certificate-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 210mm;
-            height: 297mm;
-            background-image: url('{{ $imagePath }}');
-            background-size: 100% 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
+        /* لتغيير موضع أي عنصر: عدّل top / left في الـ class الخاص به */
+        /* الوحدة بكسل (px) — الصفحة A4: عرض ~794px × ارتفاع ~1123px  */
 
-        /* اسم الطالب - التحكم الكامل بالتموضع */
-        .student-name {
-            position: absolute; /* يجب أن يكون absolute للتحكم الحر */
-            top: 540px; 
-            left: 0;
-            width: 100%;
+        .title {
+            position: fixed;
+            top: 520px;
+            left: -200px;
+            width: 310mm;
+            height: 40px;
+            overflow: hidden;
+            line-height: 40px;
             text-align: center;
-            font-family: 'aguafinascript';
-            font-size: 65px;
-            color: #1a1a1a;
-            /* background-color: rgba(189, 30, 33, 0.1);  تم تخفيف اللون للمساعدة في المعاينة فقط */
+            font-family: 'aguafinascript', 'dejavusans', sans-serif;
+            font-size: 35px;
+            font-style: normal;
+            font-weight: normal;
+            color: #010101;
         }
 
-        /* قيمة المستوى - بجانب CEFR Level */
-        .cefr-value {
-            position: absolute;
-            top: 566px;
-            left: 485px;
+        .level-box {
+            position: fixed;
+            top: 639px;
+            left: 380px;
+            width: 250px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            font-weight: bold;
             color: #bd1e20;
-            font-weight: bold;
-            font-size: 18px;
-            text-transform: uppercase;
         }
 
-        /* محاذاة قيم الجدول - جميعها absolute */
-        .value-item {
-            position: absolute;
-            font-size: 15px;
-            font-weight: bold;
-            color: #2c3e50;
+        .level-code {
+            color: #bd1e20;
+            font-style: italic;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
         }
 
-        .dates-value {
-            top: 591px;
-            left: 455px;
+        .week {
+            position: fixed;
+            top: 672px;
+            left: 363px;
+            width: 300px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        .sessions-value {
-            top: 610px;
-            left: 455px;
+        .sessions {
+            position: fixed;
+            top: 692px;
+            left: 363px;
+            width: 100px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        .weeks-value {
-            top: 628px;
-            left: 455px;
+        .numper_of_weeks {
+            position: fixed;
+            top: 710px;
+            left: 363px;
+            width: 100px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        .duration-value {
-            top: 645px;
-            left: 455px;
+        .hours {
+            position: fixed;
+            top: 730px;
+            left: 363px;
+            width: 100px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        .score-value {
-            top: 664px;
-            left: 455px;
+        .scoure {
+            position: fixed;
+            top: 754px;
+            left: 365px;
+            width: 250px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        .grade-value {
-            top: 683px;
-            left: 455px;
+        .grade {
+            position: fixed;
+            top: 778px;
+            left: 365px;
+            width: 250px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
-        /* رقم المرجع */
-        .ref-value {
-            position: absolute;
-            top: 698px;
-            left: 285px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #2c3e50;
+        .ccode {
+            position: fixed;
+            top: 793px;
+            left: 205px;
+            width: 200px;
+            height: 20px;
+            overflow: hidden;
+            line-height: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-family: 'dejavusans', sans-serif;
+            color: #000000;
         }
 
     </style>
 </head>
 
 <body>
-    <div class="certificate-container">
-        <!-- اسم الطالب -->
-        <div class="student-name">{{ $formattedName }}</div>
 
-        <!-- قيمة المستوى -->
-        <div class="cefr-value">{{ $firstPart }}</div>
+    {{-- اسم الطالب --}}
+    <div class="title">{{ $formattedName }}</div>
 
-        <!-- قيم الجدول -->
-        <div class="value-item dates-value">
-            {{ \Carbon\Carbon::parse($customData->group->start_date)->format('d / m / Y') }} To {{ \Carbon\Carbon::parse($customData->group->end_date)->format('d / m / Y') }}
-        </div>
-
-        <div class="value-item sessions-value">3</div>
-        <div class="value-item weeks-value">12</div>
-        <div class="value-item duration-value">72</div>
-        <div class="value-item score-value">{{$customData->total_degree}} %</div>
-        
-        <div class="value-item grade-value">
-            @if ($customData->total_degree >= 70 && $customData->total_degree <= 79) Pass
-            @elseif ($customData->total_degree >= 80 && $customData->total_degree <= 89) Merit
-            @elseif ($customData->total_degree >= 90 && $customData->total_degree <= 95) High Merit
-            @elseif ($customData->total_degree >= 96 && $customData->total_degree <= 100) Distinction
-            @else ---
-            @endif
-        </div>
-
-        <!-- رقم المرجع -->
-        <div class="ref-value">{{ $customData->cer_code }}</div>
+    {{-- المستوى CEFR --}}
+    <div class="level-box">
+        | <span class="level-code">{{ $firstPart }}</span>
+        @if($firstPart == 'A1') Beginner
+        @elseif($firstPart == 'A2') Elementary
+        @elseif($firstPart == 'B1') Preintermediate
+        @elseif($firstPart == 'B1plus') Intermediate
+        @elseif($firstPart == 'B2') Upper Intermediate
+        @elseif($firstPart == 'C1') Advanced
+        @elseif($firstPart == 'C2') Proficient
+        @endif
     </div>
+
+    {{-- التواريخ --}}
+    <div class="week">{{ \Carbon\Carbon::parse($customData->group->start_date)->format('d / m / Y') }} To {{ \Carbon\Carbon::parse($customData->group->end_date)->format('d / m / Y') }}</div>
+
+    {{-- الجلسات --}}
+    <div class="sessions">3</div>
+
+    {{-- الأسابيع --}}
+    <div class="numper_of_weeks">12</div>
+
+    {{-- الساعات --}}
+    <div class="hours">72</div>
+
+    {{-- النتيجة --}}
+    <div class="scoure">{{ $customData->total_degree }} %</div>
+
+    {{-- التقدير --}}
+    @php
+        $d = (int) $customData->total_degree;
+        $grade = $d >= 96 ? 'Distinction' : ($d >= 90 ? 'High Merit' : ($d >= 80 ? 'Merit' : ($d >= 70 ? 'Pass' : '---')));
+    @endphp
+    <div class="grade">{{ $grade }}</div>
+
+    {{-- رقم المرجع --}}
+    <div class="ccode">{{ $customData->cer_code }}</div>
+
 </body>
 
 </html>

@@ -40,6 +40,29 @@
             </div>
 
             <div class="ox-dash__group">
+                <div class="ox-dash__group-label">Finance</div>
+                <a class="ox-dash__navlink {{ Request::is('student/financial/history') ? 'is-active' : '' }}"
+                   href="{{ url('student/financial/history') }}">
+                    <i class="bi bi-clock-history"></i><span class="ox-dash__navtext">السجل المالي</span>
+                </a>
+                <a class="ox-dash__navlink {{ Request::is('student/financial/invoices') ? 'is-active' : '' }}"
+                   href="{{ url('student/financial/invoices') }}">
+                    <i class="bi bi-receipt"></i><span class="ox-dash__navtext">الفواتير المستحقة</span>
+                </a>
+                <a class="ox-dash__navlink {{ Request::is('student/financial/notifications') ? 'is-active' : '' }}"
+                   href="{{ url('student/financial/notifications') }}">
+                    <i class="bi bi-bell"></i><span class="ox-dash__navtext">الإشعارات المالية</span>
+                    @php
+                        $finUnread = 0;
+                        if(Auth::guard('students')->check()) {
+                            $finUnread = Auth::guard('students')->user()->unreadNotifications()->count();
+                        }
+                    @endphp
+                    @if($finUnread > 0)<span class="ox-dash__navbadge">{{ $finUnread }}</span>@endif
+                </a>
+            </div>
+
+            <div class="ox-dash__group">
                 <div class="ox-dash__group-label">Account</div>
                 <a class="ox-dash__navlink AdminNotify" data-tab-target="#AdminNotify"
                    href="{{ $onStudent ? '#AdminNotify' : url('/student#AdminNotify') }}" @if($onStudent) data-toggle="tab" @endif>

@@ -112,7 +112,7 @@ class CertificatesController extends Controller
             return response()->json(['error' => 'Student not found'], 404);
         }
         $name = $customData->group->name;
-        $studentname =  $customData->student->name;
+        $studentname = $customData->student->name_en ?? $customData->student->name;
         $formattedName = $this->formatName($studentname);
         $parts = explode('.', $name);
         $firstPart = $parts[0];
@@ -140,21 +140,22 @@ class CertificatesController extends Controller
             'tempDir' => storage_path('app/mpdf'),
             'curlAllowSelfSigned' => true,
             'allow_local_file_access' => true,
+            'autoScriptToLang'  => true,
+            'autoLangToFont'    => true,
             'fontDir' => array_merge($fontDirs, [
                 public_path()
             ]),
             'fontdata' => $fontData + [
                 'aguafinascript' => [
                     'R' => 'AguafinaScript-Regular.ttf',
-                ]
+                ],
             ],
-            'default_font' => 'sans-serif'
+            'default_font' => 'dejavusans',
         ]);
 
-        // HTML content with custom font styling
+        \Artisan::call('view:clear');
         $html = view('admin.certificates.levels', $data)->render();
-        $css = "<style>.title { font-family: 'helveticaneuel'; }</style>";
-        $mpdf->WriteHTML($css . $html);
+        $mpdf->WriteHTML($html);
 
         // Get the PDF content as a string
         $pdfContent = $mpdf->Output('', 'S');
@@ -188,7 +189,7 @@ class CertificatesController extends Controller
         }
 
         $name = $customData->group->name;
-        $studentname =  $customData->student->name;
+        $studentname =  $customData->student->name_en;
         $formattedName = $this->formatName($studentname);
         $parts = explode('.', $name);
         $firstPart = $parts[0];
@@ -216,20 +217,21 @@ class CertificatesController extends Controller
             'tempDir' => storage_path('app/mpdf'),
             'curlAllowSelfSigned' => true,
             'allow_local_file_access' => true,
+            'autoScriptToLang'  => true,
+            'autoLangToFont'    => true,
             'fontDir' => array_merge($fontDirs, [
                 public_path()
             ]),
             'fontdata' => $fontData + [
                 'aguafinascript' => [
                     'R' => 'AguafinaScript-Regular.ttf',
-                ]
+                ],
             ],
-            'default_font' => 'sans-serif'
+            'default_font' => 'dejavusans',
         ]);
-
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
         $html = view('admin.certificates.levels', $data)->render();
-        $css = "<style>.title { font-family: 'helveticaneuel'; }</style>";
-        $mpdf->WriteHTML($css . $html);
+        $mpdf->WriteHTML($html);
 
         return $mpdf->Output('certificate.pdf', 'I');
     }
