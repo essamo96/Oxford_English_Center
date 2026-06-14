@@ -58,7 +58,7 @@
                             $finUnread = Auth::guard('students')->user()->unreadNotifications()->count();
                         }
                     @endphp
-                    @if($finUnread > 0)<span class="ox-dash__navbadge">{{ $finUnread }}</span>@endif
+                    <span class="ox-dash__navbadge" data-fin-unread-badge style="{{ $finUnread > 0 ? '' : 'display:none;' }}">{{ $finUnread }}</span>
                 </a>
             </div>
 

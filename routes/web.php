@@ -180,6 +180,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     });
 
     Route::get('notifications/mark-read', ['as' => 'notifications.mark_read', 'uses' => 'MarkNotificationReadController@markAsReadAndRedirect']);
+    Route::get('notifications/dropdown-partial', ['as' => 'admin.notifications.dropdown', 'uses' => 'MarkNotificationReadController@dropdownPartial']);
     Route::get('lang/{lang}', ['as' => 'dashboard.lang', 'uses' => 'DashboardController@getLang']);
 
     // Route::get('/generat_pdf/{id}', ['as' => 'students.groups.pdf', 'middleware' => ['permission:admin.students.edit'], 'uses' => 'StudentsController@generat_pdf']);

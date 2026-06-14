@@ -218,7 +218,7 @@
         });
     });
 
-    /* Pusher real-time — reload on new notification */
+    /* Pusher real-time — prepend notification card without page reload */
     @auth('students')
     (function () {
         var ch = window.studentChannel;
@@ -231,7 +231,83 @@
             var p = new Pusher('{{ config("broadcasting.connections.pusher.key") }}', _opts);
             ch = p.subscribe('student-notifications-{{ Auth::guard("students")->id() }}');
         }
-        if (ch) { ch.bind('student.notification', function () { location.reload(); }); }
+        if (ch) {
+            ch.bind('student.notification', function (data) {
+                prependNotifCard(data);
+                // Update unread chip
+                var chip = document.querySelector('.unread-chip');
+                if (chip) {
+                    var n = (parseInt(chip.textContent, 10) || 0) + 1;
+                    chip.childNodes[chip.childNodes.length - 1].textContent = ' ' + n + ' غير مقروء';
+                } else {
+                    var actionsEl = document.querySelector('.notif-actions');
+                    if (actionsEl) {
+                        var span = document.createElement('span');
+                        span.className = 'unread-chip';
+                        span.innerHTML = '<i class="bi bi-circle-fill" style="font-size:.5rem;"></i> 1 غير مقروء';
+                        actionsEl.insertBefore(span, actionsEl.firstChild);
+                    }
+                }
+            });
+        }
+
+        function _esc(s) {
+            return String(s || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+
+        function prependNotifCard(data) {
+            var type    = data.type || 'default';
+            var title   = data.title || 'إشعار جديد';
+            var message = data.message || '';
+            var amount  = data.amount_paid || data.total_due || null;
+            var status  = data.status || '';
+
+            var iconMap = {
+                'payment_status_updated': status === 'approved' ? 'approved' : 'rejected',
+                'new_invoice': 'invoice',
+                'student_payment_submitted': 'submitted'
+            };
+            var iconClass = iconMap[type] || 'default';
+            var iconNameMap = { approved:'check-circle-fill', rejected:'x-circle-fill', invoice:'receipt-cutoff', submitted:'send-fill', 'default':'bell-fill' };
+            var iconName = iconNameMap[iconClass] || 'bell-fill';
+
+            var amountHtml = amount
+                ? '<div class="notif-amount"><i class="bi bi-currency-exchange"></i>₪ ' + parseFloat(amount).toFixed(2) + '</div>'
+                : '';
+            var progHtml = '';
+            if (data.program || data.group_name) {
+                progHtml = '<div style="font-size:.8rem;color:var(--d-muted,#64748b);margin-bottom:4px;">';
+                if (data.program)    progHtml += '<span style="margin-left:8px;"><i class="bi bi-mortarboard me-1"></i>' + _esc(data.program) + '</span>';
+                if (data.group_name) progHtml += '<span><i class="bi bi-people me-1"></i>' + _esc(data.group_name) + '</span>';
+                progHtml += '</div>';
+            }
+
+            var now = new Date();
+            var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+            var html = '<div class="notif-item unread" style="border-top:2px solid #3b82f6;">'
+                + '<div class="notif-icon ' + iconClass + '"><i class="bi bi-' + iconName + '"></i></div>'
+                + '<div class="notif-body">'
+                + '<div class="notif-title">' + _esc(title) + '</div>'
+                + (message ? '<div class="notif-msg">' + _esc(message) + '</div>' : '')
+                + amountHtml
+                + progHtml
+                + '<div class="notif-time"><i class="bi bi-clock"></i> الآن · ' + timeStr + '</div>'
+                + '</div>'
+                + '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">'
+                + '<div class="unread-dot"></div>'
+                + '</div>'
+                + '</div>';
+
+            var container = document.querySelector('.notif-card');
+            if (!container) return;
+            // Remove "لا توجد إشعارات" empty state if present
+            var empty = container.querySelector('.fin-empty');
+            if (empty) empty.remove();
+            container.insertAdjacentHTML('afterbegin', html);
+        }
     })();
     @endauth
 })();

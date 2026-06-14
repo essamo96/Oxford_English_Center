@@ -122,14 +122,42 @@ class StudentFinancialController extends Controller
                 ->first()
             : null;
 
-        $submission = DB::transaction(function () use ($student, $groupId, $request, $receiptPath, $paymentMethodId, $pendingFee) {
-            // Update the pending fee record with payment method + receipt so it's visible in admin pending list
+        // Scenario B: if no pending row but there IS a verified row → student is paying remaining balance.
+        // We create a NEW GroupStudentsFees row instead of touching the old verified one.
+        $verifiedFee = null;
+        if (!$pendingFee && $groupId) {
+            $verifiedFee = GroupStudentsFees::where('student_id', $student->id)
+                ->where('group_id', $groupId)
+                ->where('audit_status', 'verified')
+                ->where('transaction_type', 'payment')
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        $submission = DB::transaction(function () use ($student, $groupId, $request, $receiptPath, $paymentMethodId, $pendingFee, $verifiedFee) {
+            $feeIdForSubmission = null;
+
             if ($pendingFee) {
+                // Scenario A: update existing pending fee (first payment on an invoice)
                 $pendingFee->update([
                     'payment_method_id' => $paymentMethodId,
                     'payment_receipt'   => $receiptPath,
                     'student_fee_paid'  => $request->amount_paid,
                 ]);
+                $feeIdForSubmission = $pendingFee->id;
+            } elseif ($verifiedFee) {
+                // Scenario B: student pays remaining balance — create a NEW fee row
+                $newFee = GroupStudentsFees::create([
+                    'student_id'        => $student->id,
+                    'group_id'          => $groupId,
+                    'audit_status'      => 'pending',
+                    'transaction_type'  => 'payment',
+                    'transaction_amount'=> $request->amount_paid,
+                    'student_fee_paid'  => $request->amount_paid,
+                    'payment_method_id' => $paymentMethodId,
+                    'payment_receipt'   => $receiptPath,
+                ]);
+                $feeIdForSubmission = $newFee->id;
             }
 
             return StudentPaymentSubmission::create([
@@ -138,7 +166,7 @@ class StudentFinancialController extends Controller
                 'amount_paid'       => $request->amount_paid,
                 'receipt_file'      => $receiptPath,
                 'payment_method_id' => $paymentMethodId,
-                'fee_id'            => $pendingFee?->id,
+                'fee_id'            => $feeIdForSubmission,
                 'notes'             => $request->notes,
                 'status'            => 'pending',
             ]);

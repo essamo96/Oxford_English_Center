@@ -13,6 +13,13 @@ use App\Events\CountersUpdated;
 
 class MarkNotificationReadController extends Controller
 {
+    /** AJAX: return refreshed dropdown content partial (called by realtime-notifications.js). */
+    public function dropdownPartial()
+    {
+        return response(view('admin.layout.partials.notifications_dropdown')->render())
+            ->header('Content-Type', 'text/html');
+    }
+
     public function markAsReadAndRedirect(Request $request)
     {
         $type = $request->get('type');

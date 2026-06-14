@@ -75,10 +75,9 @@
                         <!--begin::Heading-->
                         <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-image:url('{{ asset('assets/media/misc/menu-header-bg.jpg') }}')">
                             <!--begin::Title-->
-                            <h3 class="text-white fw-semibold px-9 mt-10 mb-6">الإشعارات 
-                            <span class="fs-8 opacity-75 ps-3">{{ $total_notify_count ?? 0 }} تقارير جديدة</span></h3>
+                            <h3 class="text-white fw-semibold px-9 mt-10 mb-6">الإشعارات
+                            <span class="fs-8 opacity-75 ps-3" id="rt-notif-title-count">{{ $total_notify_count ?? 0 }} تقارير جديدة</span></h3>
                             <!--end::Title-->
-                            
                             <!--begin::Tabs-->
                             <ul class="nav nav-line-tabs nav-line-tabs-2x nav-stretch fw-semibold px-9" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -94,172 +93,9 @@
                             <!--end::Tabs-->
                         </div>
                         <!--end::Heading-->
-
-                        @if(($total_notify_count ?? 0) > 0)
-                        <!--begin::Tab content-->
-                        <div class="tab-content">
-                            <!--begin::Tab panel: Alerts-->
-                            <div class="tab-pane fade show active" id="kt_topbar_notifications_1" role="tabpanel">
-                                <div class="scroll-y mh-325px my-5 px-8">
-                                    {{-- Membership Requests --}}
-                                    @foreach($notify_students ?? [] as $st)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-primary text-primary fw-bold">{{ mb_substr($st->name, 0, 1) }}</span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="{{ route('notifications.mark_read', ['type' => 'booking', 'id' => $st->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">طلب عضوية: {{ $st->name }}</a>
-                                                <div class="text-gray-400 fs-7">طالب جديد ينتظر التفعيل</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light fs-8 text-muted">{{ $st->created_at->diffForHumans() }}</span>
-                                    </div>
-                                    @endforeach
-
-                                    {{-- Closed Classes --}}
-                                    @foreach($notify_closed_clases ?? [] as $cl)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-danger">
-                                                    <i class="ki-duotone ki-notification-on fs-2 text-danger"><span class="path1"></span><span class="path2"></span></i>
-                                                </span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="{{ route('notifications.mark_read', ['type' => 'closed_class', 'id' => $cl->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">إغلاق مجموعة: {{ $cl->Groups->name ?? 'مجموعة' }}</a>
-                                                <div class="text-gray-400 fs-7">قام المدرس <strong>{{ $cl->Teacher->name ?? 'غير معروف' }}</strong> بإغلاق المجموعة بتاريخ {{ $cl->closed_date }}</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light-danger fs-8">تنبيه</span>
-                                    </div>
-                                    @endforeach
-
-                                    @if(count($notify_students ?? []) == 0 && count($notify_closed_clases ?? []) == 0)
-                                    <div class="d-flex flex-column px-9 items-center justify-content-center py-10">
-                                        <div class="text-center">
-                                            <i class="bi bi-check2-circle fs-3x text-success mb-3"></i>
-                                            <div class="fw-bold fs-6 text-gray-800">لا توجد تنبيهات</div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <!--end::Tab panel-->
-
-                            <!--begin::Tab panel: Updates (Groups)-->
-                            <div class="tab-pane fade" id="kt_topbar_notifications_2" role="tabpanel">
-                                <div class="scroll-y mh-325px my-5 px-8">
-                                    @foreach($notify_Groups ?? [] as $gp)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center me-2">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-info">
-                                                    <i class="ki-duotone ki-chart-line fs-2 text-info"><span class="path1"></span><span class="path2"></span></i>
-                                                </span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="#" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $gp->name }}</a>
-                                                <div class="text-gray-400 fs-7">تقدم المجموعة: {{ $gp->progress }}%</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light-info fs-8">{{ $gp->progress }}%</span>
-                                    </div>
-                                    @endforeach
-
-                                    @if(count($notify_Groups ?? []) == 0)
-                                    <div class="d-flex flex-column px-9 items-center justify-content-center py-10">
-                                        <div class="text-center">
-                                            <div class="fw-bold fs-6 text-gray-800">لا توجد تحديثات للمجموعات</div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <!--end::Tab panel-->
-
-                            <!--begin::Tab panel: Messages-->
-                            <div class="tab-pane fade" id="kt_topbar_notifications_3" role="tabpanel">
-                                <div class="scroll-y mh-325px my-5 px-8">
-                                    {{-- Student messages --}}
-                                    @foreach($notify_Students_Admin_Messages ?? [] as $ms)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center me-2">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-warning">
-                                                    <i class="ki-duotone ki-message-text-2 fs-2 text-warning"><span class="path1"></span><span class="path2"></span></i>
-                                                </span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="{{ route('notifications.mark_read', ['type' => 'student_message', 'id' => $ms->student_id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ms->student->name ?? 'طالب' }}</a>
-                                                <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $ms->content }}</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light-warning fs-8">رسالة طالب</span>
-                                    </div>
-                                    @endforeach
-
-                                    {{-- Teacher messages --}}
-                                    @foreach($notify_Teachers_Admin_Messages ?? [] as $mt)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center me-2">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-success">
-                                                    <i class="ki-duotone ki-sms fs-2 text-success"><span class="path1"></span><span class="path2"></span></i>
-                                                </span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="{{ route('notifications.mark_read', ['type' => 'teacher_message', 'id' => $mt->teacher_id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $mt->teacher->name ?? 'معلم' }}</a>
-                                                <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $mt->content }}</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light-success fs-8">رسالة معلم</span>
-                                    </div>
-                                    @endforeach
-
-                                    {{-- Contact Us messages --}}
-                                    @foreach($notify_contacts ?? [] as $ct)
-                                    <div class="d-flex flex-stack py-4">
-                                        <div class="d-flex align-items-center me-2">
-                                            <div class="symbol symbol-35px me-4">
-                                                <span class="symbol-label bg-light-primary">
-                                                    <i class="ki-duotone ki-sms fs-2 text-primary"><span class="path1"></span><span class="path2"></span></i>
-                                                </span>
-                                            </div>
-                                            <div class="mb-0 me-2">
-                                                <a href="{{ route('notifications.mark_read', ['type' => 'contact', 'id' => $ct->id]) }}" class="fs-6 text-gray-800 text-hover-info fw-bold">{{ $ct->name ?? 'زائر' }}</a>
-                                                <div class="text-gray-400 fs-7 text-truncate w-150px">{{ $ct->subject ?? 'رسالة اتصل بنا' }}</div>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-light-primary fs-8">اتصل بنا</span>
-                                    </div>
-                                    @endforeach
-
-                                    @if(count($notify_Students_Admin_Messages ?? []) == 0 && count($notify_Teachers_Admin_Messages ?? []) == 0 && count($notify_contacts ?? []) == 0)
-                                    <div class="d-flex flex-column px-9 items-center justify-content-center py-10">
-                                        <div class="text-center">
-                                            <div class="fw-bold fs-6 text-gray-800">لا توجد رسائل جديدة</div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <!--end::Tab panel-->
-                        </div>
-                        <!--end::Tab content-->
-                        @else
-                            <div class="d-flex flex-column px-9 items-center justify-content-center py-10">
-                                <div class="text-center">
-                                    <img class="mw-100 mh-200px mb-5 theme-light-show" src="{{ asset('assets/media/illustrations/sketchy-1/1.png') }}" alt="Empty" />
-                                    <img class="mw-100 mh-200px mb-5 theme-dark-show" src="{{ asset('assets/media/illustrations/sketchy-1/1-dark.png') }}" alt="Empty" />
-                                    <div class="fw-bold fs-6 text-gray-800 text-hover-info">لا توجد إشعارات جديدة</div>
-                                    <div class="text-gray-400 fs-7 mt-1">أنت مطلع على كل شيء حالياً</div>
-                                </div>
-                            </div>
-                        @endif
-                        
-                        <div class="py-3 text-center border-top">
-                            <a href="{{ route('dashboard.view') }}" class="btn btn-color-gray-600 btn-active-color-primary">عرض الكل <i class="ki-duotone ki-arrow-right fs-5"><span class="path1"></span><span class="path2"></span></i></a>
+                        {{-- Dynamic content — refreshed via AJAX by realtime-notifications.js --}}
+                        <div id="rt-notif-body">
+                            @include('admin.layout.partials.notifications_dropdown')
                         </div>
                     </div>
                 </div>

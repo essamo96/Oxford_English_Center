@@ -56,20 +56,59 @@
 .balance-cell .val { font-size: 1.05rem; font-weight: 800; }
 .balance-cell .lbl { font-size: .72rem; color: var(--d-muted, #94a3b8); margin-top: 3px; font-weight: 500; }
 
-/* pending badge */
-.pending-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: #fef3c7; color: #92400e;
-    border: 1px solid #fcd34d;
-    border-radius: 8px; padding: 8px 14px; font-size: .83rem; font-weight: 600;
-    margin-bottom: 12px;
+/* pending review status */
+.pending-review-status {
+    background: linear-gradient(135deg, #fef9eb, #fef3c7);
+    border: 1.5px solid #fbbf24; border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
 }
+.pending-review-status .prv-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #fef3c7; border: 1.5px solid #fbbf24;
+    display: flex; align-items: center; justify-content: center;
+    color: #d97706; font-size: 1.1rem; flex-shrink: 0;
+}
+.pending-review-status .prv-body { flex: 1; }
+.pending-review-status .prv-title { font-weight: 700; color: #92400e; font-size: .9rem; margin-bottom: 2px; }
+.pending-review-status .prv-sub   { font-size: .78rem; color: #b45309; }
 .btn-cancel-small {
-    font-size: .75rem; padding: 2px 8px; margin-left: 6px;
+    font-size: .75rem; padding: 4px 10px;
     border: 1px solid #dc2626; color: #dc2626;
-    background: transparent; border-radius: 5px; cursor: pointer;
+    background: transparent; border-radius: 6px; cursor: pointer;
+    transition: background .15s;
 }
 .btn-cancel-small:hover { background: #dc2626; color: #fff; }
+
+/* pay confirm modal */
+.pay-confirm-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1060;
+    background: rgba(0,0,0,.55); align-items: center; justify-content: center;
+}
+.pay-confirm-overlay.active { display: flex; }
+.pay-confirm-box {
+    background: var(--d-card,#fff); border-radius: 14px;
+    width: 100%; max-width: 420px; margin: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.3);
+    animation: slideUp .2s ease;
+}
+.pay-confirm-head {
+    padding: 16px 20px; border-bottom: 1px solid var(--d-border,#e2e8f0);
+    display: flex; align-items: center; gap: 10px;
+}
+.pay-confirm-head h5 { margin: 0; font-weight: 700; color: var(--d-heading,#0a3258); font-size: .95rem; }
+.pay-confirm-body { padding: 18px 20px; }
+.pay-confirm-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 0; border-bottom: 1px solid var(--d-border,#f0f0f0); font-size: .88rem;
+}
+.pay-confirm-row:last-child { border-bottom: none; }
+.pay-confirm-row .lbl { color: var(--d-muted,#6b7280); font-weight: 500; }
+.pay-confirm-row .val { font-weight: 700; color: var(--d-heading,#0a3258); }
+.pay-confirm-foot {
+    padding: 14px 20px; border-top: 1px solid var(--d-border,#e2e8f0);
+    display: flex; gap: 10px; justify-content: flex-end;
+}
 
 /* pay button */
 .btn-pay {
@@ -256,13 +295,16 @@
         </div>
 
         @if($pending)
-            <div class="pending-badge">
-                <i class="bi bi-hourglass-split"></i>
-                طلب دفع بانتظار المراجعة — ₪ {{ number_format($pending->amount_paid, 2) }}
+            <div class="pending-review-status">
+                <div class="prv-icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="prv-body">
+                    <div class="prv-title">⏳ قيد التدقيق — بانتظار موافقة الإدارة</div>
+                    <div class="prv-sub">المبلغ المُرسَل: ₪ {{ number_format($pending->amount_paid, 2) }} · تم الإرسال {{ optional($pending->created_at)->diffForHumans() }}</div>
+                </div>
                 <form action="{{ route('student.financial.cancel', $pending->id) }}" method="POST"
-                      style="display:inline;margin:0;" onsubmit="return confirm('هل تريد إلغاء طلب الدفع؟')">
+                      style="margin:0;" onsubmit="return confirm('هل تريد إلغاء طلب الدفع؟')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn-cancel-small">إلغاء</button>
+                    <button type="submit" class="btn-cancel-small"><i class="bi bi-x"></i> إلغاء</button>
                 </form>
             </div>
         @elseif($hasBalance)
@@ -457,6 +499,32 @@
     </div>
 </div>
 
+{{-- Payment confirmation overlay --}}
+<div class="pay-confirm-overlay" id="payConfirmOverlay">
+    <div class="pay-confirm-box">
+        <div class="pay-confirm-head">
+            <i class="bi bi-shield-check" style="color:#059669;font-size:1.2rem;"></i>
+            <h5>تأكيد إرسال الدفعة</h5>
+        </div>
+        <div class="pay-confirm-body">
+            <p style="color:var(--d-muted,#6b7280);font-size:.85rem;margin-bottom:14px;">يرجى مراجعة تفاصيل الدفعة قبل الإرسال:</p>
+            <div class="pay-confirm-row"><span class="lbl">طريقة الدفع</span><span class="val" id="cfmMethod">—</span></div>
+            <div class="pay-confirm-row"><span class="lbl">المبلغ</span><span class="val" id="cfmAmount" style="color:#059669;">—</span></div>
+            <div class="pay-confirm-row"><span class="lbl">الإيصال</span><span class="val" id="cfmFile" style="font-size:.8rem;max-width:200px;text-align:left;word-break:break-all;">—</span></div>
+        </div>
+        <div class="pay-confirm-foot">
+            <button type="button" id="cfmCancel"
+                    style="background:var(--d-card-2,#f3f4f6);border:1px solid var(--d-border,#e2e8f0);
+                           border-radius:8px;padding:8px 18px;font-size:.87rem;cursor:pointer;color:var(--d-text,#374151);">
+                تعديل
+            </button>
+            <button type="button" id="cfmConfirm" class="btn-pay">
+                <i class="bi bi-send"></i> نعم، أرسل الطلب
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- Receipt zoom overlay is built via JS and appended to <body> --}}
 
 @endsection
@@ -582,12 +650,46 @@
         document.body.style.overflow = '';
     }
 
-    // Validate payment method before submit
+    /* ── Payment confirmation dialog ── */
+    var payConfirmOverlay = document.getElementById('payConfirmOverlay');
+    var cfmConfirm        = document.getElementById('cfmConfirm');
+    var cfmCancel         = document.getElementById('cfmCancel');
+    var _pendingForm      = null;
+
     payModal.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
         if (!payMethodId.value) {
-            e.preventDefault();
             pmError.style.display = 'block';
             pmError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
+        // Populate confirmation dialog
+        var selectedBtn = document.querySelector('.pm-btn.selected');
+        var methodName  = selectedBtn ? selectedBtn.dataset.name : '—';
+        var amount      = document.getElementById('payAmount').value;
+        var fileInput   = this.querySelector('input[name="receipt"]');
+        var fileName    = fileInput && fileInput.files[0] ? fileInput.files[0].name : 'لم يتم تحديد ملف';
+
+        document.getElementById('cfmMethod').textContent = methodName;
+        document.getElementById('cfmAmount').textContent = '₪ ' + parseFloat(amount || 0).toFixed(2);
+        document.getElementById('cfmFile').textContent   = fileName;
+
+        _pendingForm = this;
+        payConfirmOverlay.classList.add('active');
+    });
+
+    cfmCancel.addEventListener('click', function () {
+        payConfirmOverlay.classList.remove('active');
+        _pendingForm = null;
+    });
+
+    cfmConfirm.addEventListener('click', function () {
+        payConfirmOverlay.classList.remove('active');
+        if (_pendingForm) {
+            // Disable button to prevent double-submit
+            cfmConfirm.disabled = true;
+            cfmConfirm.innerHTML = '<i class="bi bi-hourglass-split"></i> جارٍ الإرسال...';
+            _pendingForm.submit();
         }
     });
 

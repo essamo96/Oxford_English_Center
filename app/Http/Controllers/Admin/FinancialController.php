@@ -39,7 +39,7 @@ class FinancialController extends AdminController
     public function getPendingList(Request $request)
     {
         // Fetch fees that are not yet verified (audit_status is pending)
-        $query = GroupStudentsFees::with(['student', 'group.program', 'program'])
+        $query = GroupStudentsFees::with(['student.branch', 'group.program', 'program'])
             ->where('audit_status', 'pending')
             ->orderBy('created_at', 'desc');
 

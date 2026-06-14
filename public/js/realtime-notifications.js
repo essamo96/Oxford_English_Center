@@ -280,6 +280,27 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * 🔄 Dropdown refresh — fetches updated notification list from server
+     * ------------------------------------------------------------------ */
+    var _refreshTimer = null;
+    function refreshDropdown() {
+        // Debounce: avoid multiple rapid refreshes from concurrent events
+        clearTimeout(_refreshTimer);
+        _refreshTimer = setTimeout(function () {
+            fetch('/admin/notifications/dropdown-partial', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }
+            }).then(function (r) {
+                if (!r.ok) return;
+                return r.text();
+            }).then(function (html) {
+                if (!html) return;
+                var body = document.getElementById('rt-notif-body');
+                if (body) body.innerHTML = html;
+            }).catch(function () {});
+        }, 400);
+    }
+
+    /* ------------------------------------------------------------------ *
      * 📡 Bootstrap pusher-js + listeners (raw client — most reliable for
      *    a self-hosted laravel-websockets server, no Echo/wss ambiguity)
      * ------------------------------------------------------------------ */
@@ -336,55 +357,36 @@
         channel.bind('pusher:subscription_succeeded', function () {
             console.log('[RT] subscribed to ' + channelName);
         });
-        channel.bind('new.booking', function (data) { NotificationManager.show(data); });
-        channel.bind('new.contact', function (data) { NotificationManager.show(data); });
+        channel.bind('new.booking', function (data) { NotificationManager.show(data); refreshDropdown(); });
+        channel.bind('new.contact', function (data) { NotificationManager.show(data); refreshDropdown(); });
         channel.bind('counters.updated', function (data) {
             if (data && data.counters) {
                 console.log('[RT] counters updated', data.counters);
                 NotificationManager.updateLiveCounters(data.counters);
+                refreshDropdown();
             }
         });
         channel.bind('student.payment.submitted', function (data) {
-            SoundManager.play('booking');
-            var colors = { bg: '#1e40af', border: '#3b82f6' };
-            var toast = document.createElement('div');
-            toast.setAttribute('data-toast', '');
-            toast.style.cssText =
-                'background:linear-gradient(135deg,' + colors.bg + ',' + colors.bg + 'dd);'
-                + 'border:1px solid ' + colors.border + ';border-right:4px solid ' + colors.border + ';'
-                + 'border-radius:12px;padding:16px;color:#fff;font-family:Cairo,sans-serif;'
-                + 'box-shadow:0 20px 60px rgba(0,0,0,.4);opacity:0;'
-                + 'transform:translateX(-100px) scale(.9);'
-                + 'transition:all .4s cubic-bezier(.175,.885,.32,1.275);'
-                + 'cursor:pointer;position:relative;overflow:hidden;direction:rtl;';
+            SoundManager.play('success');
             var name   = data.student_name || 'طالب';
             var amount = data.amount ? '₪ ' + parseFloat(data.amount).toFixed(2) : '';
-            toast.innerHTML =
-                '<div style="position:absolute;top:0;right:0;left:0;height:2px;background:' + colors.border + ';'
-                + 'animation:rtProgress 6.5s linear forwards;"></div>'
-                + '<div style="display:flex;align-items:flex-start;gap:12px;">'
-                + '<div style="font-size:28px;line-height:1;">💳</div>'
-                + '<div style="flex:1;min-width:0;">'
-                + '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">دفعة مالية جديدة بانتظار المراجعة</div>'
-                + '<div style="font-size:12px;opacity:.85;">' + name + (amount ? ' — ' + amount : '') + '</div>'
-                + '</div>'
-                + '<button type="button" data-close style="background:rgba(255,255,255,.15);border:none;'
-                + 'color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:12px;'
-                + 'display:flex;align-items:center;justify-content:center;flex:none;">✕</button>'
-                + '</div>';
-            NotificationManager.container.prepend(toast);
-            requestAnimationFrame(function () {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateX(0) scale(1)';
+            NotificationManager.show({
+                type:    'payment',
+                sound:   null, // already played above
+                icon:    '💳',
+                message: 'دفعة جديدة — ' + esc(name) + (amount ? ' (' + amount + ')' : ''),
+                preview: 'بانتظار مراجعتك في قائمة الطلبات المالية',
+                link:    data.link || null,
+                created_at: 'الآن'
             });
-            toast.querySelector('[data-close]').addEventListener('click', function (e) {
-                e.stopPropagation();
-                NotificationManager.dismiss(toast);
+            // Increment pending_student_payments counter immediately
+            document.querySelectorAll('[data-live-counter="pending_student_payments"]').forEach(function (el) {
+                var n = (parseInt(el.textContent, 10) || 0) + 1;
+                NotificationManager.animateCounter(el, parseInt(el.textContent, 10) || 0, n);
+                var badge = el.closest('.menu-badge');
+                if (badge) badge.style.display = 'inline-block';
             });
-            if (data.link) {
-                toast.addEventListener('click', function () { window.location.href = data.link; });
-            }
-            setTimeout(function () { NotificationManager.dismiss(toast); }, 6500);
+            refreshDropdown();
         });
 
         window.OxfordPusher = pusher; // exposed for manual debugging

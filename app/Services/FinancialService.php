@@ -115,6 +115,12 @@ class FinancialService
             ->orderBy('created_at', 'asc')
             ->get();
 
+        // Pre-fetch all GroupStudents for this student to avoid N+1 in the bucket loop
+        $groupStudentsMap = GroupStudents::where('student_id', $studentId)
+            ->whereNull('deleted_at')
+            ->get()
+            ->keyBy('group_id');
+
         // Per-context summaries (group_id NULL counts as one bucket)
         $buckets = $rows->groupBy(fn($r) => $r->group_id ?: 'pre_group');
         $summary = [];
@@ -123,7 +129,7 @@ class FinancialService
             $first     = $bucketRows->first();
             $totalFee  = (float) ($first->total_due_amount ?: $bucketRows->max('total_due_amount') ?: 0);
             if ($groupId) {
-                $gs = GroupStudents::where('student_id', $studentId)->where('group_id', $groupId)->first();
+                $gs = $groupStudentsMap->get($groupId);
                 if ($gs && $gs->student_fee_total > 0) $totalFee = (float) $gs->student_fee_total;
             }
             // Only real payments (or untyped legacy rows) count toward the fee. Credit and
@@ -201,26 +207,48 @@ class FinancialService
             ->whereNull('deleted_at')
             ->sum(DB::raw('GREATEST(COALESCE(remaining_amount,0), COALESCE(student_fee_paid,0))'));
 
-        // 3. Total Remaining (what students still owe) — summed PER LEDGER so an over-payer
-        // never cancels out another student's outstanding (the old global net hid real dues).
+        // 3. Total Remaining — computed via a single aggregate GROUP BY query instead of
+        // per-pair getStudentLedger() calls (which caused 100-300 queries on this method).
         $totalRemaining = 0.0;
 
-        // Group ledgers (one per distinct student+group membership)
-        $pairs = GroupStudents::whereNull('deleted_at')
-            ->get(['student_id', 'group_id'])
-            ->unique(fn ($r) => $r->student_id . '-' . $r->group_id);
-        foreach ($pairs as $p) {
-            $ledger = $this->getStudentLedger($p->student_id, $p->group_id);
-            if ($ledger) $totalRemaining += max(0, (float) $ledger['remaining_balance']);
+        // Group ledgers: one row per (student_id, group_id) pair with sums already computed.
+        $groupFees = GroupStudentsFees::whereNotNull('group_id')
+            ->whereNull('deleted_at')
+            ->selectRaw('student_id, group_id,
+                SUM(CASE WHEN audit_status="verified" AND (transaction_type="payment" OR transaction_type IS NULL) THEN transaction_amount ELSE 0 END) as confirmed_paid,
+                SUM(CASE WHEN audit_status="verified" AND transaction_type="refund" THEN ABS(transaction_amount) ELSE 0 END) as refunded')
+            ->groupBy('student_id', 'group_id')
+            ->get();
+
+        // Fetch all GroupStudents fee totals in one query
+        $feeMap = GroupStudents::whereNull('deleted_at')
+            ->get(['student_id', 'group_id', 'student_fee_total'])
+            ->keyBy(fn ($r) => $r->student_id . '-' . $r->group_id);
+
+        foreach ($groupFees as $row) {
+            $key      = $row->student_id . '-' . $row->group_id;
+            $gs       = $feeMap->get($key);
+            $totalFee = $gs ? (float) $gs->student_fee_total : 0.0;
+            if ($totalFee <= 0) continue;
+            $netPaid  = max(0, (float) $row->confirmed_paid - (float) $row->refunded);
+            $totalRemaining += max(0, $totalFee - $netPaid);
         }
 
-        // Pre-group ledgers (placement tests / fees not tied to a group)
-        $preStudents = GroupStudentsFees::whereNull('group_id')
+        // Pre-group ledgers: aggregate per student_id WHERE group_id IS NULL
+        $preFees = GroupStudentsFees::whereNull('group_id')
             ->whereNull('deleted_at')
-            ->distinct()->pluck('student_id');
-        foreach ($preStudents as $sid) {
-            $ledger = $this->getStudentLedger($sid, null);
-            if ($ledger) $totalRemaining += max(0, (float) $ledger['remaining_balance']);
+            ->selectRaw('student_id,
+                MAX(total_due_amount) as total_fee,
+                SUM(CASE WHEN audit_status="verified" AND (transaction_type="payment" OR transaction_type IS NULL) THEN transaction_amount ELSE 0 END) as confirmed_paid,
+                SUM(CASE WHEN audit_status="verified" AND transaction_type="refund" THEN ABS(transaction_amount) ELSE 0 END) as refunded')
+            ->groupBy('student_id')
+            ->get();
+
+        foreach ($preFees as $row) {
+            $totalFee = (float) $row->total_fee;
+            if ($totalFee <= 0) continue;
+            $netPaid  = max(0, (float) $row->confirmed_paid - (float) $row->refunded);
+            $totalRemaining += max(0, $totalFee - $netPaid);
         }
 
         return [

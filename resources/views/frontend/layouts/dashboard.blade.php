@@ -91,15 +91,51 @@
             var pusher = new Pusher(key, opts);
             var ch = pusher.subscribe('student-notifications-' + sid);
 
-            // Show toast only for enrollment notification (new_invoice) on any student page.
-            // Payment status toasts are handled by each financial page individually.
             ch.bind('student.notification', function (data) {
-                if ((data.type || '') !== 'new_invoice') return;
-                _showStudentToast(data);
+                var type = data.type || '';
+
+                // Always play notification sound
+                _playStudentChime(type === 'payment_status_updated' && data.status === 'approved');
+
+                // Always update unread badge in sidebar
+                _incrementFinBadge();
+
+                // Show toast for new invoice only (payment status is handled per-page)
+                if (type === 'new_invoice') { _showStudentToast(data); }
             });
 
             window.studentPusher  = pusher;
             window.studentChannel = ch;
+
+            function _playStudentChime(ok) {
+                try {
+                    var AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) return;
+                    var ctx = new AC();
+                    var freqs = ok ? [659, 784, 880] : [440, 392];
+                    freqs.forEach(function (f, i) {
+                        setTimeout(function () {
+                            var osc = ctx.createOscillator();
+                            var g   = ctx.createGain();
+                            osc.connect(g); g.connect(ctx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(f, ctx.currentTime);
+                            g.gain.setValueAtTime(0.25, ctx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+                            osc.start(ctx.currentTime);
+                            osc.stop(ctx.currentTime + 0.18);
+                        }, i * 160);
+                    });
+                } catch (e) {}
+            }
+
+            function _incrementFinBadge() {
+                var badge = document.querySelector('[data-fin-unread-badge]');
+                if (!badge) return;
+                var n = (parseInt(badge.textContent, 10) || 0) + 1;
+                badge.textContent = n;
+                badge.style.display = '';
+            }
 
             function _showStudentToast(data) {
                 var t = document.createElement('div');
