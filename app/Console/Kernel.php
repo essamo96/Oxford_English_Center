@@ -25,6 +25,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Queue worker: يعمل كل دقيقة، يُغلق تلقائياً عند فراغ الطابور،
+        // withoutOverlapping يمنع تشغيل نسخة ثانية إذا الأولى لم تنته بعد.
+        $schedule->command('queue:work --stop-when-empty --tries=3 --timeout=60')
+                 ->everyMinute()
+                 ->withoutOverlapping(5);
+
         // $schedule->call(function () {
         //     GroupStudents::where('has_evaluation', 1)
         //     ->where('evaluation_at', '<=', now()->subWeek(3))

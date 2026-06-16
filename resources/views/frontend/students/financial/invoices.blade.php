@@ -747,9 +747,9 @@
     (function () {
         var ch = window.studentChannel;
         if (!ch && typeof Pusher !== 'undefined') {
-            var _host = '{{ config("broadcasting.connections.pusher.options.host", "") }}';
-            var _port = {{ (int) config("broadcasting.connections.pusher.options.port", 443) }};
-            var _scheme = '{{ config("broadcasting.connections.pusher.options.scheme", "https") }}';
+            var _host = '{{ env("PUSHER_PUBLIC_HOST", config("broadcasting.connections.pusher.options.host", "")) }}';
+            var _port = {{ (int) env("PUSHER_PUBLIC_PORT", config("broadcasting.connections.pusher.options.port", 443)) }};
+            var _scheme = '{{ env("PUSHER_PUBLIC_SCHEME", config("broadcasting.connections.pusher.options.scheme", "https")) }}';
             var _opts = { cluster: '{{ config("broadcasting.connections.pusher.options.cluster", "mt1") }}', forceTLS: _scheme === 'https', disableStats: true };
             if (_host) { _opts.wsHost = _host; _opts.wsPort = _port; _opts.wssPort = _port; _opts.enabledTransports = [_scheme === 'https' ? 'wss' : 'ws']; }
             var p = new Pusher('{{ config("broadcasting.connections.pusher.key") }}', _opts);

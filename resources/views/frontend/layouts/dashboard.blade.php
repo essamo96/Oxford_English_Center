@@ -74,9 +74,9 @@
         (function () {
             var key     = '{{ config("broadcasting.connections.pusher.key") }}';
             var cluster = '{{ config("broadcasting.connections.pusher.options.cluster", "mt1") }}';
-            var host    = '{{ config("broadcasting.connections.pusher.options.host", "") }}';
-            var port    = {{ (int) config("broadcasting.connections.pusher.options.port", 443) }};
-            var scheme  = '{{ config("broadcasting.connections.pusher.options.scheme", "https") }}';
+            var host    = '{{ env("PUSHER_PUBLIC_HOST", config("broadcasting.connections.pusher.options.host", "")) }}';
+            var port    = {{ (int) env("PUSHER_PUBLIC_PORT", config("broadcasting.connections.pusher.options.port", 443)) }};
+            var scheme  = '{{ env("PUSHER_PUBLIC_SCHEME", config("broadcasting.connections.pusher.options.scheme", "https")) }}';
             var sid     = {{ Auth::guard('students')->id() }};
             if (!key || typeof Pusher === 'undefined') return;
 

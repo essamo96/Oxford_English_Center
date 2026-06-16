@@ -196,9 +196,9 @@
     <script>
         window.OXFORD_RT = {
             key:              @json(config('broadcasting.connections.pusher.key')),
-            host:             @json(config('broadcasting.connections.pusher.options.host', '')),
-            port:             {{ (int) config('broadcasting.connections.pusher.options.port', 443) }},
-            scheme:           @json(config('broadcasting.connections.pusher.options.scheme', 'https')),
+            host:             @json(env('PUSHER_PUBLIC_HOST', config('broadcasting.connections.pusher.options.host', ''))),
+            port:             {{ (int) env('PUSHER_PUBLIC_PORT', config('broadcasting.connections.pusher.options.port', 443)) }},
+            scheme:           @json(env('PUSHER_PUBLIC_SCHEME', config('broadcasting.connections.pusher.options.scheme', 'https'))),
             cluster:          @json(config('broadcasting.connections.pusher.options.cluster', 'mt1')),
             branch_id:        @json(auth()->guard('admin')->user()?->branch_id),
             broadcast_driver: @json(config('broadcasting.default'))
