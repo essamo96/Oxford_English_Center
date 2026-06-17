@@ -2,9 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Events\StudentNotificationBroadcast;
-use App\Models\Groups;
-use App\Models\Programs;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -34,7 +31,7 @@ class NewInvoiceNotification extends Notification implements ShouldQueue
 
     public function toDatabase($notifiable): array
     {
-        $data = [
+        return [
             'type'          => 'new_invoice',
             'title'         => 'فاتورة جديدة — تشعيب في برنامج ' . $this->programTitle,
             'message'       => 'تم تشعيبك في مجموعة «' . $this->groupName . '» ببرنامج «' . $this->programTitle . '». '
@@ -47,14 +44,7 @@ class NewInvoiceNotification extends Notification implements ShouldQueue
             'group_name'    => $this->groupName,
             'group_id'      => $this->groupId,
         ];
-
-        // Real-time push to student's Pusher channel
-        try {
-            broadcast(new StudentNotificationBroadcast($this->studentId, $data));
-        } catch (\Throwable) {
-            // Non-fatal — Pusher may be unavailable
-        }
-
-        return $data;
+        // Broadcast is fired from GroupsController directly (not here) so it fires
+        // synchronously in the HTTP request rather than inside the queued job.
     }
 }

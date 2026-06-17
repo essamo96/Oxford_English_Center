@@ -391,6 +391,20 @@ class GroupsController extends AdminController
                             $student = \App\Models\Students::find($sid);
                             if ($student) {
                                 $programTitle = optional(\App\Models\Programs::find($group->program_id))->title ?? '';
+                                $notifData = [
+                                    'type'          => 'new_invoice',
+                                    'title'         => 'فاتورة جديدة — تشعيب في برنامج ' . $programTitle,
+                                    'message'       => 'تم تشعيبك في مجموعة «' . ($group->name ?? '') . '» ببرنامج «' . $programTitle . '». '
+                                                     . 'إجمالي الرسوم: ₪ ' . number_format((float) $result['fee'], 2)
+                                                     . ' — المتبقي للسداد: ₪ ' . number_format((float) $result['remaining'], 2) . '.',
+                                    'total_due'     => (float) $result['fee'],
+                                    'remaining'     => (float) $result['remaining'],
+                                    'credit_applied'=> (float) $result['credit_applied'],
+                                    'program'       => $programTitle,
+                                    'group_name'    => $group->name ?? '',
+                                    'group_id'      => (int) $group->id,
+                                ];
+                                // DB notification (queued — OK to be async)
                                 $student->notify(new \App\Notifications\NewInvoiceNotification(
                                     studentId:    (int) $sid,
                                     groupId:      (int) $group->id,
@@ -400,9 +414,15 @@ class GroupsController extends AdminController
                                     programTitle: $programTitle,
                                     groupName:    $group->name ?? '',
                                 ));
+                                // Real-time broadcast — fired here (HTTP request) not inside queue job
+                                try {
+                                    broadcast(new \App\Events\StudentNotificationBroadcast((int) $sid, $notifData));
+                                } catch (\Throwable $be) {
+                                    \Illuminate\Support\Facades\Log::error('[RT] NewInvoice broadcast failed for student ' . $sid . ': ' . $be->getMessage());
+                                }
                             }
-                        } catch (\Throwable) {
-                            // Non-fatal — don't fail enrollment if notification fails
+                        } catch (\Throwable $e) {
+                            \Illuminate\Support\Facades\Log::error('[Enrollment] Notification failed for student ' . $sid . ': ' . $e->getMessage());
                         }
                     }
                 } catch (\App\Exceptions\EnrollmentException $e) {

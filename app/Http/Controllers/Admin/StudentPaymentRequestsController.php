@@ -199,12 +199,15 @@ class StudentPaymentRequestsController extends AdminController
                     'admin_notes'   => $submission->admin_notes,
                 ]
             ));
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] StudentNotificationBroadcast (approve) failed for student ' . $submission->student_id . ': ' . $e->getMessage());
+        }
 
-        // Update admin sidebar counters
         try {
             broadcast(new CountersUpdated($submission->student?->branch_id));
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] CountersUpdated (approve) failed: ' . $e->getMessage());
+        }
 
         return response()->json(['ok' => true, 'message' => 'تم قبول الدفعة وتسجيلها بنجاح.']);
     }
@@ -245,11 +248,15 @@ class StudentPaymentRequestsController extends AdminController
                     'admin_notes'   => $submission->admin_notes,
                 ]
             ));
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] StudentNotificationBroadcast (reject) failed for student ' . $submission->student_id . ': ' . $e->getMessage());
+        }
 
         try {
             broadcast(new CountersUpdated($submission->student?->branch_id));
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] CountersUpdated (reject) failed: ' . $e->getMessage());
+        }
 
         return response()->json(['ok' => true, 'message' => 'تم رفض الدفعة وإشعار الطالب.']);
     }

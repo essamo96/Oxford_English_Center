@@ -184,14 +184,18 @@ class StudentFinancialController extends Controller
 
         try {
             broadcast(new CountersUpdated($branchId));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] CountersUpdated broadcast failed (submitPayment): ' . $e->getMessage());
+        }
+        try {
             broadcast(new StudentPaymentSubmittedBroadcast(
                 branchId:    $branchId ?? 0,
                 studentName: $student->name ?? '',
                 amount:      (float) $request->amount_paid,
                 link:        route('admin.financial.student-payments'),
             ));
-        } catch (\Throwable) {
-            // Non-fatal: Pusher may be unavailable
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedBroadcast failed: ' . $e->getMessage());
         }
 
         return back()->with('fin_success', 'تم إرسال طلب الدفع بنجاح. سيتم مراجعته من قبل الإدارة وستصلك إشعار بالنتيجة.');
