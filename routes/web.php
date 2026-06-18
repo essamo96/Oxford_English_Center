@@ -212,7 +212,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('sms', ['as' => 'send.admin.sms', 'uses' => 'TeacherController@SMS']);
     Route::post('groups/sms', ['as' => 'send.groups.sms', 'uses' => 'StudentsController@SMSGruop']);
     Route::get('sms/balance', ['as' => 'admin.sms.balance', 'uses' => 'TeacherController@checkSmsBalance']);
-    Route::get('sms/archive', ['as' => 'admin.sms.archive', 'uses' => 'SmsArchiveController@index']);
+    Route::get('sms/archive', ['as' => 'sms_archive.view', 'middleware' => ['permission:admin.sms_archive.view'], 'uses' => 'SmsArchiveController@index']);
     Route::get('sms/archive/data', ['as' => 'admin.sms.archive.data', 'uses' => 'SmsArchiveController@getData']);
     Route::get('programs/students', ['as' => 'admin.program.students', 'uses' => 'StudentsController@getStudentsByProgram']);
     Route::get('sms/shuttle-students', ['as' => 'admin.sms.shuttle.students', 'uses' => 'StudentsController@getStudentsForSmsShuttle']);
