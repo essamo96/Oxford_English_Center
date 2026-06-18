@@ -19,6 +19,13 @@ return [
         'secret' => env('MAILGUN_SECRET'),
     ],
 
+    'tweetsms' => [
+        'base_url' => env('TWEETSMS_BASE_URL', 'https://www.tweetsms.ps/api.php'),
+        'user'     => env('TWEETSMS_USER', 'Oxford.E.C'),
+        'pass'     => env('TWEETSMS_PASS', '951EOX65'),
+        'sender'   => env('TWEETSMS_SENDER', 'Oxford.E.C'),
+    ],
+
     'ses' => [
         'key' => env('SES_KEY'),
         'secret' => env('SES_SECRET'),
@@ -35,11 +42,6 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
-    'tweetsms' => [
-        'base_url' => env('TWEETSMS_BASE_URL', 'https://tweetsms.com/api'),
-        'user'     => env('TWEETSMS_USER'),
-        'pass'     => env('TWEETSMS_PASS'),
-        'sender'   => env('TWEETSMS_SENDER'),
-    ],
+
 
 ];

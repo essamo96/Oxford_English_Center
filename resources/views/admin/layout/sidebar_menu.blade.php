@@ -67,6 +67,35 @@
                     @endif
                 @endforeach
 
+                {{-- ── إدارة خدمة tweetSMS (ثابتة) ──────────────────── --}}
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ in_array($active_menu ?? '', ['sms_log', 'sms_archive']) ? 'here show' : '' }}">
+                    <span class="menu-link">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-sms fs-1" style="color: #009ef7">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">إدارة خدمة tweetSMS</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <!--
+                        <div class="menu-item">
+                            <a class="menu-link {{ ($active_menu ?? '') == 'sms_log' ? 'active' : '' }}" href="#">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">LOG SMS</span>
+                            </a>
+                        </div>
+                        -->
+                        <div class="menu-item">
+                            <a class="menu-link {{ ($active_menu ?? '') == 'sms_archive' ? 'active' : '' }}" href="{{ route('admin.sms.archive') }}">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">أرشيف الرسائل</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

@@ -53,7 +53,112 @@ class StudentsController extends AdminController
     {
         parent::$data['teachers'] = \App\Models\Teachers::whereNull('deleted_at')->orderBy('name')->get();
         parent::$data['groups']   = \App\Models\Groups::whereNull('deleted_at')->orderBy('name')->get();
+        parent::$data['programs'] = \App\Models\Programs::whereNull('deleted_at')->orderBy('title')->get();
         return view('admin.students.view', parent::$data);
+    }
+
+    /**
+     * Return list of active students for a given program id.
+     * Expects `program_id` as GET parameter. Returns JSON array of {id, name, mobile, group}.
+     */
+    public function getStudentsByProgram(Request $request)
+    {
+        $programId = $request->get('program_id');
+        if (! $programId) return response()->json(['students' => []]);
+
+        $groups = \App\Models\Groups::where('program_id', $programId)->pluck('id')->toArray();
+        if (empty($groups)) return response()->json(['students' => []]);
+
+        $students = \App\Models\GroupStudents::whereIn('group_id', $groups)
+            ->join('students', 'group_students.student_id', '=', 'students.id')
+            ->whereNotNull('students.mobile')
+            ->where('students.status', 1)
+            ->select('students.id', 'students.name', 'students.mobile', 'group_students.group_id')
+            ->get()
+            ->map(function($row) {
+                $group = \App\Models\Groups::find($row->group_id);
+                return [
+                    'id' => $row->id,
+                    'name' => $row->name,
+                    'mobile' => $row->mobile,
+                    'group' => $group ? $group->name : ''
+                ];
+            })->values();
+
+        return response()->json(['students' => $students]);
+    }
+
+    public function getStudentsForSmsShuttle(Request $request)
+    {
+        $programId = $request->get('program_id');
+        $groupId = $request->get('group_id');
+        $programType = $request->get('program_type');
+        $hasTest = $request->get('has_placement_test');
+        $hasScore = $request->get('has_score');
+
+        $query = \App\Models\Students::query()
+            ->with(['placementTests' => function($q) { $q->orderBy('created_at', 'desc'); }])
+            ->whereNotNull('mobile');
+            // ->where('status', 1); // Maybe don't force active, but let's keep it safe.
+
+        if ($programType) {
+            $query->where('program_type', $programType);
+        }
+
+        if ($groupId) {
+            $query->whereHas('gropes', function($q) use ($groupId) {
+                $q->where('group_id', $groupId);
+            });
+        } elseif ($programId) {
+            $groups = \App\Models\Groups::where('program_id', $programId)->pluck('id')->toArray();
+            if (!empty($groups)) {
+                $query->whereHas('gropes', function($q) use ($groups) {
+                    $q->whereIn('group_id', $groups);
+                });
+            } else {
+                // If program has no groups, return empty early if they selected a program
+                return response()->json(['students' => []]);
+            }
+        }
+
+        if ($hasTest == '1') {
+            $query->whereHas('placementTests');
+        }
+        
+        if ($hasScore == '1') {
+            $query->whereHas('placementTests', function($q) {
+                $q->whereNotNull('score')->whereNotNull('assigned_level');
+            });
+        }
+
+        if ($request->get('inactive') == '1') {
+            $query->where('status', '!=', 1);
+        } else {
+            // By default maybe we want active only? Or leave it as is.
+        }
+
+        if ($request->get('no_group') == '1') {
+            $query->whereDoesntHave('gropes');
+        }
+
+        if ($request->get('pending_fin') == '1') {
+            $query->whereIn('id', \App\Models\GroupStudentsFees::where('audit_status', 'pending')->select('student_id'));
+        }
+
+        $students = $query->select('id', 'name', 'mobile')->get()->map(function($student) {
+            $test = $student->placementTests->first();
+            $score = $test ? $test->score : null;
+            $level = $test ? $test->assigned_level : null;
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'mobile' => $student->mobile,
+                'score' => $score,
+                'level' => $level,
+            ];
+        });
+
+        return response()->json(['students' => $students]);
     }
 
     public function getStudentDetails(Request $request)
@@ -1276,76 +1381,37 @@ class StudentsController extends AdminController
     }
 
     /////////////////////////////
-    public function SMSGruop(Request $request)
+    public function SMSGruop(Request $request, \App\Services\SmsService $smsService)
     {
         $groupIds = $request->input('selectedMobiles');
         $message = $request->input('note');
 
-        $groupStudents = GroupStudents::whereIn('group_id', $groupIds)
+        $groupStudents = \App\Models\GroupStudents::whereIn('group_id', $groupIds)
             ->join('students', 'group_students.student_id', '=', 'students.id')
             ->whereNotNull('students.mobile')
             ->select('students.mobile')
             ->get();
 
         $phoneNumbers = $groupStudents->pluck('mobile')->toArray();
-        $token = '9ko9p0ntxp57wxd6';
 
         $successResponses = [];
         $errorResponses = [];
 
         foreach ($phoneNumbers as $phoneNumber) {
-            $params = [
-                'token' => $token,
-                'to' => $phoneNumber,
-                'body' => $message,
-                'priority' => '1',
-                'referenceId' => '',
-                'msgId' => '',
-                'mentions' => '',
-            ];
-
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => 'https://api.ultramsg.com/instance62198/messages/chat',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => http_build_query($params),
-                CURLOPT_HTTPHEADER => ['content-type: application/x-www-form-urlencoded'],
-            ]);
-
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if ($err) {
+            $result = $smsService->send($phoneNumber, $message);
+            
+            if ($result['success']) {
+                $successResponses[] = [
+                    'phoneNumber' => $phoneNumber,
+                    'status' => 'success',
+                    'message' => 'Message sent successfully',
+                ];
+            } else {
                 $errorResponses[] = [
                     'phoneNumber' => $phoneNumber,
                     'status' => 'error',
-                    'message' => 'حدث مشكلة اثناء عملية الارسال',
+                    'message' => 'حدث مشكلة اثناء عملية الارسال (' . $result['message'] . ')',
                 ];
-            } else {
-                $responseData = json_decode($response, true);
-
-                if ($responseData && isset($responseData['status']) && $responseData['status'] === 'success') {
-                    $successResponses[] = [
-                        'phoneNumber' => $phoneNumber,
-                        'status' => 'success',
-                        'message' => 'Message sent successfully',
-                    ];
-                } else {
-                    $errorResponses[] = [
-                        'phoneNumber' => $phoneNumber,
-                        'status' => 'error',
-                        'message' => 'حدث مشكلة اثناء عملية الارسال',
-                    ];
-                }
             }
         }
 

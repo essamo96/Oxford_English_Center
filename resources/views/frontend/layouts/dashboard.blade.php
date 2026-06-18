@@ -100,8 +100,8 @@
                 // Always update unread badge in sidebar
                 _incrementFinBadge();
 
-                // Show toast for new invoice only (payment status is handled per-page)
-                if (type === 'new_invoice') { _showStudentToast(data); }
+                // Show toast for new invoice or payment status
+                if (type === 'new_invoice' || type === 'payment_status_updated') { _showStudentToast(data); }
             });
 
             window.studentPusher  = pusher;

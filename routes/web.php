@@ -209,8 +209,13 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('student/CEmail/Birthday', ['as' => 'send.CEmail.Birthday', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'StudentsController@SendCustomEmail2']);
     Route::post('teacher/notify', ['as' => 'send.teacher.message', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'TeacherController@SendMessage']);
     Route::post('student/admin/messages', ['as' => 'student.admin.messages', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'StudentsController@StudentsSendMessage']);
-    Route::post('admin/sms', ['as' => 'send.admin.sms', 'uses' => 'TeacherController@SMS']);
-    Route::post('admin/groups/sms', ['as' => 'send.groups.sms', 'uses' => 'StudentsController@SMSGruop']);
+    Route::post('sms', ['as' => 'send.admin.sms', 'uses' => 'TeacherController@SMS']);
+    Route::post('groups/sms', ['as' => 'send.groups.sms', 'uses' => 'StudentsController@SMSGruop']);
+    Route::get('sms/balance', ['as' => 'admin.sms.balance', 'uses' => 'TeacherController@checkSmsBalance']);
+    Route::get('sms/archive', ['as' => 'admin.sms.archive', 'uses' => 'SmsArchiveController@index']);
+    Route::get('sms/archive/data', ['as' => 'admin.sms.archive.data', 'uses' => 'SmsArchiveController@getData']);
+    Route::get('programs/students', ['as' => 'admin.program.students', 'uses' => 'StudentsController@getStudentsByProgram']);
+    Route::get('sms/shuttle-students', ['as' => 'admin.sms.shuttle.students', 'uses' => 'StudentsController@getStudentsForSmsShuttle']);
     Route::post('show/class_infos', ['as' => 'send.groups.infos', 'uses' => 'GroupsController@show']);
     //Memberships  Route //dd member
     Route::get('home/membership', ['as' => 'dashboard.view.membership', 'middleware' => ['permission:admin.groups.student.view|admin.groups.student.add|admin.groups.student.edit|admin.groups.student.delete|admin.groups.student.status'], 'uses' => 'MembershipsController@getIndex']);

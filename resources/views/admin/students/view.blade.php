@@ -174,6 +174,7 @@
 @section('modal')
     @include('admin.layout.masterLayouts.modal')
 
+
     <!-- Modern Details Modal -->
     <div class="modal fade" id="details_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered mw-800px">
@@ -281,48 +282,16 @@
             });
         });
 
-        // SMS logic
+        // SMS logic: open modal to choose program/group, select students, compose template, or send to custom number
         $('#sms').on('click', function() {
             var selectedMobiles = [];
             $(".checkboxes:checked").each(function() {
-                selectedMobiles.push($(this).data("mob"));
+                selectedMobiles.push({ id: $(this).data('id'), mob: $(this).data('mob'), name: $(this).closest('tr').find('td:nth-child(2)').text().trim() });
             });
 
-            if (selectedMobiles.length > 0) {
-                Swal.fire({
-                    title: 'ادخل نص الرسالة',
-                    input: 'textarea',
-                    inputAttributes: { rows: 5, maxlength: 2100 },
-                    inputPlaceholder: 'ادخل محتوى الرسالة هنا',
-                    showCancelButton: true,
-                    buttonsStyling: false,
-                    confirmButtonText: 'إرسال',
-                    cancelButtonText: 'إلغاء',
-                    customClass: { confirmButton: 'btn btn-primary', cancelButton: 'btn btn-light' },
-                    preConfirm: (note) => {
-                        if (!note) { Swal.showValidationMessage('يجب إدخال نص الرسالة'); }
-                        return $.ajax({
-                            type: 'POST',
-                            url: '{{ route("send.admin.sms") }}',
-                            data: { note: note, selectedMobiles: selectedMobiles, _token: '{{ csrf_token() }}' }
-                        });
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire('تم الارسال بنجاح!', '', 'success');
-                    }
-                });
-            } else {
-                Swal.fire({
-                    text: 'يجب اختيار طالب واحد على الأقل!',
-                    icon: 'error',
-                    buttonsStyling: false,
-                    confirmButtonText: 'حسناً',
-                    customClass: {
-                        confirmButton: 'btn btn-danger'
-                    }
-                });
-            }
+            // If there are pre-selected students from the table, we could optionally push them to the pool list
+            // But for simplicity, we just open the modal. The user can fetch students using the filters.
+            $('#smsShuttleModal').modal('show');
         });
 
         // Bulk Email logic

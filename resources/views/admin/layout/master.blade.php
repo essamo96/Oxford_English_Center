@@ -140,6 +140,7 @@
         </div>
     </div>
     @yield('modal')
+    @include('admin.students.sms_modal')
     @include('admin.layout.notificatAjax')
 
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>

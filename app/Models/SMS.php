@@ -13,7 +13,10 @@ class SMS extends Model
         $status = $result['success'] ? 1 : $result['status'];
         // $status = file_get_contents("http://www.alqudwasms.com/api.php?user=OXFORD.E.C&pass=1929459&to=" . $numbers .
         // "&message=" . urlencode($message) . "&sender=OXFORD.E.C");
-        if ($status == -999) {
+        if ($status === 1) {
+            $res->status = TRUE;
+            $res->msg = 'تم الارسال بنجاح';
+        } elseif ($status == -999) {
             $res->status = FALSE;
             $res->msg = 'فشل الارسال بسبب خلل في مزود الخدمة';
         } 

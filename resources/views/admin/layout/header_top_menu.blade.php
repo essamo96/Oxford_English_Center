@@ -39,6 +39,14 @@
                         </div>
                     </div>
                 </div>
+                <!--begin::SMS Shuttle Button-->
+                <div class="app-navbar-item ms-1 ms-md-3">
+                    <button type="button" class="btn btn-sm btn-light-primary fw-bold px-4 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#smsShuttleModal">
+                        <i class="fa fa-envelope fs-5 me-1"></i>
+                        رسائل SMS
+                    </button>
+                </div>
+                <!--end::SMS Shuttle Button-->
                 <!--begin::Branch Indicator-->
                 @if(isset($isBranchScoped) && $isBranchScoped && isset($activeBranch) && $activeBranch)
                 <div class="app-navbar-item ms-1 ms-md-3">
