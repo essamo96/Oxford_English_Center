@@ -41,7 +41,6 @@ return new class extends Migration
                     'name'       => 'admin.sms_archive.view',
                     'group_id'   => $childId,
                     'name_ar'    => 'عرض أرشيف الرسائل',
-                    'name_en'    => 'View SMS Archive',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
