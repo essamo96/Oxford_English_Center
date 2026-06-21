@@ -3,14 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\StudentPaymentSubmission;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class StudentPaymentSubmittedNotification extends Notification implements ShouldQueue
+// Sent synchronously (not queued) so the database row exists immediately —
+// the bell badge/sidebar count/notifications inbox read straight from this
+// table and must not depend on a queue worker being online.
+class StudentPaymentSubmittedNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(public readonly StudentPaymentSubmission $submission) {}
 
     public function via($notifiable): array

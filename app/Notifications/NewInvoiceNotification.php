@@ -2,18 +2,16 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
  * Sent to a student when the admin enrolls them in a new program/group.
  * Delivered via database (notifications table) + real-time Pusher broadcast.
+ * Sent synchronously (not queued) — the bell badge/sidebar count/notifications
+ * inbox read straight from this table and must not depend on a queue worker.
  */
-class NewInvoiceNotification extends Notification implements ShouldQueue
+class NewInvoiceNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(
         public readonly int   $studentId,
         public readonly int   $groupId,
