@@ -48,6 +48,16 @@
                 <a class="ox-dash__navlink {{ Request::is('student/financial/invoices') ? 'is-active' : '' }}"
                    href="{{ url('student/financial/invoices') }}">
                     <i class="bi bi-receipt"></i><span class="ox-dash__navtext">الفواتير المستحقة</span>
+                    @php
+                        $finUnpaidCount = 0;
+                        if (Auth::guard('students')->check()) {
+                            $finAllInvoices = app(\App\Services\FinancialService::class)->getStudentAllInvoices(Auth::guard('students')->id());
+                            if ($finAllInvoices) {
+                                $finUnpaidCount = collect($finAllInvoices['summary'])->where('remaining', '>', 0)->count();
+                            }
+                        }
+                    @endphp
+                    <span class="ox-dash__navbadge" style="{{ $finUnpaidCount > 0 ? '' : 'display:none;' }}">{{ $finUnpaidCount }}</span>
                 </a>
                 <a class="ox-dash__navlink {{ Request::is('student/financial/notifications') ? 'is-active' : '' }}"
                    href="{{ url('student/financial/notifications') }}">
