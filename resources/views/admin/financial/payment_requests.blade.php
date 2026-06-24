@@ -44,7 +44,7 @@
                     @if(!isset($isBranchScoped) || !$isBranchScoped)
                     <select id="filterBranch" class="form-select" style="width:180px;">
                         <option value="">كل الفروع</option>
-                        @foreach(\App\Models\Branches::all() as $br)
+                        @foreach(\App\Models\Branch::all() as $br)
                             <option value="{{ $br->id }}">{{ $br->name_ar }}</option>
                         @endforeach
                     </select>
