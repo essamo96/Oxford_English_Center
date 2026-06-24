@@ -39,7 +39,8 @@
             var sounds = {
                 booking: { freq: [523, 659, 784], duration: 0.15, wave: 'sine' },
                 contact: { freq: [440, 550, 440], duration: 0.20, wave: 'triangle' },
-                success: { freq: [784, 880],      duration: 0.12, wave: 'sine' }
+                success: { freq: [784, 880],      duration: 0.12, wave: 'sine' },
+                payment: { freq: [392, 523, 659, 784], duration: 0.16, wave: 'triangle' }
             };
             var sound = sounds[type] || sounds.success;
             var ctx = this.ctx;
@@ -97,7 +98,8 @@
         createToast: function (data) {
             var colors = {
                 booking: { bg: '#1e40af', border: '#3b82f6' },
-                contact: { bg: '#065f46', border: '#10b981' }
+                contact: { bg: '#065f46', border: '#10b981' },
+                payment: { bg: '#92400e', border: '#f59e0b' }
             };
             var c = colors[data.type] || colors.booking;
 
@@ -376,7 +378,7 @@
             }
         });
         channel.bind('student.payment.submitted', function (data) {
-            SoundManager.play('success');
+            SoundManager.play('payment');
             var name   = data.student_name || 'طالب';
             var amount = data.amount ? '₪ ' + parseFloat(data.amount).toFixed(2) : '';
             NotificationManager.show({

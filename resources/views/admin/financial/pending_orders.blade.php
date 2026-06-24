@@ -23,6 +23,15 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link text-gray-800" data-bs-toggle="tab" href="#tab_student_payments">
+            <i class="bi bi-credit-card-2-front me-2 text-success"></i> طلبات دفع الطلاب
+            @php $pendingPayBadge = \App\Support\NotifyCounts::pendingStudentPayments(auth()->user()->branch_id ?? null); @endphp
+            @if($pendingPayBadge > 0)
+            <span class="badge badge-light-danger ms-2" data-live-counter="pending_student_payments">{{ $pendingPayBadge }}</span>
+            @endif
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link text-gray-800" data-bs-toggle="tab" href="#tab_membership">
             <i class="bi bi-person-plus-fill me-2 text-primary"></i> طلبات العضوية الجديدة
             <span class="badge badge-light-primary ms-2" id="membership_count_badge">...</span>
@@ -81,6 +90,20 @@
             </thead>
             <tbody class="text-gray-600 fw-semibold text-center"></tbody>
         </table>
+    </div>
+</div>
+</div>
+
+{{-- Tab: Student Self-Service Payment Submissions --}}
+<div class="tab-pane fade" id="tab_student_payments">
+<div class="card">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <h3 class="fw-bold">طلبات الدفع المُرسَلة من بوابة الطالب</h3>
+        </div>
+    </div>
+    <div class="card-body py-4">
+        @include('admin.financial.partials.student_payments_panel')
     </div>
 </div>
 </div>
