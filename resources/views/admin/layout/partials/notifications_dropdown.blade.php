@@ -36,7 +36,7 @@
                 <div class="d-flex align-items-center">
                     <div class="symbol symbol-35px me-4"><span class="symbol-label bg-light-success"><i class="ki-duotone ki-dollar fs-2 text-success"><span class="path1"></span><span class="path2"></span></i></span></div>
                     <div class="mb-0 me-2">
-                        <a href="{{ route('admin.financial.student-payments') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">دفعة جديدة: {{ $pay->student->name ?? 'طالب' }}</a>
+                        <a href="{{ safe_route('admin.financial.student-payments') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">دفعة جديدة: {{ $pay->student->name ?? 'طالب' }}</a>
                         <div class="text-gray-400 fs-7">₪ {{ number_format($pay->amount_paid, 2) }} — {{ $pay->group->name ?? 'خارج المجموعة' }}</div>
                     </div>
                 </div>

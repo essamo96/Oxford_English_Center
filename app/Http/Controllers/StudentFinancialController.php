@@ -196,7 +196,7 @@ class StudentFinancialController extends Controller
                 branchId:    $branchId ?? 0,
                 studentName: $student->name ?? '',
                 amount:      (float) $request->amount_paid,
-                link:        route('admin.financial.student-payments'),
+                link:        safe_route('admin.financial.student-payments'),
             ));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedBroadcast failed: ' . $e->getMessage());

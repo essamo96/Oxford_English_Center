@@ -608,7 +608,7 @@
                         </a>
                     </li>
                     <li class="nav-item {{ $active_menu == 'student_payments' ? 'active' : '' }}">
-                        <a href="{{ route('admin.financial.student-payments') }}" class="nav-link nav-toggle">
+                        <a href="{{ safe_route('admin.financial.student-payments') }}" class="nav-link nav-toggle">
                             <i class="bi bi-credit-card-2-front"></i>
                             <span class="title">دفعات الطلاب</span>
                             @php $pendingPay = \App\Support\NotifyCounts::pendingStudentPayments(auth()->user()->branch_id ?? null); @endphp

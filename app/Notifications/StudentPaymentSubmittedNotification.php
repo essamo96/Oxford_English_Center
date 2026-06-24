@@ -33,7 +33,7 @@ class StudentPaymentSubmittedNotification extends Notification
             'group_name'     => $group?->name ?? 'خارج المجموعة',
             'amount_paid'    => (float) $this->submission->amount_paid,
             'submitted_at'   => $this->submission->created_at?->toDateTimeString(),
-            'url'            => route('admin.financial.student-payments'),
+            'url'            => safe_route('admin.financial.student-payments'),
         ];
     }
 }
