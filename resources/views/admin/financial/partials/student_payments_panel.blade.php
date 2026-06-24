@@ -106,8 +106,9 @@
 </div>
 
 <script>
-$(function () {
-    if (typeof $.fn.DataTable === 'undefined') { return; }
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof jQuery === 'undefined' || typeof jQuery.fn.DataTable === 'undefined') { return; }
+    var $ = jQuery;
     var currentId = null;
 
     var table = $('#payRequestsTable').DataTable({

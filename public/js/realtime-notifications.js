@@ -433,8 +433,14 @@
         };
 
         // Manual UI self-test (sound + toast + counter) without sending real data:
-        //   OxfordRTtest('contact')  or  OxfordRTtest('booking')
+        //   OxfordRTtest('contact')  or  OxfordRTtest('booking')  or  OxfordRTtest('payment')
         window.OxfordRTtest = function (type) {
+            if (type === 'payment') {
+                NotificationManager.show({ type: 'payment', icon: '💳', sound: 'payment',
+                    message: 'تجربة: دفعة جديدة — طالب تجريبي (₪ 50.00)',
+                    preview: 'بانتظار مراجعتك في قائمة الطلبات المالية', created_at: 'الآن' });
+                return;
+            }
             NotificationManager.show(type === 'booking'
                 ? { type: 'booking', icon: '📅', sound: 'booking', message: 'تجربة: حجز جديد',
                     service: 'برنامج الكبار', mobile: '0599000000', created_at: 'الآن',

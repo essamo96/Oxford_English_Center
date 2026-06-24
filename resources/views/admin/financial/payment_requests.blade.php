@@ -2,10 +2,6 @@
 @section('title', 'طلبات الدفع من الطلاب')
 @php $active_menu = 'student_payments'; @endphp
 
-@section('css')
-<link rel="stylesheet" href="{{ url('assets/admin/plugins/datatables/datatables.bundle.css') }}">
-@endsection
-
 @section('page-breadcrumb')
     <li class="breadcrumb-item text-muted">
         <a href="{{ route('dashboard.view') }}" class="text-muted text-hover-info">الرئيسية</a>
@@ -37,8 +33,4 @@
         </div>
     </div>
 </div>
-@endsection
-
-@section('js')
-<script src="{{ url('assets/admin/plugins/datatables/datatables.bundle.js') }}"></script>
 @endsection
