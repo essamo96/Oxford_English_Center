@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Contracts\Encryption\DecryptException;
 
-class permissionsController extends AdminController
+class PermissionsController extends AdminController
 {
     const INSERT_SUCCESS_MESSAGE = "نجاح، تم الإضافة بتجاح";
     const UPDATE_SUCCESS = "نجاح، تم التعديل بنجاح";

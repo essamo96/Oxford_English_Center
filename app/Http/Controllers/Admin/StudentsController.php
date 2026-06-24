@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\Students_Admin_Messages;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\SendMailToStudentsHasBirthday;
-use App\Notifications\adminStudentsNotification;
+use App\Notifications\AdminStudentsNotification;
 use App\Notifications\newAdminCreatedNotification;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Mpdf\Mpdf;
