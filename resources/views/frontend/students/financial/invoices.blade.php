@@ -204,6 +204,13 @@
 
 /* receipt zoom overlay is appended to <body> via JS */
 
+/* pay modal two-column layout */
+.pay-modal-grid { display: flex; gap: 24px; align-items: flex-start; }
+.pay-modal-col { flex: 1; min-width: 0; }
+@media (max-width: 640px) {
+    .pay-modal-grid { flex-direction: column; gap: 0; }
+}
+
 /* payment method buttons */
 .pm-btn.selected {
     border-color: #1a4a8a !important;
@@ -394,7 +401,7 @@
 {{-- Pay Modal --}}
 <div class="fin-modal-backdrop" id="payBackdrop"></div>
 <div class="fin-modal" id="payModal">
-    <div class="fin-modal-dialog" style="max-width:540px;">
+    <div class="fin-modal-dialog" style="max-width:760px;">
         <div class="fin-modal-head">
             <i class="bi bi-credit-card" style="color:#1a4a8a;font-size:1.2rem;"></i>
             <h5>إرسال دفعة</h5>
@@ -409,86 +416,93 @@
                 {{-- Invoice label --}}
                 <p id="payLabel" style="color:var(--d-muted,#64748b);font-size:.85rem;margin-bottom:16px;"></p>
 
-                {{-- Step 1: Choose payment method --}}
-                <div class="fin-form-group">
-                    <label class="fin-label">طريقة الدفع <span style="color:#dc2626;">*</span></label>
-                    <div id="pmethods" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
-                        @foreach($paymentMethods as $pm)
-                        @php $creds = is_string($pm->credentials) ? json_decode($pm->credentials, true) : (array)$pm->credentials; @endphp
-                        <button type="button"
-                                class="pm-btn"
-                                data-id="{{ $pm->id }}"
-                                data-creds="{{ json_encode($creds) }}"
-                                data-name="{{ $pm->name }}"
-                                data-img="{{ $pm->image ? asset('uploads/'.$pm->image) : '' }}"
-                                style="display:flex;align-items:center;gap:8px;
-                                       border:2px solid var(--d-border,#e2e8f0);
-                                       border-radius:10px;padding:10px 14px;
-                                       background:var(--d-card,#fff);cursor:pointer;
-                                       font-size:.86rem;font-weight:600;
-                                       color:var(--d-text,#1e293b);transition:all .18s;">
-                            @if($pm->image)
-                            <img src="{{ asset('uploads/'.$pm->image) }}" alt="{{ $pm->name }}"
-                                 style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-                            @else
-                            <i class="bi bi-bank" style="font-size:1.3rem;color:#1a4a8a;"></i>
-                            @endif
-                            {{ $pm->name }}
-                        </button>
-                        @endforeach
-                    </div>
-                    <div id="pmError" style="display:none;color:#dc2626;font-size:.78rem;margin-top:4px;">
-                        يرجى اختيار طريقة الدفع
-                    </div>
-                </div>
+                <div class="pay-modal-grid">
+                    {{-- Left column: payment method + credentials --}}
+                    <div class="pay-modal-col">
+                        <div class="fin-form-group">
+                            <label class="fin-label">طريقة الدفع <span style="color:#dc2626;">*</span></label>
+                            <div id="pmethods" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+                                @foreach($paymentMethods as $pm)
+                                @php $creds = is_string($pm->credentials) ? json_decode($pm->credentials, true) : (array)$pm->credentials; @endphp
+                                <button type="button"
+                                        class="pm-btn"
+                                        data-id="{{ $pm->id }}"
+                                        data-creds="{{ json_encode($creds) }}"
+                                        data-name="{{ $pm->name }}"
+                                        data-img="{{ $pm->image ? asset('uploads/'.$pm->image) : '' }}"
+                                        style="display:flex;align-items:center;gap:8px;
+                                               border:2px solid var(--d-border,#e2e8f0);
+                                               border-radius:10px;padding:10px 14px;
+                                               background:var(--d-card,#fff);cursor:pointer;
+                                               font-size:.86rem;font-weight:600;
+                                               color:var(--d-text,#1e293b);transition:all .18s;">
+                                    @if($pm->image)
+                                    <img src="{{ asset('uploads/'.$pm->image) }}" alt="{{ $pm->name }}"
+                                         style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
+                                    @else
+                                    <i class="bi bi-bank" style="font-size:1.3rem;color:#1a4a8a;"></i>
+                                    @endif
+                                    {{ $pm->name }}
+                                </button>
+                                @endforeach
+                            </div>
+                            <div id="pmError" style="display:none;color:#dc2626;font-size:.78rem;margin-top:4px;">
+                                يرجى اختيار طريقة الدفع
+                            </div>
+                        </div>
 
-                {{-- Required amount banner --}}
-                <div id="payRequiredBanner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;
-                     border-radius:10px;padding:12px 16px;margin-bottom:14px;
-                     display:flex;align-items:center;gap:10px;">
-                    <i class="bi bi-cash-coin" style="color:#059669;font-size:1.3rem;"></i>
-                    <div>
-                        <div style="font-size:.78rem;color:#6b7280;font-weight:500;">المبلغ المستحق عليك</div>
-                        <div id="payRequiredAmt" style="font-size:1.35rem;font-weight:800;color:#059669;letter-spacing:.5px;"></div>
-                    </div>
-                </div>
+                        {{-- Required amount banner --}}
+                        <div id="payRequiredBanner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;
+                             border-radius:10px;padding:12px 16px;margin-bottom:14px;
+                             align-items:center;gap:10px;">
+                            <i class="bi bi-cash-coin" style="color:#059669;font-size:1.3rem;"></i>
+                            <div>
+                                <div style="font-size:.78rem;color:#6b7280;font-weight:500;">المبلغ المستحق عليك</div>
+                                <div id="payRequiredAmt" style="font-size:1.35rem;font-weight:800;color:#059669;letter-spacing:.5px;"></div>
+                            </div>
+                        </div>
 
-                {{-- Credentials box — shown after method selected --}}
-                <div id="credsBox" style="display:none;background:linear-gradient(135deg,#0e2250,#1a4a8a);
-                     border-radius:12px;padding:16px 20px;color:#fff;margin-bottom:16px;">
-                    <div style="font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                        <i class="bi bi-info-circle-fill"></i>
-                        <span>بيانات الحوالة — <span id="credsMethodName"></span></span>
+                        {{-- Credentials box — shown after method selected --}}
+                        <div id="credsBox" style="display:none;background:linear-gradient(135deg,#0e2250,#1a4a8a);
+                             border-radius:12px;padding:16px 20px;color:#fff;">
+                            <div style="font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span>بيانات الحوالة — <span id="credsMethodName"></span></span>
+                            </div>
+                            <div id="credsContent" style="font-size:.95rem;line-height:2;"></div>
+                            <div style="margin-top:12px;font-size:.82rem;opacity:.85;border-top:1px solid rgba(255,255,255,.2);padding-top:10px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>
+                                أرسل الحوالة على البيانات أعلاه ثم ارفع صورة الإيصال أدناه.
+                            </div>
+                        </div>
                     </div>
-                    <div id="credsContent" style="font-size:.95rem;line-height:2;"></div>
-                    <div style="margin-top:12px;font-size:.82rem;opacity:.85;border-top:1px solid rgba(255,255,255,.2);padding-top:10px;">
-                        <i class="bi bi-exclamation-circle me-1"></i>
-                        أرسل الحوالة على البيانات أعلاه ثم ارفع صورة الإيصال أدناه.
+
+                    {{-- Right column: amount + receipt + notes --}}
+                    <div class="pay-modal-col">
+                        {{-- Amount --}}
+                        <div class="fin-form-group">
+                            <label class="fin-label">المبلغ المُرسَل <span style="color:#dc2626;">*</span></label>
+                            <div style="display:flex;align-items:center;gap:0;">
+                                <span style="background:var(--d-card-2,#f8fafc);border:1.5px solid var(--d-border,#d1d5db);border-right:none;border-radius:8px 0 0 8px;padding:9px 12px;font-size:.88rem;color:var(--d-muted,#64748b);">₪</span>
+                                <input type="number" name="amount_paid" id="payAmount" class="fin-input"
+                                       style="border-radius:0 8px 8px 0;font-size:1rem;font-weight:700;" step="0.01" min="0.01" required placeholder="0.00">
+                            </div>
+                            <div class="fin-hint" id="payRemaining" style="color:#dc2626;font-size:.8rem;margin-top:5px;"></div>
+                        </div>
+
+                        {{-- Receipt upload --}}
+                        <div class="fin-form-group">
+                            <label class="fin-label">إيصال الحوالة <span style="color:#dc2626;">*</span></label>
+                            <input type="file" name="receipt" class="fin-input" accept=".jpg,.jpeg,.png,.pdf" required style="padding:6px;">
+                            <div class="fin-hint">الصيغ المقبولة: JPG, PNG, PDF — الحد الأقصى 5MB</div>
+                        </div>
+
+                        {{-- Notes --}}
+                        <div class="fin-form-group" style="margin-bottom:0;">
+                            <label class="fin-label">ملاحظات للإدارة (اختياري)</label>
+                            <textarea name="notes" class="fin-input" rows="4" placeholder="أي ملاحظات إضافية..."></textarea>
+                        </div>
                     </div>
-                </div>
-
-                {{-- Amount --}}
-                <div class="fin-form-group">
-                    <label class="fin-label">المبلغ المُرسَل <span style="color:#dc2626;">*</span></label>
-                    <div style="display:flex;align-items:center;gap:0;">
-                        <span style="background:var(--d-card-2,#f8fafc);border:1.5px solid var(--d-border,#d1d5db);border-right:none;border-radius:8px 0 0 8px;padding:9px 12px;font-size:.88rem;color:var(--d-muted,#64748b);">₪</span>
-                        <input type="number" name="amount_paid" id="payAmount" class="fin-input"
-                               style="border-radius:0 8px 8px 0;font-size:1rem;font-weight:700;" step="0.01" min="0.01" required placeholder="0.00">
-                    </div>
-                    <div class="fin-hint" id="payRemaining" style="color:#dc2626;font-size:.8rem;margin-top:5px;"></div>
-                </div>
-
-                {{-- Receipt upload --}}
-                <div class="fin-form-group">
-                    <label class="fin-label">إيصال الحوالة <span style="color:#dc2626;">*</span></label>
-                    <input type="file" name="receipt" class="fin-input" accept=".jpg,.jpeg,.png,.pdf" required style="padding:6px;">
-                    <div class="fin-hint">الصيغ المقبولة: JPG, PNG, PDF — الحد الأقصى 5MB</div>
-                </div>
-
-                {{-- Notes --}}
-                <div class="fin-form-group">
-                    <label class="fin-label">ملاحظات للإدارة (اختياري)</label>
-                    <textarea name="notes" class="fin-input" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
                 </div>
             </div>
 
