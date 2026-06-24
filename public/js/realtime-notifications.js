@@ -314,11 +314,17 @@
             return;
         }
         if (CFG.broadcast_driver && CFG.broadcast_driver !== 'pusher') {
+            // Don't bail — this flag is read from config() and can be stale if
+            // `config:cache` was run before BROADCAST_DRIVER=pusher was set in .env
+            // (the exact same class of bug that broke route caching on this server).
+            // Attempting the connection anyway costs nothing: a real Pusher key still
+            // works, and a genuine misconfiguration fails loudly via the connection
+            // 'error' handler below instead of silently skipping setup entirely.
             console.warn(
-                '[RT] BROADCAST_DRIVER="' + CFG.broadcast_driver + '" — server will NOT broadcast events. ' +
-                'Set BROADCAST_DRIVER=pusher in .env and run: php artisan config:clear'
+                '[RT] BROADCAST_DRIVER reports "' + CFG.broadcast_driver + '" (possibly stale config cache) — ' +
+                'attempting Pusher connection anyway since a key is present. ' +
+                'If this is wrong, run: php artisan config:clear'
             );
-            return;
         }
         if (typeof window.Pusher === 'undefined') {
             console.warn('[RT] pusher-js not loaded — notifications disabled.');
