@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\CountersUpdated;
-use App\Events\StudentPaymentSubmittedBroadcast;
 use App\Models\GroupStudentsFees;
 use App\Models\PaymentMethods;
 use App\Models\StudentPaymentSubmission;
-use App\Models\User;
-use App\Notifications\StudentPaymentSubmittedNotification;
 use App\Services\FinancialService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -172,35 +168,18 @@ class StudentFinancialController extends Controller
             ]);
         });
 
-        // Notify branch admins (database + Pusher counter update)
-        $branchId = $student->branch_id;
-        $admins   = $branchId
-            ? User::where('branch_id', $branchId)->get()
-            : User::whereNull('branch_id')->get();
-
-        foreach ($admins as $admin) {
-            try {
-                $admin->notify(new StudentPaymentSubmittedNotification($submission));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedNotification failed: ' . $e->getMessage());
-            }
-        }
-
-        try {
-            broadcast(new CountersUpdated($branchId));
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[RT] CountersUpdated broadcast failed (submitPayment): ' . $e->getMessage());
-        }
-        try {
-            broadcast(new StudentPaymentSubmittedBroadcast(
-                branchId:    $branchId ?? 0,
-                studentName: $student->name ?? '',
-                amount:      (float) $request->amount_paid,
-                link:        url('admin/financial/student-payments'),
-            ));
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedBroadcast failed: ' . $e->getMessage());
-        }
+        // Notify branch admins AFTER the response is sent to the student — the DB notify()
+        // loop and the two synchronous Pusher HTTP calls were what made "تأكيد الدفع" feel slow.
+        // afterResponse() runs in the same PHP process right after the response is flushed to
+        // the browser, so the student sees the success page instantly and admins still get the
+        // real-time toast a moment later — no queue worker required.
+        \App\Jobs\NotifyAdminsOfStudentPayment::dispatch(
+            $submission,
+            $student->branch_id,
+            $student->name ?? '',
+            (float) $request->amount_paid,
+            url('admin/financial/student-payments'),
+        )->afterResponse();
 
         return back()->with('fin_success', 'تم إرسال طلب الدفع بنجاح. سيتم مراجعته من قبل الإدارة وستصلك إشعار بالنتيجة.');
     }

@@ -202,7 +202,8 @@
             scheme:           @json(env('PUSHER_PUBLIC_SCHEME', config('broadcasting.connections.pusher.options.scheme', 'https'))),
             cluster:          @json(config('broadcasting.connections.pusher.options.cluster', 'mt1')),
             branch_id:        @json(auth()->guard('admin')->user()?->branch_id),
-            broadcast_driver: @json(config('broadcasting.default'))
+            broadcast_driver: @json(config('broadcasting.default')),
+            locale:           @json(app()->getLocale())
         };
     </script>
     <script src="{{ asset('js/realtime-notifications.js') }}?v=5"></script>

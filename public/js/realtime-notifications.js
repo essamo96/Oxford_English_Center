@@ -10,6 +10,27 @@
     'use strict';
 
     var CFG = window.OXFORD_RT || {};
+    var IS_RTL = (CFG.locale || 'ar') !== 'en';
+    var DIR    = IS_RTL ? 'rtl' : 'ltr';
+
+    var I18N = {
+        ar: {
+            payment_title:  'دفعة جديدة',
+            payment_review: 'بانتظار مراجعتك في قائمة الطلبات المالية',
+            student_fallback: 'طالب',
+            now: 'الآن'
+        },
+        en: {
+            payment_title:  'New payment',
+            payment_review: 'Awaiting your review in the payment requests list',
+            student_fallback: 'Student',
+            now: 'Now'
+        }
+    };
+    function t(key) {
+        var dict = I18N[IS_RTL ? 'ar' : 'en'];
+        return dict[key] || key;
+    }
 
     /* ------------------------------------------------------------------ *
      * 🔊 Sound Manager — synthesized chimes via the Web Audio API
@@ -73,9 +94,10 @@
             if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.id = 'rt-notification-container';
+                var sideProp = IS_RTL ? 'left' : 'right';
                 this.container.style.cssText =
-                    'position:fixed;top:20px;left:20px;z-index:99999;display:flex;' +
-                    'flex-direction:column;gap:12px;max-width:380px;width:100%;direction:rtl;';
+                    'position:fixed;top:20px;' + sideProp + ':20px;z-index:99999;display:flex;' +
+                    'flex-direction:column;gap:12px;max-width:380px;width:100%;direction:' + DIR + ';';
                 document.body.appendChild(this.container);
             }
         },
@@ -102,16 +124,20 @@
                 payment: { bg: '#92400e', border: '#f59e0b' }
             };
             var c = colors[data.type] || colors.booking;
+            var accentSide = IS_RTL ? 'border-right' : 'border-left';
+            var offscreenX = IS_RTL ? '100px' : '-100px';
 
             var toast = document.createElement('div');
             toast.setAttribute('data-toast', '');
+            toast.setAttribute('dir', DIR);
             toast.style.cssText =
                 'background:linear-gradient(135deg,' + c.bg + ',' + c.bg + 'dd);' +
-                'border:1px solid ' + c.border + ';border-right:4px solid ' + c.border + ';' +
+                'border:1px solid ' + c.border + ';' + accentSide + ':4px solid ' + c.border + ';' +
                 'border-radius:12px;padding:16px;color:#fff;font-family:Cairo,sans-serif;' +
                 'box-shadow:0 20px 60px rgba(0,0,0,.4);opacity:0;' +
-                'transform:translateX(-100px) scale(.9);' +
+                'transform:translateX(' + offscreenX + ') scale(.9);' +
                 'transition:all .4s cubic-bezier(.175,.885,.32,1.275);' +
+                'direction:' + DIR + ';' +
                 'cursor:pointer;position:relative;overflow:hidden;';
 
             var meta = '';
@@ -155,7 +181,7 @@
             if (!toast || toast._gone) { return; }
             toast._gone = true;
             toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-100px) scale(.9)';
+            toast.style.transform = 'translateX(' + (IS_RTL ? '100px' : '-100px') + ') scale(.9)';
             setTimeout(function () { if (toast.parentNode) { toast.remove(); } }, 400);
         },
 
@@ -385,16 +411,16 @@
         });
         channel.bind('student.payment.submitted', function (data) {
             SoundManager.play('payment');
-            var name   = data.student_name || 'طالب';
+            var name   = data.student_name || t('student_fallback');
             var amount = data.amount ? '₪ ' + parseFloat(data.amount).toFixed(2) : '';
             NotificationManager.show({
                 type:    'payment',
                 sound:   null, // already played above
                 icon:    '💳',
-                message: 'دفعة جديدة — ' + esc(name) + (amount ? ' (' + amount + ')' : ''),
-                preview: 'بانتظار مراجعتك في قائمة الطلبات المالية',
+                message: t('payment_title') + ' — ' + esc(name) + (amount ? ' (' + amount + ')' : ''),
+                preview: t('payment_review'),
                 link:    data.link || null,
-                created_at: 'الآن'
+                created_at: t('now')
             });
             // Increment pending_student_payments counter immediately
             document.querySelectorAll('[data-live-counter="pending_student_payments"]').forEach(function (el) {
