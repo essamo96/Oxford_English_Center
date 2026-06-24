@@ -16,6 +16,7 @@ class NotificationCounterService
             'teacher_messages'         => NotifyCounts::unreadTeacherMessages($branchId),
             'closed_classes'           => NotifyCounts::closedClasses($branchId),
             'pending_student_payments' => NotifyCounts::pendingStudentPayments($branchId),
+            'pending_financial_orders' => NotifyCounts::pendingFinancialOrders($branchId),
         ];
     }
 }

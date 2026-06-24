@@ -600,6 +600,10 @@
                         <a href="{{ route('admin.financial.pending') }}" class="nav-link nav-toggle">
                             <i class="bi bi-hourglass-split"></i>
                             <span class="title">الطلبات المالية المعلقة</span>
+                            @php $pendingFinOrders = \App\Support\NotifyCounts::pendingFinancialOrders(auth()->user()->branch_id ?? null); @endphp
+                            <span class="menu-badge" style="display:{{ $pendingFinOrders > 0 ? 'inline-flex' : 'none' }};align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:0 5px;margin-right:6px;">
+                                <span data-live-counter="pending_financial_orders">{{ $pendingFinOrders }}</span>
+                            </span>
                             <span class="arrow"></span>
                         </a>
                     </li>

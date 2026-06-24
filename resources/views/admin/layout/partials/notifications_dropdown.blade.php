@@ -31,7 +31,19 @@
                 <span class="badge badge-light-danger fs-8">تنبيه</span>
             </div>
             @endforeach
-            @if(count($nd['notify_students'])==0 && count($nd['notify_closed_clases'])==0)
+            @foreach($nd['notify_student_payments'] as $pay)
+            <div class="d-flex flex-stack py-4">
+                <div class="d-flex align-items-center">
+                    <div class="symbol symbol-35px me-4"><span class="symbol-label bg-light-success"><i class="ki-duotone ki-dollar fs-2 text-success"><span class="path1"></span><span class="path2"></span></i></span></div>
+                    <div class="mb-0 me-2">
+                        <a href="{{ route('admin.financial.student-payments') }}" class="fs-6 text-gray-800 text-hover-info fw-bold">دفعة جديدة: {{ $pay->student->name ?? 'طالب' }}</a>
+                        <div class="text-gray-400 fs-7">₪ {{ number_format($pay->amount_paid, 2) }} — {{ $pay->group->name ?? 'خارج المجموعة' }}</div>
+                    </div>
+                </div>
+                <span class="badge badge-light-success fs-8">{{ $pay->created_at->diffForHumans() }}</span>
+            </div>
+            @endforeach
+            @if(count($nd['notify_students'])==0 && count($nd['notify_closed_clases'])==0 && count($nd['notify_student_payments'])==0)
             <div class="text-center py-8 text-gray-400 fs-7">لا توجد تنبيهات</div>
             @endif
         </div>

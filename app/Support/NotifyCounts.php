@@ -76,6 +76,16 @@ class NotifyCounts
         return $q->count();
     }
 
+    /** Pending financial orders (unverified fee rows) shown on "الطلبات المالية المعلقة". */
+    public static function pendingFinancialOrders(?int $branchId = null): int
+    {
+        $q = \App\Models\GroupStudentsFees::where('audit_status', 'pending')->whereNull('deleted_at');
+        if ($branchId) {
+            $q->whereHas('student', fn($s) => $s->where('branch_id', $branchId));
+        }
+        return $q->count();
+    }
+
     /** Grand total shown on the header bell badge. */
     public static function total(?int $branchId = null): int
     {
@@ -95,6 +105,7 @@ class NotifyCounts
         $contactsCount = self::unreadContacts();
         $studentMsgs   = self::unreadStudentMessages($branchId);
         $teacherMsgs   = self::unreadTeacherMessages($branchId);
+        $paymentsCount = self::pendingStudentPayments($branchId);
 
         $closedQ = Closed_Classes::with(['Teacher', 'Groups'])->where('seen', 0)->whereNull('deleted_at');
         if ($branchId) $closedQ->whereHas('Groups', fn($g) => $g->where('branch_id', $branchId));
@@ -115,13 +126,19 @@ class NotifyCounts
         $groupsQ = Groups::where('seen_progress', 0)->where('progress', '!=', 0)->whereNull('deleted_at');
         if ($branchId) $groupsQ->where('branch_id', $branchId);
 
+        $paymentsQ = StudentPaymentSubmission::where('status', 'pending')->whereNull('deleted_at')->with('student', 'group');
+        if ($branchId) {
+            $paymentsQ->whereHas('student', fn($s) => $s->where('branch_id', $branchId));
+        }
+
         return [
             'Closed_Classes_count'           => $closedCount,
             'Unseen_Students_Count'          => $studentsCount,
             'Unseen_Contacts_Count'          => $contactsCount,
             'Unread_measges_student'         => $studentMsgs,
             'Unread_measges_teacher'         => $teacherMsgs,
-            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs,
+            'Pending_Student_Payments_Count' => $paymentsCount,
+            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs + $paymentsCount,
             'total_teachers_students_measge' => $studentMsgs + $teacherMsgs,
             'notify_closed_clases'           => $closedQ->latest()->take(5)->get(),
             'notify_students'                => $studentsQ->latest()->take(5)->get(),
@@ -129,6 +146,7 @@ class NotifyCounts
             'notify_Teachers_Admin_Messages' => $teacherMsgsQ->latest()->take(5)->get(),
             'notify_Groups'                  => $groupsQ->latest()->take(5)->get(),
             'notify_contacts'                => Contacts::where('status', 0)->latest()->take(5)->get(),
+            'notify_student_payments'        => $paymentsQ->latest()->take(5)->get(),
         ];
     }
 }

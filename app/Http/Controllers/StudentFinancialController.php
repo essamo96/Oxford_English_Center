@@ -179,7 +179,11 @@ class StudentFinancialController extends Controller
             : User::whereNull('branch_id')->get();
 
         foreach ($admins as $admin) {
-            $admin->notify(new StudentPaymentSubmittedNotification($submission));
+            try {
+                $admin->notify(new StudentPaymentSubmittedNotification($submission));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedNotification failed: ' . $e->getMessage());
+            }
         }
 
         try {

@@ -227,6 +227,7 @@
             var totalMessages = (parseInt(counters.student_messages, 10) || 0) + (parseInt(counters.teacher_messages, 10) || 0);
 
             var pendingPayments = parseInt(counters.pending_student_payments, 10) || 0;
+            var pendingFinOrders = parseInt(counters.pending_financial_orders, 10) || 0;
 
             var map = {
                 'pending_requests':        pendingRequests,
@@ -235,7 +236,8 @@
                 'total_messages':          totalMessages,
                 'student_messages':        parseInt(counters.student_messages, 10) || 0,
                 'teacher_messages':        parseInt(counters.teacher_messages, 10) || 0,
-                'pending_student_payments': pendingPayments
+                'pending_student_payments': pendingPayments,
+                'pending_financial_orders': pendingFinOrders
             };
 
             Object.keys(map).forEach(function (key) {
