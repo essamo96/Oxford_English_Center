@@ -153,6 +153,10 @@ class FinancialService
                 'paid'       => $net,
                 'credit'     => $credit,
                 'remaining'  => $totalFee <= 0 ? 0.0 : max(0, $totalFee - $net),
+                // A fee row can be 'pending' (awaiting admin review) without a matching
+                // StudentPaymentSubmission being found (e.g. legacy/manually-created rows) —
+                // the invoices view must not offer the pay button again in that case.
+                'has_pending_fee' => $bucketRows->contains(fn ($r) => $r->audit_status === 'pending'),
                 'rows'       => $bucketRows,
             ];
         }

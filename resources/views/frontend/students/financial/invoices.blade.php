@@ -274,6 +274,7 @@
         $bucketKey = $bucket['group_id'] ?? 'pre_group';
         $pending   = $pendingSubmissions[$bucketKey] ?? null;
         $hasBalance = $bucket['remaining'] > 0;
+        $hasPendingFee = !$pending && ($bucket['has_pending_fee'] ?? false);
     @endphp
     <div class="inv-bucket {{ $hasBalance ? 'has-balance' : '' }}"
          data-bucket-key="{{ $bucketKey }}">
@@ -314,6 +315,14 @@
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-cancel-small"><i class="bi bi-x"></i> إلغاء</button>
                 </form>
+            </div>
+            <div data-bucket-action style="display:none;"></div>
+        @elseif($hasPendingFee)
+            <div class="pending-review-status">
+                <div class="prv-icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="prv-body">
+                    <div class="prv-title">⏳ قيد التدقيق — بانتظار موافقة الإدارة</div>
+                </div>
             </div>
             <div data-bucket-action style="display:none;"></div>
         @elseif($hasBalance)
