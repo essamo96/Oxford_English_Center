@@ -229,7 +229,7 @@
             }
         },
 
-        updateLiveCounters: function (counters) {
+        updateLiveCounters: function (counters, branchBreakdown) {
             if (!counters) return;
 
             // 1. Update notify-total (header bell)
@@ -265,20 +265,35 @@
                 'student_messages':        parseInt(counters.student_messages, 10) || 0,
                 'teacher_messages':        parseInt(counters.teacher_messages, 10) || 0,
                 'pending_student_payments': pendingPayments,
-                'pending_financial_orders': pendingFinOrders
+                'pending_financial_orders': pendingFinOrders,
+                // Aggregate badge on the "الإدارة المالية" parent menu item — sum of both
+                // pending-fee-order and student-payment-submission counts, same scope as
+                // its two children (branch-scoped for branch admins, grand total for super admin).
+                'financial_total':          pendingPayments + pendingFinOrders
             };
 
             Object.keys(map).forEach(function (key) {
                 var value = map[key];
                 document.querySelectorAll('[data-live-counter="' + key + '"]').forEach(function (el) {
                     NotificationManager.animateCounter(el, parseInt(el.textContent || '0', 10) || 0, value);
-                    
+
                     var badgeWrapper = el.closest('.menu-badge');
                     if (badgeWrapper) {
                         badgeWrapper.style.display = value > 0 ? 'inline-block' : 'none';
                     }
                 });
             });
+
+            // Super-admin tooltip: per-branch breakdown of the parent badge total, kept fresh
+            // in real time so they know which branch a new pending item belongs to.
+            if (branchBreakdown && branchBreakdown.length) {
+                var parentBadge = document.querySelector('[data-financial-parent-badge]');
+                if (parentBadge) {
+                    parentBadge.title = branchBreakdown.map(function (b) {
+                        return b.name + ': ' + b.count;
+                    }).join(' | ');
+                }
+            }
         },
 
         animateCounter: function (el, from, to) {
@@ -404,8 +419,13 @@
         channel.bind('new.contact', function (data) { NotificationManager.show(data); refreshDropdown(); });
         channel.bind('counters.updated', function (data) {
             if (data && data.counters) {
-                console.log('[RT] counters updated', data.counters);
-                NotificationManager.updateLiveCounters(data.counters);
+                // Branch admins use the branch-scoped counters (data.counters); the super
+                // admin (no branch_id) uses the grand total across all branches instead —
+                // both are bundled in every payload since broadcastWith() can't vary per
+                // channel and this event now reaches both the global and branch channels.
+                var scoped = CFG.branch_id ? data.counters : (data.counters_global || data.counters);
+                console.log('[RT] counters updated', scoped);
+                NotificationManager.updateLiveCounters(scoped, data.branch_breakdown);
                 refreshDropdown();
             }
         });
@@ -422,12 +442,15 @@
                 link:    data.link || null,
                 created_at: t('now')
             });
-            // Increment pending_student_payments counter immediately
-            document.querySelectorAll('[data-live-counter="pending_student_payments"]').forEach(function (el) {
-                var n = (parseInt(el.textContent, 10) || 0) + 1;
-                NotificationManager.animateCounter(el, parseInt(el.textContent, 10) || 0, n);
-                var badge = el.closest('.menu-badge');
-                if (badge) badge.style.display = 'inline-block';
+            // Increment pending_student_payments AND the parent "financial_total" badge
+            // immediately, before the slightly-later counters.updated event lands.
+            ['pending_student_payments', 'financial_total'].forEach(function (key) {
+                document.querySelectorAll('[data-live-counter="' + key + '"]').forEach(function (el) {
+                    var n = (parseInt(el.textContent, 10) || 0) + 1;
+                    NotificationManager.animateCounter(el, parseInt(el.textContent, 10) || 0, n);
+                    var badge = el.closest('.menu-badge');
+                    if (badge) badge.style.display = 'inline-block';
+                });
             });
             refreshDropdown();
         });

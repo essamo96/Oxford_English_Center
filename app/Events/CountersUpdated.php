@@ -14,12 +14,20 @@ class CountersUpdated implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public array $counters;
+    public array $globalCounters;
+    public array $branchBreakdown;
     private ?int $branchId;
 
     public function __construct(?int $branchId = null)
     {
         $this->branchId = $branchId;
-        $this->counters = NotificationCounterService::getAllCounters($branchId);
+        // Branch-scoped counters (consumed by that branch's admins) AND grand-total counters
+        // (consumed by the super admin, branch_id=null) are both computed here and bundled in
+        // one payload — broadcastWith() can't vary per channel, and this event now reaches both
+        // the branch channel and the global channel in a single broadcast() call.
+        $this->counters       = NotificationCounterService::getAllCounters($branchId);
+        $this->globalCounters = NotificationCounterService::getAllCounters(null);
+        $this->branchBreakdown = NotificationCounterService::branchFinancialBreakdown();
     }
 
     public function broadcastOn(): array
@@ -45,8 +53,10 @@ class CountersUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'type'     => 'counters_update',
-            'counters' => $this->counters
+            'type'             => 'counters_update',
+            'counters'         => $this->counters,
+            'counters_global'  => $this->globalCounters,
+            'branch_breakdown' => $this->branchBreakdown,
         ];
     }
 }

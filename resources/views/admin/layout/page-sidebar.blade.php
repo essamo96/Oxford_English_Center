@@ -592,6 +592,21 @@
                 <a href="javascript:void(0);" class="nav-link nav-toggle">
                     <i class="bi bi-cash-stack"></i>
                     <span class="title">الإدارة المالية</span>
+                    @php
+                        $viewerBranchId  = auth()->user()->branch_id ?? null;
+                        $financialTotal  = \App\Support\NotifyCounts::pendingFinancialOrders($viewerBranchId)
+                                          + \App\Support\NotifyCounts::pendingStudentPayments($viewerBranchId);
+                        // Super admin (no branch) also gets a per-branch breakdown in the tooltip
+                        // so they know which branch the aggregated number belongs to.
+                        $financialBreakdownTitle = $viewerBranchId ? '' : collect(
+                            \App\Services\NotificationCounterService::branchFinancialBreakdown()
+                        )->map(fn ($b) => $b['name'] . ': ' . $b['count'])->implode(' | ');
+                    @endphp
+                    <span class="menu-badge" data-financial-parent-badge
+                          style="display:{{ $financialTotal > 0 ? 'inline-flex' : 'none' }};align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:0 5px;margin-right:6px;"
+                          @if($financialBreakdownTitle) title="{{ $financialBreakdownTitle }}" @endif>
+                        <span data-live-counter="financial_total">{{ $financialTotal }}</span>
+                    </span>
                     <span class="arrow"></span>
                 </a>
                 <ul class="sub-menu">
