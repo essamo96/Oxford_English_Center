@@ -168,18 +168,41 @@ class StudentFinancialController extends Controller
             ]);
         });
 
-        // Notify branch admins AFTER the response is sent to the student — the DB notify()
-        // loop and the two synchronous Pusher HTTP calls were what made "تأكيد الدفع" feel slow.
-        // afterResponse() runs in the same PHP process right after the response is flushed to
-        // the browser, so the student sees the success page instantly and admins still get the
-        // real-time toast a moment later — no queue worker required.
-        \App\Jobs\NotifyAdminsOfStudentPayment::dispatch(
-            $submission,
-            $student->branch_id,
-            $student->name ?? '',
-            (float) $request->amount_paid,
-            url('admin/financial/student-payments'),
-        )->afterResponse();
+        // Notify branch admins — mirrors the exact pattern used in
+        // StudentPaymentRequestsController::approve() (the admin→student direction that is
+        // confirmed working in production): database notification is synchronous so the bell
+        // count is correct even without a queue worker, and broadcast() calls are fired
+        // synchronously right here (not deferred to ->afterResponse()/a queued job) so they
+        // are guaranteed to run in every server configuration, instead of depending on a
+        // PHP "terminate" callback that some FPM/hosting setups may not invoke reliably.
+        $branchId = $student->branch_id;
+        $admins   = $branchId
+            ? \App\Models\User::where('branch_id', $branchId)->get()
+            : \App\Models\User::whereNull('branch_id')->get();
+
+        foreach ($admins as $admin) {
+            try {
+                $admin->notify(new \App\Notifications\StudentPaymentSubmittedNotification($submission));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedNotification failed: ' . $e->getMessage());
+            }
+        }
+
+        try {
+            broadcast(new \App\Events\CountersUpdated($branchId));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] CountersUpdated broadcast failed (submitPayment): ' . $e->getMessage());
+        }
+        try {
+            broadcast(new \App\Events\StudentPaymentSubmittedBroadcast(
+                branchId:    $branchId ?? 0,
+                studentName: $student->name ?? '',
+                amount:      (float) $request->amount_paid,
+                link:        url('admin/financial/student-payments'),
+            ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[RT] StudentPaymentSubmittedBroadcast failed: ' . $e->getMessage());
+        }
 
         return back()->with('fin_success', 'تم إرسال طلب الدفع بنجاح. سيتم مراجعته من قبل الإدارة وستصلك إشعار بالنتيجة.');
     }

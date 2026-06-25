@@ -153,10 +153,16 @@ class FinancialService
                 'paid'       => $net,
                 'credit'     => $credit,
                 'remaining'  => $totalFee <= 0 ? 0.0 : max(0, $totalFee - $net),
-                // A fee row can be 'pending' (awaiting admin review) without a matching
-                // StudentPaymentSubmission being found (e.g. legacy/manually-created rows) —
-                // the invoices view must not offer the pay button again in that case.
-                'has_pending_fee' => $bucketRows->contains(fn ($r) => $r->audit_status === 'pending'),
+                // A fee row can be 'pending' for two very different reasons: (1) the admin just
+                // created a fresh unpaid invoice (enrollment/branching) — student_fee_paid=0,
+                // no receipt, student hasn't acted yet → pay button MUST show; or (2) the
+                // student already submitted a payment (receipt attached) awaiting admin review,
+                // possibly without a matching StudentPaymentSubmission row (legacy/manual rows)
+                // → pay button must NOT show again. payment_receipt is only ever set once money
+                // has actually been submitted, so it's the reliable signal between the two.
+                'has_pending_fee' => $bucketRows->contains(
+                    fn ($r) => $r->audit_status === 'pending' && !empty($r->payment_receipt)
+                ),
                 'rows'       => $bucketRows,
             ];
         }
