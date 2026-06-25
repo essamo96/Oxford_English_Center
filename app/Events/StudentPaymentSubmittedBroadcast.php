@@ -19,11 +19,17 @@ class StudentPaymentSubmittedBroadcast implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
-        $channel = $this->branchId
-            ? 'admin-notifications-branch-' . $this->branchId
-            : 'admin-notifications';
+        // Same dual-channel pattern as NewBookingEvent: always include the global channel
+        // (super admins with branch_id=null subscribe to it and must see every branch's
+        // activity) plus the branch-specific channel when one applies (so that branch's
+        // admins also get it on their own channel).
+        $channels = [new Channel('admin-notifications')];
 
-        return [new Channel($channel)];
+        if ($this->branchId) {
+            $channels[] = new Channel('admin-notifications-branch-' . $this->branchId);
+        }
+
+        return $channels;
     }
 
     public function broadcastAs(): string

@@ -24,11 +24,17 @@ class CountersUpdated implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
+        // Same dual-channel pattern as NewBookingEvent: always include the global channel
+        // (super admins with branch_id=null subscribe to it and must see every branch's
+        // activity) plus the branch-specific channel when one applies (so that branch's
+        // admins also get it on their own channel).
+        $channels = [new Channel('admin-notifications')];
+
         if ($this->branchId) {
-            return [new Channel('admin-notifications-branch-' . $this->branchId)];
+            $channels[] = new Channel('admin-notifications-branch-' . $this->branchId);
         }
 
-        return [new Channel('admin-notifications')];
+        return $channels;
     }
 
     public function broadcastAs(): string
