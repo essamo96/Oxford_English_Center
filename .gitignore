@@ -10,8 +10,6 @@ yarn-error.log
 .env
 *.lock
 /nbproject/private/
-/storage/logs
-/storage/framework
 *.zip
 *.rar
 *.mp4
