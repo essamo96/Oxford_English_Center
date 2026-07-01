@@ -9,6 +9,21 @@
                     <span class="arrow"></span>
                 </a>
             </li>
+
+            <!-- Standalone Registrations -->
+            @php
+                $standalone_unread = \App\Models\StudentCompo::where('is_read', false)->count();
+            @endphp
+            <li class="nav-item {{ Route::currentRouteName() == 'admin.standalone_registrations.index' ? 'active' : '' }}">
+                <a href="{{ route('admin.standalone_registrations.index') }}" class="nav-link">
+                    <i class="icon-user-follow"></i>
+                    <span class="title">طلبات تسجيل (Oxford)</span>
+                    @if ($standalone_unread > 0)
+                        <span class="badge badge-success" style="margin-right: 10px;">{{ $standalone_unread }}</span>
+                    @endif
+                </a>
+            </li>
+            <!-- End Standalone Registrations -->
             <li class="nav-item {{ $active_menu == 'memberships' ? 'active' : '' }}">
                 <a href="javascript:void(0);" class="nav-link nav-toggle">
                     <i class="icon-settings"></i>
@@ -439,19 +454,7 @@
                             <span class="arrow"></span>
                         </a>
                     </li>
-                    @if (auth()->user()->can('admin.fees.view') ||
-                    auth()->user()->can('admin.fees.add') ||
-                    auth()->user()->can('admin.fees.edit') ||
-                    auth()->user()->can('admin.fees.delete') ||
-                    auth()->user()->can('admin.fees.status'))
-                    <li class="nav-item {{ $active_menu == 'fees' ? 'active' : '' }}">
-                        <a href="{{ route('fees.view') }}" class="nav-link nav-toggle">
-                            <i class="icon-book-open"></i>
-                            <span class="title">الرسوم</span>
-                            <span class="arrow"></span>
-                        </a>
-                    </li>
-                    @endif
+
                     <!--                    @if (auth()->user()->can('admin.files.view') ||
                             auth()->user()->can('admin.files.add') ||
                             auth()->user()->can('admin.files.edit') ||
@@ -587,8 +590,9 @@
             {{-- ===== الإدارة المالية ===== --}}
             @if (auth()->user()->can('admin.financial.view') ||
                 auth()->user()->can('admin.financial.verify') ||
-                auth()->user()->can('admin.financial.refund'))
-            <li class="nav-item {{ in_array($active_menu, ['financial', 'financial_fees', 'student_payments']) ? 'active' : '' }}">
+                auth()->user()->can('admin.financial.refund') ||
+                auth()->user()->can('admin.fees.view'))
+            <li class="nav-item {{ in_array($active_menu, ['financial', 'financial_fees', 'student_payments', 'fees']) ? 'active' : '' }}">
                 <a href="javascript:void(0);" class="nav-link nav-toggle">
                     <i class="bi bi-cash-stack"></i>
                     <span class="title">الإدارة المالية</span>
@@ -610,6 +614,19 @@
                     <span class="arrow"></span>
                 </a>
                 <ul class="sub-menu">
+                    @if (auth()->user()->can('admin.fees.view') ||
+                    auth()->user()->can('admin.fees.add') ||
+                    auth()->user()->can('admin.fees.edit') ||
+                    auth()->user()->can('admin.fees.delete') ||
+                    auth()->user()->can('admin.fees.status'))
+                    <li class="nav-item {{ $active_menu == 'fees' ? 'active' : '' }}">
+                        <a href="{{ route('fees.view') }}" class="nav-link nav-toggle">
+                            <i class="bi bi-wallet2"></i>
+                            <span class="title">إدارة الرسوم</span>
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    @endif
                     @can('admin.financial.view')
                     <li class="nav-item {{ $active_menu == 'financial' ? 'active' : '' }}">
                         <a href="{{ route('admin.financial.pending') }}" class="nav-link nav-toggle">
@@ -639,14 +656,20 @@
                             <span class="arrow"></span>
                         </a>
                     </li>
+                    @endcan
+
+                    @if (auth()->user()->can('admin.fees.view') ||
+                    auth()->user()->can('admin.fees.add') ||
+                    auth()->user()->can('admin.fees.edit') ||
+                    auth()->user()->can('admin.fees.delete') ||
+                    auth()->user()->can('admin.fees.status'))
                     <li class="nav-item {{ $active_menu == 'financial_fees' ? 'active' : '' }}">
-                        <a href="{{ route('admin.financial.fees') }}" class="nav-link nav-toggle">
+                        <a href="{{ route('admin.financial.fees') }}" class="nav-link">
                             <i class="bi bi-sliders"></i>
                             <span class="title">إعدادات أنواع الرسوم</span>
-                            <span class="arrow"></span>
                         </a>
                     </li>
-                    @endcan
+                    @endif
                 </ul>
             </li>
             @endif

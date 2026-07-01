@@ -65,6 +65,62 @@
                 @endif
                 <!--end::Branch Indicator-->
 
+                <!--begin::Combo Requests Notifications-->
+                @php
+                    $standalone_unread = \App\Models\StudentCompo::where('is_read', false)->count();
+                    $standalone_recent = \App\Models\StudentCompo::where('is_read', false)->orderBy('created_at', 'desc')->take(5)->get();
+                @endphp
+                <div class="app-navbar-item ms-1 ms-md-3">
+                    <div class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-30px h-30px w-md-40px h-md-40px position-relative" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                        <i class="ki-duotone ki-user-edit fs-2">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                        </i>
+                        @if ($standalone_unread > 0)
+                            <span class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink combo-badge-dot"></span>
+                            <span class="rt-bell-badge combo-badge-count">{{ $standalone_unread }}</span>
+                        @endif
+                    </div>
+                    
+                    <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">
+                        <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-color: #0A2540;">
+                            <h3 class="text-white fw-semibold px-9 mt-10 mb-6">طلبات كومبو
+                            <span class="fs-8 opacity-75 ps-3 combo-badge-count">{{ $standalone_unread }} طلبات جديدة</span></h3>
+                        </div>
+                        <div class="scroll-y mh-325px my-5 px-8">
+                            @if($standalone_unread > 0)
+                                <div class="text-end mb-2">
+                                    <a href="javascript:;" class="mark-all-combo-read fs-8 fw-bold text-primary">تحديد الكل كمقروء</a>
+                                </div>
+                            @endif
+                            @forelse ($standalone_recent as $item)
+                                <div class="d-flex flex-stack py-4" id="combo_notif_item_{{ $item->id }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="symbol symbol-35px me-4">
+                                            <span class="symbol-label bg-light-success">
+                                                <i class="ki-duotone ki-user fs-2 text-success"><span class="path1"></span><span class="path2"></span></i>
+                                            </span>
+                                        </div>
+                                        <div class="mb-0 me-2">
+                                            <a href="{{ route('standalone_registrations.view') }}" class="fs-6 text-gray-800 text-hover-primary fw-bold mark-single-combo-read" data-id="{{ $item->id }}">
+                                                {{ $item->full_name_ar }}
+                                            </a>
+                                            <div class="text-gray-500 fs-7">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-5">
+                                    <span class="text-muted">لا يوجد طلبات تسجيل جديدة</span>
+                                </div>
+                            @endforelse
+                        </div>
+                        <div class="py-3 text-center border-top">
+                            <a href="{{ route('standalone_registrations.view') }}" class="btn btn-color-gray-600 btn-active-color-primary">عرض كل الطلبات <i class="ki-duotone ki-arrow-left fs-5"><span class="path1"></span><span class="path2"></span></i></a>
+                        </div>
+                    </div>
+                </div>
+                <!--end::Combo Requests Notifications-->
+
                 <!--begin::Notifications-->
                 <div class="app-navbar-item ms-1 ms-md-3">
                     <div class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-30px h-30px w-md-40px h-md-40px position-relative" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
@@ -139,3 +195,45 @@
 </div>
 <!--end::Header-->
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const markAllBtn = document.querySelector('.mark-all-combo-read');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch("{{ route('admin.standalone_registrations.markAllAsRead') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(r => r.json()).then(res => {
+                if(res.success) {
+                    document.querySelectorAll('.combo-badge-count').forEach(el => {
+                        if (el.tagName === 'SPAN' && el.classList.contains('rt-bell-badge')) {
+                            el.style.display = 'none';
+                        } else if (el.tagName === 'SPAN') {
+                            el.innerText = '0 طلبات جديدة';
+                        }
+                    });
+                    document.querySelectorAll('.combo-badge-dot').forEach(el => el.remove());
+                    document.querySelectorAll('[id^="combo_notif_item_"]').forEach(el => el.remove());
+                }
+            });
+        });
+    }
+
+    const singleItems = document.querySelectorAll('.mark-single-combo-read');
+    singleItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            const id = this.getAttribute('data-id');
+            fetch(`{{ url('admin/standalone-registrations/mark-read') }}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+        });
+    });
+});
+</script>

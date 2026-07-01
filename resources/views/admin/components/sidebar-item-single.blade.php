@@ -21,7 +21,9 @@
                         <span class="path3"></span><span class="path4"></span>
                     </i>
                 </span>
-                <span class="menu-title">{{ $item->name_ar ?? $item->name }}</span>
+                <span class="menu-title">
+                    {{ $item->name_ar ?? $item->name }}
+                </span>
             </a>
         </div>
     @endif

@@ -79,6 +79,10 @@ Route::group(['middleware' => ['web']], function () {
     // New Registration Routes
     Route::get('register/{type}', ['as' => 'web.register', 'uses' => 'RegistrationController@showRegistrationForm']);
     Route::post('register', ['as' => 'web.register.post', 'uses' => 'RegistrationController@postRegister']);
+
+    // Standalone Registration Routes
+    Route::get('registration/standalone', ['as' => 'registration.standalone', 'uses' => 'StandaloneRegistrationController@index']);
+    Route::post('registration/standalone', ['as' => 'registration.standalone.store', 'uses' => 'StandaloneRegistrationController@store']);
 });
 
 
@@ -248,6 +252,14 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('email-campaigns/show/{id}', ['as' => 'admin.email_campaigns.show', 'uses' => 'EmailCampaignController@show']);
     Route::get('email-campaigns/status/{id}', ['as' => 'admin.email_campaigns.status', 'uses' => 'EmailCampaignController@status']);
     Route::post('email-campaigns/delete/{id}', ['as' => 'admin.email_campaigns.delete', 'uses' => 'EmailCampaignController@destroy']);
+
+    // Standalone Registrations & Combo Requests
+    Route::get('combo-parents', ['as' => 'combo_parents.view', 'uses' => 'StandaloneRegistrationAdminController@comboParents']);
+    Route::get('standalone-registrations', ['as' => 'standalone_registrations.view', 'uses' => 'StandaloneRegistrationAdminController@index']);
+    Route::get('standalone-registrations/show/{id}', ['as' => 'admin.standalone_registrations.show', 'uses' => 'StandaloneRegistrationAdminController@show']);
+    Route::post('standalone-registrations/delete/{id}', ['as' => 'admin.standalone_registrations.delete', 'uses' => 'StandaloneRegistrationAdminController@destroy']);
+    Route::post('standalone-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);
+    Route::post('standalone-registrations/mark-all-read', ['as' => 'admin.standalone_registrations.markAllAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAllAsRead']);
 
     // Route
     Route::get('dashboard', ['as' => 'dashboard.view', 'uses' => 'DashboardController@getIndex']);
@@ -680,15 +692,17 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('financial/expenses/{id}', ['as' => 'admin.financial.expenses.update', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'ExpensesController@update']);
     Route::delete('financial/expenses/{id}', ['as' => 'admin.financial.expenses.delete', 'middleware' => ['permission:admin.financial.verify'], 'uses' => 'ExpensesController@destroy']);
 
-    Route::get('financial/fees', ['as' => 'admin.financial.fees', 'uses' => 'FinancialController@feeSettings']);
+    Route::get('financial/fees', ['as' => 'financial_fees.view', 'uses' => 'FinancialController@feeSettings']);
     Route::post('financial/fees/update', ['as' => 'admin.financial.fees.update', 'uses' => 'FinancialController@updateFeeSetting']);
     Route::delete('financial/fees/delete/{id}', ['as' => 'admin.financial.fees.delete', 'uses' => 'FinancialController@deleteFeeSetting']);
     Route::get('financial/fees/groups/{programId}', ['as' => 'admin.financial.fees.groups', 'uses' => 'FinancialController@getGroupsByProgram']);
     
     // Fee Types Management
-    Route::get('financial/fee-types', ['as' => 'admin.financial.fee_types.list', 'uses' => 'FinancialController@getFeeTypes']);
+    Route::get('financial/fee-types', ['as' => 'financial_fee_types.view', 'uses' => 'FinancialController@getFeeTypes']);
     Route::post('financial/fee-types/store', ['as' => 'admin.financial.fee_types.store', 'uses' => 'FinancialController@storeFeeType']);
     Route::delete('financial/fee-types/delete/{id}', ['as' => 'admin.financial.fee_types.delete', 'uses' => 'FinancialController@deleteFeeType']);
+
+
 
     // ── Sidebar-compatible .view aliases ────────────────────────────────────
     // financial_pending → الطلبات المالية العالقة

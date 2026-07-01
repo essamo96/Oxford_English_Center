@@ -332,7 +332,7 @@ function loadProgramMinPayment(programId) {
 }
 
 function refreshTypesTable() {
-    fetch('{{ route("admin.financial.fee_types.list") }}')
+    fetch('{{ route("financial_fee_types.view") }}')
         .then(r => r.json())
         .then(types => {
             const body = document.getElementById('typesTableBody');

@@ -20,7 +20,17 @@
                     <span class="path3"></span><span class="path4"></span>
                 </i>
             </span>
-            <span class="menu-title">{{ $item->name_ar ?? $item->name }}</span>
+            <span class="menu-title">
+                {{ $item->name_ar ?? $item->name }}
+                @if($item->name == 'combo_requests')
+                    @php
+                        $combo_unread = \App\Models\StudentCompo::where('is_read', false)->count();
+                    @endphp
+                    @if($combo_unread > 0)
+                        <span class="badge badge-danger badge-circle mx-2">{{ $combo_unread }}</span>
+                    @endif
+                @endif
+            </span>
             <span class="menu-arrow"></span>
         </span>
         <div class="menu-sub menu-sub-accordion">
@@ -36,7 +46,25 @@
                         <div class="menu-item">
                             <a class="menu-link {{ $childActive ? 'active' : '' }}" href="{{ route($childRoute) }}">
                                 <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">{{ $child->name_ar ?? $child->name }}</span>
+                                <span class="menu-title">
+                                    {{ $child->name_ar ?? $child->name }}
+                                    @if($child->name == 'standalone_registrations')
+                                        @php
+                                            $standalone_unread = \App\Models\StudentCompo::where('is_read', false)->count();
+                                        @endphp
+                                        @if($standalone_unread > 0)
+                                            <span class="badge badge-sm badge-circle badge-light-danger ms-2">{{ $standalone_unread }}</span>
+                                        @endif
+                                    @endif
+                                    @if($child->name == 'combo_parents')
+                                        @php
+                                            $parents_unread = \App\Models\StudentCompo::where('is_read', false)->whereRaw('TIMESTAMPDIFF(YEAR, dob, CURDATE()) <= 15')->count();
+                                        @endphp
+                                        @if($parents_unread > 0)
+                                            <span class="badge badge-sm badge-circle badge-light-danger ms-2">{{ $parents_unread }}</span>
+                                        @endif
+                                    @endif
+                                </span>
                             </a>
                         </div>
                     @endif
