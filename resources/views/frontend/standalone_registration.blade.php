@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS for grid -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- CSRF Token -->
@@ -63,8 +65,9 @@
             max-width: 900px;
             margin: auto;
             border: 1px solid rgba(255,255,255,0.6);
-            overflow: hidden;
+            overflow: visible;
             transition: transform 0.3s ease;
+            position: relative;
         }
 
         .header {
@@ -340,45 +343,53 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
-            pointer-events: none;
-            overflow: hidden;
+            background: linear-gradient(135deg, #0a2540, #1a4570, #2b6cb0, #d4af37, #0a2540, #1a4570);
+            background-size: 400% 400%;
+            animation: gradientMoveNWSE 5s ease infinite;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s, transform 1.2s;
         }
-        .splash-door {
+        @keyframes gradientMoveNWSE {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        .splash-screen.loaded {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(1.05); /* Elegant subtle zoom out */
+        }
+        .splash-logo-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 180px;
+            height: 180px;
+        }
+        .splash-logo-wrapper::before, .splash-logo-wrapper::after {
+            content: '';
             position: absolute;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            background: var(--primary);
-            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-            z-index: 1;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            animation: splash-ripple 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .splash-door.left {
-            left: 0;
-            transform-origin: left;
+        .splash-logo-wrapper::after {
+            animation-delay: 1.25s;
         }
-        .splash-door.right {
-            right: 0;
-            transform-origin: right;
-        }
-        .splash-screen.loaded .splash-door.left {
-            transform: translateX(-100%);
-        }
-        .splash-screen.loaded .splash-door.right {
-            transform: translateX(100%);
+        @keyframes splash-ripple {
+            0% { width: 180px; height: 180px; opacity: 1; border-width: 3px; }
+            100% { width: 500px; height: 500px; opacity: 0; border-width: 1px; }
         }
         .splash-logo-container {
             position: relative;
             z-index: 2;
-            transition: opacity 0.6s ease 0.3s;
-        }
-        .splash-screen.loaded .splash-logo-container {
-            opacity: 0;
         }
         .splash-logo {
             width: 180px;
-            animation: pulse-splash 1.5s infinite;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+            animation: pulse-splash 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
         }
         @keyframes pulse-splash {
             0% { transform: scale(0.95); opacity: 0.9; }
@@ -432,6 +443,7 @@
             padding: 2.5rem 1.5rem;
             background: rgba(255, 255, 255, 0.6);
             border-top: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0 0 24px 24px;
         }
         .social-icons {
             display: flex;
@@ -443,24 +455,86 @@
         .social-icon {
             width: 50px;
             height: 50px;
-            border-radius: 50%;
+            border-radius: 14px; /* Square with rounded corners */
             background: var(--surface);
             color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
+        .social-icon::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+
+        /* Specific Brand Colors */
+        .social-icon i[class*="facebook"] { color: #1877F2; }
+        .social-icon:hover i[class*="facebook"] { color: #fff; }
+        .social-icon:has(i[class*="facebook"])::before { background: #1877F2; }
+
+        .social-icon i[class*="instagram"] { 
+            background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .social-icon:hover i[class*="instagram"] { background: transparent; -webkit-text-fill-color: #fff; }
+        .social-icon:has(i[class*="instagram"])::before { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        .social-icon i[class*="twitter"], .social-icon i[class*="x-twitter"] { color: #000; }
+        .social-icon:hover i[class*="twitter"], .social-icon:hover i[class*="x-twitter"] { color: #fff; }
+        .social-icon:has(i[class*="twitter"])::before, .social-icon:has(i[class*="x-twitter"])::before { background: #000; }
+
+        .social-icon i[class*="youtube"] { color: #FF0000; }
+        .social-icon:hover i[class*="youtube"] { color: #fff; }
+        .social-icon:has(i[class*="youtube"])::before { background: #FF0000; }
+
+        .social-icon i[class*="linkedin"] { color: #0A66C2; }
+        .social-icon:hover i[class*="linkedin"] { color: #fff; }
+        .social-icon:has(i[class*="linkedin"])::before { background: #0A66C2; }
+
+        .social-icon i[class*="tiktok"] { color: #000; }
+        .social-icon:hover i[class*="tiktok"] { color: #fff; }
+        .social-icon:has(i[class*="tiktok"])::before { background: #000; }
+        
+        .social-icon i[class*="snapchat"] { color: #FFFC00; text-shadow: 0px 0px 1px #000; }
+        .social-icon:hover i[class*="snapchat"] { color: #000; text-shadow: none; }
+        .social-icon:has(i[class*="snapchat"])::before { background: #FFFC00; }
+
+        .social-icon i[class*="whatsapp"] { color: #25D366; }
+        .social-icon:hover i[class*="whatsapp"] { color: #fff; }
+        .social-icon:has(i[class*="whatsapp"])::before { background: #25D366; }
+
         .social-icon:hover {
-            background: var(--accent);
-            color: #fff;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
-            border-color: var(--accent);
+            transform: translateY(-6px) scale(1.08);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+            border-color: transparent;
+        }
+        .social-icon:hover::before {
+            opacity: 1;
+        }
+
+        /* Fallback */
+        @supports not selector(:has(*)) {
+            .social-icon:hover {
+                background: var(--primary);
+                color: #fff !important;
+            }
+            .social-icon:hover i {
+                color: #fff !important;
+                -webkit-text-fill-color: #fff !important;
+            }
         }
         .ote-logo-container {
             margin-top: 0.5rem;
@@ -474,20 +548,150 @@
         .ote-logo-container img:hover {
             transform: scale(1.03);
         }
+
+        /* --- HANGING 3D MEDALS (INSIDE FORM) --- */
+        .hanging-medals-wrapper {
+            position: absolute;
+            top: 0;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: top center;
+            animation: swing-medal 4s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+            z-index: 10;
+        }
+        .hanging-string {
+            width: 14px;
+            height: 45px;
+            background-image: url("data:image/svg+xml,%3Csvg width='14' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='4' y='0' width='6' height='14' rx='3' fill='none' stroke='%23d4af37' stroke-width='2'/%3E%3Crect x='2' y='12' width='10' height='6' rx='3' fill='none' stroke='%23f2cb4e' stroke-width='2'/%3E%3Cpath d='M4 12v2a3 3 0 006 0v-2' fill='none' stroke='%23d4af37' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));
+        }
+        .medal-scene {
+            width: 75px;
+            height: 75px;
+            perspective: 600px;
+        }
+        .medal-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: flip-medal 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .medal-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background: #fff;
+            padding: 6px;
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            border: 3px solid #d4af37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .medal-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .medal-back {
+            transform: rotateY(180deg);
+        }
+        @keyframes swing-medal {
+            0% { transform: rotate(8deg); }
+            100% { transform: rotate(-8deg); }
+        }
+        @keyframes flip-medal {
+            0%, 40% { transform: rotateY(0deg); }
+            50%, 90% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        
+        /* --- PROMOTIONAL RIBBON (Top Right) --- */
+        .promo-ribbon {
+            position: absolute;
+            top: 30px;
+            right: -10px; /* Stick out slightly */
+            background: linear-gradient(135deg, #f6d365 0%, #ffb347 100%); /* Golden gradient */
+            padding: 8px 24px;
+            border-radius: 8px 0 0 8px;
+            box-shadow: -3px 5px 15px rgba(255, 179, 71, 0.4), inset 0 1px 2px rgba(255,255,255,0.6);
+            z-index: 15;
+            animation: float-ribbon 3s ease-in-out infinite alternate;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-right: none;
+            direction: rtl;
+        }
+        .promo-ribbon::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 10px 10px 0 0;
+            border-color: #cc8e39 transparent transparent transparent; /* Darker fold color */
+        }
+        .promo-text {
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        @keyframes float-ribbon {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
     </style>
 </head>
 <body>
 
     <!-- Splash Screen -->
     <div class="splash-screen" id="splashScreen">
-        <div class="splash-door left"></div>
-        <div class="splash-door right"></div>
-        <div class="splash-logo-container">
-            <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" class="splash-logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
+        <div class="splash-logo-wrapper">
+            <div class="splash-logo-container">
+                <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" class="splash-logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
+            </div>
         </div>
     </div>
 
     <div class="registration-container">
+        <!-- Hanging 3D Medals -->
+        <div class="hanging-medals-wrapper">
+            <div class="hanging-string"></div>
+            <div class="medal-scene">
+                <div class="medal-3d">
+                    <!-- Front side: Oxford Logo -->
+                    <div class="medal-face">
+                        <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Logo">
+                    </div>
+                    <!-- Back side: 2026 Logo -->
+                    <div class="medal-face medal-back">
+                        <img src="{{ asset('assets/images/LOGO_2026_bg_remove.png') }}" alt="2026 Logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotional Ribbon (Top Right) -->
+        <div class="promo-ribbon">
+            <div class="promo-text">
+                <i class="bi bi-fire"></i> لا تضيع الفرصة
+            </div>
+        </div>
+
         <div class="header">
             <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
             <h1>Student Registration Form</h1>
@@ -762,7 +966,11 @@
                 <div class="social-icons">
                     @foreach($socials as $social)
                         <a href="{{ $social->link }}" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="{{ $social->name ?? 'Social Link' }}">
-                            <i class="{{ str_starts_with($social->icon, 'fa') ? '' : 'fa ' }}{{ $social->icon }}"></i>
+                            @php
+                                $iconName = trim(str_replace(['fa-brands fa-', 'fa-solid fa-', 'fab fa-', 'fas fa-', 'fa-', 'fa '], '', $social->icon));
+                                if($iconName == 'x-twitter' || $iconName == 'twitter') $iconName = 'twitter-x';
+                            @endphp
+                            <i class="bi bi-{{ $iconName }}"></i>
                         </a>
                     @endforeach
                 </div>
@@ -783,7 +991,7 @@
         }
     @endphp
     <a href="https://wa.me/{{ $waNumber }}" target="_blank" class="floating-wa" aria-label="WhatsApp Support">
-        <i class="fa-brands fa-whatsapp"></i>
+        <i class="bi bi-whatsapp"></i>
     </a>
 
     <!-- Success Modal -->
@@ -806,14 +1014,16 @@
                 document.getElementById('splashScreen').classList.add('loaded');
                 setTimeout(() => {
                     document.getElementById('splashScreen').style.display = 'none';
-                }, 1200);
-            }, 800);
+                }, 1200); // Wait for fade transition
+            }, 2500); // Longer duration according to standards
 
             // Age Logic
             const dobInput = document.getElementById('dobInput');
             const parentSection = document.getElementById('parentSection');
             const parentName = document.getElementById('parent_name');
             const parentPhone = document.getElementById('parent_phone');
+            const typeKids = document.getElementById('type_kids');
+            const typeAdults = document.getElementById('type_adults');
 
             dobInput.addEventListener('change', function() {
                 if(!this.value) return;
@@ -825,14 +1035,22 @@
                     age--;
                 }
 
-                if(age <= 15) {
+                if(age < 15) {
                     parentSection.style.display = 'block';
                     parentName.setAttribute('required', 'required');
                     parentPhone.setAttribute('required', 'required');
+                    if(typeKids) {
+                        typeKids.checked = true;
+                        typeKids.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
                 } else {
                     parentSection.style.display = 'none';
                     parentName.removeAttribute('required');
                     parentPhone.removeAttribute('required');
+                    if(typeAdults) {
+                        typeAdults.checked = true;
+                        typeAdults.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
                 }
             });
 
