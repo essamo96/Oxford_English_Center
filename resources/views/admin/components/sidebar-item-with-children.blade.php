@@ -26,9 +26,9 @@
                     @php
                         $combo_unread = \App\Models\StudentCompo::where('is_read', false)->count();
                     @endphp
-                    @if($combo_unread > 0)
-                        <span class="badge badge-danger badge-circle mx-2">{{ $combo_unread }}</span>
-                    @endif
+                    <span class="menu-badge" style="{{ $combo_unread > 0 ? '' : 'display:none' }}">
+                        <span class="badge badge-danger badge-circle mx-2" data-live-counter="combo_requests_total">{{ $combo_unread }}</span>
+                    </span>
                 @endif
             </span>
             <span class="menu-arrow"></span>
@@ -52,9 +52,9 @@
                                         @php
                                             $standalone_unread = \App\Models\StudentCompo::where('is_read', false)->count();
                                         @endphp
-                                        @if($standalone_unread > 0)
-                                            <span class="badge badge-sm badge-circle badge-light-danger ms-2">{{ $standalone_unread }}</span>
-                                        @endif
+                                        <span class="menu-badge" style="{{ $standalone_unread > 0 ? '' : 'display:none' }}">
+                                            <span class="badge badge-sm badge-circle badge-light-danger ms-2" data-live-counter="unread_combo_registrations">{{ $standalone_unread }}</span>
+                                        </span>
                                     @endif
                                     @if($child->name == 'combo_parents')
                                         @php

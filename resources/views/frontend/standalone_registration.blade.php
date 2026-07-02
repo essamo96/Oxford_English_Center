@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS for grid -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -329,9 +331,161 @@
             .registration-container { padding: 1.5rem; margin: 1rem; }
             body::before { height: 250px; }
         }
+
+        /* --- SPLASH SCREEN --- */
+        .splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .splash-door {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: var(--primary);
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 1;
+        }
+        .splash-door.left {
+            left: 0;
+            transform-origin: left;
+        }
+        .splash-door.right {
+            right: 0;
+            transform-origin: right;
+        }
+        .splash-screen.loaded .splash-door.left {
+            transform: translateX(-100%);
+        }
+        .splash-screen.loaded .splash-door.right {
+            transform: translateX(100%);
+        }
+        .splash-logo-container {
+            position: relative;
+            z-index: 2;
+            transition: opacity 0.6s ease 0.3s;
+        }
+        .splash-screen.loaded .splash-logo-container {
+            opacity: 0;
+        }
+        .splash-logo {
+            width: 180px;
+            animation: pulse-splash 1.5s infinite;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+        }
+        @keyframes pulse-splash {
+            0% { transform: scale(0.95); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.9; }
+        }
+
+        /* --- FLOATING WHATSAPP --- */
+        .floating-wa {
+            position: fixed;
+            left: 30px;
+            bottom: 30px;
+            width: 65px;
+            height: 65px;
+            background-color: #25d366;
+            color: #fff;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 38px;
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .floating-wa:hover {
+            transform: scale(1.15) rotate(5deg);
+            color: #fff;
+            box-shadow: 2px 5px 20px rgba(37, 211, 102, 0.4);
+        }
+        .floating-wa::after {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            background: transparent;
+            border: 2px solid #25d366;
+            border-radius: 50%;
+            animation: wa-pulse 2s infinite;
+            pointer-events: none;
+        }
+        @keyframes wa-pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        /* --- SOCIAL MEDIA FOOTER --- */
+        .registration-footer {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .social-icon:hover {
+            background: var(--accent);
+            color: #fff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            border-color: var(--accent);
+        }
+        .ote-logo-container {
+            margin-top: 0.5rem;
+        }
+        .ote-logo-container img {
+            max-width: 220px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.05));
+            transition: transform 0.3s ease;
+        }
+        .ote-logo-container img:hover {
+            transform: scale(1.03);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-door left"></div>
+        <div class="splash-door right"></div>
+        <div class="splash-logo-container">
+            <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" class="splash-logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
+        </div>
+    </div>
 
     <div class="registration-container">
         <div class="header">
@@ -600,7 +754,37 @@
                 </button>
             </form>
         </div>
+        
+        <!-- Social Media & OTE Logo Footer -->
+        <div class="registration-footer">
+            @if(isset($socials) && count($socials) > 0)
+                <h5 style="color:var(--primary); font-family: 'Cairo', sans-serif; margin-bottom: 1.5rem; font-size: 1.15rem; font-weight: 700;">تابعنا على منصات التواصل (Follow Us)</h5>
+                <div class="social-icons">
+                    @foreach($socials as $social)
+                        <a href="{{ $social->link }}" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="{{ $social->name ?? 'Social Link' }}">
+                            <i class="{{ str_starts_with($social->icon, 'fa') ? '' : 'fa ' }}{{ $social->icon }}"></i>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+            <div class="ote-logo-container">
+                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+            </div>
+        </div>
     </div>
+
+    <!-- Floating WhatsApp -->
+    @php
+        $waNumber = $settings->mobile ?? '';
+        if(str_starts_with($waNumber, '05')) {
+            $waNumber = '970' . ltrim($waNumber, '0');
+        } else {
+            $waNumber = preg_replace('/[^0-9]/', '', $waNumber);
+        }
+    @endphp
+    <a href="https://wa.me/{{ $waNumber }}" target="_blank" class="floating-wa" aria-label="WhatsApp Support">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <!-- Success Modal -->
     <div id="successModal">
@@ -617,6 +801,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Splash Screen Logic
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('loaded');
+                setTimeout(() => {
+                    document.getElementById('splashScreen').style.display = 'none';
+                }, 1200);
+            }, 800);
+
             // Age Logic
             const dobInput = document.getElementById('dobInput');
             const parentSection = document.getElementById('parentSection');

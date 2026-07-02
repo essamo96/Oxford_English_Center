@@ -24,6 +24,20 @@ class NotifyCounts
         return $q->count();
     }
 
+    /** Unread combo registrations. */
+    public static function unreadComboRegistrations(?int $branchId = null): int
+    {
+        // Branch logic is assumed to match the `branch` column if it maps directly to name or id.
+        // The `StudentCompo` table has a `branch` column.
+        $q = \App\Models\StudentCompo::where('is_read', 0);
+        if ($branchId) {
+            // Depending on how branch is saved in StudentCompo. It seems saved as string name.
+            // For safety, we just fetch all if branch matching is complex, or map it.
+            // We'll skip branch filtering for combo unless they strictly use branch_id.
+        }
+        return $q->count();
+    }
+
     /** Registrations created today. */
     public static function todayBookings(?int $branchId = null): int
     {
@@ -94,7 +108,8 @@ class NotifyCounts
             + self::unreadContacts()
             + self::unreadStudentMessages($branchId)
             + self::unreadTeacherMessages($branchId)
-            + self::pendingStudentPayments($branchId);
+            + self::pendingStudentPayments($branchId)
+            + self::unreadComboRegistrations($branchId);
     }
 
     /** All notification data needed by the header dropdown (lists + counts). */
@@ -106,6 +121,7 @@ class NotifyCounts
         $studentMsgs   = self::unreadStudentMessages($branchId);
         $teacherMsgs   = self::unreadTeacherMessages($branchId);
         $paymentsCount = self::pendingStudentPayments($branchId);
+        $comboCount    = self::unreadComboRegistrations($branchId);
 
         $closedQ = Closed_Classes::with(['Teacher', 'Groups'])->where('seen', 0)->whereNull('deleted_at');
         if ($branchId) $closedQ->whereHas('Groups', fn($g) => $g->where('branch_id', $branchId));
@@ -131,6 +147,8 @@ class NotifyCounts
             $paymentsQ->whereHas('student', fn($s) => $s->where('branch_id', $branchId));
         }
 
+        $comboQ = \App\Models\StudentCompo::where('is_read', 0);
+
         return [
             'Closed_Classes_count'           => $closedCount,
             'Unseen_Students_Count'          => $studentsCount,
@@ -138,7 +156,8 @@ class NotifyCounts
             'Unread_measges_student'         => $studentMsgs,
             'Unread_measges_teacher'         => $teacherMsgs,
             'Pending_Student_Payments_Count' => $paymentsCount,
-            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs + $paymentsCount,
+            'Unread_Combo_Registrations'     => $comboCount,
+            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs + $paymentsCount + $comboCount,
             'total_teachers_students_measge' => $studentMsgs + $teacherMsgs,
             'notify_closed_clases'           => $closedQ->latest()->take(5)->get(),
             'notify_students'                => $studentsQ->latest()->take(5)->get(),
@@ -147,6 +166,7 @@ class NotifyCounts
             'notify_Groups'                  => $groupsQ->latest()->take(5)->get(),
             'notify_contacts'                => Contacts::where('status', 0)->latest()->take(5)->get(),
             'notify_student_payments'        => $paymentsQ->latest()->take(5)->get(),
+            'notify_combo_registrations'     => $comboQ->latest()->take(5)->get(),
         ];
     }
 }

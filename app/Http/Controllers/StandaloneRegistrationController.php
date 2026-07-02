@@ -34,8 +34,10 @@ class StandaloneRegistrationController extends Controller
             ->where('credentials', '!=', '{}')
             ->where('credentials', '!=', 'null')
             ->get();
+            
+        $socials = \App\Models\Socials::all();
         
-        return view('frontend.standalone_registration', compact('programs', 'settings', 'feesByProgram', 'paymentMethods'));
+        return view('frontend.standalone_registration', compact('programs', 'settings', 'feesByProgram', 'paymentMethods', 'socials'));
     }
 
     public function store(Request $request)
@@ -109,6 +111,13 @@ class StandaloneRegistrationController extends Controller
             }
 
             DB::commit();
+
+            // Dispatch realtime event
+            $comboCount = \App\Support\NotifyCounts::unreadComboRegistrations();
+            $totalCount = \App\Support\NotifyCounts::total();
+            event(new \App\Events\NewComboRegistrationEvent($student, $comboCount, $totalCount));
+            // Trigger global counter update
+            event(new \App\Events\CountersUpdated());
 
             return response()->json([
                 'success' => true, 

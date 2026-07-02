@@ -269,7 +269,9 @@
                 // Aggregate badge on the "الإدارة المالية" parent menu item — sum of both
                 // pending-fee-order and student-payment-submission counts, same scope as
                 // its two children (branch-scoped for branch admins, grand total for super admin).
-                'financial_total':          pendingPayments + pendingFinOrders
+                'financial_total':          pendingPayments + pendingFinOrders,
+                'unread_combo_registrations': parseInt(counters.unread_combo_registrations, 10) || 0,
+                'combo_requests_total':       parseInt(counters.unread_combo_registrations, 10) || 0
             };
 
             Object.keys(map).forEach(function (key) {
@@ -416,6 +418,7 @@
             console.log('[RT] subscribed to ' + channelName);
         });
         channel.bind('new.booking', function (data) { NotificationManager.show(data); refreshDropdown(); });
+        channel.bind('new.combo', function (data) { NotificationManager.show(data); refreshDropdown(); });
         channel.bind('new.contact', function (data) { NotificationManager.show(data); refreshDropdown(); });
         channel.bind('counters.updated', function (data) {
             if (data && data.counters) {
