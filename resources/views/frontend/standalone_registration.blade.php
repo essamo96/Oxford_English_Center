@@ -272,52 +272,7 @@
             display: block;
         }
 
-        /* Success Modal Styles */
-        #successModal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(10, 37, 64, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
 
-        .modal-content-custom {
-            margin: auto;
-            background: white;
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--success);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
-
-        .modal-icon svg {
-            width: 40px;
-            height: 40px;
-            color: white;
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
 
         .dynamic-section {
             display: none;
@@ -1020,21 +975,8 @@
         <i class="bi bi-whatsapp"></i>
     </a>
 
-    <!-- Success Modal -->
-    <div id="successModal">
-        <div class="modal-content-custom">
-            <div class="modal-icon" style="background: var(--date-red); box-shadow: 0 10px 25px rgba(138, 21, 56, 0.3);">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <h2 style="color:var(--oxford-blue); font-weight:800; margin-bottom:0.5rem; font-size: 2rem;">Registration Successful!</h2>
-            <h3 style="font-family:'Tajawal', sans-serif; color:var(--date-red); font-size:1.6rem; font-weight: 700; margin-bottom:1rem; direction: rtl;">تم التسجيل بنجاح!</h3>
-            <p style="color:var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom:2rem; direction: ltr;">Your registration has been submitted successfully. Please do not forget to send the payment receipt via WhatsApp.</p>
-            <button onclick="window.location.reload()" class="btn-submit btn-modal" style="margin-top:0; display:flex; flex-direction:column; padding: 1rem; line-height: 1.4;">
-                <span style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span>
-                <span style="font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span>
-            </button>
-        </div>
-    </div>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1227,8 +1169,20 @@
                     loader.style.display = 'none';
 
                     if(data.success) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        document.getElementById('successModal').style.display = 'flex';
+                        Swal.fire({
+                            title: '<span style="font-family: \'Tajawal\', sans-serif; font-weight: 700;">تم التسجيل بنجاح!</span>',
+                            html: '<div style="direction: ltr; font-size: 1.1rem; line-height: 1.6; color: var(--text-muted);">Your registration has been submitted successfully.<br>Please do not forget to send the payment receipt via WhatsApp.</div>',
+                            icon: 'success',
+                            color: 'var(--date-red)',
+                            iconColor: 'var(--date-red)',
+                            confirmButtonText: '<div style="display:flex; flex-direction:column; padding: 0.25rem; line-height: 1.4;"><span style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span><span style="font-family: \'Tajawal\', sans-serif; font-size: 1.1rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span></div>',
+                            confirmButtonColor: 'var(--oxford-blue)',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
                     } else if(data.errors) {
                         for(let field in data.errors) {
                             let input = form.querySelector(`[name="${field}"]`);
