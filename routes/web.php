@@ -81,8 +81,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('register', ['as' => 'web.register.post', 'uses' => 'RegistrationController@postRegister']);
 
     // Standalone Registration Routes
-    Route::get('registration/standalone', ['as' => 'registration.standalone', 'uses' => 'StandaloneRegistrationController@index']);
-    Route::post('registration/standalone', ['as' => 'registration.standalone.store', 'uses' => 'StandaloneRegistrationController@store']);
+    Route::get('registration/program', ['as' => 'registration.standalone', 'uses' => 'StandaloneRegistrationController@index']);
+    Route::post('registration/program', ['as' => 'registration.standalone.store', 'uses' => 'StandaloneRegistrationController@store']);
 });
 
 

@@ -286,9 +286,39 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* --- RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            .registration-container { max-width: 95%; margin: 2rem auto; }
+            .header h1 { font-size: 2rem; }
+        }
+
         @media (max-width: 768px) {
-            .registration-container { padding: 1.5rem; margin: 1rem; }
+            .registration-container { padding: 0; margin: 1rem auto; width: calc(100% - 2rem); }
             body::before { height: 250px; }
+            .header { padding: 2rem 1rem 1.5rem; }
+            .header h1 { font-size: 1.7rem; }
+            .header p { font-size: 1rem; }
+            .form-section { padding: 1.5rem; }
+            .invoice-box { padding: 1.5rem 1rem; }
+            .btn-submit { font-size: 1.15rem; padding: 1rem; }
+            .floating-wa { width: 55px; height: 55px; font-size: 32px; left: 20px; bottom: 20px; }
+            .promo-ribbon { padding: 6px 16px; top: 20px; }
+            .promo-text { font-size: 0.9rem !important; }
+            .ote-logo-container { gap: 1.5rem !important; }
+        }
+
+        @media (max-width: 480px) {
+            .header img { max-width: 100px; }
+            .header h1 { font-size: 1.5rem; }
+            .header p { font-size: 0.9rem; }
+            .section-title { font-size: 1.1rem; }
+            .form-section { padding: 1.25rem 1rem; }
+            .form-control, .form-select { padding: 0.7rem 1rem; font-size: 0.95rem; }
+            .social-icon { width: 42px; height: 42px; font-size: 1.25rem; }
+            .ote-logo-container { flex-direction: column; gap: 1rem !important; }
+            .ote-logo-container img { max-width: 180px; }
+            .whatsapp-note { flex-direction: column; padding: 1rem; text-align: center; align-items: center; border-radius: 12px; border-left: none; border-top: 4px solid var(--date-red); }
+            .whatsapp-note svg { margin-bottom: 0.5rem; }
         }
 
         /* --- SPLASH SCREEN --- */
@@ -920,7 +950,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-3 p-3 rounded d-flex align-items-start" style="background: rgba(138, 21, 56, 0.05); border: 1px dashed var(--date-red); gap: 1rem;" dir="ltr">
+                    <div id="paymentScheduleNote" class="mt-3 p-3 rounded d-flex align-items-start" style="display: none; background: rgba(138, 21, 56, 0.05); border: 1px dashed var(--date-red); gap: 1rem;" dir="ltr">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--date-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 4px;">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
@@ -1061,6 +1091,7 @@
             const invoiceBox = document.getElementById('invoiceBox');
             const invProgramName = document.getElementById('invProgramName');
             const invMinAmount = document.getElementById('invMinAmount');
+            const paymentScheduleNote = document.getElementById('paymentScheduleNote');
 
             programSelect.addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
@@ -1093,10 +1124,17 @@
                             console.error('Error parsing fees details', e);
                         }
                     }
+                    
+                    if (title && (title.includes('English Levels (CEFRL)') || title.includes('مستويات اللغة الإنجليزية'))) {
+                        if(paymentScheduleNote) paymentScheduleNote.style.display = 'flex';
+                    } else {
+                        if(paymentScheduleNote) paymentScheduleNote.style.display = 'none';
+                    }
 
                     invoiceBox.style.display = 'block';
                 } else {
                     invoiceBox.style.display = 'none';
+                    if(paymentScheduleNote) paymentScheduleNote.style.display = 'none';
                 }
             });
 

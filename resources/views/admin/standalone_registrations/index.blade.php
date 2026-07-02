@@ -169,6 +169,10 @@
                     <img src="{{ url('assets/oxford/img/logo.png') }}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: white; padding: 5px; border-radius: 8px;">
                 </div>
                 <div class="mt-6">
+                    <button type="button" class="btn btn-primary mb-3" onclick="downloadQRCode()">
+                        <i class="ki-duotone ki-down fs-2"><span class="path1"></span><span class="path2"></span></i> Download QR Code (تحميل الرمز)
+                    </button>
+                    <br>
                     <a href="{{ route('registration.standalone') }}" target="_blank" class="text-primary fw-bold" style="word-break: break-all;">{{ route('registration.standalone') }}</a>
                 </div>
             </div>
@@ -427,6 +431,21 @@
                 $('#detailsContent').html('<div class="alert alert-danger">Error loading details.</div>');
             }
         });
+    }
+
+    function downloadQRCode() {
+        var canvas = document.querySelector('#qrcode canvas');
+        if(canvas) {
+            var url = canvas.toDataURL("image/png");
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'registration-qr-code.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            alert('QR Code not generated yet.');
+        }
     }
 </script>
 @stop
