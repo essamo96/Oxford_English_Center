@@ -15,6 +15,7 @@ class Programs extends Model {
         'title', 'short', 'exam', 'status', 'image',
         'min_payment_percent', 'min_payment_fixed',
         'registration_start', 'registration_end',
+        'program_type', 'is_placement_test',
     ];
 
     /**

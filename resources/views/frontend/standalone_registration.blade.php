@@ -866,7 +866,9 @@
                                 data-title="{{ $program->title }}" 
                                 data-total-fee="{{ $baseFee }}"
                                 data-min-due="{{ $minDue }}"
-                                data-fees-details="{{ $feesJson }}">
+                                data-fees-details="{{ $feesJson }}"
+                                data-program-type="{{ $program->program_type }}"
+                                data-is-placement="{{ $program->is_placement_test ? 1 : 0 }}">
                                 {{ $program->title }}
                             </option>
                         @endforeach
@@ -1087,19 +1089,89 @@
                 }
             });
 
-            // Invoice Logic
+            // Program Type Filtering & Invoice Logic
             const programSelect = document.getElementById('programSelect');
             const invoiceBox = document.getElementById('invoiceBox');
             const invProgramName = document.getElementById('invProgramName');
             const invMinAmount = document.getElementById('invMinAmount');
+            const programTypeRadios = document.querySelectorAll('input[name="program_type"]');
+            
+            function filterPrograms() {
+                const activeType = document.querySelector('input[name="program_type"]:checked')?.value;
+                const options = programSelect.querySelectorAll('option:not([value=""])');
+                
+                let selectedOptionStillValid = false;
 
-            programSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                if(selectedOption.value) {
+                options.forEach(option => {
+                    const type = option.getAttribute('data-program-type');
+                    const isPlacement = option.getAttribute('data-is-placement');
+                    
+                    if (isPlacement === '1') {
+                        option.style.display = 'none'; // Always hide placement test from manual selection
+                    } else if (activeType && type && type !== activeType) {
+                        option.style.display = 'none'; // Hide if type doesn't match
+                    } else {
+                        option.style.display = ''; // Show
+                    }
+
+                    if (option.selected && option.style.display !== 'none') {
+                        selectedOptionStillValid = true;
+                    }
+                });
+
+                if (!selectedOptionStillValid) {
+                    programSelect.value = ''; // Reset selection if it became hidden
+                }
+                
+                updateInvoice();
+            }
+
+            programTypeRadios.forEach(radio => {
+                radio.addEventListener('change', filterPrograms);
+            });
+
+            function updateInvoice() {
+                const selectedOption = programSelect.options[programSelect.selectedIndex];
+                const activeType = document.querySelector('input[name="program_type"]:checked')?.value;
+                const wantsPlacement = placementToggle.checked;
+                
+                if(selectedOption && selectedOption.value) {
                     const title = selectedOption.getAttribute('data-title');
-                    const totalFee = parseFloat(selectedOption.getAttribute('data-total-fee')) || 0;
-                    const minDue = parseFloat(selectedOption.getAttribute('data-min-due')) || 0;
+                    let totalFee = parseFloat(selectedOption.getAttribute('data-total-fee')) || 0;
+                    let minDue = parseFloat(selectedOption.getAttribute('data-min-due')) || 0;
                     const feesDetailsStr = selectedOption.getAttribute('data-fees-details');
+                    
+                    let allFees = [];
+                    if (feesDetailsStr) {
+                        try {
+                            const parsed = JSON.parse(feesDetailsStr);
+                            allFees = allFees.concat(parsed);
+                        } catch(e) {}
+                    }
+
+                    // Placement Test Dynamic Lookup
+                    if (wantsPlacement && activeType) {
+                        // Find the hidden placement test program that matches the active type
+                        const options = programSelect.querySelectorAll('option');
+                        for(let i=0; i<options.length; i++) {
+                            const opt = options[i];
+                            if (opt.getAttribute('data-is-placement') === '1' && opt.getAttribute('data-program-type') === activeType) {
+                                const ptFee = parseFloat(opt.getAttribute('data-total-fee')) || 0;
+                                totalFee += ptFee;
+                                minDue += ptFee;
+                                
+                                // Get the fee details from the placement test
+                                const ptFeesStr = opt.getAttribute('data-fees-details');
+                                if (ptFeesStr) {
+                                    try {
+                                        const ptParsed = JSON.parse(ptFeesStr);
+                                        allFees = allFees.concat(ptParsed);
+                                    } catch(e) {}
+                                }
+                                break;
+                            }
+                        }
+                    }
                     
                     invProgramName.textContent = title;
                     document.getElementById('invTotalFee').textContent = totalFee.toFixed(2);
@@ -1108,21 +1180,15 @@
                     // Render fee details
                     const detailsList = document.getElementById('invFeeDetailsList');
                     detailsList.innerHTML = '';
-                    if (feesDetailsStr) {
-                        try {
-                            const details = JSON.parse(feesDetailsStr);
-                            if (details.length > 0) {
-                                details.forEach(fee => {
-                                    const tr = document.createElement('tr');
-                                    tr.innerHTML = `<td>${fee.name}</td><td class="fw-bold" dir="ltr">₪ ${parseFloat(fee.amount).toFixed(2)}</td>`;
-                                    detailsList.appendChild(tr);
-                                });
-                            } else {
-                                detailsList.innerHTML = '<tr><td colspan="2" class="text-muted py-2">No fees specified</td></tr>';
-                            }
-                        } catch(e) {
-                            console.error('Error parsing fees details', e);
-                        }
+                    
+                    if (allFees.length > 0) {
+                        allFees.forEach(fee => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `<td>${fee.name}</td><td class="fw-bold" dir="ltr">₪ ${parseFloat(fee.amount).toFixed(2)}</td>`;
+                            detailsList.appendChild(tr);
+                        });
+                    } else {
+                        detailsList.innerHTML = '<tr><td colspan="2" class="text-muted py-2">No fees specified</td></tr>';
                     }
                     
                     if (title && (title.includes('English Levels') || title.includes('مستويات'))) {
@@ -1139,7 +1205,13 @@
                     const note = document.getElementById('paymentScheduleNote');
                     if (note) note.style.display = 'none';
                 }
-            });
+            }
+
+            programSelect.addEventListener('change', updateInvoice);
+            placementToggle.addEventListener('change', updateInvoice);
+            
+            // Initial filter call in case of pre-selected values
+            filterPrograms();
 
             // Health Issues Logic
             const healthYes = document.getElementById('health_yes');

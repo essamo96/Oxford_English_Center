@@ -96,6 +96,17 @@
 
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2 required">نوع البرنامج (Program Type)</label>
+                    <select name="program_type" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="اختر نوع البرنامج" required>
+                        <option value=""></option>
+                        <option value="kids" {{ old('program_type') == 'kids' ? 'selected' : '' }}>برنامج الصغار (Kids)</option>
+                        <option value="adults" {{ old('program_type') == 'adults' ? 'selected' : '' }}>برنامج الكبار (Adults)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
                     <label class="fs-6 fw-semibold mb-2">تاريخ بدء التسجيل</label>
                     <input type="date" name="registration_start" value="{{ old('registration_start') }}" class="form-control form-control-solid">
                 </div>

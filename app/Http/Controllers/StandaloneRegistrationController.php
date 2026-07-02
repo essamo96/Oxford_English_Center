@@ -15,7 +15,6 @@ class StandaloneRegistrationController extends Controller
     public function index()
     {
         $programs = Programs::where('status', 1)
-            ->where('is_placement_test', 0)
             ->whereIn('id', function($query) {
                 $query->select('program_id')->from('fee_settings');
             })->get();

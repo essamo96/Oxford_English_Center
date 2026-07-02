@@ -262,6 +262,7 @@ class ProgramsController extends AdminController
                 if (is_object($add) && isset($add->id)) {
                     $add->registration_start = $request->get('registration_start') ?: null;
                     $add->registration_end   = $request->get('registration_end') ?: null;
+                    $add->program_type       = $request->get('program_type') ?: null;
                     $add->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
                     $add->save();
                     $this->applyPlacementDefault($request, $add->id);
@@ -348,6 +349,7 @@ class ProgramsController extends AdminController
                 if ($update) {
                     $info->registration_start = $request->get('registration_start') ?: null;
                     $info->registration_end   = $request->get('registration_end') ?: null;
+                    $info->program_type       = $request->get('program_type') ?: null;
                     $info->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
                     $info->save();
                     $this->applyPlacementDefault($request, $id);
