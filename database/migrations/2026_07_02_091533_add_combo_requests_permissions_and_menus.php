@@ -73,7 +73,7 @@ return new class extends Migration
                 'name' => 'admin.standalone_registrations.view',
                 'name_ar' => 'عرض طلبات التسجيل',
                 'guard_name' => 'web',
-                'permissions_group_id' => $child1Id,
+                'group_id' => $child1Id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -81,7 +81,7 @@ return new class extends Migration
                 'name' => 'admin.combo_parents.view',
                 'name_ar' => 'عرض أولياء الأمور (كومبو)',
                 'guard_name' => 'web',
-                'permissions_group_id' => $child2Id,
+                'group_id' => $child2Id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

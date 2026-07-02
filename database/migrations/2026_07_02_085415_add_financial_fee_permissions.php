@@ -32,7 +32,7 @@ return new class extends Migration
                 'name' => 'admin.financial.fee_settings.list',
                 'name_ar' => 'عرض إعدادات الرسوم',
                 'guard_name' => 'web',
-                'permissions_group_id' => $groupId,
+                'group_id' => $groupId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -40,7 +40,7 @@ return new class extends Migration
                 'name' => 'admin.financial.fee_types.list',
                 'name_ar' => 'عرض أنواع الرسوم',
                 'guard_name' => 'web',
-                'permissions_group_id' => $groupId,
+                'group_id' => $groupId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
