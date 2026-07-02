@@ -280,9 +280,11 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
         }
 
         .modal-content-custom {
+            margin: auto;
             background: white;
             padding: 3rem 2rem;
             border-radius: 20px;
@@ -695,7 +697,7 @@
         <div class="header">
             <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
             <h1>Student Registration Form</h1>
-            <p style="font-family: 'Cairo', sans-serif;" dir="rtl">نموذج تسجيل الطلاب - مركز أوكسفورد</p>
+            <p style="font-family: 'Cairo', sans-serif;" dir="rtl">نموذج تسجيل الطلاب - مركز أكسفورد</p>
         </div>
 
         <div class="form-section">
@@ -1000,10 +1002,13 @@
             <div class="modal-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
-            <h2 style="color:var(--primary-blue); font-weight:700; margin-bottom:1rem;">Registration Successful!</h2>
-            <h3 style="font-family:'Cairo'; color:var(--text-muted); font-size:1.5rem; margin-bottom:1.5rem;">تم التسجيل بنجاح!</h3>
-            <p style="color:var(--text-dark); margin-bottom:2rem;">Your registration has been submitted successfully. Please do not forget to send the payment receipt via WhatsApp.</p>
-            <button onclick="window.location.reload()" class="btn-submit" style="margin-top:0;">Register Another (تسجيل طالب آخر)</button>
+            <h2 style="color:var(--primary); font-weight:800; margin-bottom:0.5rem; font-size: 2rem;">Registration Successful!</h2>
+            <h3 style="font-family:'Tajawal', sans-serif; color:var(--success); font-size:1.6rem; font-weight: 700; margin-bottom:1rem; direction: rtl;">تم التسجيل بنجاح!</h3>
+            <p style="color:var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom:2rem; direction: ltr;">Your registration has been submitted successfully. Please do not forget to send the payment receipt via WhatsApp.</p>
+            <button onclick="window.location.reload()" class="btn-submit" style="margin-top:0; display:flex; flex-direction:column; padding: 1rem; line-height: 1.4;">
+                <span style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span>
+                <span style="font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span>
+            </button>
         </div>
     </div>
 

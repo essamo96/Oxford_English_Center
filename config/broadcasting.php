@@ -43,12 +43,19 @@ return [
             'options' => array_merge([
                 'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
                 'useTLS'  => env('PUSHER_SCHEME', 'https') === 'https',
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                ],
             ], env('PUSHER_HOST') ? [
                 'host'      => env('PUSHER_HOST'),
                 'port'      => (int) env('PUSHER_PORT', 6001),
                 'scheme'    => env('PUSHER_SCHEME', 'http'),
                 'encrypted' => env('PUSHER_SCHEME', 'http') === 'https',
             ] : []),
+            'client_options' => [
+                'verify' => false,
+            ],
         ],
 
         'redis' => [

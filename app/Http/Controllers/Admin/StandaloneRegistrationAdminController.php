@@ -43,8 +43,8 @@ class StandaloneRegistrationAdminController extends AdminController
                     return $row->is_contacted ? 'bg-light-success' : '';
                 })
                 ->addColumn('action', function ($row) {
-                    $btn = '<button type="button" class="btn btn-sm btn-primary view-details me-1" data-id="' . $row->id . '">View</button>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger delete-btn" data-id="' . $row->id . '">Delete</button>';
+                    $btn = '<button type="button" class="btn btn-icon btn-sm btn-primary view-details me-1" data-id="' . $row->id . '" title="عرض"><i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></button>';
+                    $btn .= '<button type="button" class="btn btn-icon btn-sm btn-danger delete-btn" data-id="' . $row->id . '" title="حذف"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
                     return $btn;
                 })
                 ->addColumn('program_title', function ($row) {
@@ -144,8 +144,8 @@ class StandaloneRegistrationAdminController extends AdminController
 
             return \Yajra\DataTables\Facades\DataTables::of($query)
                 ->addColumn('action', function ($row) {
-                    $btn = '<button type="button" class="btn btn-sm btn-primary view-details me-1" data-id="' . $row->id . '">View</button>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger delete-btn" data-id="' . $row->id . '">Delete</button>';
+                    $btn = '<button type="button" class="btn btn-icon btn-sm btn-primary view-details me-1" data-id="' . $row->id . '" title="عرض"><i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></button>';
+                    $btn .= '<button type="button" class="btn btn-icon btn-sm btn-danger delete-btn" data-id="' . $row->id . '" title="حذف"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
                     return $btn;
                 })
                 ->addColumn('program_title', function ($row) {

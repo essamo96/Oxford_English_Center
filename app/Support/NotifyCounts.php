@@ -108,8 +108,7 @@ class NotifyCounts
             + self::unreadContacts()
             + self::unreadStudentMessages($branchId)
             + self::unreadTeacherMessages($branchId)
-            + self::pendingStudentPayments($branchId)
-            + self::unreadComboRegistrations($branchId);
+            + self::pendingStudentPayments($branchId);
     }
 
     /** All notification data needed by the header dropdown (lists + counts). */
@@ -157,7 +156,7 @@ class NotifyCounts
             'Unread_measges_teacher'         => $teacherMsgs,
             'Pending_Student_Payments_Count' => $paymentsCount,
             'Unread_Combo_Registrations'     => $comboCount,
-            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs + $paymentsCount + $comboCount,
+            'total_notify_count'             => $closedCount + $studentsCount + $contactsCount + $studentMsgs + $teacherMsgs + $paymentsCount,
             'total_teachers_students_measge' => $studentMsgs + $teacherMsgs,
             'notify_closed_clases'           => $closedQ->latest()->take(5)->get(),
             'notify_students'                => $studentsQ->latest()->take(5)->get(),

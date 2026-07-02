@@ -44,14 +44,16 @@ class StandaloneRegistrationController extends Controller
     {
         $messages = [
             'full_name_ar.regex' => 'الرجاء إدخال حروف عربية فقط',
-            'phone.regex' => 'رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام'
+            'phone.regex' => 'رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام',
+            'phone.unique' => 'رقم الجوال هذا مسجل مسبقاً',
+            'email.unique' => 'البريد الإلكتروني هذا مسجل مسبقاً'
         ];
 
         $rules = [
             'full_name_ar' => 'required|string|max:255|regex:/^[\p{Arabic}\s]+$/u',
             'full_name_en' => 'required|string|max:255',
-            'phone' => 'required|string|regex:/^05[0-9]{8}$/',
-            'email' => 'required|email|max:255',
+            'phone' => 'required|string|regex:/^05[0-9]{8}$/|unique:student_compos,phone',
+            'email' => 'required|email|max:255|unique:student_compos,email',
             'dob' => 'required|date',
             'gender' => 'required|in:Male,Female',
             'address' => 'required|string',

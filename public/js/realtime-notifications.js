@@ -239,13 +239,24 @@
                 el.style.display = total > 0 ? '' : 'none';
             });
 
-            // Update header bell dot
-            document.querySelectorAll('.app-navbar-item .bullet-dot').forEach(function (el) {
+            // Update header bell dot (excluding combo badge dot)
+            document.querySelectorAll('.app-navbar-item .bullet-dot:not(.combo-badge-dot)').forEach(function (el) {
                 el.style.display = total > 0 ? '' : 'none';
             });
 
+            // Update combo requests UI elements specifically
+            var comboTotal = parseInt(counters.unread_combo_registrations, 10) || 0;
+            document.querySelectorAll('.combo-badge-dot').forEach(function(el) {
+                el.style.display = comboTotal > 0 ? '' : 'none';
+            });
+            document.querySelectorAll('.combo-badge-count').forEach(function(el) {
+                if (el.tagName === 'SPAN' && el.classList.contains('rt-bell-badge')) {
+                    el.style.display = comboTotal > 0 ? '' : 'none';
+                }
+            });
+
             // Update title text in notifications dropdown
-            var titleSpan = document.querySelector('.menu-sub-dropdown h3 span');
+            var titleSpan = document.getElementById('rt-notif-title-count');
             if (titleSpan) {
                 titleSpan.textContent = total + ' تقارير جديدة';
             }
@@ -271,6 +282,7 @@
                 // its two children (branch-scoped for branch admins, grand total for super admin).
                 'financial_total':          pendingPayments + pendingFinOrders,
                 'unread_combo_registrations': parseInt(counters.unread_combo_registrations, 10) || 0,
+                'unread_combo_registrations_title': parseInt(counters.unread_combo_registrations, 10) || 0,
                 'combo_requests_total':       parseInt(counters.unread_combo_registrations, 10) || 0
             };
 
@@ -418,7 +430,33 @@
             console.log('[RT] subscribed to ' + channelName);
         });
         channel.bind('new.booking', function (data) { NotificationManager.show(data); refreshDropdown(); });
-        channel.bind('new.combo', function (data) { NotificationManager.show(data); refreshDropdown(); });
+        channel.bind('new.combo', function (data) { 
+            NotificationManager.show(data); 
+            var comboList = document.getElementById('combo-notifications-list');
+            if(comboList) {
+                var emptyMsg = comboList.querySelector('.text-center.py-5');
+                if(emptyMsg) emptyMsg.remove();
+                
+                var html = 
+                    '<div class="d-flex flex-stack py-4" id="combo_notif_item_' + data.id + '">' +
+                        '<div class="d-flex align-items-center">' +
+                            '<div class="symbol symbol-35px me-4">' +
+                                '<span class="symbol-label bg-light-success">' +
+                                    '<i class="ki-duotone ki-user fs-2 text-success"><span class="path1"></span><span class="path2"></span></i>' +
+                                '</span>' +
+                            '</div>' +
+                            '<div class="mb-0 me-2">' +
+                                '<a href="' + (data.link || '#') + '" class="fs-6 text-gray-800 text-hover-primary fw-bold mark-single-combo-read" data-id="' + data.id + '">' +
+                                    esc(data.client_name || 'طالب جديد') +
+                                '</a>' +
+                                '<div class="text-gray-500 fs-7">' + (data.created_at || 'الآن') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                comboList.insertAdjacentHTML('afterbegin', html);
+            }
+            refreshDropdown(); 
+        });
         channel.bind('new.contact', function (data) { NotificationManager.show(data); refreshDropdown(); });
         channel.bind('counters.updated', function (data) {
             if (data && data.counters) {

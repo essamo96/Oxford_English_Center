@@ -19,21 +19,6 @@
                 <span class="badge badge-light fs-8 text-muted">{{ $st->created_at->diffForHumans() }}</span>
             </div>
             @endforeach
-            @foreach($nd['notify_combo_registrations'] as $combo)
-            <div class="d-flex flex-stack py-4">
-                <div class="d-flex align-items-center">
-                    <div class="symbol symbol-35px me-4"><span class="symbol-label bg-light-info"><i class="ki-duotone ki-address-book fs-2 text-info"><span class="path1"></span><span class="path2"></span></i></span></div>
-                    <div class="mb-0 me-2">
-                        <a href="{{ route('admin.standalone_registrations.markAsRead', $combo->id) }}" class="fs-6 text-gray-800 text-hover-info fw-bold" onclick="event.preventDefault(); document.getElementById('mark-read-combo-{{ $combo->id }}').submit();">طلب كومبو: {{ $combo->full_name_ar ?? $combo->full_name_en }}</a>
-                        <form id="mark-read-combo-{{ $combo->id }}" action="{{ route('admin.standalone_registrations.markAsRead', $combo->id) }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
-                        <div class="text-gray-400 fs-7">طلب تسجيل برنامج {{ $combo->program_type }}</div>
-                    </div>
-                </div>
-                <span class="badge badge-light-info fs-8">{{ $combo->created_at->diffForHumans() }}</span>
-            </div>
-            @endforeach
             @foreach($nd['notify_closed_clases'] as $cl)
             <div class="d-flex flex-stack py-4">
                 <div class="d-flex align-items-center">
@@ -58,7 +43,7 @@
                 <span class="badge badge-light-success fs-8">{{ $pay->created_at->diffForHumans() }}</span>
             </div>
             @endforeach
-            @if(count($nd['notify_students'])==0 && count($nd['notify_combo_registrations'])==0 && count($nd['notify_closed_clases'])==0 && count($nd['notify_student_payments'])==0)
+            @if(count($nd['notify_students'])==0 && count($nd['notify_closed_clases'])==0 && count($nd['notify_student_payments'])==0)
             <div class="text-center py-8 text-gray-400 fs-7">لا توجد تنبيهات</div>
             @endif
         </div>

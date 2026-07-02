@@ -75,18 +75,16 @@
                         <i class="ki-duotone ki-user-edit fs-2">
                             <span class="path1"></span><span class="path2"></span><span class="path3"></span>
                         </i>
-                        @if ($standalone_unread > 0)
-                            <span class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink combo-badge-dot"></span>
-                            <span class="rt-bell-badge combo-badge-count">{{ $standalone_unread }}</span>
-                        @endif
+                        <span class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink combo-badge-dot" style="{{ $standalone_unread > 0 ? '' : 'display:none;' }}"></span>
+                        <span class="rt-bell-badge combo-badge-count" data-live-counter="unread_combo_registrations" style="{{ $standalone_unread > 0 ? '' : 'display:none;' }}">{{ $standalone_unread }}</span>
                     </div>
                     
                     <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">
                         <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-color: #0A2540;">
                             <h3 class="text-white fw-semibold px-9 mt-10 mb-6">طلبات كومبو
-                            <span class="fs-8 opacity-75 ps-3 combo-badge-count">{{ $standalone_unread }} طلبات جديدة</span></h3>
+                            <span class="fs-8 opacity-75 ps-3 combo-badge-count"><span data-live-counter="unread_combo_registrations_title">{{ $standalone_unread }}</span> طلبات جديدة</span></h3>
                         </div>
-                        <div class="scroll-y mh-325px my-5 px-8">
+                        <div class="scroll-y mh-325px my-5 px-8" id="combo-notifications-list">
                             @if($standalone_unread > 0)
                                 <div class="text-end mb-2">
                                     <a href="javascript:;" class="mark-all-combo-read fs-8 fw-bold text-primary">تحديد الكل كمقروء</a>
@@ -223,17 +221,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const singleItems = document.querySelectorAll('.mark-single-combo-read');
-    singleItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            const id = this.getAttribute('data-id');
+    document.addEventListener('click', function(e) {
+        const item = e.target.closest('.mark-single-combo-read');
+        if(item) {
+            const id = item.getAttribute('data-id');
             fetch(`{{ url('admin/standalone-registrations/mark-read') }}/${id}`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             });
-        });
+        }
     });
 });
 </script>

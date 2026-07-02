@@ -286,7 +286,7 @@
             <div class="card-body d-flex ps-xl-15">
                 <div class="m-0">
                     <div class="position-relative fs-2x z-index-2 fw-bold text-white mb-7">
-                        أهلاً بك في أكاديمية أوكسفورد
+                        أهلاً بك في أكاديمية أكسفورد
                         <br />
                         <span class="fs-4 fw-semibold opacity-75">إدارة تعليمية متكاملة بأحدث المعايير</span>
                     </div>
