@@ -175,6 +175,8 @@ class StandaloneRegistrationAdminController extends AdminController
         self::$data['branches'] = \App\Models\Branch::where('status', 1)->get();
         
         return view('admin.standalone_registrations.parents', self::$data);
+    }
+
     public function toggleContact(Request $request)
     {
         $registration = StudentCompo::findOrFail($request->id);
