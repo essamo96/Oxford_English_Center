@@ -83,6 +83,13 @@ class ProgramsController extends AdminController
 
             return view('admin.programs.parts.status', $data)->render();
         });
+
+        $datatable->editColumn('is_placement_test', function ($row) {
+            $data['id'] = $row->id;
+            $data['is_placement_test'] = $row->is_placement_test;
+
+            return view('admin.programs.parts.placement_status', $data)->render();
+        });
         $datatable->editColumn('grope_no', function ($row) {
             $group = new Groups();
             $group_count = $group->countGroup($row->id);
@@ -255,6 +262,7 @@ class ProgramsController extends AdminController
                 if (is_object($add) && isset($add->id)) {
                     $add->registration_start = $request->get('registration_start') ?: null;
                     $add->registration_end   = $request->get('registration_end') ?: null;
+                    $add->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
                     $add->save();
                     $this->applyPlacementDefault($request, $add->id);
                 }
@@ -340,6 +348,7 @@ class ProgramsController extends AdminController
                 if ($update) {
                     $info->registration_start = $request->get('registration_start') ?: null;
                     $info->registration_end   = $request->get('registration_end') ?: null;
+                    $info->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
                     $info->save();
                     $this->applyPlacementDefault($request, $id);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
@@ -413,6 +422,32 @@ class ProgramsController extends AdminController
             return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
         }
     }
+
+    //////////////////////////////////////////////
+    public function postPlacementStatus(Request $request)
+    {
+        $id = $request->get('id');
+        try {
+            $id = Crypt::decrypt($id);
+        } catch (DecryptException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Error Decode']);
+        }
+        
+        $programs = new Programs();
+        $info = $programs->getProgram($id);
+        if ($info) {
+            $is_placement_test = $request->get('is_placement_test') ? 1 : 0;
+            $info->is_placement_test = $is_placement_test;
+            if ($info->save()) {
+                return response()->json(['status' => 'success', 'message' => 'تم التحديث بنجاح']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => self::EXECUTION_ERROR]);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
+        }
+    }
+
     public function getProgramGroupsDetails(Request $request, $id) {
         try {
             $id = Crypt::decrypt($id);

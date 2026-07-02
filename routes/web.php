@@ -456,6 +456,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('programs/delete', ['as' => 'programs.delete', 'middleware' => ['permission:admin.programs.delete'], 'uses' => 'ProgramsController@postDelete']);
     Route::get('programs/details/{id}', ['as' => 'programs.details', 'middleware' => ['permission:admin.programs.view'], 'uses' => 'ProgramsController@getProgramGroupsDetails']);
     Route::post('programs/status', ['as' => 'programs.status', 'middleware' => ['permission:admin.programs.status'], 'uses' => 'ProgramsController@postStatus']);
+    Route::post('programs/placement-status', ['as' => 'programs.placement_status', 'middleware' => ['permission:admin.programs.status'], 'uses' => 'ProgramsController@postPlacementStatus']);
 
     //groups Route
     Route::get('groups', ['as' => 'groups.view', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getIndex']);

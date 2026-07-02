@@ -83,6 +83,7 @@
                         <th class="min-w-100px text-center"> إجمالي الطلاب </th>
                         <th class="min-w-160px text-center"> الحد الأدنى للدفع </th>
                         <th class="min-w-100px text-center"> الحالة </th>
+                        <th class="min-w-100px text-center"> إخفاء (تحديد مستوى) </th>
                         <th class="text-center min-w-150px"> العمليات </th>
                     </tr>
                 </thead>
@@ -134,6 +135,7 @@
         { data: "students_count", name: "students_count", className: "text-center" },
         { data: "min_payment", name: "min_payment", orderable: false, searchable: false, className: "text-center" },
         { data: "status", name: "status", orderable: true, searchable: false },
+        { data: "is_placement_test", name: "is_placement_test", orderable: true, searchable: false, className: "text-center" },
         { data: "actions", name: "actions", orderable: false, searchable: false, className: "text-center" }
     ];
 
@@ -208,6 +210,36 @@
                             confirmButton: "btn btn-primary"
                         }
                     });
+                }
+            });
+        });
+
+        // Add handler for placement-status toggle
+        $(document).on('change', '.placement-status', function(e) {
+            e.preventDefault();
+            var id = $(this).data('href');
+            var isChecked = $(this).is(':checked');
+            var url = "{{ route('programs.placement_status') }}";
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: id,
+                    is_placement_test: isChecked ? 1 : 0
+                },
+                success: function(response) {
+                    if (response.status == 'success') {
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                        table.ajax.reload(null, false);
+                    }
+                },
+                error: function() {
+                    toastr.error('حدث خطأ أثناء تغيير الحالة');
+                    table.ajax.reload(null, false);
                 }
             });
         });

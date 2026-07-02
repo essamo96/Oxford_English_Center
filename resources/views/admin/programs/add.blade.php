@@ -85,6 +85,13 @@
                         <label class="form-check-label">يُحدَّد تلقائيًا في خطوة «تحديد المستوى» بالتسجيل (برنامج واحد فقط)</label>
                     </div>
                 </div>
+                <div class="col-md-6 fv-row mt-4">
+                    <label class="fs-6 fw-semibold mb-2">إخفاء من فورم التسجيل (برنامج تحديد مستوى)</label>
+                    <div class="form-check form-switch form-check-custom form-check-solid mt-2">
+                        <input class="form-check-input" type="checkbox" value="1" name="is_placement_test" {{ old('is_placement_test') == 1 ? 'checked' : '' }} />
+                        <label class="form-check-label">تفعيل (لن يظهر في قائمة البرامج في فورم التسجيل)</label>
+                    </div>
+                </div>
             </div>
 
             <div class="row g-9 mb-8">
