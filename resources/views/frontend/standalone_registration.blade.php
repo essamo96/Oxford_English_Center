@@ -966,10 +966,19 @@
                             <span dir="ltr">{{ $settings->mobile ?? '+970XXXXXXXXX' }}</span>
                         </div>
                     </div>
+
+                    <div class="mt-3 p-3 rounded" style="background: rgba(138, 21, 56, 0.05); border: 1px dashed var(--date-red);">
+                        <strong class="mb-2 d-block" style="color: var(--date-red); font-family: 'Cairo', sans-serif; font-size: 1.05rem;" dir="rtl">ملاحظة: يتم تسديد الرسوم على ثلاثة شهور كالتالي:</strong>
+                        <ul style="color: var(--date-red); font-family: 'Cairo', sans-serif; list-style-type: disc; padding-right: 1.5rem; margin-bottom: 0;" dir="rtl">
+                            <li>الشهر الاول عند التسجيل: 500 شيكل بالإضافة لرسوم الكتب 150 شيكل.</li>
+                            <li>الشهر الثاني: 400 شيكل.</li>
+                            <li>الشهر الثالث: 300 شيكل.</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-submit" id="submitBtn">
-                    <span class="btn-text">Complete Registration (إتمام التسجيل)</span>
+                    <span class="btn-text">Submit (تأكيد الطلب)</span>
                     <div class="loader"></div>
                 </button>
             </form>
@@ -991,8 +1000,9 @@
                     @endforeach
                 </div>
             @endif
-            <div class="ote-logo-container">
+            <div class="ote-logo-container d-flex justify-content-center align-items-center flex-wrap" style="gap: 2rem;">
                 <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+                <img src="{{ asset('assets/images/oxford-ielts.png') }}" alt="Oxford ELLT Global" style="mix-blend-mode: multiply;">
             </div>
         </div>
     </div>
