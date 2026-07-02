@@ -859,7 +859,7 @@
                                     $minDue = $baseFee;
                                 }
                                 $feesJson = json_encode($progFees->map(function($f) {
-                                    return ['name' => $f->type_name, 'amount' => $f->amount];
+                                    return ['name' => $f->name_en . ' (' . $f->name_ar . ')', 'amount' => $f->amount];
                                 })->toArray());
                             @endphp
                             <option value="{{ $program->id }}" 
@@ -872,6 +872,33 @@
                         @endforeach
                     </select>
                     <div class="invalid-feedback"></div>
+                </div>
+
+                <div id="paymentScheduleNote" class="mb-4 p-3 rounded d-flex align-items-start" style="display: none; background: rgba(138, 21, 56, 0.05); border: 1px dashed var(--date-red); gap: 1rem;" dir="ltr">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--date-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 4px;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <div style="flex-grow: 1;">
+                        <strong class="mb-2 d-block" style="color: var(--date-red); font-family: 'Inter', sans-serif; font-size: 1.05rem;" dir="ltr">
+                            Note: Payment Schedule over 3 months:
+                            <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: normal; margin-left: 5px;">(ملاحظة: يتم تسديد الرسوم على ثلاثة شهور كالتالي)</span>
+                        </strong>
+                        
+                        <ul style="color: var(--date-red); font-family: 'Inter', sans-serif; list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0;" dir="ltr">
+                            <li class="mb-2">
+                                <strong>First month upon registration:</strong> 500 NIS + Book fees 150 NIS.<br>
+                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الأول عند التسجيل: 500 شيكل بالإضافة لرسوم الكتب 150 شيكل)</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Second month:</strong> 400 NIS.<br>
+                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثاني: 400 شيكل)</span>
+                            </li>
+                            <li>
+                                <strong>Third month:</strong> 300 NIS.<br>
+                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثالث: 300 شيكل)</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div id="invoiceBox" class="invoice-box" style="display:none;">
@@ -950,32 +977,6 @@
                         </div>
                     </div>
 
-                    <div id="paymentScheduleNote" class="mt-3 p-3 rounded d-flex align-items-start" style="display: none; background: rgba(138, 21, 56, 0.05); border: 1px dashed var(--date-red); gap: 1rem;" dir="ltr">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--date-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 4px;">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <div style="flex-grow: 1;">
-                            <strong class="mb-2 d-block" style="color: var(--date-red); font-family: 'Inter', sans-serif; font-size: 1.05rem;" dir="ltr">
-                                Note: Payment Schedule over 3 months:
-                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: normal; margin-left: 5px;">(ملاحظة: يتم تسديد الرسوم على ثلاثة شهور كالتالي)</span>
-                            </strong>
-                            
-                            <ul style="color: var(--date-red); font-family: 'Inter', sans-serif; list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0;" dir="ltr">
-                                <li class="mb-2">
-                                    <strong>First month upon registration:</strong> 500 NIS + Book fees 150 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الأول عند التسجيل: 500 شيكل بالإضافة لرسوم الكتب 150 شيكل)</span>
-                                </li>
-                                <li class="mb-2">
-                                    <strong>Second month:</strong> 400 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثاني: 400 شيكل)</span>
-                                </li>
-                                <li>
-                                    <strong>Third month:</strong> 300 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثالث: 300 شيكل)</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
 
                 <button type="submit" class="btn-submit" id="submitBtn">

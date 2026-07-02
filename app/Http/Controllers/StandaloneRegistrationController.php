@@ -23,7 +23,7 @@ class StandaloneRegistrationController extends Controller
         $settings = \App\Models\Settings::find(1);
         $allFees = DB::table('fee_settings')
             ->join('fee_types', 'fee_settings.type', '=', 'fee_types.slug')
-            ->select('fee_settings.*', 'fee_types.name_ar as type_name')
+            ->select('fee_settings.*', 'fee_types.name_en', 'fee_types.name_ar')
             ->get();
             
         $feesByProgram = $allFees->groupBy('program_id');
