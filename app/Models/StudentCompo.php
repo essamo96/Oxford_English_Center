@@ -10,7 +10,7 @@ class StudentCompo extends Model
     protected $fillable = [
         'full_name_ar', 'full_name_en', 'phone', 'email', 'dob', 'gender',
         'address', 'branch', 'major_profession', 'health_issues', 'health_issues_details',
-        'placement_test', 'placement_test_date', 'program_id', 'program_type', 'is_invoiced', 'is_read'
+        'placement_test', 'placement_test_date', 'program_id', 'program_type', 'is_invoiced', 'is_read', 'is_contacted'
     ];
 
     public function parents()

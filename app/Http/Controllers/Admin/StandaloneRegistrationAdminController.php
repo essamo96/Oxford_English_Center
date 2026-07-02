@@ -16,6 +16,9 @@ class StandaloneRegistrationAdminController extends AdminController
             if ($request->filled('program_id')) {
                 $query->where('program_id', $request->program_id);
             }
+            if ($request->filled('program_type')) {
+                $query->where('program_type', $request->program_type);
+            }
             if ($request->filled('gender')) {
                 $query->where('gender', $request->gender);
             }
@@ -31,8 +34,14 @@ class StandaloneRegistrationAdminController extends AdminController
             if ($request->filled('date_to')) {
                 $query->whereDate('created_at', '<=', $request->date_to);
             }
+            if ($request->filled('is_contacted')) {
+                $query->where('is_contacted', $request->is_contacted);
+            }
 
             return \Yajra\DataTables\Facades\DataTables::of($query)
+                ->setRowClass(function ($row) {
+                    return $row->is_contacted ? 'bg-light-success' : '';
+                })
                 ->addColumn('action', function ($row) {
                     $btn = '<button type="button" class="btn btn-sm btn-primary view-details me-1" data-id="' . $row->id . '">View</button>';
                     $btn .= '<button type="button" class="btn btn-sm btn-danger delete-btn" data-id="' . $row->id . '">Delete</button>';
@@ -47,7 +56,13 @@ class StandaloneRegistrationAdminController extends AdminController
                 ->editColumn('created_at', function ($row) {
                     return $row->created_at->format('Y-m-d H:i');
                 })
-                ->rawColumns(['action', 'is_read'])
+                ->editColumn('is_contacted', function ($row) {
+                    $checked = $row->is_contacted ? 'checked' : '';
+                    return '<div class="form-check form-switch form-check-custom form-check-solid d-flex justify-content-center">
+                                <input class="form-check-input contact-toggle" type="checkbox" data-id="' . $row->id . '" ' . $checked . ' />
+                            </div>';
+                })
+                ->rawColumns(['action', 'is_read', 'is_contacted'])
                 ->make(true);
         }
 
@@ -160,5 +175,12 @@ class StandaloneRegistrationAdminController extends AdminController
         self::$data['branches'] = \App\Models\Branch::where('status', 1)->get();
         
         return view('admin.standalone_registrations.parents', self::$data);
+    public function toggleContact(Request $request)
+    {
+        $registration = StudentCompo::findOrFail($request->id);
+        $registration->is_contacted = $request->is_contacted;
+        $registration->save();
+
+        return response()->json(['success' => true]);
     }
 }

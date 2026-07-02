@@ -37,6 +37,14 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <label class="filter-label">Program Type <span class="text-muted">(نوع البرنامج)</span></label>
+                <select name="program_type" class="form-select form-select-solid">
+                    <option value="">All</option>
+                    <option value="Kids">Kids (برنامج الصغار)</option>
+                    <option value="Adults">Adults (برنامج الكبار)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="filter-label">Gender</label>
                 <select name="gender" class="form-select form-select-solid">
                     <option value="">All</option>
@@ -62,6 +70,14 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <label class="filter-label">Contact Status <span class="text-muted">(حالة التواصل)</span></label>
+                <select name="is_contacted" class="form-select form-select-solid">
+                    <option value="">All</option>
+                    <option value="1">Contacted (تم التواصل)</option>
+                    <option value="0">Not Contacted (لم يتم التواصل)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="filter-label">Date From</label>
                 <input type="date" name="date_from" class="form-control form-control-solid">
             </div>
@@ -84,6 +100,11 @@
                 <i class="ki-duotone ki-people fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Standalone Registrations
             </span>
         </div>
+        <div class="card-toolbar">
+            <button type="button" class="btn btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
+                <i class="ki-duotone ki-scan-barcode fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></i> إنشاء QR Code
+            </button>
+        </div>
     </div>
     <div class="card-body py-4">
         <div class="table-responsive">
@@ -97,6 +118,7 @@
                         <th class="min-w-80px text-center">Phone</th>
                         <th class="min-w-80px text-center">DOB</th>
                         <th class="min-w-80px text-center">Status</th>
+                        <th class="min-w-80px text-center">Contacted <span class="d-block fs-8">(تم التواصل)</span></th>
                         <th class="min-w-100px text-center">Registered At</th>
                         <th class="text-center min-w-100px pe-4"> Actions </th>
                     </tr>
@@ -129,10 +151,35 @@
         </div>
     </div>
 </div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registration Form QR Code</h5>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ki-duotone ki-cross fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-muted mb-5" style="font-family:'Cairo'">امسح الرمز لفتح نموذج طلبات كومبو الخارجي</p>
+                <div id="qrcode-container" style="position: relative; display: inline-block;">
+                    <div id="qrcode"></div>
+                    <img src="{{ url('assets/oxford/img/logo.png') }}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: white; padding: 5px; border-radius: 8px;">
+                </div>
+                <div class="mt-6">
+                    <a href="{{ route('registration.standalone') }}" target="_blank" class="text-primary fw-bold" style="word-break: break-all;">{{ route('registration.standalone') }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
 <script src="{{ asset('assets/admin/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     $(document).ready(function() {
         var table = $('#registrations_table').DataTable({
@@ -142,23 +189,24 @@
                 url: "{{ route('standalone_registrations.view') }}",
                 data: function (d) {
                     d.program_id = $('select[name="program_id"]').val();
+                    d.program_type = $('select[name="program_type"]').val();
                     d.gender = $('select[name="gender"]').val();
                     d.branch = $('select[name="branch"]').val();
                     d.is_invoiced = $('select[name="is_invoiced"]').val();
+                    d.is_contacted = $('select[name="is_contacted"]').val();
                     d.date_from = $('input[name="date_from"]').val();
                     d.date_to = $('input[name="date_to"]').val();
                 }
             },
             columns: [
-                {data: 'id', name: 'id', orderable: false, searchable: false, render: function (data, type, row, meta) {
-                    return meta.row + meta.settings._iDisplayStart + 1;
-                }},
+                {data: 'id', name: 'id'},
                 {data: 'full_name_en', name: 'full_name_en'},
                 {data: 'full_name_ar', name: 'full_name_ar'},
-                {data: 'program_title', name: 'program.title', orderable: false, searchable: false},
+                {data: 'program_title', name: 'program_id'},
                 {data: 'phone', name: 'phone'},
                 {data: 'dob', name: 'dob'},
                 {data: 'is_read', name: 'is_read'},
+                {data: 'is_contacted', name: 'is_contacted', orderable: false, searchable: false},
                 {data: 'created_at', name: 'created_at'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
@@ -168,14 +216,110 @@
             order: [[7, 'desc']]
         });
 
-        $('#btn-filter').click(function(){
+        $('#btn-filter').click(function() {
             table.draw();
         });
 
-        $('#btn-reset').click(function(){
+        $('#btn-reset').click(function() {
             $('#filterForm')[0].reset();
-            $('select[name="program_id"]').val(null).trigger('change');
+            $('select[data-control="select2"]').val(null).trigger('change');
             table.draw();
+        });
+
+        // Delegate view details button
+        $('#registrations_table').on('click', '.view-details', function() {
+            var id = $(this).data('id');
+            $('#detailsModal').modal('show');
+            $('#detailsContent').html('<div class="text-center py-10"><span class="spinner-border text-primary" role="status"></span></div>');
+            
+            $.get("{{ url('admin/standalone-registrations/show') }}/" + id, function(res) {
+                if (res.success) {
+                    var data = res.data;
+                    var parents = res.parents;
+                    
+                    var html = '<div class="row mb-5">';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Name (AR):</label><div class="fs-6">' + (data.full_name_ar || '-') + '</div></div>';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Name (EN):</label><div class="fs-6">' + (data.full_name_en || '-') + '</div></div>';
+                    html += '</div>';
+
+                    html += '<div class="row mb-5">';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Phone:</label><div class="fs-6">' + (data.phone || '-') + '</div></div>';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Email:</label><div class="fs-6">' + (data.email || '-') + '</div></div>';
+                    html += '</div>';
+
+                    html += '<div class="row mb-5">';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Date of Birth:</label><div class="fs-6">' + (data.dob || '-') + '</div></div>';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Gender:</label><div class="fs-6">' + (data.gender || '-') + '</div></div>';
+                    html += '</div>';
+
+                    html += '<div class="row mb-5">';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Address:</label><div class="fs-6">' + (data.address || '-') + '</div></div>';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Branch:</label><div class="fs-6">' + (data.branch || '-') + '</div></div>';
+                    html += '</div>';
+
+                    html += '<div class="row mb-5">';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Major/Profession:</label><div class="fs-6">' + (data.major_profession || '-') + '</div></div>';
+                    html += '<div class="col-md-6"><label class="fw-bold text-muted">Program:</label><div class="fs-6">' + (data.program ? data.program.title : '-') + '</div></div>';
+                    html += '</div>';
+                    
+                    if (data.health_issues === 'Yes') {
+                        html += '<div class="row mb-5">';
+                        html += '<div class="col-md-12"><label class="fw-bold text-danger">Health Issues:</label><div class="fs-6 text-danger">' + (data.health_issues_details || '-') + '</div></div>';
+                        html += '</div>';
+                    }
+
+                    if (parents && parents.length > 0) {
+                        html += '<div class="separator my-5"></div>';
+                        html += '<h4 class="text-info mb-4">Parents Details</h4>';
+                        html += '<div class="table-responsive"><table class="table table-bordered text-center">';
+                        html += '<thead class="bg-light"><tr><th>Name</th><th>Kinship</th><th>Phone</th><th>ID No</th><th>Job</th></tr></thead><tbody>';
+                        $.each(parents, function(i, parent) {
+                            html += '<tr>';
+                            html += '<td>' + (parent.full_name || '-') + '</td>';
+                            html += '<td>' + (parent.kinship || '-') + '</td>';
+                            html += '<td>' + (parent.phone || '-') + '</td>';
+                            html += '<td>' + (parent.id_no || '-') + '</td>';
+                            html += '<td>' + (parent.job || '-') + '</td>';
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    $('#detailsContent').html(html);
+                    
+                    // Reload table if status was updated
+                    table.draw(false);
+                }
+            });
+        });
+
+        // Delegate toggle contact switch
+        $('#registrations_table').on('change', '.contact-toggle', function() {
+            var id = $(this).data('id');
+            var is_contacted = $(this).is(':checked') ? 1 : 0;
+            
+            $.post("{{ route('admin.standalone_registrations.toggleContact') }}", {
+                _token: '{{ csrf_token() }}',
+                id: id,
+                is_contacted: is_contacted
+            }, function(res) {
+                if (res.success) {
+                    table.draw(false);
+                } else {
+                    alert('Error updating status');
+                }
+            });
+        });
+
+        // Generate QR Code
+        var qrUrl = "{{ route('registration.standalone') }}";
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: qrUrl,
+            width: 250,
+            height: 250,
+            colorDark : "#0a2540",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H // High error correction needed when placing an image on top
         });
 
         // Delete Logic
