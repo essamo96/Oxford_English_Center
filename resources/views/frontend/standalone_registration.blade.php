@@ -957,6 +957,10 @@
         
         <!-- Social Media & OTE Logo Footer -->
         <div class="registration-footer">
+            <div class="ote-logo-container d-flex justify-content-center align-items-center flex-wrap mb-4" style="gap: 2rem;">
+                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+                <img src="{{ asset('assets/images/oxford-ielts.png') }}" alt="Oxford ELLT Global" style="mix-blend-mode: multiply;">
+            </div>
             @if(isset($socials) && count($socials) > 0)
                 <h5 style="color:var(--primary); font-family: 'Cairo', sans-serif; margin-bottom: 1.5rem; font-size: 1.15rem; font-weight: 700;">تابعنا على منصات التواصل (Follow Us)</h5>
                 <div class="social-icons">
@@ -971,10 +975,6 @@
                     @endforeach
                 </div>
             @endif
-            <div class="ote-logo-container d-flex justify-content-center align-items-center flex-wrap" style="gap: 2rem;">
-                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
-                <img src="{{ asset('assets/images/oxford-ielts.png') }}" alt="Oxford ELLT Global" style="mix-blend-mode: multiply;">
-            </div>
         </div>
     </div>
 
