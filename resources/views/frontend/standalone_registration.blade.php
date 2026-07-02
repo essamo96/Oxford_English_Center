@@ -112,7 +112,7 @@
             font-weight: 700;
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--accent);
+            border-bottom: 2px solid var(--date-red);
             display: inline-block;
         }
 
@@ -144,8 +144,8 @@
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+            border-color: var(--date-red);
+            box-shadow: 0 0 0 4px rgba(138, 21, 56, 0.15);
             background-color: #fff;
             transform: translateY(-2px);
         }
@@ -170,12 +170,12 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--accent);
+            background: var(--date-red);
             border-radius: 4px 0 0 4px;
         }
 
         .invoice-box:hover {
-            border-color: var(--accent);
+            border-color: var(--date-red);
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             transform: translateY(-3px);
         }
@@ -193,7 +193,7 @@
         .payment-method-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
-            border-color: var(--accent) !important;
+            border-color: var(--date-red) !important;
         }
 
         .btn-submit {
@@ -228,9 +228,9 @@
         }
 
         .whatsapp-note {
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 4px solid var(--success);
-            color: #065f46;
+            background: rgba(138, 21, 56, 0.1);
+            border-left: 4px solid var(--date-red);
+            color: var(--date-red);
             padding: 1rem 1.5rem;
             border-radius: 0 12px 12px 0;
             display: flex;
@@ -240,7 +240,7 @@
         }
 
         .whatsapp-note svg {
-            color: var(--success);
+            color: var(--date-red);
             flex-shrink: 0;
             margin-top: 2px;
         }
@@ -672,32 +672,34 @@
     </div>
 
     <div class="registration-container">
-        <!-- Hanging 3D Medals -->
+        <!-- Hanging 3D Medals 
         <div class="hanging-medals-wrapper">
             <div class="hanging-string"></div>
             <div class="medal-scene">
                 <div class="medal-3d">
-                    <!-- Front side: Oxford Logo -->
                     <div class="medal-face">
                         <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Logo">
                     </div>
-                    <!-- Back side: 2026 Logo -->
                     <div class="medal-face medal-back">
                         <img src="{{ asset('assets/images/LOGO_2026_bg_remove.png') }}" alt="2026 Logo">
                     </div>
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Promotional Ribbon (Top Right) -->
-        <div class="promo-ribbon">
-            <div class="promo-text">
-                <i class="bi bi-fire"></i> لا تضيع الفرصة
+        <style>
+            .promo-ribbon-red::after { border-color: #610B24 transparent transparent transparent !important; }
+        </style>
+        <div class="promo-ribbon promo-ribbon-red" style="background: var(--date-red); box-shadow: -3px 5px 15px rgba(138, 21, 56, 0.4); border-color: var(--date-red); direction: ltr;">
+            <div class="promo-text" style="font-size: 1.05rem;">
+                Welcome To Oxford Family
             </div>
         </div>
 
         <div class="header">
-            <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Center Logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
+            <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford Centre Logo" onerror="this.src='https://via.placeholder.com/120x120.png?text=Logo'">
             <h1>Student Registration Form</h1>
             <p style="font-family: 'Cairo', sans-serif;" dir="rtl">نموذج تسجيل الطلاب - مركز أكسفورد</p>
         </div>
@@ -874,9 +876,9 @@
                                 } else {
                                     $minDue = $baseFee;
                                 }
-                                $feesJson = htmlspecialchars(json_encode($progFees->map(function($f) {
+                                $feesJson = json_encode($progFees->map(function($f) {
                                     return ['name' => $f->type_name, 'amount' => $f->amount];
-                                })->toArray()));
+                                })->toArray());
                             @endphp
                             <option value="{{ $program->id }}" 
                                 data-title="{{ $program->title }}" 
@@ -906,11 +908,21 @@
                             <p class="fw-bold fs-5 text-primary">₪ <span id="invMinAmount">0.00</span></p>
                         </div>
                         <div class="col-md-12">
-                            <p class="mb-2 text-muted">Fee Details (تفاصيل الرسوم):</p>
-                            <ul class="list-group mb-2" id="invFeeDetailsList">
-                                <!-- Dynamically populated list -->
-                            </ul>
-                            <p class="fs-6 text-muted mb-0"><small>* Includes program registration and base tuition. (تشمل جميع المتطلبات الأساسية للبرنامج)</small></p>
+                            <p class="mb-2 fw-bold" style="color: var(--date-red) !important;">Fee Details (تفاصيل الرسوم):</p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm mb-2 text-center align-middle" dir="ltr">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="color: var(--primary);">Fee Type (نوع الرسم)</th>
+                                            <th style="color: var(--primary);">Amount (المبلغ ₪)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invFeeDetailsList">
+                                        <!-- Dynamically populated list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="fs-6 mb-0 fw-bold" style="color: var(--date-red) !important;"><small>* Includes program registration and base tuition. (تشمل جميع المتطلبات الأساسية للبرنامج)</small></p>
                         </div>
                     </div>
                     
@@ -1102,13 +1114,12 @@
                             const details = JSON.parse(feesDetailsStr);
                             if (details.length > 0) {
                                 details.forEach(fee => {
-                                    const li = document.createElement('li');
-                                    li.className = 'list-group-item d-flex justify-content-between align-items-center py-2';
-                                    li.innerHTML = `<span>${fee.name}</span> <span class="fw-bold">₪ ${parseFloat(fee.amount).toFixed(2)}</span>`;
-                                    detailsList.appendChild(li);
+                                    const tr = document.createElement('tr');
+                                    tr.innerHTML = `<td>${fee.name}</td><td class="fw-bold" dir="ltr">₪ ${parseFloat(fee.amount).toFixed(2)}</td>`;
+                                    detailsList.appendChild(tr);
                                 });
                             } else {
-                                detailsList.innerHTML = '<li class="list-group-item text-muted py-2">No fees specified</li>';
+                                detailsList.innerHTML = '<tr><td colspan="2" class="text-muted py-2">No fees specified</td></tr>';
                             }
                         } catch(e) {
                             console.error('Error parsing fees details', e);
