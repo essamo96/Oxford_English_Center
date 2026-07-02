@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oxford Center | Standalone Registration</title>
+    <title>Oxford Centre | Standalone Registration</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS for grid -->
@@ -30,6 +30,8 @@
             --text-muted: #64748b;
             --border: #e2e8f0;
             --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --oxford-blue: #36336D;
+            --date-red: #8A1538;
         }
 
         body {
@@ -195,7 +197,7 @@
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, var(--accent) 0%, #b8962b 100%);
+            background: linear-gradient(135deg, var(--oxford-blue) 0%, #292654 100%);
             color: #fff;
             border: none;
             padding: 1.2rem;
@@ -210,14 +212,14 @@
             justify-content: center;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 8px 16px rgba(212, 175, 55, 0.25);
+            box-shadow: 0 8px 16px rgba(54, 51, 109, 0.25);
             margin-top: 2rem;
         }
 
         .btn-submit:hover {
-            background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+            background: linear-gradient(135deg, #444085 0%, var(--oxford-blue) 100%);
             transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.35);
+            box-shadow: 0 12px 24px rgba(54, 51, 109, 0.35);
             color: #fff;
         }
         
@@ -999,13 +1001,13 @@
     <!-- Success Modal -->
     <div id="successModal">
         <div class="modal-content-custom">
-            <div class="modal-icon">
+            <div class="modal-icon" style="background: var(--date-red); box-shadow: 0 10px 25px rgba(138, 21, 56, 0.3);">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
-            <h2 style="color:var(--primary); font-weight:800; margin-bottom:0.5rem; font-size: 2rem;">Registration Successful!</h2>
-            <h3 style="font-family:'Tajawal', sans-serif; color:var(--success); font-size:1.6rem; font-weight: 700; margin-bottom:1rem; direction: rtl;">تم التسجيل بنجاح!</h3>
+            <h2 style="color:var(--oxford-blue); font-weight:800; margin-bottom:0.5rem; font-size: 2rem;">Registration Successful!</h2>
+            <h3 style="font-family:'Tajawal', sans-serif; color:var(--date-red); font-size:1.6rem; font-weight: 700; margin-bottom:1rem; direction: rtl;">تم التسجيل بنجاح!</h3>
             <p style="color:var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom:2rem; direction: ltr;">Your registration has been submitted successfully. Please do not forget to send the payment receipt via WhatsApp.</p>
-            <button onclick="window.location.reload()" class="btn-submit" style="margin-top:0; display:flex; flex-direction:column; padding: 1rem; line-height: 1.4;">
+            <button onclick="window.location.reload()" class="btn-submit btn-modal" style="margin-top:0; display:flex; flex-direction:column; padding: 1rem; line-height: 1.4;">
                 <span style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span>
                 <span style="font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span>
             </button>
