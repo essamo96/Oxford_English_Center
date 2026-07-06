@@ -288,25 +288,56 @@
 
         /* --- RESPONSIVENESS --- */
         @media (max-width: 1024px) {
-            .registration-container { max-width: 95%; margin: 2rem auto; overflow: hidden; }
+            .registration-container { max-width: 95%; margin: 2rem auto; }
             .header h1 { font-size: 2rem; }
             
-            /* Corner Ribbon */
+            /* Corner Ribbon Folded */
             .promo-ribbon {
-                top: 25px;
-                right: -45px;
-                padding: 6px 45px;
-                transform: rotate(45deg);
+                top: -8px;
+                right: -8px;
+                width: 130px;
+                height: 130px;
+                padding: 0 !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
                 border-radius: 0;
-                border: none;
-                text-align: center;
+                transform: none;
+                overflow: hidden;
+            }
+            .promo-ribbon::before,
+            .promo-ribbon::after {
+                content: '';
+                position: absolute;
+                z-index: -1;
+                border: 4px solid #610B24;
+                display: block;
+            }
+            .promo-ribbon::before {
+                top: 0;
+                left: 0;
+                border-top-color: transparent;
+                border-left-color: transparent;
             }
             .promo-ribbon::after {
-                display: none;
+                bottom: 0;
+                right: 0;
+                border-bottom-color: transparent;
+                border-right-color: transparent;
             }
             .promo-text {
-                justify-content: center;
-                font-size: 0.95rem;
+                position: absolute;
+                top: 25px;
+                right: -32px;
+                width: 184px;
+                transform: rotate(45deg);
+                background: var(--date-red);
+                color: #fff;
+                text-align: center;
+                padding: 6px 0;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                font-size: 0.85rem !important;
+                display: block !important;
             }
         }
 
@@ -320,8 +351,6 @@
             .invoice-box { padding: 1.5rem 1rem; }
             .btn-submit { font-size: 1.15rem; padding: 1rem; }
             .floating-wa { width: 55px; height: 55px; font-size: 32px; left: 20px; bottom: 20px; }
-            .promo-ribbon { top: 20px; right: -45px; padding: 4px 45px; }
-            .promo-text { font-size: 0.85rem !important; }
             .ote-logo-container { gap: 1.5rem !important; }
         }
 
@@ -713,8 +742,8 @@
 
         <div class="form-section">
             <form id="registrationForm">
-                <!-- Section A: Student Details -->
-                <h3 class="section-title">Section A: Student Details <span style="font-family: 'Cairo', sans-serif; font-size:1rem; color:var(--text-muted)">(بيانات الطالب)</span></h3>
+                <!-- Step A: Student Details -->
+                <h3 class="section-title">Step A: Student Details <span style="font-family: 'Cairo', sans-serif; font-size:1rem; color:var(--text-muted)">(بيانات الطالب)</span></h3>
                 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -826,8 +855,8 @@
 
                 <hr class="my-5" style="border-color: var(--border-color)">
 
-                <!-- Section B: Placement Test -->
-                <h3 class="section-title">Section B: Placement Test <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختبار تحديد المستوى)</span></h3>
+                <!-- Step B: Placement Test -->
+                <h3 class="section-title">Step B: Placement Test <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختبار تحديد المستوى)</span></h3>
                 <div class="mb-4">
                     <label class="form-label">Do you want to take a placement test? <span class="ar">(هل ترغب بالتقدم لاختبار تحديد المستوى؟)</span></label>
                     <div class="form-check form-switch mt-2 d-flex align-items-center">
@@ -846,8 +875,8 @@
 
                 <hr class="my-5" style="border-color: var(--border-color)">
 
-                <!-- Section C: Program Selection & Invoicing -->
-                <h3 class="section-title">Section C: Program Selection <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختيار البرنامج والفاتورة)</span></h3>
+                <!-- Step C: Program Selection & Invoicing -->
+                <h3 class="section-title">Step C: Program Selection <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختيار البرنامج والفاتورة)</span></h3>
                 
                 <div class="mb-4">
                     <label class="form-label">Program Type <span class="ar">(نوع البرنامج)</span> *</label>
@@ -855,7 +884,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="program_type" id="type_kids" value="kids" required>
                             <label class="form-check-label" for="type_kids">
-                                Kids (برنامج الصغار)
+                                Young (برنامج الصغار)
                             </label>
                         </div>
                         <div class="form-check">
@@ -1080,7 +1109,7 @@
                     age--;
                 }
 
-                if(age < 15) {
+                if(age <= 15) {
                     parentSection.style.display = 'block';
                     parentName.setAttribute('required', 'required');
                     parentPhone.setAttribute('required', 'required');
@@ -1097,6 +1126,7 @@
                         typeAdults.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
+                filterPrograms();
             });
 
             // Placement Test Logic
@@ -1125,18 +1155,36 @@
                 const activeType = document.querySelector('input[name="program_type"]:checked')?.value;
                 const options = programSelect.querySelectorAll('option:not([value=""])');
                 
+                const dobInput = document.getElementById('dobInput');
+                let age = null;
+                if(dobInput && dobInput.value) {
+                    const dob = new Date(dobInput.value);
+                    const today = new Date();
+                    age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+                }
+
                 let selectedOptionStillValid = false;
 
                 options.forEach(option => {
                     const type = option.getAttribute('data-program-type');
                     const isPlacement = option.getAttribute('data-is-placement');
+                    const title = option.getAttribute('data-title') || option.textContent;
                     
                     if (isPlacement === '1') {
                         option.style.display = 'none'; // Always hide placement test from manual selection
-                    } else if (activeType && type && type !== activeType) {
-                        option.style.display = 'none'; // Hide if type doesn't match
+                    } else if (age !== null && age <= 15) {
+                        if (title.toLowerCase().includes('english levels') || title.includes('مستويات')) {
+                            option.style.display = '';
+                        } else {
+                            option.style.display = 'none';
+                        }
                     } else {
-                        option.style.display = ''; // Show
+                        // If age > 15, show all without exception
+                        option.style.display = '';
                     }
 
                     if (option.selected && option.style.display !== 'none') {
