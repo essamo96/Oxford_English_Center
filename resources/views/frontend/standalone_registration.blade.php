@@ -763,34 +763,34 @@
                 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Full Name (English) <span class="ar">(الاسم الرباعي بالإنجليزية)</span> *</label>
+                        <label class="form-label">Full Name (English) <span class="ar">(الاسم الرباعي بالإنجليزية)</span> <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="full_name_en" required placeholder="e.g. John Doe">
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Full Name (Arabic) <span class="ar">(الاسم الرباعي بالعربية)</span> *</label>
+                        <label class="form-label">Full Name (Arabic) <span class="ar">(الاسم الرباعي بالعربية)</span> <span class="text-danger">*</span></label>
                         <input type="text" class="form-control text-end" name="full_name_ar" required placeholder="مثال: أحمد محمد" dir="rtl">
                         <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Phone Number <span class="ar">(رقم الجوال)</span> *</label>
+                        <label class="form-label">Phone Number <span class="ar">(رقم الجوال)</span> <span class="text-danger">*</span></label>
                         <input type="tel" class="form-control" name="phone" required placeholder="05XXXXXXXX">
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Email Address <span class="ar">(البريد الإلكتروني)</span> *</label>
+                        <label class="form-label">Email Address <span class="ar">(البريد الإلكتروني)</span> <span class="text-danger">*</span></label>
                         <input type="email" class="form-control" name="email" required placeholder="email@example.com">
                         <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Date of Birth <span class="ar">(تاريخ الميلاد)</span> *</label>
+                        <label class="form-label">Date of Birth <span class="ar">(تاريخ الميلاد)</span> <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" name="dob" id="dobInput" required>
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Gender <span class="ar">(الجنس)</span> *</label>
+                        <label class="form-label">Gender <span class="ar">(الجنس)</span> <span class="text-danger">*</span></label>
                         <select class="form-select" name="gender" required>
                             <option value="">-- Select Gender --</option>
                             <option value="Male">Male (ذكر)</option>
@@ -800,13 +800,13 @@
                     </div>
 
                     <div class="col-md-12">
-                        <label class="form-label">Address <span class="ar">(العنوان)</span> *</label>
+                        <label class="form-label">Address <span class="ar">(العنوان)</span> <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="address" required>
                         <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Branch <span class="ar">(الفرع)</span> *</label>
+                        <label class="form-label">Branch <span class="ar">(الفرع)</span> <span class="text-danger">*</span></label>
                         <select class="form-select" name="branch" required>
                             <option value="">-- Select Branch --</option>
                             <option value="Headquarters - Deir al-Balah">المقر الرئيسي - دير البلح (Headquarters - Deir al-Balah)</option>
@@ -815,13 +815,13 @@
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Major/Profession <span class="ar">(التخصص/المهنة)</span> *</label>
+                        <label class="form-label">Major/Profession <span class="ar">(التخصص/المهنة)</span> <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="major_profession" required>
                         <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="col-md-12 mt-4">
-                        <label class="form-label">Does the applicant have any health problems? <span class="ar">(هل يعاني المتقدم من مشاكل صحية؟)</span> *</label>
+                        <label class="form-label">Does the applicant have any health problems? <span class="ar">(هل يعاني المتقدم من مشاكل صحية؟)</span> <span class="text-danger">*</span></label>
                         <div class="d-flex gap-4 mt-2">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="health_issues" id="health_no" value="0" checked>
@@ -838,7 +838,7 @@
                         </div>
 
                     <div class="col-md-12 mt-3" id="healthIssuesDetailsContainer" style="display: none;">
-                        <label class="form-label text-danger">Please describe the health problem <span class="ar">(يرجى وصف المشكلة الصحية بالتفصيل)</span> *</label>
+                        <label class="form-label text-danger">Please describe the health problem <span class="ar">(يرجى وصف المشكلة الصحية بالتفصيل)</span> <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="health_issues_details" rows="3" placeholder="تفاصيل المشكلة الصحية"></textarea>
                         <div class="invalid-feedback"></div>
                     </div>
@@ -852,12 +852,12 @@
                     </h4>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label">Parent Name <span class="ar">(اسم ولي الأمر)</span> *</label>
+                            <label class="form-label">Parent Name <span class="ar">(اسم ولي الأمر)</span> <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="parent_name" id="parent_name">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Parent Phone <span class="ar">(رقم جوال ولي الأمر)</span> *</label>
+                            <label class="form-label">Parent Phone <span class="ar">(رقم جوال ولي الأمر)</span> <span class="text-danger">*</span></label>
                             <input type="tel" class="form-control" name="parent_phone" id="parent_phone">
                             <div class="invalid-feedback"></div>
                         </div>
@@ -883,7 +883,7 @@
 
                 <div id="placementDateSection" class="dynamic-section">
                     <div class="col-md-6">
-                        <label class="form-label">Preferred Date & Time <span class="ar">(الموعد المفضل للاختبار)</span> *</label>
+                        <label class="form-label">Preferred Date & Time <span class="ar">(الموعد المفضل للاختبار)</span> <span class="text-danger">*</span></label>
                         <input type="datetime-local" class="form-control" name="placement_test_date" id="placement_test_date">
                         <div class="invalid-feedback"></div>
                     </div>
@@ -895,7 +895,7 @@
                 <h3 class="section-title">Step C: Program Selection <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختيار البرنامج والفاتورة)</span></h3>
                 
                 <div class="mb-4">
-                    <label class="form-label">Program Type <span class="ar">(نوع البرنامج)</span> *</label>
+                    <label class="form-label">Program Type <span class="ar">(نوع البرنامج)</span> <span class="text-danger">*</span></label>
                     <div class="d-flex gap-4 mt-2">
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="program_type" id="type_kids" value="kids" required>
@@ -913,7 +913,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Select Program <span class="ar">(اختر البرنامج)</span> *</label>
+                    <label class="form-label">Select Program <span class="ar">(اختر البرنامج)</span> <span class="text-danger">*</span></label>
                     <select class="form-select" name="program_id" id="programSelect" required>
                         <option value="">-- Choose a Program --</option>
                         @foreach($programs as $program)

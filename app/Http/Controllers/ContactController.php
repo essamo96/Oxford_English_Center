@@ -24,13 +24,37 @@ class ContactController extends Controller
     }
 
     ///////////////////////////
-    public function getIndex()
+    public function getIndex(\Illuminate\Http\Request $request)
     {
+        $rateKey = 'contact_us_' . $request->ip();
+        $lastSent = $request->session()->get('last_contact_sent_at');
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateKey, 1) || 
+            ($lastSent && \Carbon\Carbon::parse($lastSent)->diffInMinutes(\Carbon\Carbon::now()) < 120)) {
+            $request->session()->now('danger', 'يرجى المحاولة بعد ساعتين (You can only send one message every 2 hours).');
+        }
+
         return view('frontend.contact.view', parent::$data);
     }
 
     public function postContact(Request $request)
     {
+        // 1. Honeypot Check
+        if ($request->filled('company_website')) {
+            // Silently redirect for bots to trick them
+            $request->session()->flash('success', 'Successfully Sent ');
+            return redirect('contact');
+        }
+
+        // 2. IP and Session Rate Limiting (1 request per 120 minutes)
+        $rateKey = 'contact_us_' . $request->ip();
+        $lastSent = $request->session()->get('last_contact_sent_at');
+        
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateKey, 1) || 
+            ($lastSent && \Carbon\Carbon::parse($lastSent)->diffInMinutes(\Carbon\Carbon::now()) < 120)) {
+            $request->session()->flash('danger', 'يرجى المحاولة بعد ساعتين (You can only send one message every 2 hours).');
+            return redirect('contact')->withInput();
+        }
+
         ////////////////////////////////////////////
         $name = $request->get('name');
         $email = $request->get('email');
@@ -81,6 +105,10 @@ class ContactController extends Controller
             // best-effort notification email; the submission is already saved, and
             // send_mail no longer throws if SMTP is unavailable.
             $this->send_mail($myarray);
+
+            // Record successful submission time in session & cache
+            \Illuminate\Support\Facades\RateLimiter::hit($rateKey, 120 * 60); // 120 minutes in seconds
+            $request->session()->put('last_contact_sent_at', \Carbon\Carbon::now());
 
             $request->session()->flash('success', 'Successfully Sent ');
             return redirect('contact')->withInput();

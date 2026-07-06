@@ -63,6 +63,11 @@
                         </center>
                         <form id="contact-form" method="post">
                             <fieldset style="border:0;padding:0;margin:0">
+                                <!-- Honeypot Field for Spam Prevention -->
+                                <div style="display:none;" aria-hidden="true">
+                                    <label for="company_website">Company Website</label>
+                                    <input type="text" name="company_website" id="company_website" autocomplete="off">
+                                </div>
                                 <div class="ox-form-row">
                                     <div class="ox-field form-group">
                                         <label class="ox-label" for="form-name">Name</label>
