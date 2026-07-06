@@ -723,7 +723,7 @@
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" dir="rtl" style="display:block; text-align:right;">الاسم الرباعي بالعربية <span class="ar" style="font-family: 'Inter', sans-serif;">(Full Name Arabic)</span> *</label>
+                        <label class="form-label">Full Name (Arabic) <span class="ar">(الاسم الرباعي بالعربية)</span> *</label>
                         <input type="text" class="form-control text-end" name="full_name_ar" required placeholder="مثال: أحمد محمد" dir="rtl">
                         <div class="invalid-feedback"></div>
                     </div>
