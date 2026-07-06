@@ -288,8 +288,26 @@
 
         /* --- RESPONSIVENESS --- */
         @media (max-width: 1024px) {
-            .registration-container { max-width: 95%; margin: 2rem auto; }
+            .registration-container { max-width: 95%; margin: 2rem auto; overflow: hidden; }
             .header h1 { font-size: 2rem; }
+            
+            /* Corner Ribbon */
+            .promo-ribbon {
+                top: 25px;
+                right: -45px;
+                padding: 6px 45px;
+                transform: rotate(45deg);
+                border-radius: 0;
+                border: none;
+                text-align: center;
+            }
+            .promo-ribbon::after {
+                display: none;
+            }
+            .promo-text {
+                justify-content: center;
+                font-size: 0.95rem;
+            }
         }
 
         @media (max-width: 768px) {
@@ -302,8 +320,8 @@
             .invoice-box { padding: 1.5rem 1rem; }
             .btn-submit { font-size: 1.15rem; padding: 1rem; }
             .floating-wa { width: 55px; height: 55px; font-size: 32px; left: 20px; bottom: 20px; }
-            .promo-ribbon { padding: 6px 16px; top: 20px; }
-            .promo-text { font-size: 0.9rem !important; }
+            .promo-ribbon { top: 20px; right: -45px; padding: 4px 45px; }
+            .promo-text { font-size: 0.85rem !important; }
             .ote-logo-container { gap: 1.5rem !important; }
         }
 
@@ -421,6 +439,13 @@
         @keyframes wa-pulse {
             0% { transform: scale(1); opacity: 0.8; }
             100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .floating-wa i, .social-icon i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
         }
 
         /* --- SOCIAL MEDIA FOOTER --- */
@@ -805,9 +830,9 @@
                 <h3 class="section-title">Section B: Placement Test <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختبار تحديد المستوى)</span></h3>
                 <div class="mb-4">
                     <label class="form-label">Do you want to take a placement test? <span class="ar">(هل ترغب بالتقدم لاختبار تحديد المستوى؟)</span></label>
-                    <div class="form-check form-switch mt-2" style="transform: scale(1.2); transform-origin: left center;">
-                        <input class="form-check-input" type="checkbox" id="placementTestToggle" name="placement_test" value="1">
-                        <label class="form-check-label ms-2" for="placementTestToggle">Yes, I want to take the test (نعم، أرغب)</label>
+                    <div class="form-check form-switch mt-2 d-flex align-items-center">
+                        <input class="form-check-input fs-5" type="checkbox" id="placementTestToggle" name="placement_test" value="1" style="margin-top: 0; cursor: pointer;">
+                        <label class="form-check-label ms-2 fs-6" for="placementTestToggle" style="cursor: pointer; padding-top: 2px;">Yes, I want to take the test (نعم، أرغب)</label>
                     </div>
                 </div>
 
