@@ -74,7 +74,7 @@
     <div class="card-body py-4">
         @include('admin.layout.error')
         <div class="table-responsive">
-            <table class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center" id="programs_table">
+            <table class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center text-nowrap" id="programs_table">
                 <thead>
                     <tr class="text-start text-muted fw-bold fs-6 text-uppercase gs-0">
                         <th class="w-50px text-center"> # </th>
@@ -129,6 +129,7 @@
 <script>
     var table;
     var tableId = 'programs_table';
+    var customResponsive = false;
     var columns = [
         { data: "id", name: "id", orderable: false, searchable: false, render: function(data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "title", name: "title", orderable: true, className: "text-start" },

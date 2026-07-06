@@ -36,7 +36,8 @@ $(document).ready(function() {
     }
 
     table = $(tableSelector).DataTable({
-        responsive: true,
+        responsive: (typeof customResponsive !== 'undefined') ? customResponsive : true,
+        scrollX: (typeof customScrollX !== 'undefined') ? customScrollX : false,
         ordering: false,
         processing: true,
         pageLength: (typeof customPageLength !== 'undefined') ? customPageLength : 10,

@@ -140,6 +140,8 @@ class ProgramsController extends AdminController
 
             return view('admin.programs.parts.actions', $data)->render();
         });
+        
+        $datatable->rawColumns(['title', 'status', 'is_placement_test', 'grope_no', 'students_count', 'min_payment', 'actions', 'program_type']);
         $datatable->escapeColumns(['*']);
         return $datatable->make(true);
     }
