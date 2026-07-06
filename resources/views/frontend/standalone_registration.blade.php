@@ -291,53 +291,54 @@
             .registration-container { max-width: 95%; margin: 2rem auto; }
             .header h1 { font-size: 2rem; }
             
-            /* Corner Ribbon Folded */
+            /* Beautiful Side Ribbon */
             .promo-ribbon {
-                top: -8px;
-                right: -8px;
-                width: 130px;
-                height: 130px;
-                padding: 0 !important;
-                background: transparent !important;
-                box-shadow: none !important;
-                border: none !important;
-                border-radius: 0;
+                position: absolute;
+                top: 40px;
+                right: -15px;
+                width: auto;
+                height: auto;
+                background: linear-gradient(135deg, var(--date-red) 0%, #610B24 100%) !important;
+                color: #fff;
+                padding: 8px 15px !important;
+                border-radius: 12px 0 0 12px !important;
                 transform: none;
-                overflow: hidden;
+                box-shadow: 0 8px 15px rgba(138, 21, 56, 0.3) !important;
+                border: none !important;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                overflow: visible !important;
             }
-            .promo-ribbon::before,
             .promo-ribbon::after {
                 content: '';
                 position: absolute;
+                top: 100%;
+                right: 0;
+                border-top: 15px solid #4A081B; /* Darker fold */
+                border-right: 15px solid transparent;
+                border-bottom: none;
+                border-left: none;
                 z-index: -1;
-                border: 4px solid #610B24;
                 display: block;
             }
             .promo-ribbon::before {
-                top: 0;
-                left: 0;
-                border-top-color: transparent;
-                border-left-color: transparent;
-            }
-            .promo-ribbon::after {
-                bottom: 0;
-                right: 0;
-                border-bottom-color: transparent;
-                border-right-color: transparent;
+                display: none;
             }
             .promo-text {
-                position: absolute;
-                top: 25px;
-                right: -32px;
-                width: 184px;
-                transform: rotate(45deg);
-                background: var(--date-red);
-                color: #fff;
-                text-align: center;
-                padding: 6px 0;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                position: static;
+                transform: none;
+                background: transparent;
+                padding: 0;
+                box-shadow: none;
+                width: auto;
                 font-size: 0.85rem !important;
+                font-weight: 700;
+                text-align: center;
+                line-height: 1.3;
+                max-width: 120px;
                 display: block !important;
+                white-space: normal;
             }
         }
 
@@ -352,6 +353,21 @@
             .btn-submit { font-size: 1.15rem; padding: 1rem; }
             .floating-wa { width: 55px; height: 55px; font-size: 32px; left: 20px; bottom: 20px; }
             .ote-logo-container { gap: 1.5rem !important; }
+            
+            /* Mobile adjustments for side ribbon */
+            .promo-ribbon {
+                top: 25px;
+                right: -10px;
+                padding: 6px 12px !important;
+            }
+            .promo-ribbon::after {
+                border-top-width: 10px;
+                border-right-width: 10px;
+            }
+            .promo-text {
+                font-size: 0.75rem !important;
+                max-width: 90px;
+            }
         }
 
         @media (max-width: 480px) {
