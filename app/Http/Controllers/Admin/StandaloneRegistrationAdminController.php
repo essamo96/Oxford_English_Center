@@ -44,6 +44,7 @@ class StandaloneRegistrationAdminController extends AdminController
                 })
                 ->addColumn('action', function ($row) {
                     $btn = '<button type="button" class="btn btn-icon btn-sm btn-primary view-details me-1" data-id="' . $row->id . '" title="عرض"><i class="ki-duotone ki-eye fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></button>';
+                    $btn .= '<button type="button" class="btn btn-icon btn-sm btn-success record-payment-btn me-1" data-id="' . $row->id . '" data-name="' . $row->full_name_ar . '" title="تسجيل دفعة"><i class="ki-duotone ki-wallet fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></button>';
                     $btn .= '<button type="button" class="btn btn-icon btn-sm btn-danger delete-btn" data-id="' . $row->id . '" title="حذف"><i class="ki-duotone ki-trash fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
                     return $btn;
                 })
@@ -70,6 +71,7 @@ class StandaloneRegistrationAdminController extends AdminController
         self::$data['breadcrumb'] = 'Registrations';
         self::$data['programs'] = \App\Models\Programs::all();
         self::$data['branches'] = \App\Models\Branch::where('status', 1)->get();
+        self::$data['payment_methods'] = \App\Models\PaymentMethods::where('is_active', 1)->get();
         
         return view('admin.standalone_registrations.index', self::$data);
     }
@@ -184,5 +186,39 @@ class StandaloneRegistrationAdminController extends AdminController
         $registration->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function storePayment(Request $request, $id)
+    {
+        $request->validate([
+            'payer_name' => 'required|string|max:191',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|string',
+            'payment_method' => 'required|string',
+            'receipt' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+        ]);
+
+        $registration = StudentCompo::findOrFail($id);
+
+        $payment = new \App\Models\StudentCompoPayment();
+        $payment->student_compo_id = $registration->id;
+        $payment->admin_id = auth()->guard('admin')->id() ?? auth()->id();
+        $payment->payer_name = $request->payer_name;
+        $payment->amount = $request->amount;
+        $payment->currency = $request->currency;
+        $payment->payment_method = $request->payment_method;
+
+        if ($request->hasFile('receipt')) {
+            $file = $request->file('receipt');
+            $fileName = time() . '_' . $registration->id . '_receipt.' . $file->getClientOriginalExtension();
+            $payment->receipt_path = $file->storeAs('compo_receipts', $fileName, 'uploads');
+        }
+
+        $payment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الدفعة بنجاح'
+        ]);
     }
 }

@@ -261,7 +261,9 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('standalone-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);
     Route::post('standalone-registrations/mark-all-read', ['as' => 'admin.standalone_registrations.markAllAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAllAsRead']);
     Route::post('standalone-registrations/toggle-contact', ['as' => 'admin.standalone_registrations.toggleContact', 'uses' => 'StandaloneRegistrationAdminController@toggleContact']);
-
+    Route::post('standalone-registrations/{id}/payment', ['as' => 'admin.standalone_registrations.payment', 'uses' => 'StandaloneRegistrationAdminController@storePayment']);
+    Route::get('standalone-registrations-payments', ['as' => 'standalone_registrations.payments.view', 'uses' => 'StudentCompoPaymentController@index']);
+    Route::get('standalone-registrations-payments/details/{id}', ['as' => 'standalone_registrations.payments.details', 'uses' => 'StudentCompoPaymentController@details']);
 
     // Route
     Route::get('dashboard', ['as' => 'dashboard.view', 'uses' => 'DashboardController@getIndex']);

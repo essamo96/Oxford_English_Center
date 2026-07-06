@@ -22,4 +22,9 @@ class StudentCompo extends Model
     {
         return $this->belongsTo(Programs::class, 'program_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(StudentCompoPayment::class, 'student_compo_id');
+    }
 }

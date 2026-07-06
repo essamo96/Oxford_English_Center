@@ -179,6 +179,69 @@
         </div>
     </div>
 </div>
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-650px">
+        <div class="modal-content">
+            <form id="paymentForm" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Record Payment (تسجيل دفعة) - <span id="paymentStudentName" class="text-primary"></span></h5>
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ki-duotone ki-cross fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="student_compo_id" id="payment_student_id">
+                    
+                    <div class="row g-5">
+                        <div class="col-md-12 mb-3">
+                            <label class="required form-label">Payer Name (اسم الدافع)</label>
+                            <input type="text" name="payer_name" class="form-control form-control-solid" required placeholder="ادخل اسم الشخص الذي قام بالدفع">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="required form-label">Amount (المبلغ)</label>
+                            <input type="number" step="0.01" name="amount" class="form-control form-control-solid" required placeholder="0.00">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="required form-label">Currency (العملة)</label>
+                            <select name="currency" class="form-select form-select-solid" required>
+                                <option value="NIS">شيكل (NIS)</option>
+                                <option value="USD">دولار (USD)</option>
+                                <option value="JOD">دينار (JOD)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="required form-label">Payment Method (طريقة الدفع)</label>
+                            <select name="payment_method" class="form-select form-select-solid" required>
+                                <option value="">اختر طريقة الدفع</option>
+                                @foreach($payment_methods ?? [] as $pm)
+                                    <option value="{{ $pm->name }}">{{ $pm->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Receipt Attachment (إشعار الدفع) - اختياري</label>
+                            <input type="file" name="receipt" class="form-control form-control-solid" accept="image/jpeg,image/png,image/jpg,application/pdf">
+                            <div class="text-muted fs-7 mt-1">Allowed formats: jpeg, png, jpg, pdf. Max size: 5MB</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-payment">
+                        <span class="indicator-label">Save Payment (حفظ)</span>
+                        <span class="indicator-progress">Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
@@ -360,6 +423,56 @@
         $(document).on('click', '.view-details', function() {
             var id = $(this).data('id');
             viewDetails(id);
+        });
+
+        // Record Payment Button
+        $(document).on('click', '.record-payment-btn', function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $('#payment_student_id').val(id);
+            $('#paymentStudentName').text(name);
+            $('#paymentForm')[0].reset();
+            $('#paymentModal').modal('show');
+        });
+
+        // Submit Payment Form
+        $('#paymentForm').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var btn = $('#btn-save-payment');
+            var id = $('#payment_student_id').val();
+            
+            btn.attr('data-kt-indicator', 'on');
+            btn.prop('disabled', true);
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '{{ url("admin/standalone-registrations") }}/' + id + '/payment',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    btn.removeAttr('data-kt-indicator');
+                    btn.prop('disabled', false);
+                    
+                    if(response.success) {
+                        $('#paymentModal').modal('hide');
+                        Swal.fire('تم الحفظ!', response.message, 'success');
+                    }
+                },
+                error: function(xhr) {
+                    btn.removeAttr('data-kt-indicator');
+                    btn.prop('disabled', false);
+                    var errors = xhr.responseJSON.errors;
+                    var errorMsg = 'حدث خطأ يرجى المحاولة مرة أخرى.';
+                    if(errors) {
+                        errorMsg = Object.values(errors).map(val => val[0]).join('<br>');
+                    }
+                    Swal.fire('خطأ!', errorMsg, 'error');
+                }
+            });
         });
     });
 
