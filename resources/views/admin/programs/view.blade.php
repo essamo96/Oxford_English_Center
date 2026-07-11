@@ -80,7 +80,6 @@
                         <th class="w-50px text-center"> # </th>
                         <th class="min-w-200px text-center"> اسم البرنامج </th>
                         <th class="min-w-150px text-center"> المجموعات </th>
-                        <th class="min-w-100px text-center"> إجمالي الطلاب </th>
                         <th class="min-w-160px text-center"> الحد الأدنى للدفع </th>
                         <th class="min-w-100px text-center"> الحالة </th>
                         <th class="min-w-100px text-center"> إخفاء (تحديد مستوى) </th>
@@ -182,7 +181,6 @@
         { data: "id", name: "id", orderable: false, searchable: false, render: function(data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; } },
         { data: "title", name: "title", orderable: true, className: "text-start" },
         { data: "grope_no", name: "grope_no", className: "text-center" },
-        { data: "students_count", name: "students_count", className: "text-center" },
         { data: "min_payment", name: "min_payment", orderable: false, searchable: false, className: "text-center" },
         { data: "status", name: "status", orderable: true, searchable: false },
         { data: "is_placement_test", name: "is_placement_test", orderable: true, searchable: false, className: "text-center" },

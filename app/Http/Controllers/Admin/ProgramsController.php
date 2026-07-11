@@ -78,11 +78,21 @@ class ProgramsController extends AdminController
                 $programTypeHtml = '<span class="badge badge-light-success mt-1" style="width:fit-content;">برنامج الكبار (Adults)</span>';
             }
 
+            $count = $row->students_count ?? 0;
+            if ($count > 0) {
+                $studentsHtml = '<span class="badge badge-light-success mt-1 ms-2" style="width:fit-content;"><i class="bi bi-people-fill text-success me-1"></i> ' . $count . ' - طالب</span>';
+            } else {
+                $studentsHtml = '<span class="badge badge-light-dark mt-1 ms-2" style="width:fit-content;">0 - طلاب</span>';
+            }
+
             return '<div class="d-flex align-items-center view-program-details" data-id="' . Crypt::encrypt($row->id) . '" style="cursor: pointer;">
                         ' . $imageHtml . '
                         <div class="d-flex justify-content-start flex-column">
                             <span class="text-dark fw-bold text-hover-primary mb-1 fs-6">' . $title . '</span>
-                            ' . $programTypeHtml . '
+                            <div class="d-flex align-items-center">
+                                ' . $programTypeHtml . '
+                                ' . $studentsHtml . '
+                            </div>
                         </div>
                     </div>';
         });
@@ -113,15 +123,7 @@ class ProgramsController extends AdminController
             }
         });
 
-        $datatable->addColumn('students_count', function ($row) {
-            $count = $row->students_count ?? 0;
-            if ($count > 0) {
-                return '<span class="badge badge-light-success fs-5 fw-bold p-3">
-                            <i class="bi bi-people-fill text-success me-1 fs-5 "></i> ' . $count . ' -  طالب
-                        </span>';
-            }
-            return '<span class="badge badge-light-dark fs-5 fw-bold fs-5 me-1 p-3">0 - طلاب</span>';
-        });
+
 
         $datatable->addColumn('min_payment', function ($row) {
             $pct   = $row->min_payment_percent;
@@ -151,7 +153,7 @@ class ProgramsController extends AdminController
             return view('admin.programs.parts.actions', $data)->render();
         });
         
-        $datatable->rawColumns(['title', 'status', 'is_placement_test', 'grope_no', 'students_count', 'min_payment', 'actions', 'program_type']);
+        $datatable->rawColumns(['title', 'status', 'is_placement_test', 'grope_no', 'min_payment', 'actions', 'program_type']);
         $datatable->escapeColumns(['*']);
         return $datatable->make(true);
     }
@@ -265,6 +267,9 @@ class ProgramsController extends AdminController
         ]);
         //////////////////////////////////////////////////////////
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => $validator->messages()->first()]);
+            }
             $request->session()->flash('danger', $validator->messages());
             return redirect(route('programs.add'))->withInput();
         } else {
@@ -277,19 +282,22 @@ class ProgramsController extends AdminController
                     $add->program_type       = $request->get('program_type') ?: null;
                     $add->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
 
-                    // Handle brochure PDF upload
-                    if ($request->hasFile('brochure') && $request->file('brochure')->isValid()) {
-                        $brochurePath = $request->file('brochure')->store('brochures', 'public');
-                        $add->brochure_path = $brochurePath;
-                    }
-
+                    // Synchronous file upload removed; handled by chunked upload endpoint.
+                    
                     $add->save();
                     $this->applyPlacementDefault($request, $add->id);
+                }
+                
+                if ($request->ajax()) {
+                    return response()->json(['status' => 'success', 'program_id' => $add->id]);
                 }
                 $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
                 return redirect(route('programs.view'));
             } else {
-                $request->session()->flash('danger', self::EXECUTION_ERROR);
+                if ($request->ajax()) {
+                    return response()->json(['status' => 'error', 'message' => self::INSERT_ERROR_MESSAGE]);
+                }
+                $request->session()->flash('danger', self::INSERT_ERROR_MESSAGE);
                 return redirect(route('programs.add'))->withInput();
             }
         }
@@ -361,6 +369,9 @@ class ProgramsController extends AdminController
                 'short' => 'required',
             ]);
             if ($validator->fails()) {
+                if ($request->ajax()) {
+                    return response()->json(['status' => 'error', 'message' => $validator->messages()->first()]);
+                }
                 $request->session()->flash('danger', $validator->messages());
                 return redirect(route('programs.edit', ['id' => $encrypted_id]))->withInput();
             } else {
@@ -371,19 +382,24 @@ class ProgramsController extends AdminController
                     $info->program_type       = $request->get('program_type') ?: null;
                     $info->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
 
-                    // Handle brochure PDF upload (delete old file if exists)
-                    if ($request->hasFile('brochure') && $request->file('brochure')->isValid()) {
-                        if (!empty($info->brochure_path)) {
-                            Storage::disk('public')->delete($info->brochure_path);
-                        }
-                        $brochurePath = $request->file('brochure')->store('brochures', 'public');
-                        $info->brochure_path = $brochurePath;
-                    }
+                    // Synchronous file upload removed; handled by chunked upload endpoint.
 
-                    $info->save();
+                    $edit = $info->save();
                     $this->applyPlacementDefault($request, $id);
-                    $request->session()->flash('success', self::UPDATE_SUCCESS);
-                    return redirect(route('programs.view'));
+
+                    if ($edit) {
+                        if ($request->ajax()) {
+                            return response()->json(['status' => 'success', 'program_id' => $id]);
+                        }
+                        $request->session()->flash('success', self::UPDATE_SUCCESS);
+                        return redirect(route('programs.view'));
+                    } else {
+                        if ($request->ajax()) {
+                            return response()->json(['status' => 'error', 'message' => self::EXECUTION_ERROR]);
+                        }
+                        $request->session()->flash('danger', self::EXECUTION_ERROR);
+                        return redirect(route('programs.edit', ['id' => $encrypted_id]))->withInput();
+                    }
                 } else {
                     $request->session()->flash('danger', self::EXECUTION_ERROR);
                     return redirect(route('programs.edit', ['id' => $encrypted_id]))->withInput();
