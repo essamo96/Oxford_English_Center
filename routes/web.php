@@ -472,6 +472,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('programs/placement-status', ['as' => 'programs.placement_status', 'middleware' => ['permission:admin.programs.status'], 'uses' => 'ProgramsController@postPlacementStatus']);
     Route::post('programs/brochure/delete', ['as' => 'programs.brochure.delete', 'middleware' => ['permission:admin.programs.edit'], 'uses' => 'ProgramsController@deleteBrochure']);
     Route::get('programs/brochure/qr/{id}', ['as' => 'programs.brochure.qr', 'middleware' => ['permission:admin.programs.view'], 'uses' => 'ProgramsController@getBrochureQr']);
+    Route::get('programs/brochure-chunk', ['as' => 'programs.brochure.chunk', 'middleware' => ['permission:admin.programs.edit'], 'uses' => 'ProgramsController@checkChunk']);
+    Route::post('programs/brochure-chunk', ['as' => 'programs.brochure.chunk.upload', 'middleware' => ['permission:admin.programs.edit'], 'uses' => 'ProgramsController@uploadChunk']);
 
     //groups Route
     Route::get('groups', ['as' => 'groups.view', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getIndex']);

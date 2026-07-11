@@ -542,7 +542,13 @@ class ProgramsController extends AdminController
         $info = $programs->getProgram($id);
         if ($info) {
             if (!empty($info->brochure_path)) {
-                Storage::disk('public')->delete($info->brochure_path);
+                if (str_starts_with($info->brochure_path, 'uploads/')) {
+                    if (file_exists(public_path($info->brochure_path))) {
+                        unlink(public_path($info->brochure_path));
+                    }
+                } else {
+                    Storage::disk('public')->delete($info->brochure_path);
+                }
                 $info->brochure_path = null;
                 $info->save();
                 return response()->json(['status' => 'success', 'message' => 'تم حذف البروشور بنجاح']);
@@ -592,5 +598,83 @@ class ProgramsController extends AdminController
             'has_brochure' => $hasBrochure,
             'qr_svg' => $qrSvg,
         ]);
+    }
+
+    public function checkChunk(Request $request)
+    {
+        $identifier = $request->get('resumableIdentifier');
+        $chunkNumber = $request->get('resumableChunkNumber');
+        $chunkPath = storage_path('app/chunks/' . $identifier . '/' . $chunkNumber . '.part');
+
+        if (file_exists($chunkPath)) {
+            return response('OK', 200);
+        } else {
+            return response('Not found', 404);
+        }
+    }
+
+    public function uploadChunk(Request $request)
+    {
+        $identifier = $request->get('resumableIdentifier');
+        $filename = $request->get('resumableFilename');
+        $chunkNumber = $request->get('resumableChunkNumber');
+        $totalChunks = $request->get('resumableTotalChunks');
+        $programId = $request->get('program_id');
+
+        $chunkDir = storage_path('app/chunks/' . $identifier);
+        if (!is_dir($chunkDir)) {
+            mkdir($chunkDir, 0777, true);
+        }
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $file->move($chunkDir, $chunkNumber . '.part');
+        }
+
+        // Check if all chunks are uploaded
+        $chunks = glob($chunkDir . '/*.part');
+        if (count($chunks) == $totalChunks) {
+            // Assemble
+            $finalPath = 'uploads/brochures/' . \Illuminate\Support\Str::uuid() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $filename);
+            $finalFile = public_path($finalPath);
+            
+            if (!is_dir(public_path('uploads/brochures'))) {
+                mkdir(public_path('uploads/brochures'), 0777, true);
+            }
+
+            $out = fopen($finalFile, 'wb');
+            for ($i = 1; $i <= $totalChunks; $i++) {
+                $in = fopen($chunkDir . '/' . $i . '.part', 'rb');
+                stream_copy_to_stream($in, $out);
+                fclose($in);
+            }
+            fclose($out);
+
+            // Cleanup chunks
+            array_map('unlink', glob($chunkDir . '/*'));
+            rmdir($chunkDir);
+
+            // Update Program
+            if ($programId) {
+                $program = Programs::find($programId);
+                if ($program) {
+                    if (!empty($program->brochure_path)) {
+                        if (str_starts_with($program->brochure_path, 'uploads/')) {
+                            if (file_exists(public_path($program->brochure_path))) {
+                                unlink(public_path($program->brochure_path));
+                            }
+                        } else {
+                            if (Storage::disk('public')->exists($program->brochure_path)) {
+                                Storage::disk('public')->delete($program->brochure_path);
+                            }
+                        }
+                    }
+                    $program->brochure_path = $finalPath;
+                    $program->save();
+                }
+            }
+            return response()->json(['status' => 'success']);
+        }
+        return response()->json(['status' => 'success']);
     }
 }

@@ -142,7 +142,9 @@
     @yield('modal')
     @include('admin.students.sms_modal')
     @include('admin.layout.notificatAjax')
+    @include('admin.layout.upload_progress')
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/resumable.js/1.1.0/resumable.min.js"></script>
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>

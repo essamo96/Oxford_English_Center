@@ -28,6 +28,9 @@ class Programs extends Model {
         if (empty($this->brochure_path)) {
             return null;
         }
+        if (str_starts_with($this->brochure_path, 'uploads/')) {
+            return asset($this->brochure_path);
+        }
         return asset('storage/' . $this->brochure_path);
     }
 

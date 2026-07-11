@@ -34,7 +34,7 @@
     </div>
     <div class="card-body py-4">
         @include('admin.layout.masterLayouts.error')
-        <form role="form" method="post" action="" class="form d-flex flex-column gap-7" enctype="multipart/form-data">
+        <form id="program_form" role="form" method="post" action="{{ route('programs.edit', Crypt::encrypt($info->id)) }}" class="form d-flex flex-column gap-7">
             {{ csrf_field() }}
 
             <div class="row g-9 mb-8">
@@ -122,8 +122,8 @@
                     <label class="fs-6 fw-semibold mb-2">
                         <i class="bi bi-file-earmark-pdf text-danger me-1"></i> بروشور البرنامج (PDF)
                     </label>
-                    <input type="file" name="brochure" accept=".pdf,application/pdf" class="form-control form-control-solid">
-                    <div class="form-text text-muted">اختياري — يُسمح بملفات PDF فقط (حتى 100 ميجابايت)</div>
+                    <input type="file" id="brochure_input" accept=".pdf,application/pdf" class="form-control form-control-solid">
+                    <div class="form-text text-muted">اختياري — يُسمح بملفات PDF فقط (حتى 100 ميجابايت). الرفع يتم في الخلفية.</div>
                 </div>
                 <div class="col-md-6 fv-row">
                     @if(!empty($info->brochure_path))
@@ -165,10 +165,10 @@
             openMetronicFileManager('image', 'thumbnail');
         });
 
-        function deleteBrochure(encryptedId) {
+        function deleteBrochure(id) {
             Swal.fire({
                 title: 'هل أنت متأكد؟',
-                text: 'سيتم حذف ملف البروشور نهائياً',
+                text: "سيتم حذف ملف البروشور نهائياً!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'نعم، احذف',
@@ -177,45 +177,162 @@
                     confirmButton: 'btn btn-danger',
                     cancelButton: 'btn btn-light'
                 }
-            }).then(function(result) {
+            }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
                         url: "{{ route('programs.brochure.delete') }}",
                         type: 'POST',
                         data: {
                             _token: '{{ csrf_token() }}',
-                            id: encryptedId
+                            id: id
                         },
                         success: function(response) {
-                            if (response.status == 'success') {
-                                Swal.fire({
-                                    text: response.message,
-                                    icon: 'success',
-                                    confirmButtonText: 'موافق',
-                                    customClass: { confirmButton: 'btn btn-primary' }
-                                }).then(function() {
-                                    location.reload();
-                                });
+                            if (response.status === 'success') {
+                                toastr.success('تم حذف البروشور بنجاح');
+                                setTimeout(() => window.location.reload(), 1000);
                             } else {
-                                Swal.fire({
-                                    text: response.message,
-                                    icon: 'error',
-                                    confirmButtonText: 'موافق',
-                                    customClass: { confirmButton: 'btn btn-primary' }
-                                });
+                                toastr.error(response.message || 'حدث خطأ أثناء الحذف');
                             }
                         },
                         error: function() {
-                            Swal.fire({
-                                text: 'حدث خطأ أثناء حذف البروشور',
-                                icon: 'error',
-                                confirmButtonText: 'موافق',
-                                customClass: { confirmButton: 'btn btn-primary' }
-                            });
+                            toastr.error('حدث خطأ أثناء حذف البروشور');
                         }
                     });
                 }
             });
         }
+
+        $(document).ready(function() {
+            if (typeof Resumable !== 'undefined') {
+                var r = new Resumable({
+                    target: '{{ route("programs.brochure.chunk") }}',
+                    chunkSize: 1 * 1024 * 1024,
+                    simultaneousUploads: 3,
+                    testChunks: true,
+                    throttleProgressCallbacks: 1,
+                    query: {
+                        _token: '{{ csrf_token() }}'
+                    }
+                });
+
+                var brochureInput = document.getElementById('brochure_input');
+                if (brochureInput) {
+                    r.assignBrowse(brochureInput);
+                }
+                
+                var uploadWidget = $('#global_upload_widget');
+                var progressBar = $('#upload_progress_bar');
+                var progressText = $('#upload_percentage');
+                var speedText = $('#upload_speed');
+                var timeText = $('#upload_time_remaining');
+                
+                var lastProgressTime = 0;
+                var lastProgressBytes = 0;
+
+                r.on('fileAdded', function(file){
+                    $('#upload_file_name').text(file.fileName);
+                });
+
+                r.on('fileProgress', function(file){
+                    uploadWidget.show();
+                    var progress = Math.floor(file.progress() * 100);
+                    progressBar.css('width', progress + '%');
+                    progressText.text(progress + '%');
+
+                    var now = new Date().getTime();
+                    if (lastProgressTime > 0) {
+                        var timeDiff = (now - lastProgressTime) / 1000;
+                        var bytesDiff = r.getSize() * file.progress() - lastProgressBytes;
+                        if (timeDiff > 0 && bytesDiff > 0) {
+                            var speed = bytesDiff / timeDiff;
+                            var speedMB = (speed / (1024 * 1024)).toFixed(2);
+                            speedText.text(speedMB + ' MB/s');
+                            
+                            var remainingBytes = r.getSize() - (r.getSize() * file.progress());
+                            var remainingSeconds = remainingBytes / speed;
+                            timeText.text(Math.round(remainingSeconds) + ' ثانية متبقية');
+                        }
+                    }
+                    lastProgressTime = now;
+                    lastProgressBytes = r.getSize() * file.progress();
+                });
+
+                r.on('fileSuccess', function(file, message){
+                    toastr.success('تم رفع البروشور بنجاح');
+                    setTimeout(function() {
+                        uploadWidget.hide();
+                        progressBar.css('width', '0%');
+                        progressText.text('0%');
+                        // Reload to show the new brochure button
+                        window.location.reload();
+                    }, 2000);
+                    window.isUploading = false;
+                });
+
+                r.on('fileError', function(file, message){
+                    toastr.error('حدث خطأ أثناء رفع البروشور');
+                    window.isUploading = false;
+                });
+
+                $('#cancel_global_upload').click(function() {
+                    r.cancel();
+                    uploadWidget.hide();
+                    window.isUploading = false;
+                    toastr.info('تم إلغاء الرفع');
+                });
+
+                window.addEventListener("beforeunload", function (e) {
+                    if (window.isUploading) {
+                        var confirmationMessage = 'جاري رفع الملف... هل أنت متأكد من رغبتك في مغادرة الصفحة وإلغاء الرفع؟';
+                        (e || window.event).returnValue = confirmationMessage;
+                        return confirmationMessage;
+                    }
+                });
+            }
+
+            $('#program_form').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var submitBtn = form.find('button[type="submit"]');
+                var hasFile = (typeof r !== 'undefined' && r.files.length > 0);
+                
+                submitBtn.prop('disabled', true);
+                
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: form.attr('action') || window.location.href,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        submitBtn.prop('disabled', false);
+                        if (response.status === 'success') {
+                            toastr.success('تم الحفظ بنجاح');
+                            
+                            if (hasFile) {
+                                r.opts.query.program_id = response.program_id;
+                                window.isUploading = true;
+                                r.upload();
+                                
+                                Swal.fire({
+                                    text: "تم الحفظ بنجاح، جاري رفع البروشور في الخلفية...",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    timer: 2500
+                                });
+                            }
+                        } else {
+                            toastr.error(response.message || 'حدث خطأ أثناء الحفظ');
+                        }
+                    },
+                    error: function(xhr) {
+                        submitBtn.prop('disabled', false);
+                        toastr.error('خطأ في الاتصال بالخادم');
+                    }
+                });
+            });
+        });
     </script>
 @stop
