@@ -256,6 +256,7 @@
         @keyframes oxModalIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .ox-qr-btn:hover { background: #f39c12 !important; transform: translateY(-50%) scale(1.1) !important; }
+        #qrSvgContainer svg { width: 260px !important; height: 260px !important; display: block; margin: 0 auto; }
     </style>
     <script>
         let currentBrochureUrl = '';
@@ -275,7 +276,7 @@
                     document.getElementById('qrProgramTitle').innerText = data.title;
                     document.getElementById('qrSvgContainer').innerHTML = data.qr_svg + `
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 5px;">
-                        <img src="{{ url('assets/site/images/logo.png') }}" style="width: 100%; height: auto;" alt="Oxford">
+                        <img src="{{ asset('assets/oxford/img/logo.png') }}" style="width: 100%; height: auto;" alt="Oxford">
                     </div>`;
                     document.getElementById('qrSvgContainer').style.visibility = 'visible';
                     currentBrochureUrl = data.url;
@@ -320,34 +321,32 @@
 
             var svgData = new XMLSerializer().serializeToString(svgElement);
             var canvas = document.createElement("canvas");
-            var svgSize = svgElement.getBoundingClientRect();
-            canvas.width = svgSize.width;
-            canvas.height = svgSize.height;
+            canvas.width = 600;
+            canvas.height = 600;
             var ctx = canvas.getContext("2d");
 
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            var img = document.createElement("img");
-            img.setAttribute("src", "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData))));
-
+            var img = new Image();
             img.onload = function() {
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 50, 50, 500, 500);
 
                 var logo = new Image();
                 logo.crossOrigin = "Anonymous";
-                logo.src = "{{ url('assets/site/images/logo.png') }}";
+                logo.src = "{{ asset('assets/oxford/img/logo.png') }}";
                 logo.onload = function() {
-                    var logoSize = 45;
-                    var x = (canvas.width - logoSize) / 2;
-                    var y = (canvas.height - logoSize) / 2;
-                    
-                    ctx.beginPath();
-                    ctx.arc(x + logoSize/2, y + logoSize/2, logoSize/2 + 2, 0, 2 * Math.PI);
+                    // Draw white background for logo
                     ctx.fillStyle = "white";
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                        ctx.roundRect(250, 250, 100, 100, 15);
+                    } else {
+                        ctx.arc(300, 300, 50, 0, 2 * Math.PI);
+                    }
                     ctx.fill();
                     
-                    ctx.drawImage(logo, x, y, logoSize, logoSize);
+                    ctx.drawImage(logo, 260, 260, 80, 80);
                     
                     var url = canvas.toDataURL("image/png");
                     var link = document.createElement("a");
@@ -365,6 +364,7 @@
                     link.click();
                 };
             };
+            img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
         }
     </script>
 </div>
