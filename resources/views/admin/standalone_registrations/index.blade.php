@@ -165,7 +165,12 @@
             <div class="modal-body text-center">
                 <p class="text-muted mb-5" style="font-family:'Cairo'">امسح الرمز لفتح نموذج طلبات كومبو الخارجي</p>
                 <div id="qrcode-container" style="position: relative; display: inline-block;">
-                    <div id="qrcode"></div>
+                    <div id="qrcode" style="width: 250px; height: 250px; overflow: hidden;">
+                        <style>
+                            #qrcode canvas { width: 100% !important; height: 100% !important; }
+                            #qrcode img { display: none !important; } /* qrcodejs sometimes adds img fallback */
+                        </style>
+                    </div>
                     <img src="{{ url('assets/oxford/img/logo.png') }}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: white; padding: 5px; border-radius: 8px;">
                 </div>
                 <div class="mt-6">
@@ -382,8 +387,8 @@
         var qrUrl = "{{ route('registration.standalone') }}";
         var qrcode = new QRCode(document.getElementById("qrcode"), {
             text: qrUrl,
-            width: 250,
-            height: 250,
+            width: 1000,
+            height: 1000,
             colorDark : "#0a2540",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H // High error correction needed when placing an image on top
@@ -547,18 +552,47 @@
     }
 
     function downloadQRCode() {
-        var canvas = document.querySelector('#qrcode canvas');
-        if(canvas) {
-            var url = canvas.toDataURL("image/png");
+        var qrCanvas = document.querySelector('#qrcode canvas');
+        if(!qrCanvas) {
+            alert('QR Code not generated yet.');
+            return;
+        }
+        
+        var size = 1000;
+        var combinedCanvas = document.createElement('canvas');
+        combinedCanvas.width = size;
+        combinedCanvas.height = size;
+        var ctx = combinedCanvas.getContext('2d');
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(qrCanvas, 0, 0, size, size);
+        
+        var logoImg = new Image();
+        logoImg.onload = function() {
+            var logoSize = size * 0.24;
+            var logoX = (size - logoSize) / 2;
+            var logoY = (size - logoSize) / 2;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(logoX - 10, logoY - 10, logoSize + 20, logoSize + 20, 20);
+            } else {
+                ctx.arc(size/2, size/2, (logoSize/2) + 10, 0, 2 * Math.PI);
+            }
+            ctx.fill();
+            
+            ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            
             var a = document.createElement('a');
-            a.href = url;
+            a.href = combinedCanvas.toDataURL("image/png", 1.0);
             a.download = 'registration-qr-code.png';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        } else {
-            alert('QR Code not generated yet.');
-        }
+        };
+        logoImg.src = "{{ url('assets/oxford/img/logo.png') }}";
     }
 </script>
 @stop

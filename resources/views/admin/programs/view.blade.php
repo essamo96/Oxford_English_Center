@@ -399,18 +399,19 @@
         if (!svgEl) { toastr.error('لا يوجد QR Code لتحميله'); return; }
 
         var svgData = new XMLSerializer().serializeToString(svgEl);
+        var scale = 8;
         var canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 350; // extra space for text at the bottom
+        canvas.width = 300 * scale;
+        canvas.height = 350 * scale; // extra space for text at the bottom
         var ctx = canvas.getContext('2d');
 
         // White background
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, 300, 350);
+        ctx.fillRect(0, 0, 300 * scale, 350 * scale);
 
         var img = new Image();
         img.onload = function() {
-            ctx.drawImage(img, 0, 0, 300, 300);
+            ctx.drawImage(img, 0, 0, 300 * scale, 300 * scale);
 
             var logoImg = new Image();
             logoImg.onload = function() {
@@ -418,24 +419,24 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 if (ctx.roundRect) {
-                    ctx.roundRect(120, 120, 60, 60, 10);
+                    ctx.roundRect(120 * scale, 120 * scale, 60 * scale, 60 * scale, 10 * scale);
                 } else {
-                    ctx.arc(150, 150, 30, 0, 2 * Math.PI);
+                    ctx.arc(150 * scale, 150 * scale, 30 * scale, 0, 2 * Math.PI);
                 }
                 ctx.fill();
                 
                 // Draw Oxford Logo
-                ctx.drawImage(logoImg, 125, 125, 50, 50);
+                ctx.drawImage(logoImg, 125 * scale, 125 * scale, 50 * scale, 50 * scale);
 
                 // Add program title text at bottom
                 ctx.fillStyle = '#333333';
-                ctx.font = 'bold 14px Cairo, Arial, sans-serif';
+                ctx.font = 'bold ' + (14 * scale) + 'px Cairo, Arial, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(_currentQrProgramTitle, 150, 330);
+                ctx.fillText(_currentQrProgramTitle, 150 * scale, 330 * scale);
 
                 var link = document.createElement('a');
                 link.download = 'QR_' + (_currentQrProgramTitle || 'brochure') + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
             };
             logoImg.src = "{{ asset('assets/oxford/img/logo.png') }}";

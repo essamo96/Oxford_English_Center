@@ -1838,7 +1838,7 @@
             return new Promise((resolve, reject) => {
                 const canvas = document.getElementById('qrGenCanvas');
                 const ctx = canvas.getContext('2d');
-                const size = 480;
+                const size = 1920;
                 canvas.width = size; canvas.height = size;
                 ctx.clearRect(0, 0, size, size);
 
