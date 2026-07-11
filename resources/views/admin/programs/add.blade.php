@@ -96,8 +96,8 @@
 
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">
-                    <label class="fs-6 fw-semibold mb-2 required">نوع البرنامج (Program Type)</label>
-                    <select name="program_type" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="اختر نوع البرنامج" required>
+                    <label class="fs-6 fw-semibold mb-2">نوع البرنامج (Program Type)</label>
+                    <select name="program_type" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="اختر نوع البرنامج">
                         <option value=""></option>
                         <option value="kids" {{ old('program_type') == 'kids' ? 'selected' : '' }}>برنامج الصغار (Kids)</option>
                         <option value="adults" {{ old('program_type') == 'adults' ? 'selected' : '' }}>برنامج الكبار (Adults)</option>
@@ -113,6 +113,17 @@
                 <div class="col-md-6 fv-row">
                     <label class="fs-6 fw-semibold mb-2">تاريخ انتهاء التسجيل</label>
                     <input type="date" name="registration_end" value="{{ old('registration_end') }}" class="form-control form-control-solid">
+                </div>
+            </div>
+
+            {{-- قسم البروشور PDF --}}
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">
+                        <i class="bi bi-file-earmark-pdf text-danger me-1"></i> بروشور البرنامج (PDF)
+                    </label>
+                    <input type="file" name="brochure" accept=".pdf,application/pdf" class="form-control form-control-solid">
+                    <div class="form-text text-muted">اختياري — يُسمح بملفات PDF فقط (حتى 100 ميجابايت)</div>
                 </div>
             </div>
 

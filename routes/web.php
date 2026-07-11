@@ -23,6 +23,12 @@ Route::group(['middleware' => 'web'], function () {
     Route::post('admin/groups/qr/deactivate/{id}', ['as' => 'groups.qr.deactivate', 'uses' => 'GroupQrController@deactivate']);
 });
 
+// =================== Program Brochure (public — QR Code landing) ===================
+Route::group(['middleware' => 'web'], function () {
+    Route::get('brochure/{id}', ['as' => 'brochure.show', 'uses' => 'BrochureController@show']);
+    Route::get('brochure/{id}/download', ['as' => 'brochure.download', 'uses' => 'BrochureController@download']);
+});
+
 Route::get('/clear-cache', function () {
 
     Artisan::call('cache:clear');
@@ -35,6 +41,11 @@ Route::get('/clear-cache', function () {
 Route::get('/run-queue', function () {
     Artisan::call('queue:work');
     return "Queue worker finished processing all pending jobs!";
+});
+
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return "Storage linked successfully!";
 });
 
 Route::group(['middleware' => ['web']], function () {
@@ -459,6 +470,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('programs/details/{id}', ['as' => 'programs.details', 'middleware' => ['permission:admin.programs.view'], 'uses' => 'ProgramsController@getProgramGroupsDetails']);
     Route::post('programs/status', ['as' => 'programs.status', 'middleware' => ['permission:admin.programs.status'], 'uses' => 'ProgramsController@postStatus']);
     Route::post('programs/placement-status', ['as' => 'programs.placement_status', 'middleware' => ['permission:admin.programs.status'], 'uses' => 'ProgramsController@postPlacementStatus']);
+    Route::post('programs/brochure/delete', ['as' => 'programs.brochure.delete', 'middleware' => ['permission:admin.programs.edit'], 'uses' => 'ProgramsController@deleteBrochure']);
+    Route::get('programs/brochure/qr/{id}', ['as' => 'programs.brochure.qr', 'middleware' => ['permission:admin.programs.view'], 'uses' => 'ProgramsController@getBrochureQr']);
 
     //groups Route
     Route::get('groups', ['as' => 'groups.view', 'middleware' => ['permission:admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'GroupsController@getIndex']);

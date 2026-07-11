@@ -12,9 +12,11 @@ use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 ////////////////////////////////////
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Validator;
+use BaconQrCode\Common\ErrorCorrectionLevel;
 use Illuminate\Contracts\Encryption\DecryptException;
 
 class ProgramsController extends AdminController
@@ -69,10 +71,18 @@ class ProgramsController extends AdminController
                             </div>';
             }
 
+            $programTypeHtml = '';
+            if ($row->program_type === 'kids') {
+                $programTypeHtml = '<span class="badge badge-light-primary mt-1" style="width:fit-content;">برنامج الصغار (Kids)</span>';
+            } elseif ($row->program_type === 'adults') {
+                $programTypeHtml = '<span class="badge badge-light-success mt-1" style="width:fit-content;">برنامج الكبار (Adults)</span>';
+            }
+
             return '<div class="d-flex align-items-center view-program-details" data-id="' . Crypt::encrypt($row->id) . '" style="cursor: pointer;">
                         ' . $imageHtml . '
                         <div class="d-flex justify-content-start flex-column">
                             <span class="text-dark fw-bold text-hover-primary mb-1 fs-6">' . $title . '</span>
+                            ' . $programTypeHtml . '
                         </div>
                     </div>';
         });
@@ -266,6 +276,13 @@ class ProgramsController extends AdminController
                     $add->registration_end   = $request->get('registration_end') ?: null;
                     $add->program_type       = $request->get('program_type') ?: null;
                     $add->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
+
+                    // Handle brochure PDF upload
+                    if ($request->hasFile('brochure') && $request->file('brochure')->isValid()) {
+                        $brochurePath = $request->file('brochure')->store('brochures', 'public');
+                        $add->brochure_path = $brochurePath;
+                    }
+
                     $add->save();
                     $this->applyPlacementDefault($request, $add->id);
                 }
@@ -353,6 +370,16 @@ class ProgramsController extends AdminController
                     $info->registration_end   = $request->get('registration_end') ?: null;
                     $info->program_type       = $request->get('program_type') ?: null;
                     $info->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
+
+                    // Handle brochure PDF upload (delete old file if exists)
+                    if ($request->hasFile('brochure') && $request->file('brochure')->isValid()) {
+                        if (!empty($info->brochure_path)) {
+                            Storage::disk('public')->delete($info->brochure_path);
+                        }
+                        $brochurePath = $request->file('brochure')->store('brochures', 'public');
+                        $info->brochure_path = $brochurePath;
+                    }
+
                     $info->save();
                     $this->applyPlacementDefault($request, $id);
                     $request->session()->flash('success', self::UPDATE_SUCCESS);
@@ -381,6 +408,10 @@ class ProgramsController extends AdminController
         $programs = new Programs();
         $info = $programs->getProgram($id);
         if ($info) {
+            // Delete brochure file if exists
+            if (!empty($info->brochure_path)) {
+                Storage::disk('public')->delete($info->brochure_path);
+            }
             $delete = $programs->deleteProgram($info);
             if ($delete) {
 
@@ -477,5 +508,73 @@ class ProgramsController extends AdminController
         } else {
             return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
         }
+    }
+
+    //////////////////////////////////////////////
+    // Delete brochure PDF only (without deleting the program)
+    //////////////////////////////////////////////
+    public function deleteBrochure(Request $request)
+    {
+        $id = $request->get('id');
+        try {
+            $id = Crypt::decrypt($id);
+        } catch (DecryptException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Error Decode']);
+        }
+
+        $programs = new Programs();
+        $info = $programs->getProgram($id);
+        if ($info) {
+            if (!empty($info->brochure_path)) {
+                Storage::disk('public')->delete($info->brochure_path);
+                $info->brochure_path = null;
+                $info->save();
+                return response()->json(['status' => 'success', 'message' => 'تم حذف البروشور بنجاح']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'لا يوجد بروشور لحذفه']);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
+        }
+    }
+
+    //////////////////////////////////////////////
+    // Generate QR Code SVG for program brochure
+    //////////////////////////////////////////////
+    public function getBrochureQr(Request $request, $id)
+    {
+        try {
+            $decryptedId = Crypt::decrypt($id);
+        } catch (DecryptException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Error Decode']);
+        }
+
+        $programs = new Programs();
+        $info = $programs->getProgram($decryptedId);
+        if (!$info) {
+            return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
+        }
+
+        $encryptedId = Crypt::encrypt($decryptedId);
+        $brochureUrl = route('brochure.show', ['id' => $encryptedId]);
+        $hasBrochure = !empty($info->brochure_path);
+
+        // Generate QR Code SVG using bacon/bacon-qr-code
+        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+        );
+        $writer = new \BaconQrCode\Writer($renderer);
+        
+        // Use ErrorCorrectionLevel::H() to ensure the QR code remains readable when we place a logo in the center
+        $qrSvg = $writer->writeString($brochureUrl, 'UTF-8', \BaconQrCode\Common\ErrorCorrectionLevel::H());
+
+        return response()->json([
+            'status' => 'success',
+            'title' => $info->title,
+            'url' => $brochureUrl,
+            'has_brochure' => $hasBrochure,
+            'qr_svg' => $qrSvg,
+        ]);
     }
 }

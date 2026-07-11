@@ -117,6 +117,17 @@
                     <span class="ox-action__icon"><i class="bi bi-journal-bookmark-fill"></i></span>
                     <div><h3>Book A Course</h3><span>Reserve your seat today</span></div>
                 </a>
+                
+                {{-- Dynamic Program Brochures --}}
+                @foreach($programsWithBrochures as $prog)
+                <a class="ox-action" href="{{ route('brochure.show', \Illuminate\Support\Facades\Crypt::encrypt($prog->id)) }}" data-reveal="up" data-reveal-delay=".3s">
+                    <span class="ox-action__icon"><i class="bi bi-file-earmark-pdf-fill"></i></span>
+                    <div>
+                        <h3>{{ $prog->title }}</h3>
+                        <span>تحميل بروشور البرنامج</span>
+                    </div>
+                </a>
+                @endforeach
             </div>
         </div>
     </section>

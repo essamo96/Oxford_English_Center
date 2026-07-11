@@ -13,10 +13,23 @@ class Programs extends Model {
     protected $table = 'programs';
     protected $fillable = [
         'title', 'short', 'exam', 'status', 'image',
+        'brochure_path',
         'min_payment_percent', 'min_payment_fixed',
         'registration_start', 'registration_end',
         'program_type', 'is_placement_test',
     ];
+
+    /**
+     * Get the public URL for the brochure PDF.
+     * Returns null if no brochure is uploaded.
+     */
+    public function getBrochureUrlAttribute()
+    {
+        if (empty($this->brochure_path)) {
+            return null;
+        }
+        return asset('storage/' . $this->brochure_path);
+    }
 
     /**
      * Compute the minimum acceptable first payment for this program against a given total.

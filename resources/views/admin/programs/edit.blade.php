@@ -96,8 +96,8 @@
 
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">
-                    <label class="fs-6 fw-semibold mb-2 required">نوع البرنامج (Program Type)</label>
-                    <select name="program_type" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="اختر نوع البرنامج" required>
+                    <label class="fs-6 fw-semibold mb-2">نوع البرنامج (Program Type)</label>
+                    <select name="program_type" class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="اختر نوع البرنامج">
                         <option value=""></option>
                         <option value="kids" {{ ($info->program_type ?? '') == 'kids' ? 'selected' : '' }}>برنامج الصغار (Kids)</option>
                         <option value="adults" {{ ($info->program_type ?? '') == 'adults' ? 'selected' : '' }}>برنامج الكبار (Adults)</option>
@@ -116,6 +116,40 @@
                 </div>
             </div>
 
+            {{-- قسم البروشور PDF --}}
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">
+                        <i class="bi bi-file-earmark-pdf text-danger me-1"></i> بروشور البرنامج (PDF)
+                    </label>
+                    <input type="file" name="brochure" accept=".pdf,application/pdf" class="form-control form-control-solid">
+                    <div class="form-text text-muted">اختياري — يُسمح بملفات PDF فقط (حتى 100 ميجابايت)</div>
+                </div>
+                <div class="col-md-6 fv-row">
+                    @if(!empty($info->brochure_path))
+                        <label class="fs-6 fw-semibold mb-2">البروشور الحالي</label>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <a href="{{ $info->brochure_url }}" target="_blank" class="btn btn-sm btn-light-primary">
+                                <i class="bi bi-eye me-1"></i> عرض
+                            </a>
+                            <a href="{{ $info->brochure_url }}" download class="btn btn-sm btn-light-success">
+                                <i class="bi bi-download me-1"></i> تحميل
+                            </a>
+                            <button type="button" class="btn btn-sm btn-light-danger" onclick="deleteBrochure('{{ Crypt::encrypt($info->id) }}')">
+                                <i class="bi bi-trash me-1"></i> حذف البروشور
+                            </button>
+                        </div>
+                    @else
+                        <label class="fs-6 fw-semibold mb-2">&nbsp;</label>
+                        <div class="mt-2">
+                            <span class="badge badge-light-warning fs-7 p-3">
+                                <i class="bi bi-info-circle me-1"></i> لم يتم رفع بروشور بعد
+                            </span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <div class="card-footer d-flex justify-content-end py-6 px-9">
                 <a href="{{ route('programs.view') }}" class="btn btn-light btn-active-light-primary me-2">إلغاء</a>
                 <button type="submit" class="btn btn-primary">حفظ</button>
@@ -130,5 +164,58 @@
         $('#lfm').on('click', function() {
             openMetronicFileManager('image', 'thumbnail');
         });
+
+        function deleteBrochure(encryptedId) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف ملف البروشور نهائياً',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-light'
+                }
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('programs.brochure.delete') }}",
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            id: encryptedId
+                        },
+                        success: function(response) {
+                            if (response.status == 'success') {
+                                Swal.fire({
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'موافق',
+                                    customClass: { confirmButton: 'btn btn-primary' }
+                                }).then(function() {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'موافق',
+                                    customClass: { confirmButton: 'btn btn-primary' }
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                text: 'حدث خطأ أثناء حذف البروشور',
+                                icon: 'error',
+                                confirmButtonText: 'موافق',
+                                customClass: { confirmButton: 'btn btn-primary' }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @stop

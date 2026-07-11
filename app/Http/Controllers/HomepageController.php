@@ -41,6 +41,10 @@ class HomepageController extends Controller {
         parent::$data['value'] = $page->getPageBySlug('value');
         $page = new Pages();
         parent::$data['students'] = $page->getPageBySlug('students');
+
+        // Fetch programs that have a brochure
+        parent::$data['programsWithBrochures'] = \App\Models\Programs::whereNotNull('brochure_path')->whereNull('deleted_at')->get();
+
         return view('frontend.home.view', parent::$data);
     }
     
