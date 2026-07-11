@@ -213,8 +213,8 @@
         <div class="card-footer-area">
             <p class="footer-text">
                 &copy; {{ date('Y') }}
-                <a href="{{ url('/') }}">أكاديمية أوكسفورد</a>
-                — جميع الحقوق محفوظة
+                <a href="{{ url('/') }}">Oxford English Centre</a>
+                — All Rights Reserved
             </p>
         </div>
     </div>
