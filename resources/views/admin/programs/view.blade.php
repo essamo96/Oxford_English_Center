@@ -400,34 +400,38 @@
 
         var svgData = new XMLSerializer().serializeToString(svgEl);
         var canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = 600;
+        canvas.width = 300;
+        canvas.height = 350; // extra space for text at the bottom
         var ctx = canvas.getContext('2d');
 
         // White background
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, 600, 600);
+        ctx.fillRect(0, 0, 300, 350);
 
         var img = new Image();
         img.onload = function() {
-            ctx.drawImage(img, 50, 50, 500, 500);
+            ctx.drawImage(img, 0, 0, 300, 300);
 
             var logoImg = new Image();
             logoImg.onload = function() {
                 // Draw rounded white background for logo
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.roundRect(250, 250, 100, 100, 15); // x, y, width, height, radius
+                if (ctx.roundRect) {
+                    ctx.roundRect(120, 120, 60, 60, 10);
+                } else {
+                    ctx.arc(150, 150, 30, 0, 2 * Math.PI);
+                }
                 ctx.fill();
                 
                 // Draw Oxford Logo
-                ctx.drawImage(logoImg, 260, 260, 80, 80);
+                ctx.drawImage(logoImg, 125, 125, 50, 50);
 
                 // Add program title text at bottom
                 ctx.fillStyle = '#333333';
-                ctx.font = 'bold 18px Cairo, Arial, sans-serif';
+                ctx.font = 'bold 14px Cairo, Arial, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(_currentQrProgramTitle, 300, 585);
+                ctx.fillText(_currentQrProgramTitle, 150, 330);
 
                 var link = document.createElement('a');
                 link.download = 'QR_' + (_currentQrProgramTitle || 'brochure') + '.png';

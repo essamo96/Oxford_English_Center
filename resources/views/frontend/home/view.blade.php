@@ -321,16 +321,16 @@
 
             var svgData = new XMLSerializer().serializeToString(svgElement);
             var canvas = document.createElement("canvas");
-            canvas.width = 600;
-            canvas.height = 600;
+            canvas.width = 300;
+            canvas.height = 300;
             var ctx = canvas.getContext("2d");
 
             ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, 300, 300);
 
             var img = new Image();
             img.onload = function() {
-                ctx.drawImage(img, 50, 50, 500, 500);
+                ctx.drawImage(img, 0, 0, 300, 300);
 
                 var logo = new Image();
                 logo.crossOrigin = "Anonymous";
@@ -340,13 +340,13 @@
                     ctx.fillStyle = "white";
                     ctx.beginPath();
                     if (ctx.roundRect) {
-                        ctx.roundRect(250, 250, 100, 100, 15);
+                        ctx.roundRect(120, 120, 60, 60, 10);
                     } else {
-                        ctx.arc(300, 300, 50, 0, 2 * Math.PI);
+                        ctx.arc(150, 150, 30, 0, 2 * Math.PI);
                     }
                     ctx.fill();
                     
-                    ctx.drawImage(logo, 260, 260, 80, 80);
+                    ctx.drawImage(logo, 125, 125, 50, 50);
                     
                     var url = canvas.toDataURL("image/png");
                     var link = document.createElement("a");
