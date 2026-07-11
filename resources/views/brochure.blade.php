@@ -195,14 +195,14 @@
             </p>
 
             {{-- Embedded PDF viewer for desktop --}}
-            <iframe src="{{ $brochureUrl }}" class="pdf-embed" title="بروشور {{ $program->title }}"></iframe>
+            <iframe src="{{ $serveUrl }}" class="pdf-embed" title="بروشور {{ $program->title }}"></iframe>
 
             <div class="d-flex flex-column align-items-center gap-2">
-                <a href="{{ $brochureUrl }}" download class="download-btn">
+                <a href="{{ $downloadUrl }}" download class="download-btn">
                     <i class="bi bi-download"></i>
                     تحميل البروشور
                 </a>
-                <a href="{{ $brochureUrl }}" target="_blank" class="view-btn">
+                <a href="{{ $serveUrl }}" target="_blank" class="view-btn">
                     <i class="bi bi-eye"></i>
                     عرض في نافذة جديدة
                 </a>

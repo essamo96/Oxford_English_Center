@@ -27,6 +27,7 @@ Route::group(['middleware' => 'web'], function () {
 Route::group(['middleware' => 'web'], function () {
     Route::get('brochure/{id}', ['as' => 'brochure.show', 'uses' => 'BrochureController@show']);
     Route::get('brochure/{id}/download', ['as' => 'brochure.download', 'uses' => 'BrochureController@download']);
+    Route::get('brochure/{id}/file', ['as' => 'brochure.file', 'uses' => 'BrochureController@serveFile']);
 });
 
 Route::get('/clear-cache', function () {

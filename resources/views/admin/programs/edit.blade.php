@@ -129,10 +129,10 @@
                     @if(!empty($info->brochure_path))
                         <label class="fs-6 fw-semibold mb-2">البروشور الحالي</label>
                         <div class="d-flex align-items-center gap-2 mt-2">
-                            <a href="{{ $info->brochure_url }}" target="_blank" class="btn btn-sm btn-light-primary">
+                            <a href="{{ route('brochure.file', Crypt::encrypt($info->id)) }}" target="_blank" class="btn btn-sm btn-light-primary">
                                 <i class="bi bi-eye me-1"></i> عرض
                             </a>
-                            <a href="{{ $info->brochure_url }}" download class="btn btn-sm btn-light-success">
+                            <a href="{{ route('brochure.download', Crypt::encrypt($info->id)) }}" class="btn btn-sm btn-light-success">
                                 <i class="bi bi-download me-1"></i> تحميل
                             </a>
                             <button type="button" class="btn btn-sm btn-light-danger" onclick="deleteBrochure('{{ Crypt::encrypt($info->id) }}')">
