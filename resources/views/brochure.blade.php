@@ -57,6 +57,7 @@
             justify-content: center;
             margin: 0 auto 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 8px;
         }
         .logo-circle i {
             font-size: 36px;
@@ -180,9 +181,9 @@
     <div class="brochure-card">
         <div class="card-header-area">
             <div class="logo-circle">
-                <i class="bi bi-mortarboard-fill"></i>
+                <img src="{{ asset('assets/oxford/img/logo.png') }}" style="width: 100%; height: auto;" alt="Oxford English Centre">
             </div>
-            <p class="academy-name">أكاديمية أوكسفورد للغة الإنجليزية</p>
+            <p class="academy-name" style="direction: ltr;">Oxford English Centre</p>
             <h1 class="program-title">{{ $program->title }}</h1>
         </div>
 
