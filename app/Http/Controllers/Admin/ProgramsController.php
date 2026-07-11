@@ -542,13 +542,7 @@ class ProgramsController extends AdminController
         $info = $programs->getProgram($id);
         if ($info) {
             if (!empty($info->brochure_path)) {
-                if (str_starts_with($info->brochure_path, 'uploads/')) {
-                    if (file_exists(public_path($info->brochure_path))) {
-                        unlink(public_path($info->brochure_path));
-                    }
-                } else {
-                    Storage::disk('public')->delete($info->brochure_path);
-                }
+                Storage::disk('public')->delete($info->brochure_path);
                 $info->brochure_path = null;
                 $info->save();
                 return response()->json(['status' => 'success', 'message' => 'تم حذف البروشور بنجاح']);
@@ -635,11 +629,11 @@ class ProgramsController extends AdminController
         $chunks = glob($chunkDir . '/*.part');
         if (count($chunks) == $totalChunks) {
             // Assemble
-            $finalPath = 'uploads/brochures/' . \Illuminate\Support\Str::uuid() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $filename);
-            $finalFile = public_path($finalPath);
+            $finalPath = 'brochures/' . \Illuminate\Support\Str::uuid() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $filename);
+            $finalFile = storage_path('app/public/' . $finalPath);
             
-            if (!is_dir(public_path('uploads/brochures'))) {
-                mkdir(public_path('uploads/brochures'), 0777, true);
+            if (!is_dir(storage_path('app/public/brochures'))) {
+                mkdir(storage_path('app/public/brochures'), 0777, true);
             }
 
             $out = fopen($finalFile, 'wb');
@@ -658,16 +652,8 @@ class ProgramsController extends AdminController
             if ($programId) {
                 $program = Programs::find($programId);
                 if ($program) {
-                    if (!empty($program->brochure_path)) {
-                        if (str_starts_with($program->brochure_path, 'uploads/')) {
-                            if (file_exists(public_path($program->brochure_path))) {
-                                unlink(public_path($program->brochure_path));
-                            }
-                        } else {
-                            if (Storage::disk('public')->exists($program->brochure_path)) {
-                                Storage::disk('public')->delete($program->brochure_path);
-                            }
-                        }
+                    if (!empty($program->brochure_path) && Storage::disk('public')->exists($program->brochure_path)) {
+                        Storage::disk('public')->delete($program->brochure_path);
                     }
                     $program->brochure_path = $finalPath;
                     $program->save();
