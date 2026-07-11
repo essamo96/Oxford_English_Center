@@ -90,4 +90,40 @@ class BrochureController extends Controller
 
         return response()->file($path);
     }
+
+    public function getBrochureQr(Request $request, $id)
+    {
+        try {
+            $decryptedId = Crypt::decrypt($id);
+        } catch (DecryptException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Error Decode']);
+        }
+
+        $program = Programs::find($decryptedId);
+        if (!$program) {
+            return response()->json(['status' => 'error', 'message' => 'البرنامج غير موجود']);
+        }
+
+        $encryptedId = Crypt::encrypt($decryptedId);
+        $brochureUrl = route('brochure.show', ['id' => $encryptedId]);
+        $hasBrochure = !empty($program->brochure_path);
+
+        // Generate QR Code SVG using bacon/bacon-qr-code
+        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+        );
+        $writer = new \BaconQrCode\Writer($renderer);
+        
+        // Use ErrorCorrectionLevel::H() to ensure the QR code remains readable when we place a logo in the center
+        $qrSvg = $writer->writeString($brochureUrl, 'UTF-8', \BaconQrCode\Common\ErrorCorrectionLevel::H());
+
+        return response()->json([
+            'status' => 'success',
+            'title' => $program->title,
+            'url' => $brochureUrl,
+            'has_brochure' => $hasBrochure,
+            'qr_svg' => $qrSvg,
+        ]);
+    }
 }

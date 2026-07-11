@@ -120,13 +120,18 @@
                 
                 {{-- Dynamic Program Brochures --}}
                 @foreach($programsWithBrochures as $prog)
-                <a class="ox-action" href="{{ route('brochure.show', \Illuminate\Support\Facades\Crypt::encrypt($prog->id)) }}" data-reveal="up" data-reveal-delay=".3s">
-                    <span class="ox-action__icon"><i class="bi bi-file-earmark-pdf-fill"></i></span>
-                    <div>
-                        <h3>{{ $prog->title }}</h3>
-                        <span>تحميل بروشور البرنامج</span>
-                    </div>
-                </a>
+                <div class="ox-action-wrapper" style="position: relative; display: block;" data-reveal="up" data-reveal-delay=".3s">
+                    <a class="ox-action" href="{{ route('brochure.show', \Illuminate\Support\Facades\Crypt::encrypt($prog->id)) }}" style="padding-left: 60px;">
+                        <span class="ox-action__icon"><i class="bi bi-file-earmark-pdf-fill"></i></span>
+                        <div>
+                            <h3>{{ $prog->title }}</h3>
+                            <span>تحميل بروشور البرنامج</span>
+                        </div>
+                    </a>
+                    <button type="button" class="ox-qr-btn" onclick="event.preventDefault(); event.stopPropagation(); showQrModal('{{ Crypt::encrypt($prog->id) }}')" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: #1e3a5f; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" title="مشاركة عبر QR Code">
+                        <i class="bi bi-qr-code"></i>
+                    </button>
+                </div>
                 @endforeach
             </div>
         </div>
@@ -217,5 +222,150 @@
         </div>
     </section>
 
+    {{-- QR Code Modal --}}
+    <div id="oxQrModal" class="ox-modal" style="display: none;">
+        <div class="ox-modal__backdrop" onclick="closeQrModal()"></div>
+        <div class="ox-modal__content">
+            <button class="ox-modal__close" onclick="closeQrModal()">&times;</button>
+            <div class="ox-modal__header">
+                <h3>مشاركة البروشور</h3>
+                <p id="qrProgramTitle" style="color: #666; font-size: 14px; margin-top: 5px;"></p>
+            </div>
+            <div class="ox-modal__body" style="text-align: center; padding: 30px;">
+                <div id="qrLoading" style="display: none;">
+                    <i class="bi bi-arrow-repeat" style="font-size: 32px; animation: spin 1s linear infinite; color: #1e3a5f;"></i>
+                </div>
+                <div id="qrSvgContainer" style="position: relative; display: inline-block; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                    <!-- SVG gets injected here -->
+                </div>
+            </div>
+            <div class="ox-modal__footer" style="display: flex; gap: 10px; justify-content: center; padding: 20px; border-top: 1px solid #eee;">
+                <button onclick="copyQrUrl()" class="ox-btn" style="flex: 1; background: #f8f9fa; color: #1e3a5f; border: 2px solid #eee; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="bi bi-link-45deg"></i> نسخ الرابط</button>
+                <button onclick="downloadQrImage()" class="ox-btn" style="flex: 1; background: #28a745; color: white; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="bi bi-download"></i> تحميل الصورة</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        .ox-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .ox-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .ox-modal__content { position: relative; background: #fff; width: 100%; max-width: 400px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: oxModalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; }
+        .ox-modal__header { padding: 25px 25px 15px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+        .ox-modal__header h3 { margin: 0; color: #1e3a5f; font-size: 20px; font-weight: 700; }
+        .ox-modal__close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border: none; background: #f8f9fa; border-radius: 50%; font-size: 20px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .ox-modal__close:hover { background: #fee; color: #e74c3c; }
+        @keyframes oxModalIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .ox-qr-btn:hover { background: #f39c12 !important; transform: translateY(-50%) scale(1.1) !important; }
+    </style>
+    <script>
+        let currentBrochureUrl = '';
+
+        function showQrModal(encryptedId) {
+            document.getElementById('oxQrModal').style.display = 'flex';
+            document.getElementById('qrLoading').style.display = 'block';
+            document.getElementById('qrSvgContainer').style.visibility = 'hidden';
+            
+            fetch("{{ url('brochure') }}/" + encryptedId + "/qr", {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('qrLoading').style.display = 'none';
+                if (data.status === 'success') {
+                    document.getElementById('qrProgramTitle').innerText = data.title;
+                    document.getElementById('qrSvgContainer').innerHTML = data.qr_svg + `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 5px;">
+                        <img src="{{ url('assets/site/images/logo.png') }}" style="width: 100%; height: auto;" alt="Oxford">
+                    </div>`;
+                    document.getElementById('qrSvgContainer').style.visibility = 'visible';
+                    currentBrochureUrl = data.url;
+                } else {
+                    alert(data.message || 'حدث خطأ أثناء تحميل QR');
+                    closeQrModal();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('حدث خطأ في الاتصال');
+                closeQrModal();
+            });
+        }
+
+        function closeQrModal() {
+            document.getElementById('oxQrModal').style.display = 'none';
+        }
+
+        function copyQrUrl() {
+            if(currentBrochureUrl) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(currentBrochureUrl).then(() => {
+                        alert('تم نسخ الرابط بنجاح!');
+                    });
+                } else {
+                    var dummy = document.createElement("textarea");
+                    document.body.appendChild(dummy);
+                    dummy.value = currentBrochureUrl;
+                    dummy.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(dummy);
+                    alert('تم نسخ الرابط بنجاح!');
+                }
+            }
+        }
+
+        function downloadQrImage() {
+            var container = document.getElementById('qrSvgContainer');
+            var svgElement = container.querySelector('svg');
+            if(!svgElement) return;
+
+            var svgData = new XMLSerializer().serializeToString(svgElement);
+            var canvas = document.createElement("canvas");
+            var svgSize = svgElement.getBoundingClientRect();
+            canvas.width = svgSize.width;
+            canvas.height = svgSize.height;
+            var ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var img = document.createElement("img");
+            img.setAttribute("src", "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData))));
+
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+
+                var logo = new Image();
+                logo.crossOrigin = "Anonymous";
+                logo.src = "{{ url('assets/site/images/logo.png') }}";
+                logo.onload = function() {
+                    var logoSize = 45;
+                    var x = (canvas.width - logoSize) / 2;
+                    var y = (canvas.height - logoSize) / 2;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x + logoSize/2, y + logoSize/2, logoSize/2 + 2, 0, 2 * Math.PI);
+                    ctx.fillStyle = "white";
+                    ctx.fill();
+                    
+                    ctx.drawImage(logo, x, y, logoSize, logoSize);
+                    
+                    var url = canvas.toDataURL("image/png");
+                    var link = document.createElement("a");
+                    var title = document.getElementById('qrProgramTitle').innerText || 'brochure';
+                    link.download = title + "_QR.png";
+                    link.href = url;
+                    link.click();
+                };
+                logo.onerror = function() {
+                    var url = canvas.toDataURL("image/png");
+                    var link = document.createElement("a");
+                    var title = document.getElementById('qrProgramTitle').innerText || 'brochure';
+                    link.download = title + "_QR.png";
+                    link.href = url;
+                    link.click();
+                };
+            };
+        }
+    </script>
 </div>
 @stop
