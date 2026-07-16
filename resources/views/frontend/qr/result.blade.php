@@ -38,7 +38,7 @@
         width: 90px; height: 90px;
         border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: 3rem; margin-bottom: 18px;
+        font-size: 3.2rem; margin-bottom: 18px;
     }
     .qr-icon.success { background: #d1fae5; color: #065f46; box-shadow: 0 8px 22px rgba(6,95,70,0.18); }
     .qr-icon.error   { background: #fee2e2; color: #dc2626; box-shadow: 0 8px 22px rgba(220,38,38,0.18); }
@@ -47,14 +47,14 @@
         font-family: 'Fraunces', Georgia, serif;
         font-style: italic;
         font-weight: 600;
-        font-size: 1.7rem;
+        font-size: 1.9rem;
         color: #003366;
         letter-spacing: -0.02em;
         margin: 0 0 12px;
     }
     .qr-message {
         color: #4b5563;
-        font-size: 1rem;
+        font-size: 1.2rem;
         line-height: 1.7;
         margin-bottom: 24px;
     }
@@ -65,7 +65,7 @@
         padding: 12px 28px;
         border-radius: 999px;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.15rem;
         display: inline-block;
         transition: all 0.25s;
         letter-spacing: 0.04em;

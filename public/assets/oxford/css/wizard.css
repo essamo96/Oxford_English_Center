@@ -52,7 +52,7 @@
 }
 
 .hero-content h1 {
-    font-size: 4.5rem;
+    font-size: 4.7rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: -2px;
@@ -62,7 +62,7 @@
 }
 
 .hero-content p {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     opacity: 0.9;
     font-weight: 500;
     color: var(--white);
@@ -83,7 +83,7 @@
 }
 
 .hero-content h1 {
-    font-size: 3.5rem;
+    font-size: 3.7rem;
     font-weight: 800;
     margin-bottom: 1rem;
     letter-spacing: -1px;
@@ -91,7 +91,7 @@
 }
 
 .hero-content p {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     opacity: 0.9;
     max-width: 600px;
     margin: 0 auto;
@@ -151,7 +151,7 @@
 }
 
 .program-name {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 900;
     margin: 0;
     text-transform: uppercase;
@@ -307,7 +307,7 @@
     font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-weight: 600;
-    font-size: 1.55rem;
+    font-size: 1.75rem;
     letter-spacing: 0;
     line-height: 1;
     font-variation-settings: "opsz" 144, "SOFT" 30;
@@ -353,7 +353,7 @@
     font-family: 'bootstrap-icons';
     font-style: normal;
     font-weight: bold;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     visibility: visible;
     position: absolute;
     inset: 0;
@@ -365,7 +365,7 @@
 
 .step-label {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #6c7689;
     text-transform: uppercase;
@@ -390,35 +390,35 @@
     .wizard-header-steps { padding: 44px 44px 28px; }
     .step-track-line { top: 76px; }
     .step-number { width: 56px; height: 56px; }
-    .step-number .step-num-text { font-size: 1.4rem; }
+    .step-number .step-num-text { font-size: 1.6rem; }
 }
 
 @media (max-width: 991px) {
     .wizard-header-steps { padding: 36px 32px 24px; }
     .step-track-line { top: 66px; left: 11%; right: 11%; }
     .step-number { width: 50px; height: 50px; }
-    .step-number .step-num-text { font-size: 1.25rem; }
-    .step-label { font-size: 0.78rem; letter-spacing: 0.1em; }
+    .step-number .step-num-text { font-size: 1.45rem; }
+    .step-label { font-size: 0.98rem; letter-spacing: 0.1em; }
     .step-indicator { gap: 13px; }
-    .step-indicator.completed .step-num-text::before { font-size: 1.2rem; }
+    .step-indicator.completed .step-num-text::before { font-size: 1.4rem; }
 }
 
 @media (max-width: 768px) {
     .wizard-header-steps { padding: 28px 18px 20px; }
     .step-track-line { top: 56px; left: 13%; right: 13%; }
     .step-number { width: 42px; height: 42px; border-width: 1.5px; }
-    .step-number .step-num-text { font-size: 1.05rem; }
-    .step-label { font-size: 0.66rem; letter-spacing: 0.08em; }
+    .step-number .step-num-text { font-size: 1.25rem; }
+    .step-label { font-size: 0.86rem; letter-spacing: 0.08em; }
     .step-indicator { gap: 10px; }
     .step-indicator.active .step-number::before { inset: -6px; }
-    .step-indicator.completed .step-num-text::before { font-size: 1rem; }
+    .step-indicator.completed .step-num-text::before { font-size: 1.2rem; }
 }
 
 @media (max-width: 480px) {
     .wizard-header-steps { padding: 22px 8px 16px; }
     .step-track-line { top: 50px; left: 15%; right: 15%; }
     .step-number { width: 36px; height: 36px; }
-    .step-number .step-num-text { font-size: 0.95rem; }
+    .step-number .step-num-text { font-size: 1.15rem; }
     /* Hide labels on tiny phones — circles tell the story */
     .step-label { display: none; }
     .step-indicator.active::after {
@@ -426,7 +426,7 @@
         position: absolute;
         top: 48px;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.62rem;
+        font-size: 0.82rem;
         font-weight: 700;
         color: #003366;
         text-transform: uppercase;
@@ -485,7 +485,7 @@
     font-weight: 700;
     color: var(--primary-color);
     margin-bottom: 12px;
-    font-size: 1.25rem; /* Larger font */
+    font-size: 1.45rem; /* Larger font */
     display: block;
     letter-spacing: -0.2px;
 }
@@ -496,7 +496,7 @@
     border: 2px solid #eef0f2;
     background: #fdfdfd;
     padding: 0 20px;
-    font-size: 1.2rem; /* Larger font */
+    font-size: 1.4rem; /* Larger font */
     color: var(--text-dark);
     transition: var(--transition-smooth);
 }
@@ -523,7 +523,7 @@
 }
 
 .file-upload-wrapper i {
-    font-size: 40px;
+    font-size: 43.2px;
     color: var(--text-muted);
     margin-bottom: 10px;
 }
@@ -540,7 +540,7 @@
 
 .file-name-display {
     margin-top: 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--primary-color);
     font-weight: 600;
 }
@@ -574,7 +574,7 @@
 }
 
 #credentials-list .review-label {
-    font-size: 0.8rem;
+    font-size: 1rem;
     text-transform: uppercase;
     color: var(--text-muted);
     font-weight: 700;
@@ -582,7 +582,7 @@
 }
 
 #credentials-list .review-value {
-    font-size: 1.05rem;
+    font-size: 1.25rem;
     color: var(--primary-color);
     font-weight: 800;
 }
@@ -596,7 +596,7 @@
 }
 
 .review-section-title {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -619,14 +619,14 @@
 }
 
 .review-label {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 4px;
 }
 
 .review-value {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: var(--primary-color);
     font-weight: 700;
 }
@@ -658,7 +658,7 @@
     margin: 0;
     padding-left: 20px;
     color: #856404;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
 }
 
 .custom-checkbox-wrapper {
@@ -677,7 +677,7 @@
 }
 
 .custom-checkbox-text {
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--text-dark);
 }
@@ -831,7 +831,7 @@ select.form-control {
 }
 
 .payment-card .icon-box i {
-    font-size: 3rem;
+    font-size: 3.2rem;
 }
 
 .payment-card h6 {
@@ -845,7 +845,7 @@ select.form-control {
     color: var(--white);
     padding: 8px 20px;
     border-radius: 30px;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     z-index: 1;
     pointer-events: none;
@@ -876,7 +876,7 @@ select.form-control {
 }
 
 .payment-card .check-icon i {
-    font-size: 1.2rem !important;
+    font-size: 1.4rem !important;
     line-height: 1 !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -901,13 +901,13 @@ select.form-control {
     display: flex;
     align-items: center;
     border-radius: 20px 20px 0 0;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     letter-spacing: 0.5px;
 }
 
 .details-header i {
     margin-right: 15px !important;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: var(--secondary-color);
 }
 
@@ -932,7 +932,7 @@ select.form-control {
 }
 
 .file-upload-container .upload-icon-wrapper i {
-    font-size: 4.5rem;
+    font-size: 4.7rem;
     color: var(--secondary-color);
     transition: var(--transition-smooth);
     text-shadow: 0 5px 15px rgba(255,204,0,0.3);
@@ -947,7 +947,7 @@ select.form-control {
     color: var(--primary-color);
     font-weight: 800;
     margin-top: 20px;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
 }
 
 /* QR Circle for Programs */
@@ -964,7 +964,7 @@ select.form-control {
     transform: translateY(20px);
     transition: var(--transition-smooth);
     color: var(--primary-color);
-    font-size: 1.8rem;
+    font-size: 2rem;
     box-shadow: 0 8px 20px rgba(255, 204, 0, 0.5);
     border: 3px solid var(--white);
 }
@@ -999,7 +999,7 @@ select.form-control {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 2.2rem;
     color: var(--primary-color);
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
@@ -1017,7 +1017,7 @@ select.form-control {
     margin-bottom: 10px !important;
 }
 #receipt-dropzone .bi-cloud-arrow-up {
-    font-size: 3rem !important;
+    font-size: 3.2rem !important;
     margin-bottom: 6px !important;
 }
 #receipt-dropzone p {
@@ -1043,7 +1043,7 @@ select.form-control {
 }
 
 .test-btn i {
-    font-size: 2.5rem;
+    font-size: 2.7rem;
     margin-bottom: 10px;
     display: block;
     color: var(--text-muted);
@@ -1067,7 +1067,7 @@ select.form-control {
 /* Validation Styles */
 .error-message {
     color: #dc3545;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin-top: 8px;
     display: block;
@@ -1094,7 +1094,7 @@ select.form-control {
     display: flex;
     align-items: center;
     border-bottom: 2px solid #f0f2f5;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
 }
 
 .step-pane h4::after, .step-pane h3.step-heading::after {
@@ -1109,7 +1109,7 @@ select.form-control {
 
 .step-pane h4 i, .step-pane h3.step-heading i {
     color: var(--secondary-color) !important;
-    font-size: 2rem;
+    font-size: 2.2rem;
     margin-right: 15px;
     filter: drop-shadow(0 4px 8px rgba(255, 204, 0, 0.3));
 }
@@ -1130,7 +1130,7 @@ select.form-control {
     font-weight: 700;
     display: flex;
     align-items: center;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
 }
 
 .review-grid {
@@ -1146,7 +1146,7 @@ select.form-control {
 }
 
 .review-label {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     color: var(--text-muted);
     font-weight: 700;
     text-transform: uppercase;
@@ -1157,7 +1157,7 @@ select.form-control {
 .review-value {
     color: var(--primary-color);
     font-weight: 800;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     line-height: 1;
     margin-bottom: 0;
 }
@@ -1168,7 +1168,7 @@ select.form-control {
     color: var(--primary-color);
     border-radius: 12px;
     padding: 8px 20px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 800;
     cursor: pointer;
     transition: var(--transition-smooth);
@@ -1213,7 +1213,7 @@ select.form-control {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     color: var(--primary-color);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
@@ -1229,7 +1229,7 @@ select.form-control {
 }
 
 .upload-receipt-label label {
-    font-size: 1.4rem !important;
+    font-size: 1.6rem !important;
     color: var(--primary-color);
     margin-bottom: 20px !important;
     display: flex;
@@ -1239,13 +1239,13 @@ select.form-control {
 
 .upload-receipt-label label i {
     color: var(--secondary-color) !important;
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin-right: 15px;
     filter: drop-shadow(0 2px 4px rgba(255, 204, 0, 0.2));
 }
 
 .step-icon {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     color: var(--secondary-color);
     margin-bottom: 5px;
     transition: var(--transition-smooth);
@@ -1276,13 +1276,13 @@ select.form-control {
     font-family: 'Outfit', sans-serif !important;
     font-weight: 800 !important;
     color: var(--primary-color) !important;
-    font-size: 1.75rem !important;
+    font-size: 1.95rem !important;
 }
 
 .swal2-html-container {
     font-family: 'Inter', sans-serif !important;
     color: #5e6278 !important;
-    font-size: 1.1rem !important;
+    font-size: 1.3rem !important;
     line-height: 1.6 !important;
 }
 
@@ -1292,7 +1292,7 @@ select.form-control {
     padding: 12px 35px !important;
     font-weight: 700 !important;
     border-radius: 0.75rem !important;
-    font-size: 1rem !important;
+    font-size: 1.2rem !important;
     transition: var(--transition-smooth) !important;
     box-shadow: 0 10px 20px rgba(0, 51, 102, 0.2) !important;
 }
@@ -1347,7 +1347,7 @@ select.form-control {
 
 .registration-notes li {
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     margin-bottom: 5px;
 }
 
@@ -1362,7 +1362,7 @@ select.form-control {
    Responsive Design (Mobile First)
    ============================================================ */
 @media (max-width: 991px) {
-    .hero-content h1 { font-size: 3rem; }
+    .hero-content h1 { font-size: 3.2rem; }
     .wizard-main-card { margin: 20px 10px; }
     .wizard-header-steps { padding: 20px; }
 }
@@ -1370,7 +1370,7 @@ select.form-control {
 @media (max-width: 768px) {
     .entry-screen { height: auto; min-height: 100vh; }
     .book-course-hero { min-height: 350px; }
-    .hero-content h1 { font-size: 2.5rem; }
+    .hero-content h1 { font-size: 2.7rem; }
     .program-selection-wrapper {
         flex-direction: column;
         padding: 0 15px;
@@ -1380,14 +1380,14 @@ select.form-control {
     .program-option { width: 100%; flex: 0 0 auto; }
     .program-card { height: 180px; }
     .wizard-header-steps { padding: 15px 10px; }
-    .step-label { font-size: 0.75rem; }
+    .step-label { font-size: 0.95rem; }
     .wizard-footer { padding: 20px; }
     .credential-item { flex-direction: column; align-items: flex-start !important; }
     .credential-item .copy-btn { margin-top: 15px; width: 100%; justify-content: center; }
 }
 
 @media (max-width: 576px) {
-    .hero-content h1 { font-size: 2rem; }
+    .hero-content h1 { font-size: 2.2rem; }
     .step-label { display: none; } /* Hide labels on very small screens */
     .step-indicator::after { top: 20px; }
     .wizard-body { padding: 25px 15px; }
@@ -1463,7 +1463,7 @@ select.form-control {
     content: '\F26E'; /* bootstrap-icons check */
     font-family: 'bootstrap-icons';
     color: white;
-    font-size: 14px;
+    font-size: 17.2px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1473,7 +1473,7 @@ select.form-control {
 .option-text {
     font-weight: 600;
     color: #444;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
 }
 
 .schedule-option input:checked ~ .option-text {
@@ -1572,7 +1572,7 @@ textarea[name="address"], .health-textarea {
 
 .review-label-final {
     color: #888;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 500;
 }
 
@@ -1606,7 +1606,7 @@ textarea[name="address"], .health-textarea {
     align-items: center;
     justify-content: center;
     color: var(--primary-color);
-    font-size: 1.5rem;
+    font-size: 1.7rem;
 }
 
 .notes-alert-premium {
@@ -1726,7 +1726,7 @@ textarea[name="address"], .health-textarea {
     align-items: center;
     justify-content: center;
     margin: 0 auto 25px;
-    font-size: 2.5rem;
+    font-size: 2.7rem;
     color: var(--primary-color);
     transition: var(--transition-smooth);
 }
@@ -1741,12 +1741,12 @@ textarea[name="address"], .health-textarea {
     font-weight: 800;
     color: var(--primary-color);
     margin-bottom: 15px;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
 }
 
 .enroll-type-card p {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 1.6;
 }
 
@@ -1759,7 +1759,7 @@ textarea[name="address"], .health-textarea {
     color: var(--white);
     padding: 8px 20px;
     border-radius: 30px;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;

@@ -19,6 +19,9 @@
                 <li><i class="bi bi-telephone-fill"></i> <a href="tel:+{{ optional($mysettings)->mobile }}">+{{ optional($mysettings)->mobile }}</a></li>
                 <li><i class="bi bi-envelope-fill"></i> <a href="mailto:{{ optional($mysettings)->contact_email }}">{{ optional($mysettings)->contact_email }}</a></li>
             </ul>
+            <div class="ox-topbar__brand">
+                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre" style="max-width: 150px; height: 70px;">
+            </div>
             <ul class="ox-topbar__cta">
                 <li><a class="ox-toplink ox-toplink--accent" href="{{ url('book') }}"><i class="bi bi-mortarboard-fill"></i> Apply Now</a></li>
                 @if(!$isStudent && !$isTeacher)
@@ -132,7 +135,7 @@
 <div class="ox-backdrop" data-backdrop></div>
 <aside class="ox-drawer" data-drawer aria-label="Mobile menu">
     <div class="ox-drawer__head">
-        <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford" style="height:42px">
+        <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford" style="height:52px">
         <button class="ox-iconbtn" data-drawer-close aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
     </div>
 

@@ -28,7 +28,7 @@
                         padding-top: 25px;
                         text-align: center !important;
                         color: Black;
-                        font-size: 1.8rem;
+                        font-size: 2rem;
                         min-height: 250px;
                     }
                 </style>

@@ -90,13 +90,13 @@
             font-weight: 800;
             color: var(--primary);
             margin-bottom: 0.5rem;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             letter-spacing: -0.5px;
         }
         
         .header p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.3rem;
         }
 
         .form-section {
@@ -105,7 +105,7 @@
 
         .section-title {
             color: var(--primary);
-            font-size: 1.25rem;
+            font-size: 1.45rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
@@ -117,7 +117,7 @@
             font-weight: 600;
             color: var(--primary);
             margin-bottom: 0.6rem;
-            font-size: 0.95rem;
+            font-size: 1.15rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -127,14 +127,14 @@
             font-family: 'Tajawal', sans-serif;
             color: var(--text-muted);
             font-weight: 400;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
         }
 
         .form-control, .form-select {
             border: 2px solid var(--border);
             border-radius: 12px;
             padding: 0.8rem 1.2rem;
-            font-size: 1rem;
+            font-size: 1.2rem;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             background-color: rgba(255,255,255,0.8);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
@@ -200,7 +200,7 @@
             padding: 1.2rem;
             width: 100%;
             border-radius: 14px;
-            font-size: 1.25rem;
+            font-size: 1.45rem;
             font-weight: 700;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
@@ -260,7 +260,7 @@
         }
 
         .invalid-feedback {
-            font-size: 0.85rem;
+            font-size: 1.05rem;
             color: #e53e3e;
             display: none;
         }
@@ -289,7 +289,7 @@
         /* --- RESPONSIVENESS --- */
         @media (max-width: 1024px) {
             .registration-container { max-width: 95%; margin: 2rem auto; }
-            .header h1 { font-size: 2rem; }
+            .header h1 { font-size: 2.2rem; }
             
             /* Beautiful Side Ribbon */
             .promo-ribbon {
@@ -332,7 +332,7 @@
                 padding: 0;
                 box-shadow: none;
                 width: auto;
-                font-size: 0.85rem !important;
+                font-size: 1.05rem !important;
                 font-weight: 700;
                 text-align: center;
                 line-height: 1.3;
@@ -346,12 +346,12 @@
             .registration-container { padding: 0; margin: 1rem auto; width: calc(100% - 2rem); }
             body::before { height: 250px; }
             .header { padding: 2rem 1rem 1.5rem; }
-            .header h1 { font-size: 1.7rem; }
-            .header p { font-size: 1rem; }
+            .header h1 { font-size: 1.9rem; }
+            .header p { font-size: 1.2rem; }
             .form-section { padding: 1.5rem; }
             .invoice-box { padding: 1.5rem 1rem; }
-            .btn-submit { font-size: 1.15rem; padding: 1rem; }
-            .floating-wa { width: 55px; height: 55px; font-size: 32px; left: 20px; bottom: 20px; }
+            .btn-submit { font-size: 1.35rem; padding: 1rem; }
+            .floating-wa { width: 55px; height: 55px; font-size: 35.2px; left: 20px; bottom: 20px; }
             .ote-logo-container { gap: 1.5rem !important; }
             
             /* Mobile adjustments for side ribbon */
@@ -365,19 +365,19 @@
                 border-right-width: 10px;
             }
             .promo-text {
-                font-size: 0.75rem !important;
+                font-size: 0.95rem !important;
                 max-width: 90px;
             }
         }
 
         @media (max-width: 480px) {
             .header img { max-width: 100px; }
-            .header h1 { font-size: 1.5rem; }
-            .header p { font-size: 0.9rem; }
-            .section-title { font-size: 1.1rem; }
+            .header h1 { font-size: 1.7rem; }
+            .header p { font-size: 1.1rem; }
+            .section-title { font-size: 1.3rem; }
             .form-section { padding: 1.25rem 1rem; }
-            .form-control, .form-select { padding: 0.7rem 1rem; font-size: 0.95rem; }
-            .social-icon { width: 42px; height: 42px; font-size: 1.25rem; }
+            .form-control, .form-select { padding: 0.7rem 1rem; font-size: 1.15rem; }
+            .social-icon { width: 42px; height: 42px; font-size: 1.45rem; }
             .ote-logo-container { flex-direction: column; gap: 1rem !important; }
             .ote-logo-container img { max-width: 180px; }
             .whatsapp-note { flex-direction: column; padding: 1rem; text-align: center; align-items: center; border-radius: 12px; border-left: none; border-top: 4px solid var(--date-red); }
@@ -457,7 +457,7 @@
             color: #fff;
             border-radius: 50px;
             text-align: center;
-            font-size: 38px;
+            font-size: 41.2px;
             box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
             z-index: 100;
             display: flex;
@@ -517,7 +517,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
@@ -699,7 +699,7 @@
             color: #fff;
             font-family: 'Cairo', sans-serif;
             font-weight: 800;
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
             letter-spacing: 0.5px;
             display: flex;
@@ -745,7 +745,7 @@
             .promo-ribbon-red::after { border-color: #610B24 transparent transparent transparent !important; }
         </style>
         <div class="promo-ribbon promo-ribbon-red" style="background: var(--date-red); box-shadow: -3px 5px 15px rgba(138, 21, 56, 0.4); border-color: var(--date-red); direction: ltr;">
-            <div class="promo-text" style="font-size: 1.05rem;">
+            <div class="promo-text" style="font-size: 1.25rem;">
                 Welcome To Oxford Family
             </div>
         </div>
@@ -759,7 +759,7 @@
         <div class="form-section">
             <form id="registrationForm">
                 <!-- Step A: Student Details -->
-                <h3 class="section-title">Step A: Student Details <span style="font-family: 'Cairo', sans-serif; font-size:1rem; color:var(--text-muted)">(بيانات الطالب)</span></h3>
+                <h3 class="section-title">Step A: Student Details <span style="font-family: 'Cairo', sans-serif; font-size: 1.2rem; color:var(--text-muted)">(بيانات الطالب)</span></h3>
                 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -846,7 +846,7 @@
 
                 <!-- Dynamic Parent Section -->
                 <div id="parentSection" class="dynamic-section">
-                    <h4 class="mb-3" style="color:var(--primary-blue); font-size:1.1rem;">
+                    <h4 class="mb-3" style="color:var(--primary-blue); font-size: 1.3rem;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         Parent Information <span class="ar" style="font-weight:normal">(بيانات ولي الأمر - العمر 15 أو أقل)</span>
                     </h4>
@@ -872,7 +872,7 @@
                 <hr class="my-5" style="border-color: var(--border-color)">
 
                 <!-- Step B: Placement Test -->
-                <h3 class="section-title">Step B: Placement Test <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختبار تحديد المستوى)</span></h3>
+                <h3 class="section-title">Step B: Placement Test <span class="ar" style="font-size: 1.2rem; color:var(--text-muted)">(اختبار تحديد المستوى)</span></h3>
                 <div class="mb-4">
                     <label class="form-label">Do you want to take a placement test? <span class="ar">(هل ترغب بالتقدم لاختبار تحديد المستوى؟)</span></label>
                     <div class="form-check form-switch mt-2 d-flex align-items-center">
@@ -892,7 +892,7 @@
                 <hr class="my-5" style="border-color: var(--border-color)">
 
                 <!-- Step C: Program Selection & Invoicing -->
-                <h3 class="section-title">Step C: Program Selection <span class="ar" style="font-size:1rem; color:var(--text-muted)">(اختيار البرنامج والفاتورة)</span></h3>
+                <h3 class="section-title">Step C: Program Selection <span class="ar" style="font-size: 1.2rem; color:var(--text-muted)">(اختيار البرنامج والفاتورة)</span></h3>
                 
                 <div class="mb-4">
                     <label class="form-label">Program Type <span class="ar">(نوع البرنامج)</span> <span class="text-danger">*</span></label>
@@ -947,7 +947,7 @@
                 </div>
 
                 <div id="invoiceBox" class="invoice-box" style="display:none;">
-                    <h4>Invoice Summary <span class="ar" style="font-weight:normal; font-size:1.1rem">(ملخص الفاتورة)</span></h4>
+                    <h4>Invoice Summary <span class="ar" style="font-weight:normal; font-size: 1.3rem">(ملخص الفاتورة)</span></h4>
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <p class="mb-1 text-muted">Selected Program (البرنامج المختار):</p>
@@ -982,7 +982,7 @@
                     
                     <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
                     
-                    <h5 class="mb-3">Available Payment Methods <span class="ar" style="font-weight:normal; font-size:1rem">(طرق الدفع المتاحة)</span></h5>
+                    <h5 class="mb-3">Available Payment Methods <span class="ar" style="font-weight:normal; font-size: 1.2rem">(طرق الدفع المتاحة)</span></h5>
                     <div class="row payment-methods-container">
                         @foreach($paymentMethods as $pm)
                             <div class="col-md-6 mb-3">
@@ -1027,23 +1027,23 @@
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
                         <div style="flex-grow: 1;">
-                            <strong class="mb-2 d-block" style="color: var(--date-red); font-family: 'Inter', sans-serif; font-size: 1.05rem;" dir="ltr">
+                            <strong class="mb-2 d-block" style="color: var(--date-red); font-family: 'Inter', sans-serif; font-size: 1.25rem;" dir="ltr">
                                 Note: Payment Schedule over 3 months:
-                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: normal; margin-left: 5px;">(ملاحظة: يتم تسديد الرسوم على ثلاثة شهور كالتالي)</span>
+                                <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 1.15rem; font-weight: normal; margin-left: 5px;">(ملاحظة: يتم تسديد الرسوم على ثلاثة شهور كالتالي)</span>
                             </strong>
                             
                             <ul style="color: var(--date-red); font-family: 'Inter', sans-serif; list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0;" dir="ltr">
                                 <li class="mb-2">
                                     <strong>First month upon registration:</strong> 500 NIS + Book fees 150 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الأول عند التسجيل: 500 شيكل بالإضافة لرسوم الكتب 150 شيكل)</span>
+                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 1.1rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الأول عند التسجيل: 500 شيكل بالإضافة لرسوم الكتب 150 شيكل)</span>
                                 </li>
                                 <li class="mb-2">
                                     <strong>Second month:</strong> 400 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثاني: 400 شيكل)</span>
+                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 1.1rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثاني: 400 شيكل)</span>
                                 </li>
                                 <li>
                                     <strong>Third month:</strong> 300 NIS.<br>
-                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 0.9rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثالث: 300 شيكل)</span>
+                                    <span dir="rtl" style="font-family: 'Cairo', sans-serif; font-size: 1.1rem; opacity: 0.9; display: inline-block; margin-top: 2px;">(الشهر الثالث: 300 شيكل)</span>
                                 </li>
                             </ul>
                         </div>
@@ -1061,11 +1061,11 @@
         <!-- Social Media & OTE Logo Footer -->
         <div class="registration-footer">
             <div class="ote-logo-container d-flex justify-content-center align-items-center flex-wrap mb-4" style="gap: 2rem;">
-                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre" style="max-width: 150px; height: 70px;">
                 <img src="{{ asset('assets/images/oxford-ielts.png') }}" alt="Oxford ELLT Global" style="mix-blend-mode: multiply;">
             </div>
             @if(isset($socials) && count($socials) > 0)
-                <h5 style="color:var(--primary); font-family: 'Cairo', sans-serif; margin-bottom: 1.5rem; font-size: 1.15rem; font-weight: 700;">تابعنا على منصات التواصل (Follow Us)</h5>
+                <h5 style="color:var(--primary); font-family: 'Cairo', sans-serif; margin-bottom: 1.5rem; font-size: 1.35rem; font-weight: 700;">تابعنا على منصات التواصل (Follow Us)</h5>
                 <div class="social-icons">
                     @foreach($socials as $social)
                         <a href="{{ $social->link }}" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="{{ $social->name ?? 'Social Link' }}">
@@ -1389,11 +1389,11 @@
                     if(data.success) {
                         Swal.fire({
                             title: '<span style="font-family: \'Tajawal\', sans-serif; font-weight: 700;">تم التسجيل بنجاح!</span>',
-                            html: '<div style="direction: ltr; font-size: 1.1rem; line-height: 1.6; color: var(--text-muted);">Your registration has been submitted successfully.<br>Please do not forget to send the payment receipt via WhatsApp.</div>',
+                            html: '<div style="direction: ltr; font-size: 1.3rem; line-height: 1.6; color: var(--text-muted);">Your registration has been submitted successfully.<br>Please do not forget to send the payment receipt via WhatsApp.</div>',
                             icon: 'success',
                             color: 'var(--date-red)',
                             iconColor: 'var(--date-red)',
-                            confirmButtonText: '<div style="display:flex; flex-direction:column; padding: 0.25rem; line-height: 1.4;"><span style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span><span style="font-family: \'Tajawal\', sans-serif; font-size: 1.1rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span></div>',
+                            confirmButtonText: '<div style="display:flex; flex-direction:column; padding: 0.25rem; line-height: 1.4;"><span style="font-size: 1.4rem; font-weight: 700; letter-spacing: 1px;">REGISTER ANOTHER</span><span style="font-family: \'Tajawal\', sans-serif; font-size: 1.3rem; font-weight: 500; opacity: 0.9;">تسجيل طالب آخر</span></div>',
                             confirmButtonColor: 'var(--oxford-blue)',
                             allowOutsideClick: false
                         }).then((result) => {

@@ -13,8 +13,8 @@
         body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
 
         /* Professional Typography */
-        h1 { color: #002147; font-size: 24px; margin-top: 15px; font-weight: 700; letter-spacing: -0.5px; }
-        p { font-size: 16px; line-height: 1.6; color: #475569; }
+        h1 { color: #002147; font-size: 27.2px; margin-top: 15px; font-weight: 700; letter-spacing: -0.5px; }
+        p { font-size: 19.2px; line-height: 1.6; color: #475569; }
 
         /* Mobile Styles */
         @media screen and (max-width: 600px) {
@@ -33,7 +33,7 @@
                     <tr>
                         <td align="center">
                             <img src="{{ $message->embed(public_path('OXFORD-LOGO.jpg')) }}" alt="Oxford English Centre" width="200" style="display: block; width: 200px; max-width: 250px;">
-                            <h1 style="margin-top: 15px; font-size: 24px; color: #002147;">{{ $mysettings->name ?? 'Oxford English Centre' }}</h1>
+                            <h1 style="margin-top: 15px; font-size: 27.2px; color: #002147;">{{ $mysettings->name ?? 'Oxford English Centre' }}</h1>
                         </td>
                     </tr>
                 </table>
@@ -58,9 +58,9 @@
                     <!-- Professional Sign-off -->
                     <tr>
                         <td class="mobile-padding" style="padding: 0 50px 45px 50px;">
-                            <p style="font-size: 15px; color: #64748b; margin: 0; border-top: 1px solid #f1f5f9; padding-top: 30px;">
+                            <p style="font-size: 18.2px; color: #64748b; margin: 0; border-top: 1px solid #f1f5f9; padding-top: 30px;">
                                 Best regards,<br>
-                                <strong style="color: #002147; font-size: 16px;">{{ $mysettings->name ?? 'Oxford English Centre Team' }}</strong>
+                                <strong style="color: #002147; font-size: 19.2px;">{{ $mysettings->name ?? 'Oxford English Centre Team' }}</strong>
                             </p>
                         </td>
                     </tr>
@@ -91,11 +91,11 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                        <td style="font-size: 16.2px; color: #94a3b8; line-height: 1.8;">
                             &copy; {{ date('Y') }} {{ $mysettings->name ?? 'Oxford English Centre' }}. All rights reserved.<br>
                             {{ $mysettings->address ?? '' }} @if(isset($mysettings->phone)) | {{ $mysettings->phone }} @endif
                             <br>
-                            <span style="font-size: 12px;">You received this email because you are a registered student at our center.</span>
+                            <span style="font-size: 15.2px;">You received this email because you are a registered student at our center.</span>
                         </td>
                     </tr>
                 </table>

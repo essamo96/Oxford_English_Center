@@ -319,7 +319,7 @@
                                     </div>
                                     @if($awaitingPay)
                                     <div style="position:absolute;inset:0;background:rgba(20,33,61,.55);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:10px;border-radius:inherit;">
-                                        <div><i class="fa fa-lock fa-2x"></i><div style="font-size:12px;font-weight:700;margin-top:6px;">بانتظار تأكيد الدفع</div></div>
+                                        <div><i class="fa fa-lock fa-2x"></i><div style="font-size: 15.2px;font-weight:700;margin-top:6px;">بانتظار تأكيد الدفع</div></div>
                                     </div>
                                     @endif
                                 </div>
@@ -458,7 +458,7 @@
                                             <input class="form-control-modern" type="password" name="rpassword" placeholder="Confirm new password">
                                         </div>
                                         <div class="form-group mb-none text-center">
-                                            <button class="btn-modern btn-modern-accent" style="width: 100%; padding: 12px; font-size: 16px;" type="submit" value="Login">
+                                            <button class="btn-modern btn-modern-accent" style="width: 100%; padding: 12px; font-size: 19.2px;" type="submit" value="Login">
                                                 <i class="fa fa-save"></i> Save Changes
                                             </button>
                                         </div>
@@ -669,7 +669,7 @@ $('.date-picker').datepicker();
             inputAttributes: {
                 autocapitalize: 'off',
                 placeholder: 'XXXX-XXXX',
-                style: 'text-align: center; font-size: 24px; letter-spacing: 2px;'
+                style: 'text-align: center; font-size: 27.2px; letter-spacing: 2px;'
             },
             showLoaderOnConfirm: true,
             preConfirm: (inputValue) => {

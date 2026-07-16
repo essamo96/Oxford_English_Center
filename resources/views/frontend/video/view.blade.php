@@ -38,16 +38,16 @@
 
 .vid-breadcrumb{
   display:flex;align-items:center;gap:8px;
-  color:rgba(255,255,255,.45);font-size:.82rem;margin-bottom:14px;
+  color:rgba(255,255,255,.45);font-size: 1.02rem;margin-bottom:14px;
 }
 .vid-breadcrumb a{color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s;}
 .vid-breadcrumb a:hover{color:var(--vid-gold);}
-.vid-breadcrumb i{font-size:.7rem;color:rgba(255,255,255,.3);}
+.vid-breadcrumb i{font-size: 0.9rem;color:rgba(255,255,255,.3);}
 
 .vid-eyebrow{
   display:inline-flex;align-items:center;gap:7px;
   background:rgba(229,57,53,.15);border:1px solid rgba(229,57,53,.3);
-  color:#ff6659;font-size:.78rem;font-weight:700;
+  color:#ff6659;font-size: 0.98rem;font-weight:700;
   letter-spacing:.07em;text-transform:uppercase;
   padding:4px 13px;border-radius:999px;margin-bottom:14px;
 }
@@ -58,10 +58,10 @@
   font-weight:900;color:#fff;line-height:1.15;margin:0 0 10px;
 }
 .vid-banner h1 em{font-style:normal;color:var(--vid-gold);}
-.vid-banner__sub{color:rgba(255,255,255,.62);font-size:.95rem;margin:0;}
+.vid-banner__sub{color:rgba(255,255,255,.62);font-size: 1.15rem;margin:0;}
 .vid-banner__meta{
   display:flex;align-items:center;gap:20px;flex-wrap:wrap;
-  color:rgba(255,255,255,.55);font-size:.82rem;margin-top:16px;
+  color:rgba(255,255,255,.55);font-size: 1.02rem;margin-top:16px;
 }
 .vid-banner__meta span{display:flex;align-items:center;gap:6px;}
 .vid-banner__meta span i{color:var(--vid-teal);}
@@ -74,7 +74,7 @@
   flex-wrap:wrap;gap:12px;margin-bottom:36px;
 }
 .vid-section__title-block .eyebrow{
-  font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  font-size: 0.96rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   color:var(--vid-teal);display:flex;align-items:center;gap:8px;margin-bottom:8px;
 }
 .vid-section__title-block .eyebrow::before{
@@ -140,7 +140,7 @@
   box-shadow:0 0 0 14px rgba(229,57,53,.15);
 }
 .vid-card__play-ring i{
-  font-size:1.4rem;color:#fff;
+  font-size: 1.6rem;color:#fff;
   margin-right:-2px;
 }
 
@@ -148,11 +148,11 @@
 .vid-card__yt-badge{
   position:absolute;top:12px;left:12px;
   background:rgba(229,57,53,.9);
-  color:#fff;font-size:.72rem;font-weight:800;
+  color:#fff;font-size: 0.92rem;font-weight:800;
   padding:3px 10px;border-radius:999px;
   display:flex;align-items:center;gap:5px;
 }
-.vid-card__yt-badge i{font-size:.85rem;}
+.vid-card__yt-badge i{font-size: 1.05rem;}
 
 /* Hover gradient */
 .vid-card__shade{
@@ -167,7 +167,7 @@
 .vid-card__body{padding:16px 18px 18px;}
 .vid-card__title{
   font-family:'Cairo',sans-serif;
-  font-size:.98rem;font-weight:800;color:var(--vid-primary);
+  font-size: 1.18rem;font-weight:800;color:var(--vid-primary);
   margin:0 0 10px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   line-height:1.45;
@@ -178,14 +178,14 @@
 }
 .vid-card__yt-link{
   display:inline-flex;align-items:center;gap:6px;
-  color:var(--vid-red);font-size:.78rem;font-weight:700;text-decoration:none;
+  color:var(--vid-red);font-size: 0.98rem;font-weight:700;text-decoration:none;
   transition:color .2s;
 }
 .vid-card__yt-link:hover{color:#c62828;}
 .vid-card__watch{
   display:inline-flex;align-items:center;gap:6px;
   background:var(--vid-primary);color:#fff;
-  font-size:.75rem;font-weight:700;
+  font-size: 0.95rem;font-weight:700;
   padding:5px 14px;border-radius:999px;
   border:none;cursor:pointer;transition:background .2s;
 }
@@ -204,7 +204,7 @@
   position:absolute;top:-44px;left:0;
   background:rgba(255,255,255,.12);border:none;color:#fff;
   width:40px;height:40px;border-radius:50%;
-  font-size:1.1rem;cursor:pointer;
+  font-size: 1.3rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background .2s;
 }
@@ -216,7 +216,7 @@
 
 /* ── EMPTY ───────────────────────────────────────────────────── */
 .vid-empty{text-align:center;padding:80px 20px;color:#94a3b8;}
-.vid-empty i{font-size:4rem;display:block;margin-bottom:18px;opacity:.35;color:var(--vid-red);}
+.vid-empty i{font-size: 4.2rem;display:block;margin-bottom:18px;opacity:.35;color:var(--vid-red);}
 
 /* ── PAGINATION ──────────────────────────────────────────────── */
 .vid-pagination{margin-top:48px;display:flex;justify-content:center;}
@@ -288,7 +288,7 @@
         <div class="eyebrow"><span></span>Video Gallery</div>
         <h2>Latest Videos</h2>
       </div>
-      <span style="font-size:.82rem;color:#94a3b8;">
+      <span style="font-size: 1.02rem;color:#94a3b8;">
         <i class="bi bi-info-circle" style="color:var(--vid-teal);"></i>
         Click any video to watch
       </span>

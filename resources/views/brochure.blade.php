@@ -60,19 +60,19 @@
             padding: 8px;
         }
         .logo-circle i {
-            font-size: 36px;
+            font-size: 39.2px;
             color: #1e3a5f;
         }
         .academy-name {
             color: #fff;
-            font-size: 14px;
+            font-size: 17.2px;
             font-weight: 400;
             opacity: 0.9;
             margin-bottom: 8px;
         }
         .program-title {
             color: #fff;
-            font-size: 24px;
+            font-size: 27.2px;
             font-weight: 700;
             line-height: 1.4;
         }
@@ -92,12 +92,12 @@
             box-shadow: 0 8px 25px rgba(204,0,0,0.3);
         }
         .pdf-icon i {
-            font-size: 40px;
+            font-size: 43.2px;
             color: #fff;
         }
         .description {
             color: #666;
-            font-size: 15px;
+            font-size: 18.2px;
             margin-bottom: 25px;
             line-height: 1.6;
         }
@@ -110,7 +110,7 @@
             color: #fff;
             border: none;
             border-radius: 14px;
-            font-size: 18px;
+            font-size: 21.2px;
             font-weight: 700;
             font-family: 'Cairo', sans-serif;
             cursor: pointer;
@@ -124,7 +124,7 @@
             color: #fff;
         }
         .download-btn i {
-            font-size: 22px;
+            font-size: 25.2px;
         }
         .view-btn {
             display: inline-flex;
@@ -135,7 +135,7 @@
             color: #1e3a5f;
             border: 2px solid #e9ecef;
             border-radius: 14px;
-            font-size: 16px;
+            font-size: 19.2px;
             font-weight: 600;
             font-family: 'Cairo', sans-serif;
             cursor: pointer;
@@ -154,7 +154,7 @@
         }
         .footer-text {
             color: #aaa;
-            font-size: 12px;
+            font-size: 15.2px;
         }
         .footer-text a {
             color: #1e3a5f;

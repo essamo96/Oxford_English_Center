@@ -149,11 +149,11 @@
                     + 'opacity:0;transform:translateX(-60px);'
                     + 'transition:opacity .35s ease,transform .35s ease;';
                 var amount = data.total_due || data.remaining;
-                t.innerHTML = '<div style="font-weight:700;font-size:.95rem;margin-bottom:4px;">📋 '
+                t.innerHTML = '<div style="font-weight:700;font-size: 1.15rem;margin-bottom:4px;">📋 '
                     + _esc(data.title || 'فاتورة جديدة') + '</div>'
-                    + (data.message ? '<div style="font-size:.82rem;opacity:.9;margin-bottom:6px;line-height:1.4;">'
+                    + (data.message ? '<div style="font-size: 1.02rem;opacity:.9;margin-bottom:6px;line-height:1.4;">'
                         + _esc(data.message) + '</div>' : '')
-                    + (amount ? '<div style="font-size:.88rem;font-weight:700;background:rgba(255,255,255,.15);'
+                    + (amount ? '<div style="font-size: 1.08rem;font-weight:700;background:rgba(255,255,255,.15);'
                         + 'border-radius:6px;padding:3px 10px;display:inline-block;">₪ '
                         + parseFloat(amount).toFixed(2) + '</div>' : '');
                 document.body.appendChild(t);

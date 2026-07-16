@@ -16,6 +16,7 @@
         "mpdf/mpdf": "^8.2",
         "mpdf/psr-http-message-shim": "^1.0",
         "phpmailer/phpmailer": "^6.9",
+        "phpoffice/phpspreadsheet": "^5.9",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^5.11",
         "unisharp/laravel-filemanager": "^2.7",

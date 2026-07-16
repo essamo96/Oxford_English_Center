@@ -34,15 +34,15 @@
     }
 
     .marks-header-info { flex: 1; min-width: 180px; }
-    .marks-group-label { font-size: 11px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-    .marks-group-name  { font-size: 20px; font-weight: 800; color: var(--accent); line-height: 1.2; }
-    .marks-group-meta  { font-size: 12px; opacity: .7; margin-top: 5px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .marks-group-label { font-size: 14.2px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .marks-group-name  { font-size: 23.2px; font-weight: 800; color: var(--accent); line-height: 1.2; }
+    .marks-group-meta  { font-size: 15.2px; opacity: .7; margin-top: 5px; display: flex; gap: 12px; flex-wrap: wrap; }
 
     /* Stats row */
     .marks-stats { display: flex; gap: 20px; flex-wrap: wrap; }
     .marks-stat  { text-align: center; min-width: 56px; }
-    .marks-stat-num   { font-size: 26px; font-weight: 800; line-height: 1; }
-    .marks-stat-label { font-size: 11px; opacity: .65; margin-top: 3px; }
+    .marks-stat-num   { font-size: 29.2px; font-weight: 800; line-height: 1; }
+    .marks-stat-label { font-size: 14.2px; opacity: .65; margin-top: 3px; }
 
     /* Quick action buttons */
     .marks-quick-btns {
@@ -55,7 +55,7 @@
     .mq-btn {
         border-radius: 8px;
         padding: 8px 14px;
-        font-size: 12px;
+        font-size: 15.2px;
         font-weight: 700;
         text-decoration: none !important;
         display: inline-flex;
@@ -89,7 +89,7 @@
     }
 
     .marks-content-card-header .card-title {
-        font-size: 14px;
+        font-size: 17.2px;
         font-weight: 700;
         color: var(--primary);
         display: flex;
@@ -98,7 +98,7 @@
     }
 
     .marks-content-card-header .card-hint {
-        font-size: 12px;
+        font-size: 15.2px;
         color: var(--light-text);
     }
 
@@ -106,7 +106,7 @@
     .marks-input-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 13px;
+        font-size: 16.2px;
     }
 
     .marks-input-table thead tr {
@@ -116,7 +116,7 @@
 
     .marks-input-table thead th {
         padding: 11px 10px;
-        font-size: 11px;
+        font-size: 14.2px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .4px;
@@ -178,7 +178,7 @@
         border: 1.5px solid #e2e8f0;
         border-radius: 7px;
         text-align: center;
-        font-size: 13px;
+        font-size: 16.2px;
         font-weight: 600;
         color: var(--primary);
         background: white;
@@ -201,7 +201,7 @@
         color: var(--accent);
         border-radius: 20px;
         font-weight: 800;
-        font-size: 13px;
+        font-size: 16.2px;
     }
 
     /* Save button */
@@ -211,7 +211,7 @@
         border: none;
         padding: 12px 44px;
         border-radius: 10px;
-        font-size: 14px;
+        font-size: 17.2px;
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 15px rgba(40,167,69,.3);
@@ -230,8 +230,8 @@
         .marks-header-card { padding: 20px 16px; }
         .marks-quick-btns  { margin-left: 0; width: 100%; justify-content: center; }
         .marks-stats       { justify-content: center; width: 100%; }
-        .deg-input         { width: 52px; font-size: 12px; }
-        .marks-input-table thead th { font-size: 10px; padding: 8px 4px; }
+        .deg-input         { width: 52px; font-size: 15.2px; }
+        .marks-input-table thead th { font-size: 13.2px; padding: 8px 4px; }
         .marks-input-table tbody td { padding: 7px 4px; }
     }
 </style>
@@ -243,7 +243,7 @@
     <div class="container" style="position: relative; z-index: 1;">
 
         {{-- Breadcrumbs Navigation --}}
-        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 16.2px; color: var(--light-text);">
             <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
             <span style="margin: 0 5px;">/</span>
             <span style="color: var(--primary);">Courses</span>
@@ -257,10 +257,10 @@
         <div class="page-header-block d-flex justify-content-between align-items-center">
             <p class="page-title m-0"><i class="fa fa-pencil-square-o"></i> Record Student Marks</p>
             <div class="d-flex align-items-center" style="gap: 10px;">
-                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 13px;" onclick="window.print()">
+                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 16.2px;" onclick="window.print()">
                     <i class="fa fa-print"></i> Print
                 </button>
-                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 13px;">
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 16.2px;">
                     <i class="fa fa-arrow-left"></i> Back
                 </a>
             </div>
@@ -355,7 +355,7 @@
                             @php $counter = 1; @endphp
                             @foreach($group_students as $group)
                                 <tr>
-                                    <td style="color: var(--light-text); font-weight: 600; font-size: 12px;">{{ $counter }}</td>
+                                    <td style="color: var(--light-text); font-weight: 600; font-size: 15.2px;">{{ $counter }}</td>
                                     <td>
                                         <div class="student-mini-profile">
                                             <img src="{{ $group->student && $group->student->image ? url($group->student->image) : url('assets/oxford/img/students/avatar.png') }}" alt="">
@@ -386,7 +386,7 @@
         </div>
 
         {{-- Tip Note --}}
-        <div style="margin-top: 16px; background: rgba(49,130,206,.06); border-left: 3px solid #3182ce; border-radius: 6px; padding: 11px 16px; font-size: 13px; color: var(--light-text);">
+        <div style="margin-top: 16px; background: rgba(49,130,206,.06); border-left: 3px solid #3182ce; border-radius: 6px; padding: 11px 16px; font-size: 16.2px; color: var(--light-text);">
             <i class="fa fa-info-circle" style="color: #3182ce;"></i>
             <strong style="color: var(--primary);">Tip:</strong>
             Totals calculate live as you type. Click <em>Save All Marks</em> to persist changes.

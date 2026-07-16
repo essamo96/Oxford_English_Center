@@ -269,6 +269,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // Standalone Registrations & Combo Requests
     Route::get('combo-parents', ['as' => 'combo_parents.view', 'uses' => 'StandaloneRegistrationAdminController@comboParents']);
     Route::get('standalone-registrations', ['as' => 'standalone_registrations.view', 'uses' => 'StandaloneRegistrationAdminController@index']);
+    Route::get('standalone-registrations/export', ['as' => 'admin.standalone_registrations.export', 'middleware' => ['permission:admin.standalone_registrations.export'], 'uses' => 'StandaloneRegistrationAdminController@exportExcel']);
     Route::get('standalone-registrations/show/{id}', ['as' => 'admin.standalone_registrations.show', 'uses' => 'StandaloneRegistrationAdminController@show']);
     Route::post('standalone-registrations/delete/{id}', ['as' => 'admin.standalone_registrations.delete', 'uses' => 'StandaloneRegistrationAdminController@destroy']);
     Route::post('standalone-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);

@@ -8,12 +8,12 @@
 <style>
     .exam-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
     @media (max-width: 640px){ .exam-grid { grid-template-columns:1fr; } }
-    .exam-field label { display:block; font-size:13px; font-weight:700; color:var(--primary,#14213d); margin-bottom:6px; }
+    .exam-field label { display:block; font-size: 16.2px; font-weight:700; color:var(--primary,#14213d); margin-bottom:6px; }
     .exam-input-wrap { position:relative; }
     .exam-input-wrap .fa-calendar { position:absolute; inset-inline-end:14px; top:50%; transform:translateY(-50%); color:#9aa4b8; pointer-events:none; }
     .exam-date {
         width:100%; height:48px; padding:10px 42px 10px 14px; border:1px solid #e2e8f0;
-        border-radius:10px; background:#fff; font-size:14px; font-weight:600; color:#1f2937; cursor:pointer;
+        border-radius:10px; background:#fff; font-size: 17.2px; font-weight:600; color:#1f2937; cursor:pointer;
         transition:border-color .15s, box-shadow .15s;
     }
     .exam-date:focus { outline:none; border-color:var(--accent,#f5c518); box-shadow:0 0 0 3px rgba(245,197,24,.15); }
@@ -27,7 +27,7 @@
     <div id="bg-particles"></div>
     <div class="container" style="position: relative; z-index: 1;">
         {{-- Breadcrumbs --}}
-        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 16.2px; color: var(--light-text);">
             <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> الرئيسية</a>
             <span style="margin: 0 5px;">/</span>
             <span style="color: var(--primary);">جدول الامتحانات</span>
@@ -44,11 +44,11 @@
                     <div class="d-flex justify-content-between align-items-center"
                          style="gap:12px; padding:18px 20px; background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff;">
                         <div>
-                            <div style="font-size:16px; font-weight:800;"><i class="fa fa-calendar-plus-o" style="color:var(--accent,#f5c518);"></i> جدولة امتحانات «{{ $group->name }}»</div>
-                            <div style="font-size:12.5px; opacity:.8; margin-top:3px;">حدّد مواعيد الاختبارات لتظهر لطلاب المجموعة</div>
+                            <div style="font-size: 19.2px; font-weight:800;"><i class="fa fa-calendar-plus-o" style="color:var(--accent,#f5c518);"></i> جدولة امتحانات «{{ $group->name }}»</div>
+                            <div style="font-size: 15.7px; opacity:.8; margin-top:3px;">حدّد مواعيد الاختبارات لتظهر لطلاب المجموعة</div>
                         </div>
                         <a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}"
-                           class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; padding:7px 16px; font-size:13px; white-space:nowrap;">
+                           class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; padding:7px 16px; font-size: 16.2px; white-space:nowrap;">
                             <i class="fa fa-arrow-left"></i> رجوع
                         </a>
                     </div>
@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="mt-30" style="background: rgba(49,130,206,.05); border-inline-start:4px solid #3182ce; border-radius:8px; padding:14px 18px;">
-                    <div style="font-size:13px; font-weight:700; color:#2b6cb0; margin-bottom:4px;"><i class="fa fa-info-circle"></i> ملاحظة</div>
+                    <div style="font-size: 16.2px; font-weight:700; color:#2b6cb0; margin-bottom:4px;"><i class="fa fa-info-circle"></i> ملاحظة</div>
                     <p class="m-0 text-muted small">ستظهر هذه المواعيد لجميع طلاب المجموعة بمجرّد حفظها. يُرجى مطابقتها مع التقويم الأكاديمي.</p>
                 </div>
             </div>

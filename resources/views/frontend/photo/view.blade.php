@@ -59,7 +59,7 @@
   background:rgba(247,183,51,.18);
   border:1px solid rgba(247,183,51,.35);
   color:var(--gal-gold);
-  font-size:.82rem;
+  font-size: 1.02rem;
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
@@ -87,19 +87,19 @@
   font-style:normal;
   color:var(--gal-gold);
 }
-.gal-banner__sub{color:rgba(255,255,255,.65);font-size:1rem;margin:0;}
+.gal-banner__sub{color:rgba(255,255,255,.65);font-size: 1.2rem;margin:0;}
 
 .gal-breadcrumb{
   display:flex;
   align-items:center;
   gap:8px;
   color:rgba(255,255,255,.45);
-  font-size:.85rem;
+  font-size: 1.05rem;
   margin-bottom:16px;
 }
 .gal-breadcrumb a{color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s;}
 .gal-breadcrumb a:hover{color:var(--gal-gold);}
-.gal-breadcrumb i{font-size:.7rem;color:rgba(255,255,255,.3);}
+.gal-breadcrumb i{font-size: 0.9rem;color:rgba(255,255,255,.3);}
 
 /* ── STAT STRIP ─────────────────────────────────────────────── */
 .gal-stats{
@@ -126,10 +126,10 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:1rem;
+  font-size: 1.2rem;
 }
-.gal-stat__num{font-size:1.15rem;font-weight:800;}
-.gal-stat__lbl{font-size:.78rem;color:#64748b;}
+.gal-stat__num{font-size: 1.35rem;font-weight:800;}
+.gal-stat__lbl{font-size: 0.98rem;color:#64748b;}
 
 /* ── SECTION ────────────────────────────────────────────────── */
 .gal-section{
@@ -145,7 +145,7 @@
   gap:12px;
 }
 .gal-section__title-block .eyebrow{
-  font-size:.78rem;
+  font-size: 0.98rem;
   font-weight:700;
   letter-spacing:.1em;
   text-transform:uppercase;
@@ -224,8 +224,8 @@
   background:linear-gradient(135deg,#dde6f0,#c8d8ea);
   color:#8ca4bc;
 }
-.album-card__empty i{font-size:2.5rem;}
-.album-card__empty span{font-size:.8rem;font-weight:600;}
+.album-card__empty i{font-size: 2.7rem;}
+.album-card__empty span{font-size: 1rem;font-weight:600;}
 
 /* Count pill */
 .album-card__count{
@@ -236,7 +236,7 @@
   backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
   color:#fff;
-  font-size:.75rem;
+  font-size: 0.95rem;
   font-weight:700;
   padding:4px 11px;
   border-radius:999px;
@@ -266,7 +266,7 @@
   backdrop-filter:blur(8px);
   border:1.5px solid rgba(255,255,255,.5);
   color:#fff;
-  font-size:.82rem;
+  font-size: 1.02rem;
   font-weight:700;
   padding:8px 24px;
   border-radius:999px;
@@ -285,7 +285,7 @@
   right:12px;
   background:var(--gal-gold);
   color:#fff;
-  font-size:.68rem;
+  font-size: 0.88rem;
   font-weight:800;
   letter-spacing:.04em;
   padding:3px 9px;
@@ -300,7 +300,7 @@
 }
 .album-card__title{
   font-family:'Cairo',sans-serif;
-  font-size:1.02rem;
+  font-size: 1.22rem;
   font-weight:800;
   color:var(--gal-primary);
   margin:0 0 6px;
@@ -309,7 +309,7 @@
   text-overflow:ellipsis;
 }
 .album-card__desc{
-  font-size:.82rem;
+  font-size: 1.02rem;
   color:#64748b;
   margin:0;
   display:-webkit-box;
@@ -330,11 +330,11 @@
   display:flex;
   align-items:center;
   gap:5px;
-  font-size:.77rem;
+  font-size: 0.97rem;
   color:#94a3b8;
   font-weight:600;
 }
-.album-card__meta-item i{font-size:.85rem;color:var(--gal-teal);}
+.album-card__meta-item i{font-size: 1.05rem;color:var(--gal-teal);}
 
 /* ── EMPTY STATE ────────────────────────────────────────────── */
 .gal-empty{
@@ -342,9 +342,9 @@
   padding:80px 20px;
   color:#94a3b8;
 }
-.gal-empty i{font-size:4rem;display:block;margin-bottom:20px;opacity:.4;}
-.gal-empty h4{font-size:1.2rem;color:#64748b;font-weight:700;margin-bottom:8px;}
-.gal-empty p{font-size:.9rem;}
+.gal-empty i{font-size: 4.2rem;display:block;margin-bottom:20px;opacity:.4;}
+.gal-empty h4{font-size: 1.4rem;color:#64748b;font-weight:700;margin-bottom:8px;}
+.gal-empty p{font-size: 1.1rem;}
 
 /* ── PAGINATION ─────────────────────────────────────────────── */
 .gal-pagination{margin-top:48px;display:flex;justify-content:center;}

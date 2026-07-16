@@ -29,7 +29,7 @@
         border: 1px solid rgba(245, 34, 45, 0.2);
         padding: 4px 10px;
         border-radius: 6px;
-        font-size: 11px;
+        font-size: 14.2px;
         font-weight: 700;
         transition: all 0.3s;
     }
@@ -45,7 +45,7 @@
         border: 1px solid #ffcc00;
         padding: 4px 10px;
         border-radius: 6px;
-        font-size: 11px;
+        font-size: 14.2px;
         font-weight: 700;
         transition: all 0.3s;
         cursor: pointer;
@@ -60,7 +60,7 @@
         width:26px; height:26px; border-radius:50%;
         background:#ffcc00; color:#003366;
         display:flex; align-items:center; justify-content:center;
-        font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,.25); border:2px solid #fff;
+        font-size: 15.2px; box-shadow:0 2px 8px rgba(0,0,0,.25); border:2px solid #fff;
     }
 
     /* Keep the QR/Close buttons a fixed size & shape regardless of the program title length */
@@ -85,7 +85,7 @@
         color: #fff !important;
         border-bottom: 3px solid #ffcc00;
     }
-    #teacherQrModal .modal-header .modal-title { font-size: 1.15rem; }
+    #teacherQrModal .modal-header .modal-title { font-size: 1.35rem; }
     #teacherQrModal #teacherQrGroupName {
         font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
         font-style: italic;
@@ -95,15 +95,15 @@
     }
     #teacherQrModal .modal-header { padding: 16px 22px; }
     #teacherQrModal .modal-header .btn-close { filter: invert(1) brightness(1.5); opacity: 0.85; }
-    #teacherQrModal #teacherQrGroupName { font-size: 1.05rem; }
+    #teacherQrModal #teacherQrGroupName { font-size: 1.25rem; }
     #teacherQrCanvas { max-width: 280px; width: 100%; }
     .teacher-qr-wrap { background: #fff !important; border: 2px solid #003366 !important; border-radius: 14px; padding: 14px !important; }
 
     /* QR modal body — consistent spacing + readable inputs on a soft background */
     #teacherQrModal .modal-body { background: #f6f8fb; padding: 22px 24px; }
-    #teacherQrModal .modal-body label { color: #14213d; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
+    #teacherQrModal .modal-body label { color: #14213d; font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; }
     #teacherQrModal .modal-body .form-control {
-        border: 1px solid #d9e2ef; border-radius: 10px; padding: 11px 13px; font-size: .95rem;
+        border: 1px solid #d9e2ef; border-radius: 10px; padding: 11px 13px; font-size: 1.15rem;
     }
     #teacherQrModal .modal-body .form-control:focus {
         border-color: #003366; box-shadow: 0 0 0 3px rgba(0,51,102,.12);
@@ -125,7 +125,7 @@
         border: 2px solid transparent !important;
         padding: 14px 28px !important;
         font-weight: 700 !important;
-        font-size: 1.02rem !important;
+        font-size: 1.22rem !important;
         letter-spacing: 0.04em;
         border-radius: 10px !important;
         display: inline-flex !important;
@@ -213,14 +213,14 @@
     .t-qr-text {
         color: #003366;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.15rem;
         display: flex;
         align-items: center;
         gap: 8px;
         margin-top: 6px;
         animation: tQrTextPulse 1.8s ease-in-out infinite;
     }
-    .t-qr-text i { color: #ffcc00; font-size: 1.2rem; animation: tQrIconSpin 2.5s linear infinite; }
+    .t-qr-text i { color: #ffcc00; font-size: 1.4rem; animation: tQrIconSpin 2.5s linear infinite; }
     @keyframes tQrIconSpin  { to { transform: rotate(360deg); } }
     @keyframes tQrTextPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 </style>
@@ -325,21 +325,21 @@
                                 <div class="dash-card__title" style="margin-bottom:18px;"><i class="fa fa-credit-card"></i> Financial Overview</div>
                                 <div style="display: flex; flex-direction: column; gap: 15px;">
                                     <div style="display: flex; align-items: center; gap: 15px; background: var(--surface-2); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
-                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-success-bg); color: var(--c-success); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-success-bg); color: var(--c-success); display: flex; align-items: center; justify-content: center; font-size: 23.2px;">
                                             <i class="bi bi-wallet2"></i>
                                         </div>
                                         <div>
-                                            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${{ number_format($financials['total_amount'] ?? 0, 2) }}</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary);">Total Received Salary</div>
+                                            <div style="font-size: 27.2px; font-weight: 800; color: var(--text-primary);">${{ number_format($financials['total_amount'] ?? 0, 2) }}</div>
+                                            <div style="font-size: 15.2px; color: var(--text-secondary);">Total Received Salary</div>
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 15px; background: var(--surface-2); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
-                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-info); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                        <div style="width: 46px; height: 46px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-info); display: flex; align-items: center; justify-content: center; font-size: 23.2px;">
                                             <i class="bi bi-file-earmark-check"></i>
                                         </div>
                                         <div>
-                                            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">{{ $financials['total_forms'] ?? 0 }}</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary);">Received Salary Forms</div>
+                                            <div style="font-size: 27.2px; font-weight: 800; color: var(--text-primary);">{{ $financials['total_forms'] ?? 0 }}</div>
+                                            <div style="font-size: 15.2px; color: var(--text-secondary);">Received Salary Forms</div>
                                         </div>
                                     </div>
                                     <button type="button" class="dash-btn dash-btn--primary teacherSalaryBtn-trigger" style="margin-top: 5px; width: 100%;">
@@ -374,7 +374,7 @@
                                         @endphp
                                         <button type="button" class="schedule-day-tab {{ $isToday ? 'is-active' : '' }}" 
                                                 data-day="{{ $dayKey }}" 
-                                                style="flex: 1; min-width: 48px; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface-2); color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; text-align: center; position: relative;">
+                                                style="flex: 1; min-width: 48px; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface-2); color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-size: 16.2px; font-weight: 600; text-align: center; position: relative;">
                                             {{ $dayLabel }}
                                             @if($hasLectures)
                                                 <span style="position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--gold-mid);"></span>
@@ -389,20 +389,20 @@
                                             @forelse($weeklySchedule[$dayKey] ?? [] as $event)
                                                 <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--surface-2); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                                                     <div>
-                                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">{{ $event['group_name'] }}</div>
-                                                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">{{ $event['program_title'] }}</div>
-                                                        <div style="font-size: 12px; color: var(--gold-mid); margin-top: 5px; font-weight: 600;">
+                                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 17.2px;">{{ $event['group_name'] }}</div>
+                                                        <div style="font-size: 14.2px; color: var(--text-secondary); margin-top: 2px;">{{ $event['program_title'] }}</div>
+                                                        <div style="font-size: 15.2px; color: var(--gold-mid); margin-top: 5px; font-weight: 600;">
                                                             <i class="fa fa-clock-o"></i> {{ $event['times'] }}
                                                         </div>
                                                     </div>
                                                     <div style="display: flex; gap: 6px;">
                                                         @if($event['zoom'])
-                                                            <a href="{{ $event['zoom'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 11px; background: #2D8CFF; color: #fff; border-color: transparent;" title="Zoom Link">
+                                                            <a href="{{ $event['zoom'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 14.2px; background: #2D8CFF; color: #fff; border-color: transparent;" title="Zoom Link">
                                                                 <i class="fa fa-video-camera"></i> Zoom
                                                             </a>
                                                         @endif
                                                         @if($event['drive'])
-                                                            <a href="{{ $event['drive'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 11px; background: var(--c-success-bg); color: var(--c-success); border-color: transparent;" title="Drive Link">
+                                                            <a href="{{ $event['drive'] }}" target="_blank" class="dash-btn dash-btn--sm" style="padding: 4px 8px; font-size: 14.2px; background: var(--c-success-bg); color: var(--c-success); border-color: transparent;" title="Drive Link">
                                                                 <i class="fa fa-hdd-o"></i> Drive
                                                             </a>
                                                         @endif
@@ -410,8 +410,8 @@
                                                 </div>
                                             @empty
                                                 <div style="text-align: center; padding: 30px 10px; color: var(--text-secondary);">
-                                                    <i class="fa fa-calendar-o" style="font-size: 30px; color: var(--border-color); margin-bottom: 10px; display: block;"></i>
-                                                    <p class="m-0" style="font-size: 13px;">No lectures scheduled for this day.</p>
+                                                    <i class="fa fa-calendar-o" style="font-size: 33.2px; color: var(--border-color); margin-bottom: 10px; display: block;"></i>
+                                                    <p class="m-0" style="font-size: 16.2px;">No lectures scheduled for this day.</p>
                                                 </div>
                                             @endforelse
                                         </div>
@@ -524,24 +524,24 @@
                             <!-- Proactive To-Do Widget -->
                             <div class="col-md-5 mt-xs-30">
                                 <div class="info-card" style="border-top: 4px solid var(--danger); padding: 20px;">
-                                    <h3 class="mb-15" style="font-size: 16px;"><i class="fa fa-bell-o text-danger"></i> Pending Actions</h3>
+                                    <h3 class="mb-15" style="font-size: 19.2px;"><i class="fa fa-bell-o text-danger"></i> Pending Actions</h3>
                                     <ul style="list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto;">
                                         @if($count > 0)
                                         <li style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
                                             <i class="fa fa-envelope-o text-warning" style="margin-right: 8px;"></i>
-                                            <span style="font-size: 13px;">You have <strong>{{ $count }}</strong> unread messages</span>
-                                            <a href="#AdminNotify" data-toggle="tab" class="pull-right" style="font-size: 12px; color: var(--primary);">View</a>
+                                            <span style="font-size: 16.2px;">You have <strong>{{ $count }}</strong> unread messages</span>
+                                            <a href="#AdminNotify" data-toggle="tab" class="pull-right" style="font-size: 15.2px; color: var(--primary);">View</a>
                                         </li>
                                         @endif
                                         <li style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
                                             <i class="fa fa-exclamation-circle text-danger" style="margin-right: 8px;"></i>
-                                            <span style="font-size: 13px;">Update attendance for active groups</span>
-                                            <a href="#Courses" data-toggle="tab" class="pull-right" style="font-size: 12px; color: var(--primary);">Review</a>
+                                            <span style="font-size: 16.2px;">Update attendance for active groups</span>
+                                            <a href="#Courses" data-toggle="tab" class="pull-right" style="font-size: 15.2px; color: var(--primary);">Review</a>
                                         </li>
                                         <li style="padding: 10px 0;">
                                             <i class="fa fa-calendar-times-o text-danger" style="margin-right: 8px;"></i>
-                                            <span style="font-size: 13px;">Check missing exam schedules</span>
-                                            <a href="{{ route('teacher.ExamDates', $teacher_id) }}" class="pull-right" style="font-size: 12px; color: var(--primary);">Fix</a>
+                                            <span style="font-size: 16.2px;">Check missing exam schedules</span>
+                                            <a href="{{ route('teacher.ExamDates', $teacher_id) }}" class="pull-right" style="font-size: 15.2px; color: var(--primary);">Fix</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -821,7 +821,7 @@
                     <i class="fa fa-money" style="color:#ffcc00; margin-right:6px;"></i> My Salaries &amp; Details
                 </h5>
                 <button type="button" onclick="$('#teacherSalaryModal').modal('hide');" data-dismiss="modal" aria-label="Close"
-                        style="flex:0 0 auto; background:rgba(255,255,255,.18); color:#fff; border:none; border-radius:8px; width:34px; height:34px; line-height:1; font-size:20px; cursor:pointer;">
+                        style="flex:0 0 auto; background:rgba(255,255,255,.18); color:#fff; border:none; border-radius:8px; width:34px; height:34px; line-height:1; font-size: 23.2px; cursor:pointer;">
                     <i class="fa fa-times"></i>
                 </button>
             </div>

@@ -16,9 +16,9 @@
     align-items: center;
     gap: 16px;
 }
-.fin-hero__icon { font-size: 2.2rem; opacity: .85; }
-.fin-hero h2   { font-size: 1.4rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
-.fin-hero p    { margin: 0; opacity: .85; font-size: .88rem; color: #fff !important; }
+.fin-hero__icon { font-size: 2.4rem; opacity: .85; }
+.fin-hero h2   { font-size: 1.6rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
+.fin-hero p    { margin: 0; opacity: .85; font-size: 1.08rem; color: #fff !important; }
 
 .fin-card {
     background: var(--d-card, #fff);
@@ -36,15 +36,15 @@
     gap: 10px;
     background: var(--d-card-2, #f8fafc);
 }
-.fin-card-head i   { font-size: 1.25rem; color: #1a4a8a; }
-.fin-card-head h5  { margin: 0; font-weight: 700; color: var(--d-heading, #0a3258); font-size: 1rem; }
+.fin-card-head i   { font-size: 1.45rem; color: #1a4a8a; }
+.fin-card-head h5  { margin: 0; font-weight: 700; color: var(--d-heading, #0a3258); font-size: 1.2rem; }
 .fin-card-head .badge-count {
     margin-left: auto;
     background: #1a4a8a;
     color: #fff;
     border-radius: 20px;
     padding: 2px 12px;
-    font-size: .78rem;
+    font-size: 0.98rem;
     font-weight: 600;
 }
 
@@ -53,7 +53,7 @@
 .fin-table thead th {
     background: var(--d-card-2, #f8fafc);
     color: var(--d-muted, #64748b);
-    font-size: .82rem;
+    font-size: 1.02rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .5px;
@@ -66,7 +66,7 @@
     vertical-align: middle;
     border-bottom: 1px solid var(--d-border, #e2e8f0);
     color: var(--d-text, #1e293b);
-    font-size: .95rem;
+    font-size: 1.15rem;
 }
 .fin-table tbody tr:last-child td { border-bottom: none; }
 .fin-table tbody tr:hover { background: var(--d-hover, rgba(0,0,0,.03)); }
@@ -88,25 +88,25 @@
     background: var(--d-card-2, #f0f4f8);
     border: 1px solid var(--d-border, #e2e8f0);
     color: var(--d-text, #334155);
-    font-size: .8rem; cursor: pointer; text-decoration: none;
+    font-size: 1rem; cursor: pointer; text-decoration: none;
 }
 .receipt-pdf-btn:hover { background: #1a4a8a; color: #fff; border-color: #1a4a8a; }
 
 /* badges */
-.badge-verified { background: #d1fae5; color: #065f46; border-radius: 20px; padding: 4px 12px; font-size: .78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-.badge-type     { border-radius: 6px; padding: 3px 9px; font-size: .75rem; font-weight: 600; }
+.badge-verified { background: #d1fae5; color: #065f46; border-radius: 20px; padding: 4px 12px; font-size: 0.98rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.badge-type     { border-radius: 6px; padding: 3px 9px; font-size: 0.95rem; font-weight: 600; }
 .badge-payment  { background: #dbeafe; color: #1d4ed8; }
 .badge-refund   { background: #fee2e2; color: #b91c1c; }
 .badge-credit   { background: #e0f2fe; color: #0369a1; }
 .badge-adjust   { background: #fef3c7; color: #92400e; }
 
-.amount-positive { color: #059669; font-weight: 700; font-size: .95rem; }
-.amount-negative { color: #dc2626; font-weight: 700; font-size: .95rem; }
+.amount-positive { color: #059669; font-weight: 700; font-size: 1.15rem; }
+.amount-negative { color: #dc2626; font-weight: 700; font-size: 1.15rem; }
 
 /* empty state */
 .fin-empty { text-align: center; padding: 64px 24px; }
-.fin-empty i { font-size: 3.5rem; color: var(--d-muted, #94a3b8); display: block; margin-bottom: 14px; }
-.fin-empty p { color: var(--d-muted, #64748b); font-size: .93rem; }
+.fin-empty i { font-size: 3.7rem; color: var(--d-muted, #94a3b8); display: block; margin-bottom: 14px; }
+.fin-empty p { color: var(--d-muted, #64748b); font-size: 1.13rem; }
 
 /* receipt zoom overlay is created by JS and appended to <body> */
 </style>
@@ -162,17 +162,17 @@
                 <tbody>
                     @foreach($rows as $i => $row)
                     <tr>
-                        <td style="color:var(--d-muted,#94a3b8);font-size:.78rem;">{{ $i + 1 }}</td>
+                        <td style="color:var(--d-muted,#94a3b8);font-size: 0.98rem;">{{ $i + 1 }}</td>
                         <td>
-                            <div style="font-weight:600;font-size:.87rem;">{{ optional($row->created_at)->format('Y-m-d') }}</div>
-                            <div style="color:var(--d-muted,#94a3b8);font-size:.76rem;">{{ optional($row->created_at)->format('h:i A') }}</div>
+                            <div style="font-weight:600;font-size: 1.07rem;">{{ optional($row->created_at)->format('Y-m-d') }}</div>
+                            <div style="color:var(--d-muted,#94a3b8);font-size: 0.96rem;">{{ optional($row->created_at)->format('h:i A') }}</div>
                         </td>
                         <td>
                             @if($row->group)
-                                <div style="font-weight:700;color:#1a4a8a;font-size:.82rem;">{{ $row->group->program?->title ?? '' }}</div>
-                                <div style="color:var(--d-muted,#64748b);font-size:.78rem;">{{ $row->group->name }}</div>
+                                <div style="font-weight:700;color:#1a4a8a;font-size: 1.02rem;">{{ $row->group->program?->title ?? '' }}</div>
+                                <div style="color:var(--d-muted,#64748b);font-size: 0.98rem;">{{ $row->group->name }}</div>
                             @else
-                                <span style="color:var(--d-muted,#94a3b8);font-style:italic;font-size:.82rem;">{{ $row->student_paid_type ?? 'رسوم عامة' }}</span>
+                                <span style="color:var(--d-muted,#94a3b8);font-style:italic;font-size: 1.02rem;">{{ $row->student_paid_type ?? 'رسوم عامة' }}</span>
                             @endif
                         </td>
                         <td>
@@ -193,8 +193,8 @@
                                 ₪ {{ number_format(abs($amt), 2) }}
                             </span>
                         </td>
-                        <td style="font-size:.82rem;color:var(--d-muted,#64748b);">{{ $row->paymentMethod?->name ?? '—' }}</td>
-                        <td style="font-size:.82rem;color:var(--d-muted,#64748b);">{{ $row->verifiedBy?->name ?? '—' }}</td>
+                        <td style="font-size: 1.02rem;color:var(--d-muted,#64748b);">{{ $row->paymentMethod?->name ?? '—' }}</td>
+                        <td style="font-size: 1.02rem;color:var(--d-muted,#64748b);">{{ $row->verifiedBy?->name ?? '—' }}</td>
                         <td>
                             @if($row->payment_receipt)
                                 @php
@@ -207,14 +207,14 @@
                                          class="receipt-thumb js-receipt-zoom"
                                          data-url="{{ $receiptUrl }}"
                                          alt="إيصال"
-                                         onerror="this.outerHTML='<span style=\'color:var(--d-muted,#94a3b8);font-size:.76rem;\' title=\'الملف غير موجود\'><i class=\'bi bi-image-slash\'></i> محذوف</span>'">
+                                         onerror="this.outerHTML='<span style=\'color:var(--d-muted,#94a3b8);font-size: 0.96rem;\' title=\'الملف غير موجود\'><i class=\'bi bi-image-slash\'></i> محذوف</span>'">
                                 @else
                                     <a href="{{ $receiptUrl }}" target="_blank" class="receipt-pdf-btn">
                                         <i class="bi bi-file-earmark-pdf"></i> عرض PDF
                                     </a>
                                 @endif
                             @else
-                                <span style="color:var(--d-muted,#94a3b8);font-size:.8rem;">لا يوجد</span>
+                                <span style="color:var(--d-muted,#94a3b8);font-size: 1rem;">لا يوجد</span>
                             @endif
                         </td>
                         <td><span class="badge-verified"><i class="bi bi-patch-check-fill"></i>مؤكد</span></td>
@@ -245,7 +245,7 @@
         + 'box-shadow:0 8px 48px rgba(0,0,0,.6);cursor:default;object-fit:contain;}'
         + '#_rcptClose{position:absolute;top:18px;right:22px;'
         + 'background:rgba(255,255,255,.18);border:none;color:#fff;'
-        + 'font-size:1.6rem;width:40px;height:40px;border-radius:50%;cursor:pointer;'
+        + 'font-size: 1.8rem;width:40px;height:40px;border-radius:50%;cursor:pointer;'
         + 'display:flex;align-items:center;justify-content:center;transition:background .15s;}'
         + '#_rcptClose:hover{background:rgba(255,255,255,.35);}</style>'
         + '<button id="_rcptClose"><i class="bi bi-x"></i></button>'

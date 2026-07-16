@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\StudentCompo;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class StandaloneRegistrationAdminController extends AdminController
 {
@@ -74,6 +79,88 @@ class StandaloneRegistrationAdminController extends AdminController
         self::$data['payment_methods'] = \App\Models\PaymentMethods::where('is_active', 1)->get();
         
         return view('admin.standalone_registrations.index', self::$data);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = StudentCompo::query();
+
+        if ($request->filled('program_id')) {
+            $query->where('program_id', $request->program_id);
+        }
+        if ($request->filled('program_type')) {
+            $query->where('program_type', $request->program_type);
+        }
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+        if ($request->filled('branch')) {
+            $query->where('branch', $request->branch);
+        }
+        if ($request->filled('is_invoiced')) {
+            $query->where('is_invoiced', $request->is_invoiced);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('is_contacted')) {
+            $query->where('is_contacted', $request->is_contacted);
+        }
+
+        $registrations = $query->orderBy('full_name_ar')
+            ->get(['full_name_ar', 'phone'])
+            ->unique('phone')
+            ->values();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Registrations');
+        $sheet->setRightToLeft(true);
+
+        // Column headers
+        $sheet->setCellValue('A1', 'اسم الطالب');
+        $sheet->setCellValue('B1', 'رقم الجوال');
+        $sheet->getRowDimension(1)->setRowHeight(28);
+        $sheet->getStyle('A1:B1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '36336D']],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]],
+        ]);
+
+        $row = 2;
+        foreach ($registrations as $registration) {
+            $sheet->setCellValue('A' . $row, $registration->full_name_ar);
+            $sheet->setCellValueExplicit('B' . $row, $registration->phone, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->getRowDimension($row)->setRowHeight(22);
+
+            $fill = $row % 2 === 0 ? 'F1F5F9' : 'FFFFFF';
+            $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray([
+                'font' => ['size' => 11],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $fill]],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'E2E8F0']]],
+            ]);
+            $row++;
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(40);
+        $sheet->getColumnDimension('B')->setWidth(25);
+        $sheet->freezePane('A2');
+
+        $fileName = 'standalone-registrations-' . now()->format('Y-m-d') . '.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     public function show($id)

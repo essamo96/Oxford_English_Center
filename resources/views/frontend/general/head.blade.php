@@ -109,7 +109,7 @@
   display: inline-block;
   padding: 6px 12px;
   margin-bottom: 0;
-  font-size: 14px;
+  font-size: 17.2px;
   font-weight: 400;
   line-height: 1.42857143;
   text-align: center;

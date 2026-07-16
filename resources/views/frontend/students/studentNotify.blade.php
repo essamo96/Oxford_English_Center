@@ -60,7 +60,7 @@
                 <div class="chat-header p-15 border-bottom d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-10">
                         <i class="fa fa-users text-accent"></i>
-                        <select id="chat-group-id" class="form-control modern-input" style="width: 250px; height: 35px; font-size: 13px;">
+                        <select id="chat-group-id" class="form-control modern-input" style="width: 250px; height: 35px; font-size: 16.2px;">
                             @foreach($student_groups as $sg)
                                 @if($sg->group)
                                     <option value="{{ $sg->group_id }}">{{ optional($sg->group->program)->title ?? 'N/A' }} - {{ $sg->group->name }}</option>
@@ -144,9 +144,9 @@ function openNewInquiryModal() {
         title: '<h3 style="color:white; margin-bottom:10px;">Contact Administration</h3>',
         html: `
             <div style="text-align: left;">
-                <label style="color:#a0aec0; font-size:12px; margin-bottom:5px; display:block;">Subject</label>
+                <label style="color:#a0aec0; font-size: 15.2px; margin-bottom:5px; display:block;">Subject</label>
                 <input id="swal-title" class="swal2-input swal2-modern-input" style="margin-top:0; width:100%; box-sizing:border-box;" placeholder="Enter message subject...">
-                <label style="color:#a0aec0; font-size:12px; margin-top:15px; margin-bottom:5px; display:block;">Message Content</label>
+                <label style="color:#a0aec0; font-size: 15.2px; margin-top:15px; margin-bottom:5px; display:block;">Message Content</label>
                 <textarea id="swal-content" class="swal2-textarea swal2-modern-textarea" style="margin-top:0; width:100%; box-sizing:border-box;" rows="5" placeholder="Type your detailed inquiry here..."></textarea>
             </div>
         `,

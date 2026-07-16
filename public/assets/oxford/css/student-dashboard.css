@@ -109,7 +109,7 @@
     gap: 12px;
     color: rgba(255, 255, 255, 0.75);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     flex-wrap: wrap;
 }
 
@@ -191,7 +191,7 @@
 
 .sidebar-brand span {
     font-family: var(--font-display);
-    font-size: 0.88rem;
+    font-size: 1.08rem;
     font-weight: 800;
     color: var(--oxford-blue);
     letter-spacing: 1px;
@@ -215,7 +215,7 @@
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-weight: 600;
-    font-size: 0.94rem;
+    font-size: 1.14rem;
     transition: var(--transition-fast);
     text-decoration: none !important;
     position: relative;
@@ -234,7 +234,7 @@
 }
 
 .profile-nav-link i {
-    font-size: 1.35rem;
+    font-size: 1.55rem;
     transition: var(--transition-fast);
     color: var(--text-muted);
 }
@@ -357,7 +357,7 @@
 
 .card-title-premium {
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 1.95rem;
     font-weight: 800;
     color: var(--oxford-blue);
     margin: 0;
@@ -369,7 +369,7 @@
 
 .card-title-premium i {
     color: var(--oxford-gold);
-    font-size: 2rem;
+    font-size: 2.2rem;
     filter: drop-shadow(0 3px 8px rgba(253, 200, 0, 0.25));
     animation: pulse 2.5s ease-in-out infinite;
 }
@@ -426,7 +426,7 @@
 .status-badge-premium {
     padding: 8px 18px;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -489,7 +489,7 @@
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     color: var(--text-muted);
     font-weight: 700;
@@ -499,7 +499,7 @@
 }
 
 .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--oxford-blue);
     font-family: var(--font-display);
@@ -520,7 +520,7 @@
     padding: 14px 32px;
     border-radius: var(--radius-md);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     transition: var(--transition-fast);
     display: inline-flex;
     align-items: center;
@@ -660,7 +660,7 @@
     color: var(--text-muted);
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     padding: 0 20px 18px;
     border: none;
     letter-spacing: 0.8px;
@@ -698,7 +698,7 @@
     border: 1.5px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 12px 16px;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     transition: var(--transition-fast);
     background-color: var(--bg-light);
     color: var(--text-primary);
@@ -781,7 +781,7 @@
 }
 
 .ox-fab-menu span {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
 }
 
 .ox-fab-menu:hover {
@@ -905,7 +905,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
     transition: var(--transition-fast);
@@ -966,7 +966,7 @@
     }
     
     .card-title-premium {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
     }
     
     .stats-grid {
@@ -989,7 +989,7 @@
     }
     
     .pagination-area h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     
     .btn-premium {
@@ -998,7 +998,7 @@
     }
     
     .table-p {
-        font-size: 0.9rem;
+        font-size: 1.1rem;
     }
     
     .table-p td {
@@ -1024,11 +1024,11 @@
 
 @media (max-width: 575px) {
     .pagination-area h1 {
-        font-size: 1.5rem;
+        font-size: 1.7rem;
     }
     
     .card-title-premium {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
     }
     
     .modern-card {

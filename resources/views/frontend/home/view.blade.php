@@ -121,14 +121,14 @@
                 {{-- Dynamic Program Brochures --}}
                 @foreach($programsWithBrochures as $prog)
                 <div class="ox-action-wrapper" style="position: relative; display: block;" data-reveal="up" data-reveal-delay=".3s">
-                    <a class="ox-action" href="{{ route('brochure.show', \Illuminate\Support\Facades\Crypt::encrypt($prog->id)) }}" style="padding-left: 60px;">
+                    <a class="ox-action" href="{{ route('brochure.show', \Illuminate\Support\Facades\Crypt::encrypt($prog->id)) }}" style="padding-right: 60px;">
                         <span class="ox-action__icon"><i class="bi bi-file-earmark-pdf-fill"></i></span>
                         <div>
                             <h3>{{ $prog->title }}</h3>
                             <span>تحميل بروشور البرنامج</span>
                         </div>
                     </a>
-                    <button type="button" class="ox-qr-btn" onclick="event.preventDefault(); event.stopPropagation(); showQrModal('{{ Crypt::encrypt($prog->id) }}')" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: #1e3a5f; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" title="مشاركة عبر QR Code">
+                    <button type="button" class="ox-qr-btn" onclick="event.preventDefault(); event.stopPropagation(); showQrModal('{{ Crypt::encrypt($prog->id) }}')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #1e3a5f; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" title="مشاركة عبر QR Code">
                         <i class="bi bi-qr-code"></i>
                     </button>
                 </div>
@@ -229,11 +229,11 @@
             <button class="ox-modal__close" onclick="closeQrModal()">&times;</button>
             <div class="ox-modal__header">
                 <h3>مشاركة البروشور</h3>
-                <p id="qrProgramTitle" style="color: #666; font-size: 14px; margin-top: 5px;"></p>
+                <p id="qrProgramTitle" style="color: #666; font-size: 17.2px; margin-top: 5px;"></p>
             </div>
             <div class="ox-modal__body" style="text-align: center; padding: 30px;">
                 <div id="qrLoading" style="display: none;">
-                    <i class="bi bi-arrow-repeat" style="font-size: 32px; animation: spin 1s linear infinite; color: #1e3a5f;"></i>
+                    <i class="bi bi-arrow-repeat" style="font-size: 35.2px; animation: spin 1s linear infinite; color: #1e3a5f;"></i>
                 </div>
                 <div id="qrSvgContainer" style="position: relative; display: inline-block; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
                     <!-- SVG gets injected here -->
@@ -250,8 +250,8 @@
         .ox-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
         .ox-modal__content { position: relative; background: #fff; width: 100%; max-width: 400px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: oxModalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; }
         .ox-modal__header { padding: 25px 25px 15px; text-align: center; border-bottom: 1px solid #f0f0f0; }
-        .ox-modal__header h3 { margin: 0; color: #1e3a5f; font-size: 20px; font-weight: 700; }
-        .ox-modal__close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border: none; background: #f8f9fa; border-radius: 50%; font-size: 20px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .ox-modal__header h3 { margin: 0; color: #1e3a5f; font-size: 23.2px; font-weight: 700; }
+        .ox-modal__close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border: none; background: #f8f9fa; border-radius: 50%; font-size: 23.2px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .ox-modal__close:hover { background: #fee; color: #e74c3c; }
         @keyframes oxModalIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }

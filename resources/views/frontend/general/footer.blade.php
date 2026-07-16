@@ -6,7 +6,7 @@
 
 <!-- Approvals strip -->
 <div class="ox-approve">
-    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre" style="max-width: 150px; height: 70px;">
 </div>
 
 <footer class="ox-footer">

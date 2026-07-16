@@ -2,7 +2,7 @@
 @section('title', 'Oxford Test of English')
 @section('content')
 <div class="text-center">
-    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt=""/>
+    <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="" style="max-width: 150px; height: 70px;"/>
 </div>
 <div class="about-page1-area">
     <div class="container">

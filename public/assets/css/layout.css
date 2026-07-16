@@ -115,7 +115,7 @@
 }
 .ox-play-btn {
     width: 84px; height: 84px; border-radius: 50%;
-    display: grid; place-items: center; color: var(--ox-primary); font-size: 26px;
+    display: grid; place-items: center; color: var(--ox-primary); font-size: 29.2px;
     background: #fff; box-shadow: var(--ox-shadow-lg);
     transition: transform var(--ox-dur) var(--ox-ease-spring);
 }
@@ -173,6 +173,6 @@
 .ox-breadcrumb li { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,.85); }
 .ox-breadcrumb a { color: rgba(255,255,255,.85); }
 .ox-breadcrumb a:hover { color: var(--ox-accent); }
-.ox-breadcrumb li + li::before { content: "\F285"; font-family: "bootstrap-icons"; font-size: 11px; opacity: .6; }
+.ox-breadcrumb li + li::before { content: "\F285"; font-family: "bootstrap-icons"; font-size: 14.2px; opacity: .6; }
 [dir="rtl"] .ox-breadcrumb li + li::before { content: "\F284"; }
 .ox-breadcrumb li:last-child { color: var(--ox-accent); font-weight: 600; }

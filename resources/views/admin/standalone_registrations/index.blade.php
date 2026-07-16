@@ -101,6 +101,11 @@
             </span>
         </div>
         <div class="card-toolbar">
+            @can('admin.standalone_registrations.export')
+            <button type="button" id="btn-export-excel" class="btn btn-sm btn-light-success me-2">
+                <i class="ki-duotone ki-file-up fs-2"><span class="path1"></span><span class="path2"></span></i> تصدير اكسل
+            </button>
+            @endcan
             <button type="button" class="btn btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
                 <i class="ki-duotone ki-scan-barcode fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></i> إنشاء QR Code
             </button>
@@ -290,6 +295,20 @@
 
         $('#btn-filter').click(function() {
             table.draw();
+        });
+
+        $('#btn-export-excel').click(function() {
+            var params = $.param({
+                program_id: $('select[name="program_id"]').val(),
+                program_type: $('select[name="program_type"]').val(),
+                gender: $('select[name="gender"]').val(),
+                branch: $('select[name="branch"]').val(),
+                is_invoiced: $('select[name="is_invoiced"]').val(),
+                is_contacted: $('select[name="is_contacted"]').val(),
+                date_from: $('input[name="date_from"]').val(),
+                date_to: $('input[name="date_to"]').val()
+            });
+            window.location.href = "{{ route('admin.standalone_registrations.export') }}?" + params;
         });
 
         $('#btn-reset').click(function() {

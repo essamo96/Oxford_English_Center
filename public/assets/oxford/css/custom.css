@@ -92,7 +92,7 @@ nav#desktop-nav ul li > ul {
     background: #5d6b82 none repeat scroll 0 0;
     bottom: 12px;
     color: #fff;
-    font-size: 24px;
+    font-size: 27.2px;
     height: 60px;
     padding-top: 13px;
     position: absolute;
@@ -163,10 +163,10 @@ nav#desktop-nav ul li > ul {
     text-align: justify;
 }
 .counter-area .counter1-box h2 {
-    font-size: 50px;
+    font-size: 53.2px;
 }
 .title-news-left-bold {
-    font-size: 18px;
+    font-size: 21.2px;
     height: 30px;
     overflow: hidden;
     white-space: nowrap;

@@ -86,7 +86,7 @@
         .alert-info .alert-icon { color: #4299e1; }
 
         .alert-icon {
-            font-size: 24px;
+            font-size: 27.2px;
             margin-right: 15px;
             display: flex;
             align-items: center;
@@ -95,13 +95,13 @@
             flex-grow: 1;
         }
         .alert-text {
-            font-size: 14px;
+            font-size: 17.2px;
             font-weight: 600;
         }
         .close-alert {
             background: transparent;
             border: none;
-            font-size: 18px;
+            font-size: 21.2px;
             cursor: pointer;
             opacity: 0.5;
             transition: 0.3s;

@@ -44,15 +44,15 @@
 }
 .galc-breadcrumb{
   display:flex;align-items:center;gap:8px;
-  color:rgba(255,255,255,.45);font-size:.82rem;margin-bottom:14px;
+  color:rgba(255,255,255,.45);font-size: 1.02rem;margin-bottom:14px;
 }
 .galc-breadcrumb a{color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s;}
 .galc-breadcrumb a:hover{color:var(--gal-gold);}
-.galc-breadcrumb i{font-size:.7rem;color:rgba(255,255,255,.3);}
+.galc-breadcrumb i{font-size: 0.9rem;color:rgba(255,255,255,.3);}
 .galc-banner__eyebrow{
   display:inline-flex;align-items:center;gap:7px;
   background:rgba(247,183,51,.16);border:1px solid rgba(247,183,51,.32);
-  color:var(--gal-gold);font-size:.78rem;font-weight:700;
+  color:var(--gal-gold);font-size: 0.98rem;font-weight:700;
   letter-spacing:.07em;text-transform:uppercase;
   padding:4px 13px;border-radius:999px;margin-bottom:14px;
 }
@@ -64,7 +64,7 @@
 .galc-banner h1 em{font-style:normal;color:var(--gal-gold);}
 .galc-banner__meta{
   display:flex;align-items:center;gap:20px;flex-wrap:wrap;
-  color:rgba(255,255,255,.6);font-size:.85rem;margin-top:14px;
+  color:rgba(255,255,255,.6);font-size: 1.05rem;margin-top:14px;
 }
 .galc-banner__meta span{
   display:flex;align-items:center;gap:6px;
@@ -72,7 +72,7 @@
 .galc-banner__meta span i{color:var(--gal-teal);}
 .galc-back{
   display:inline-flex;align-items:center;gap:7px;
-  color:rgba(255,255,255,.75);font-size:.85rem;font-weight:600;
+  color:rgba(255,255,255,.75);font-size: 1.05rem;font-weight:600;
   border:1px solid rgba(255,255,255,.25);
   padding:7px 18px;border-radius:999px;text-decoration:none;
   transition:all .2s;margin-top:4px;
@@ -91,7 +91,7 @@
   flex-wrap:wrap;gap:12px;margin-bottom:32px;
 }
 .galc-count{
-  font-size:.88rem;color:#64748b;font-weight:600;
+  font-size: 1.08rem;color:#64748b;font-weight:600;
 }
 .galc-count strong{color:var(--gal-primary);}
 
@@ -141,7 +141,7 @@
 }
 .galc-item:hover .galc-item__overlay{opacity:1;}
 .galc-item__overlay i{
-  font-size:1.8rem;
+  font-size: 2rem;
   color:#fff;
   background:rgba(255,255,255,.15);
   backdrop-filter:blur(6px);
@@ -155,7 +155,7 @@
   content:'غلاف';
   position:absolute;top:10px;right:10px;
   background:var(--gal-gold);color:#fff;
-  font-size:.68rem;font-weight:800;
+  font-size: 0.88rem;font-weight:800;
   padding:3px 10px;border-radius:999px;
   pointer-events:none;
 }
@@ -164,7 +164,7 @@
 .galc-empty{
   text-align:center;padding:80px 20px;color:#94a3b8;
 }
-.galc-empty i{font-size:4rem;display:block;margin-bottom:16px;opacity:.35;}
+.galc-empty i{font-size: 4.2rem;display:block;margin-bottom:16px;opacity:.35;}
 
 /* ── LIGHTBOX ────────────────────────────────────────────────── */
 .lbx{
@@ -203,7 +203,7 @@
   background:rgba(255,255,255,.12);
   border:none;color:#fff;
   width:42px;height:42px;border-radius:50%;
-  font-size:1.2rem;cursor:pointer;
+  font-size: 1.4rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background .2s;z-index:2;
 }
@@ -216,7 +216,7 @@
   color:#fff;border-radius:50%;
   width:48px;height:48px;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:1.1rem;transition:background .2s;
+  cursor:pointer;font-size: 1.3rem;transition:background .2s;
 }
 .lbx__nav:hover{background:rgba(255,255,255,.22);}
 .lbx__prev{right:20px;}
@@ -224,7 +224,7 @@
 
 .lbx__counter{
   position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-  color:rgba(255,255,255,.55);font-size:.82rem;font-weight:600;
+  color:rgba(255,255,255,.55);font-size: 1.02rem;font-weight:600;
   background:rgba(255,255,255,.08);padding:5px 18px;border-radius:999px;
 }
 
@@ -305,7 +305,7 @@
         <p class="galc-count">
           Showing <strong>{{ count($pics) }}</strong> Photos
         </p>
-        <span style="font-size:.8rem;color:#94a3b8;">
+        <span style="font-size: 1rem;color:#94a3b8;">
           <i class="bi bi-arrows-fullscreen" style="color:var(--gal-teal);"></i>
           Click to view fullscreen
         </span>

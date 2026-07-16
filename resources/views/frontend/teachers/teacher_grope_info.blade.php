@@ -2,7 +2,7 @@
     <!-- Modern Header -->
     <div class="detail-header" style="padding: 18px 22px; border-radius: 12px 12px 0 0;">
         <div class="d-flex justify-content-between align-items-center mb-10">
-            <div style="font-size:16px; font-weight:700; color:#fff;"><i class="fa fa-graduation-cap" style="color:var(--gold-mid);"></i> {{ $data->group->program->title }}</div>
+            <div style="font-size: 19.2px; font-weight:700; color:#fff;"><i class="fa fa-graduation-cap" style="color:var(--gold-mid);"></i> {{ $data->group->program->title }}</div>
             <button href="#Courses" class="dash-btn dash-btn--sm" id="go-back" data-toggle="tab">
                 <i class="fa fa-arrow-left"></i> Back
             </button>
@@ -34,7 +34,7 @@
             </div>
 
             <div class="col-md-8">
-                <div style="font-size:14px; font-weight:700; margin-bottom:14px; color:var(--text-primary);"><i class="fa fa-cogs" style="color:var(--gold-mid);"></i> Instructor Tools</div>
+                <div style="font-size: 17.2px; font-weight:700; margin-bottom:14px; color:var(--text-primary);"><i class="fa fa-cogs" style="color:var(--gold-mid);"></i> Instructor Tools</div>
                 <div class="action-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
                     @if($data->group->zoom)
                         <a href="{{ $data->group->zoom }}" target="_blank" class="action-card zoom">

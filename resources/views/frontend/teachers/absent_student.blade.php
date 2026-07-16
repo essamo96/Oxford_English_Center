@@ -6,8 +6,8 @@
 <link rel="stylesheet" href="{{ asset('css/pages/student-dashboard.css') }}?v={{ time() }}">
 <style>
     .attendance-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
-    .attendance-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
-    .select-all-bar { background: rgba(26,39,68,.05); border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; font-weight: 700; color: var(--primary); font-size: 13px; cursor: pointer; }
+    .attendance-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 16.2px; font-weight: 600; }
+    .select-all-bar { background: rgba(26,39,68,.05); border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; font-weight: 700; color: var(--primary); font-size: 16.2px; cursor: pointer; }
 </style>
 @endsection
 
@@ -17,7 +17,7 @@
     <div class="container" style="position: relative; z-index: 1;">
 
         {{-- Breadcrumbs Navigation --}}
-        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 16.2px; color: var(--light-text);">
             <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
             <span style="margin: 0 5px;">/</span>
             <span style="color: var(--primary);">Courses</span>
@@ -33,14 +33,14 @@
                     background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff;
                     box-shadow:0 10px 30px rgba(0,33,71,.18);">
             <div>
-                <div style="font-size:17px; font-weight:800;"><i class="fa fa-calendar-check-o" style="color:var(--accent,#f5c518);"></i> كشف الحضور والغياب</div>
-                <div style="font-size:13px; opacity:.85; margin-top:3px;">المجموعة: <strong>{{ $group_info->name }}</strong></div>
+                <div style="font-size: 20.2px; font-weight:800;"><i class="fa fa-calendar-check-o" style="color:var(--accent,#f5c518);"></i> كشف الحضور والغياب</div>
+                <div style="font-size: 16.2px; opacity:.85; margin-top:3px;">المجموعة: <strong>{{ $group_info->name }}</strong></div>
             </div>
             <div class="d-flex align-items-center" style="gap: 10px;">
-                <button type="button" class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; border:none; padding:7px 16px; font-size:13px;" onclick="window.print()">
+                <button type="button" class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; border:none; padding:7px 16px; font-size: 16.2px;" onclick="window.print()">
                     <i class="fa fa-print"></i> طباعة
                 </button>
-                <a href="{{ url('/teacher') }}" class="btn-modern btn-sm" style="background:#f5c518; color:#14213d; padding:7px 16px; font-size:13px; font-weight:700;">
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-sm" style="background:#f5c518; color:#14213d; padding:7px 16px; font-size: 16.2px; font-weight:700;">
                     <i class="fa fa-arrow-left"></i> رجوع
                 </a>
             </div>
@@ -92,7 +92,7 @@
 
                 {{-- Select All Bar --}}
                 <div style="padding: 14px 16px; background: var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <span style="color: white; font-size: 14px; font-weight: 700;"><i class="fa fa-users" style="color: var(--accent);"></i> Student Roster</span>
+                    <span style="color: white; font-size: 17.2px; font-weight: 700;"><i class="fa fa-users" style="color: var(--accent);"></i> Student Roster</span>
                     <label class="attendance-label" for="check-all" style="color: white;">
                         <input type="checkbox" id="check-all" class="attendance-checkbox"> Select All Present
                     </label>
@@ -141,7 +141,7 @@
             </form>
         </div>
 
-        <div class="mt-30" style="background: rgba(245,197,24,.05); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 13px; color: var(--light-text);">
+        <div class="mt-30" style="background: rgba(245,197,24,.05); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 16.2px; color: var(--light-text);">
             <i class="fa fa-info-circle" style="color: var(--accent);"></i>
             <strong style="color: var(--primary);">ملاحظة:</strong> يُحتسب حضور المدرس مرة واحدة فقط لكل محاضرة. عند فتح الشاشة ثانيةً في نفس المحاضرة ستظهر قائمة المتأخرين فقط (الطلاب غير المسجّلين) دون احتساب محاضرة جديدة. ويُشترط الاتصال بشبكة المركز وأن يكون ضمن وقت المحاضرة.
         </div>

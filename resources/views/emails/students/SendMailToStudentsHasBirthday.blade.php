@@ -8,15 +8,15 @@
 <body>
 @component('mail::message')
 # Dear Student
-{{-- <strong style="font-size: 16px; color:#002147"><strong >,{{$username}}</strong> </strong> --}}
-{{-- # <strong style="font-size: 16px; color:#000000">Welcome to<strong style="font-size: 16px; color:#002147"> {{ config('app.name') }}</strong>.Hope you are well.</strong> --}}
+{{-- <strong style="font-size: 19.2px; color:#002147"><strong >,{{$username}}</strong> </strong> --}}
+{{-- # <strong style="font-size: 19.2px; color:#000000">Welcome to<strong style="font-size: 19.2px; color:#002147"> {{ config('app.name') }}</strong>.Hope you are well.</strong> --}}
 
 
 {{$title}}:
 @component('mail::panel')
-<strong style="font-size: 16px; color:#002147">{{$message}}</strong><br> 
+<strong style="font-size: 19.2px; color:#002147">{{$message}}</strong><br> 
 
-{{-- <strong style="font-size: 16px; color:#000000">Your password is: </strong>{{$password}} <br> --}}
+{{-- <strong style="font-size: 19.2px; color:#000000">Your password is: </strong>{{$password}} <br> --}}
 
 @endcomponent
 {{-- @component('mail::button', ['url' => 'https://www.oxford.ps/login'])
@@ -24,6 +24,6 @@
 @endcomponent --}}
 
 Best regards,<br>
-<span style="font-size: 16px; color:#002147">{{ config('app.name') }}</span>
+<span style="font-size: 19.2px; color:#002147">{{ config('app.name') }}</span>
 @endcomponent
 </body> 

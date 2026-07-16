@@ -7,24 +7,24 @@
 
 <body>
 @component('mail::message')
-# Dear <strong style="font-size: 16px; color:#002147"><strong >,{{$username}}</strong> </strong>
-# <strong style="font-size: 16px; color:#000000">Welcome to<strong style="font-size: 16px; color:#002147"> {{ config('app.name') }}</strong>. Please keep your account information safe.</strong>
+# Dear <strong style="font-size: 19.2px; color:#002147"><strong >,{{$username}}</strong> </strong>
+# <strong style="font-size: 19.2px; color:#000000">Welcome to<strong style="font-size: 19.2px; color:#002147"> {{ config('app.name') }}</strong>. Please keep your account information safe.</strong>
 
 
 Your Account Info:
 @component('mail::panel')
-<strong style="font-size: 16px; color:#000000">Your username is:  </strong><span>{{$password}}</span><br> 
+<strong style="font-size: 19.2px; color:#000000">Your username is:  </strong><span>{{$password}}</span><br> 
 
-<strong style="font-size: 16px; color:#000000">Your password is: </strong>{{$password}} <br>
+<strong style="font-size: 19.2px; color:#000000">Your password is: </strong>{{$password}} <br>
 
 @endcomponent
-# <span style="font-size: 16px; color:#000000">Thank you for choosing Oxford Institution, and we look forward to achieving success together.</span>
+# <span style="font-size: 19.2px; color:#000000">Thank you for choosing Oxford Institution, and we look forward to achieving success together.</span>
 
 @component('mail::button', ['url' => 'https://www.oxford.ps/login'])
   Login Page
 @endcomponent
 
 Best regards,<br>
-<span style="font-size: 16px; color:#002147">{{ config('app.name') }}</span>
+<span style="font-size: 19.2px; color:#002147">{{ config('app.name') }}</span>
 @endcomponent
 </body> 

@@ -147,7 +147,7 @@ body::before {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.4);
     z-index: 20;
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -174,7 +174,7 @@ body::before {
 .login-links a {
     color: rgba(255, 255, 255, 0.5);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     transition: 0.3s;
     font-weight: 500;
 }

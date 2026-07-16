@@ -10,9 +10,9 @@
     border-radius: 16px; padding: 28px 32px; color: #fff;
     margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
 }
-.fin-hero__icon { font-size: 2.2rem; opacity: .85; }
-.fin-hero h2 { font-size: 1.4rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
-.fin-hero p  { margin: 0; opacity: .85; font-size: .88rem; color: #fff !important; }
+.fin-hero__icon { font-size: 2.4rem; opacity: .85; }
+.fin-hero h2 { font-size: 1.6rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
+.fin-hero p  { margin: 0; opacity: .85; font-size: 1.08rem; color: #fff !important; }
 
 .notif-card {
     background: var(--d-card, #fff);
@@ -27,14 +27,14 @@
 .unread-chip {
     background: #fee2e2; color: #991b1b;
     border-radius: 20px; padding: 4px 12px;
-    font-size: .78rem; font-weight: 700;
+    font-size: 0.98rem; font-weight: 700;
     display: inline-flex; align-items: center; gap: 5px;
 }
 .btn-mark-all {
     background: var(--d-card-2, #f3f4f6);
     border: 1px solid var(--d-border, #e2e8f0);
     border-radius: 8px; padding: 6px 14px;
-    font-size: .83rem; cursor: pointer; color: var(--d-text, #374151);
+    font-size: 1.03rem; cursor: pointer; color: var(--d-text, #374151);
     display: inline-flex; align-items: center; gap: 6px;
     transition: background .15s;
 }
@@ -52,7 +52,7 @@
 .notif-icon {
     width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0;
+    font-size: 1.3rem; flex-shrink: 0;
 }
 .notif-icon.approved  { background: #d1fae5; color: #059669; }
 .notif-icon.rejected  { background: #fee2e2; color: #dc2626; }
@@ -61,27 +61,27 @@
 .notif-icon.default   { background: var(--d-card-2,#f3f4f6); color: var(--d-muted,#6b7280); }
 
 .notif-body { flex: 1; }
-.notif-title { font-weight: 700; color: var(--d-heading,#0a3258); margin-bottom: 3px; font-size: .92rem; }
-.notif-msg   { color: var(--d-text,#4b5563); font-size: .84rem; margin-bottom: 5px; line-height: 1.5; }
+.notif-title { font-weight: 700; color: var(--d-heading,#0a3258); margin-bottom: 3px; font-size: 1.12rem; }
+.notif-msg   { color: var(--d-text,#4b5563); font-size: 1.04rem; margin-bottom: 5px; line-height: 1.5; }
 .notif-amount {
     display: inline-flex; align-items: center; gap: 5px;
     background: #d1fae5; color: #065f46;
-    border-radius: 6px; padding: 2px 10px; font-size: .8rem; font-weight: 700; margin-bottom: 5px;
+    border-radius: 6px; padding: 2px 10px; font-size: 1rem; font-weight: 700; margin-bottom: 5px;
 }
-.notif-time  { color: var(--d-muted,#94a3b8); font-size: .76rem; display: flex; align-items: center; gap: 5px; }
+.notif-time  { color: var(--d-muted,#94a3b8); font-size: 0.96rem; display: flex; align-items: center; gap: 5px; }
 
 .unread-dot  { width: 9px; height: 9px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 10px; }
 .btn-read {
     background: none; border: 1px solid var(--d-border,#e2e8f0);
-    border-radius: 6px; padding: 3px 8px; font-size: .76rem;
+    border-radius: 6px; padding: 3px 8px; font-size: 0.96rem;
     cursor: pointer; color: var(--d-muted,#64748b); display: flex; align-items: center; gap: 3px;
     white-space: nowrap; margin-top: 4px; transition: background .15s;
 }
 .btn-read:hover { background: #1a4a8a; color: #fff; border-color: #1a4a8a; }
 
 .fin-empty { text-align: center; padding: 64px 24px; }
-.fin-empty i { font-size: 3.5rem; color: var(--d-muted,#94a3b8); display: block; margin-bottom: 14px; }
-.fin-empty p { color: var(--d-muted,#64748b); font-size: .93rem; }
+.fin-empty i { font-size: 3.7rem; color: var(--d-muted,#94a3b8); display: block; margin-bottom: 14px; }
+.fin-empty p { color: var(--d-muted,#64748b); font-size: 1.13rem; }
 
 .fin-pagination { margin-top: 16px; display: flex; justify-content: center; }
 </style>
@@ -107,7 +107,7 @@
 
     <div class="notif-actions">
         @if($unreadCount > 0)
-            <span class="unread-chip"><i class="bi bi-circle-fill" style="font-size:.5rem;"></i>{{ $unreadCount }} غير مقروء</span>
+            <span class="unread-chip"><i class="bi bi-circle-fill" style="font-size: 0.7rem;"></i>{{ $unreadCount }} غير مقروء</span>
             <form action="{{ route('student.financial.mark-all-read') }}" method="POST" style="margin:0;">
                 @csrf
                 <button type="submit" class="btn-mark-all">
@@ -115,7 +115,7 @@
                 </button>
             </form>
         @else
-            <span style="color:var(--d-muted,#94a3b8);font-size:.84rem;"><i class="bi bi-check2-all me-1"></i>جميع الإشعارات مقروءة</span>
+            <span style="color:var(--d-muted,#94a3b8);font-size: 1.04rem;"><i class="bi bi-check2-all me-1"></i>جميع الإشعارات مقروءة</span>
             <span></span>
         @endif
     </div>
@@ -159,7 +159,7 @@
                 @endif
                 {{-- Extra invoice details --}}
                 @if(!empty($data['program']) || !empty($data['group_name']))
-                <div style="font-size:.8rem;color:var(--d-muted,#64748b);margin-bottom:4px;">
+                <div style="font-size: 1rem;color:var(--d-muted,#64748b);margin-bottom:4px;">
                     @if(!empty($data['program']))<span style="margin-left:8px;"><i class="bi bi-mortarboard me-1"></i>{{ $data['program'] }}</span>@endif
                     @if(!empty($data['group_name']))<span><i class="bi bi-people me-1"></i>{{ $data['group_name'] }}</span>@endif
                 </div>
@@ -244,7 +244,7 @@
                     if (actionsEl) {
                         var span = document.createElement('span');
                         span.className = 'unread-chip';
-                        span.innerHTML = '<i class="bi bi-circle-fill" style="font-size:.5rem;"></i> 1 غير مقروء';
+                        span.innerHTML = '<i class="bi bi-circle-fill" style="font-size: 0.7rem;"></i> 1 غير مقروء';
                         actionsEl.insertBefore(span, actionsEl.firstChild);
                     }
                 }
@@ -278,7 +278,7 @@
                 : '';
             var progHtml = '';
             if (data.program || data.group_name) {
-                progHtml = '<div style="font-size:.8rem;color:var(--d-muted,#64748b);margin-bottom:4px;">';
+                progHtml = '<div style="font-size: 1rem;color:var(--d-muted,#64748b);margin-bottom:4px;">';
                 if (data.program)    progHtml += '<span style="margin-left:8px;"><i class="bi bi-mortarboard me-1"></i>' + _esc(data.program) + '</span>';
                 if (data.group_name) progHtml += '<span><i class="bi bi-people me-1"></i>' + _esc(data.group_name) + '</span>';
                 progHtml += '</div>';

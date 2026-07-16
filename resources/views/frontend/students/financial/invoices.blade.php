@@ -10,9 +10,9 @@
     border-radius: 16px; padding: 28px 32px; color: #fff;
     margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
 }
-.fin-hero__icon { font-size: 2.2rem; opacity: .85; }
-.fin-hero h2 { font-size: 1.4rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
-.fin-hero p  { margin: 0; opacity: .85; font-size: .88rem; color: #fff !important; }
+.fin-hero__icon { font-size: 2.4rem; opacity: .85; }
+.fin-hero h2 { font-size: 1.6rem; font-weight: 800; margin: 0 0 3px; color: #fff !important; }
+.fin-hero p  { margin: 0; opacity: .85; font-size: 1.08rem; color: #fff !important; }
 
 /* KPI cards */
 .fin-kpis { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
@@ -23,8 +23,8 @@
     border-radius: 14px; padding: 18px 20px; text-align: center;
     box-shadow: 0 2px 8px rgba(0,0,0,.05);
 }
-.fin-kpi .kpi-val { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
-.fin-kpi .kpi-lbl { font-size: .75rem; color: var(--d-muted, #64748b); margin-top: 4px; font-weight: 500; }
+.fin-kpi .kpi-val { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+.fin-kpi .kpi-lbl { font-size: 0.95rem; color: var(--d-muted, #64748b); margin-top: 4px; font-weight: 500; }
 .kpi-blue  { color: #2563eb; }
 .kpi-green { color: #059669; }
 .kpi-red   { color: #dc2626; }
@@ -40,7 +40,7 @@
 }
 .inv-bucket.has-balance { border-color: #1a4a8a; }
 .inv-bucket-title {
-    font-weight: 700; font-size: .95rem;
+    font-weight: 700; font-size: 1.15rem;
     color: var(--d-heading, #0a3258); margin-bottom: 14px;
     display: flex; align-items: center; gap: 8px;
 }
@@ -53,8 +53,8 @@
     border: 1px solid var(--d-border, #e8edf2);
     border-radius: 10px; padding: 12px 14px; text-align: center;
 }
-.balance-cell .val { font-size: 1.05rem; font-weight: 800; }
-.balance-cell .lbl { font-size: .72rem; color: var(--d-muted, #94a3b8); margin-top: 3px; font-weight: 500; }
+.balance-cell .val { font-size: 1.25rem; font-weight: 800; }
+.balance-cell .lbl { font-size: 0.92rem; color: var(--d-muted, #94a3b8); margin-top: 3px; font-weight: 500; }
 
 /* pending review status */
 .pending-review-status {
@@ -67,13 +67,13 @@
     width: 40px; height: 40px; border-radius: 50%;
     background: #fef3c7; border: 1.5px solid #fbbf24;
     display: flex; align-items: center; justify-content: center;
-    color: #d97706; font-size: 1.1rem; flex-shrink: 0;
+    color: #d97706; font-size: 1.3rem; flex-shrink: 0;
 }
 .pending-review-status .prv-body { flex: 1; }
-.pending-review-status .prv-title { font-weight: 700; color: #92400e; font-size: .9rem; margin-bottom: 2px; }
-.pending-review-status .prv-sub   { font-size: .78rem; color: #b45309; }
+.pending-review-status .prv-title { font-weight: 700; color: #92400e; font-size: 1.1rem; margin-bottom: 2px; }
+.pending-review-status .prv-sub   { font-size: 0.98rem; color: #b45309; }
 .btn-cancel-small {
-    font-size: .75rem; padding: 4px 10px;
+    font-size: 0.95rem; padding: 4px 10px;
     border: 1px solid #dc2626; color: #dc2626;
     background: transparent; border-radius: 6px; cursor: pointer;
     transition: background .15s;
@@ -96,11 +96,11 @@
     padding: 16px 20px; border-bottom: 1px solid var(--d-border,#e2e8f0);
     display: flex; align-items: center; gap: 10px;
 }
-.pay-confirm-head h5 { margin: 0; font-weight: 700; color: var(--d-heading,#0a3258); font-size: .95rem; }
+.pay-confirm-head h5 { margin: 0; font-weight: 700; color: var(--d-heading,#0a3258); font-size: 1.15rem; }
 .pay-confirm-body { padding: 18px 20px; }
 .pay-confirm-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 7px 0; border-bottom: 1px solid var(--d-border,#f0f0f0); font-size: .88rem;
+    padding: 7px 0; border-bottom: 1px solid var(--d-border,#f0f0f0); font-size: 1.08rem;
 }
 .pay-confirm-row:last-child { border-bottom: none; }
 .pay-confirm-row .lbl { color: var(--d-muted,#6b7280); font-weight: 500; }
@@ -115,14 +115,14 @@
     display: inline-flex; align-items: center; gap: 7px;
     background: #1a4a8a; color: #fff;
     border: none; border-radius: 9px; padding: 8px 18px;
-    font-size: .85rem; font-weight: 600; cursor: pointer;
+    font-size: 1.05rem; font-weight: 600; cursor: pointer;
     transition: background .18s;
 }
 .btn-pay:hover { background: #0E2250; }
 .badge-paid-full {
     display: inline-flex; align-items: center; gap: 6px;
     background: #d1fae5; color: #065f46;
-    border-radius: 8px; padding: 6px 14px; font-size: .82rem; font-weight: 600;
+    border-radius: 8px; padding: 6px 14px; font-size: 1.02rem; font-weight: 600;
 }
 
 /* submissions table */
@@ -137,27 +137,27 @@
     background: var(--d-card-2, #f8fafc);
     display: flex; align-items: center; gap: 10px;
 }
-.fin-card-head i { font-size: 1.2rem; color: #1a4a8a; }
-.fin-card-head h5 { margin: 0; font-weight: 700; color: var(--d-heading, #0a3258); font-size: .95rem; }
+.fin-card-head i { font-size: 1.4rem; color: #1a4a8a; }
+.fin-card-head h5 { margin: 0; font-weight: 700; color: var(--d-heading, #0a3258); font-size: 1.15rem; }
 .fin-table { width: 100%; }
 .fin-table thead th {
     background: var(--d-card-2, #f8fafc);
-    color: var(--d-muted, #64748b); font-size: .82rem;
+    color: var(--d-muted, #64748b); font-size: 1.02rem;
     font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
     padding: 10px 16px; border-bottom: 1px solid var(--d-border, #e2e8f0);
 }
 .fin-table tbody td {
     padding: 12px 16px; vertical-align: middle;
     border-bottom: 1px solid var(--d-border, #e2e8f0);
-    color: var(--d-text, #1e293b); font-size: .95rem;
+    color: var(--d-text, #1e293b); font-size: 1.15rem;
 }
 .fin-table tbody tr:last-child td { border-bottom: none; }
 .fin-table tbody tr:hover { background: var(--d-hover, rgba(0,0,0,.025)); }
 
 /* status badges */
-.s-pending  { background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size:.76rem;font-weight:600; }
-.s-approved { background:#d1fae5;color:#065f46;border-radius:20px;padding:3px 10px;font-size:.76rem;font-weight:600; }
-.s-rejected { background:#fee2e2;color:#991b1b;border-radius:20px;padding:3px 10px;font-size:.76rem;font-weight:600; }
+.s-pending  { background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size: 0.96rem;font-weight:600; }
+.s-approved { background:#d1fae5;color:#065f46;border-radius:20px;padding:3px 10px;font-size: 0.96rem;font-weight:600; }
+.s-rejected { background:#fee2e2;color:#991b1b;border-radius:20px;padding:3px 10px;font-size: 0.96rem;font-weight:600; }
 
 .receipt-sm {
     width:42px;height:42px;object-fit:cover;
@@ -167,7 +167,7 @@
 .receipt-sm:hover { transform:scale(1.12); }
 
 .fin-empty { text-align:center;padding:52px 20px; }
-.fin-empty i { font-size:3rem;color:var(--d-muted,#94a3b8);display:block;margin-bottom:12px; }
+.fin-empty i { font-size: 3.2rem;color:var(--d-muted,#94a3b8);display:block;margin-bottom:12px; }
 .fin-empty p { color:var(--d-muted,#64748b); }
 
 /* Modal */
@@ -192,15 +192,15 @@
     padding:18px 22px;border-bottom:1px solid var(--d-border,#e2e8f0);
     display:flex;align-items:center;gap:10px;
 }
-.fin-modal-head h5 { margin:0;font-weight:700;color:var(--d-heading,#0a3258);font-size:.97rem; }
-.fin-modal-head .close-modal { margin-left:auto;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--d-muted,#64748b);line-height:1; }
+.fin-modal-head h5 { margin:0;font-weight:700;color:var(--d-heading,#0a3258);font-size: 1.17rem; }
+.fin-modal-head .close-modal { margin-left:auto;background:none;border:none;font-size: 1.5rem;cursor:pointer;color:var(--d-muted,#64748b);line-height:1; }
 .fin-modal-body { padding:20px 22px; }
 .fin-modal-foot { padding:14px 22px;border-top:1px solid var(--d-border,#e2e8f0);display:flex;gap:10px;justify-content:flex-end; }
-.fin-input { width:100%;border:1.5px solid var(--d-border,#d1d5db);border-radius:8px;padding:9px 12px;font-size:.88rem;background:var(--d-card,#fff);color:var(--d-text,#1e293b);transition:border-color .15s; }
+.fin-input { width:100%;border:1.5px solid var(--d-border,#d1d5db);border-radius:8px;padding:9px 12px;font-size: 1.08rem;background:var(--d-card,#fff);color:var(--d-text,#1e293b);transition:border-color .15s; }
 .fin-input:focus { outline:none;border-color:#1a4a8a; }
-.fin-label { display:block;margin-bottom:5px;font-size:.83rem;font-weight:600;color:var(--d-text,#374151); }
+.fin-label { display:block;margin-bottom:5px;font-size: 1.03rem;font-weight:600;color:var(--d-text,#374151); }
 .fin-form-group { margin-bottom:16px; }
-.fin-hint { font-size:.76rem;color:var(--d-muted,#6b7280);margin-top:4px; }
+.fin-hint { font-size: 0.96rem;color:var(--d-muted,#6b7280);margin-top:4px; }
 
 /* receipt zoom overlay is appended to <body> via JS */
 
@@ -373,7 +373,7 @@
                 <tbody>
                     @foreach($mySubmissions as $sub)
                     <tr>
-                        <td style="color:var(--d-muted,#64748b);font-size:.8rem;">{{ optional($sub->created_at)->format('Y-m-d H:i') }}</td>
+                        <td style="color:var(--d-muted,#64748b);font-size: 1rem;">{{ optional($sub->created_at)->format('Y-m-d H:i') }}</td>
                         <td>{{ $sub->group?->name ?? 'خارج المجموعة' }}</td>
                         <td style="font-weight:700;color:#059669;">₪ {{ number_format($sub->amount_paid, 2) }}</td>
                         <td>
@@ -385,7 +385,7 @@
                                      alt="إيصال">
                             @else
                                 <a href="{{ asset('uploads/'.$sub->receipt_file) }}" target="_blank"
-                                   style="font-size:.8rem;color:#1a4a8a;display:inline-flex;gap:4px;align-items:center;">
+                                   style="font-size: 1rem;color:#1a4a8a;display:inline-flex;gap:4px;align-items:center;">
                                     <i class="bi bi-file-earmark-pdf"></i> PDF
                                 </a>
                             @endif
@@ -397,7 +397,7 @@
                             @endphp
                             <span class="{{ $smap[$sub->status] ?? '' }}">{{ $slab[$sub->status] ?? $sub->status }}</span>
                         </td>
-                        <td style="color:var(--d-muted,#64748b);font-size:.8rem;">{{ $sub->admin_notes ?? '—' }}</td>
+                        <td style="color:var(--d-muted,#64748b);font-size: 1rem;">{{ $sub->admin_notes ?? '—' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -412,7 +412,7 @@
 <div class="fin-modal" id="payModal">
     <div class="fin-modal-dialog" style="max-width:760px;">
         <div class="fin-modal-head">
-            <i class="bi bi-credit-card" style="color:#1a4a8a;font-size:1.2rem;"></i>
+            <i class="bi bi-credit-card" style="color:#1a4a8a;font-size: 1.4rem;"></i>
             <h5>إرسال دفعة</h5>
             <button class="close-modal" id="closePayModal"><i class="bi bi-x"></i></button>
         </div>
@@ -423,7 +423,7 @@
 
             <div class="fin-modal-body">
                 {{-- Invoice label --}}
-                <p id="payLabel" style="color:var(--d-muted,#64748b);font-size:.85rem;margin-bottom:16px;"></p>
+                <p id="payLabel" style="color:var(--d-muted,#64748b);font-size: 1.05rem;margin-bottom:16px;"></p>
 
                 <div class="pay-modal-grid">
                     {{-- Left column: payment method + credentials --}}
@@ -443,19 +443,19 @@
                                                border:2px solid var(--d-border,#e2e8f0);
                                                border-radius:10px;padding:10px 14px;
                                                background:var(--d-card,#fff);cursor:pointer;
-                                               font-size:.86rem;font-weight:600;
+                                               font-size: 1.06rem;font-weight:600;
                                                color:var(--d-text,#1e293b);transition:all .18s;">
                                     @if($pm->image)
                                     <img src="{{ asset('uploads/'.$pm->image) }}" alt="{{ $pm->name }}"
                                          style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
                                     @else
-                                    <i class="bi bi-bank" style="font-size:1.3rem;color:#1a4a8a;"></i>
+                                    <i class="bi bi-bank" style="font-size: 1.5rem;color:#1a4a8a;"></i>
                                     @endif
                                     {{ $pm->name }}
                                 </button>
                                 @endforeach
                             </div>
-                            <div id="pmError" style="display:none;color:#dc2626;font-size:.78rem;margin-top:4px;">
+                            <div id="pmError" style="display:none;color:#dc2626;font-size: 0.98rem;margin-top:4px;">
                                 يرجى اختيار طريقة الدفع
                             </div>
                         </div>
@@ -464,22 +464,22 @@
                         <div id="payRequiredBanner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;
                              border-radius:10px;padding:12px 16px;margin-bottom:14px;
                              align-items:center;gap:10px;">
-                            <i class="bi bi-cash-coin" style="color:#059669;font-size:1.3rem;"></i>
+                            <i class="bi bi-cash-coin" style="color:#059669;font-size: 1.5rem;"></i>
                             <div>
-                                <div style="font-size:.78rem;color:#6b7280;font-weight:500;">المبلغ المستحق عليك</div>
-                                <div id="payRequiredAmt" style="font-size:1.35rem;font-weight:800;color:#059669;letter-spacing:.5px;"></div>
+                                <div style="font-size: 0.98rem;color:#6b7280;font-weight:500;">المبلغ المستحق عليك</div>
+                                <div id="payRequiredAmt" style="font-size: 1.55rem;font-weight:800;color:#059669;letter-spacing:.5px;"></div>
                             </div>
                         </div>
 
                         {{-- Credentials box — shown after method selected --}}
                         <div id="credsBox" style="display:none;background:linear-gradient(135deg,#0e2250,#1a4a8a);
                              border-radius:12px;padding:16px 20px;color:#fff;">
-                            <div style="font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                            <div style="font-weight:700;font-size: 1.2rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
                                 <i class="bi bi-info-circle-fill"></i>
                                 <span>بيانات الحوالة — <span id="credsMethodName"></span></span>
                             </div>
-                            <div id="credsContent" style="font-size:.95rem;line-height:2;"></div>
-                            <div style="margin-top:12px;font-size:.82rem;opacity:.85;border-top:1px solid rgba(255,255,255,.2);padding-top:10px;">
+                            <div id="credsContent" style="font-size: 1.15rem;line-height:2;"></div>
+                            <div style="margin-top:12px;font-size: 1.02rem;opacity:.85;border-top:1px solid rgba(255,255,255,.2);padding-top:10px;">
                                 <i class="bi bi-exclamation-circle me-1"></i>
                                 أرسل الحوالة على البيانات أعلاه ثم ارفع صورة الإيصال أدناه.
                             </div>
@@ -492,11 +492,11 @@
                         <div class="fin-form-group">
                             <label class="fin-label">المبلغ المُرسَل <span style="color:#dc2626;">*</span></label>
                             <div style="display:flex;align-items:center;gap:0;">
-                                <span style="background:var(--d-card-2,#f8fafc);border:1.5px solid var(--d-border,#d1d5db);border-right:none;border-radius:8px 0 0 8px;padding:9px 12px;font-size:.88rem;color:var(--d-muted,#64748b);">₪</span>
+                                <span style="background:var(--d-card-2,#f8fafc);border:1.5px solid var(--d-border,#d1d5db);border-right:none;border-radius:8px 0 0 8px;padding:9px 12px;font-size: 1.08rem;color:var(--d-muted,#64748b);">₪</span>
                                 <input type="number" name="amount_paid" id="payAmount" class="fin-input"
-                                       style="border-radius:0 8px 8px 0;font-size:1rem;font-weight:700;" step="0.01" min="0.01" required placeholder="0.00">
+                                       style="border-radius:0 8px 8px 0;font-size: 1.2rem;font-weight:700;" step="0.01" min="0.01" required placeholder="0.00">
                             </div>
-                            <div class="fin-hint" id="payRemaining" style="color:#dc2626;font-size:.8rem;margin-top:5px;"></div>
+                            <div class="fin-hint" id="payRemaining" style="color:#dc2626;font-size: 1rem;margin-top:5px;"></div>
                         </div>
 
                         {{-- Receipt upload --}}
@@ -518,7 +518,7 @@
             <div class="fin-modal-foot">
                 <button type="button" id="closePayModal2"
                         style="background:var(--d-card-2,#f3f4f6);border:1px solid var(--d-border,#e2e8f0);
-                               border-radius:8px;padding:8px 18px;font-size:.87rem;cursor:pointer;
+                               border-radius:8px;padding:8px 18px;font-size: 1.07rem;cursor:pointer;
                                color:var(--d-text,#374151);">إلغاء</button>
                 <button type="submit" id="paySubmitBtn" class="btn-pay">
                     <i class="bi bi-send"></i>إرسال الطلب
@@ -532,19 +532,19 @@
 <div class="pay-confirm-overlay" id="payConfirmOverlay">
     <div class="pay-confirm-box">
         <div class="pay-confirm-head">
-            <i class="bi bi-shield-check" style="color:#059669;font-size:1.2rem;"></i>
+            <i class="bi bi-shield-check" style="color:#059669;font-size: 1.4rem;"></i>
             <h5>تأكيد إرسال الدفعة</h5>
         </div>
         <div class="pay-confirm-body">
-            <p style="color:var(--d-muted,#6b7280);font-size:.85rem;margin-bottom:14px;">يرجى مراجعة تفاصيل الدفعة قبل الإرسال:</p>
+            <p style="color:var(--d-muted,#6b7280);font-size: 1.05rem;margin-bottom:14px;">يرجى مراجعة تفاصيل الدفعة قبل الإرسال:</p>
             <div class="pay-confirm-row"><span class="lbl">طريقة الدفع</span><span class="val" id="cfmMethod">—</span></div>
             <div class="pay-confirm-row"><span class="lbl">المبلغ</span><span class="val" id="cfmAmount" style="color:#059669;">—</span></div>
-            <div class="pay-confirm-row"><span class="lbl">الإيصال</span><span class="val" id="cfmFile" style="font-size:.8rem;max-width:200px;text-align:left;word-break:break-all;">—</span></div>
+            <div class="pay-confirm-row"><span class="lbl">الإيصال</span><span class="val" id="cfmFile" style="font-size: 1rem;max-width:200px;text-align:left;word-break:break-all;">—</span></div>
         </div>
         <div class="pay-confirm-foot">
             <button type="button" id="cfmCancel"
                     style="background:var(--d-card-2,#f3f4f6);border:1px solid var(--d-border,#e2e8f0);
-                           border-radius:8px;padding:8px 18px;font-size:.87rem;cursor:pointer;color:var(--d-text,#374151);">
+                           border-radius:8px;padding:8px 18px;font-size: 1.07rem;cursor:pointer;color:var(--d-text,#374151);">
                 تعديل
             </button>
             <button type="button" id="cfmConfirm" class="btn-pay">
@@ -605,12 +605,12 @@
                     var val   = creds[k];
                     html += '<div style="display:flex;justify-content:space-between;align-items:center;'
                           + 'border-bottom:1px solid rgba(255,255,255,.12);padding:7px 0;gap:8px;">'
-                          + '<span style="opacity:.8;font-size:.9rem;">' + label + '</span>'
+                          + '<span style="opacity:.8;font-size: 1.1rem;">' + label + '</span>'
                           + '<div style="display:flex;align-items:center;gap:8px;">'
-                          + '<strong style="font-size:1rem;letter-spacing:.5px;">' + val + '</strong>'
+                          + '<strong style="font-size: 1.2rem;letter-spacing:.5px;">' + val + '</strong>'
                           + '<button type="button" onclick="copyCredVal(this,\'' + val.replace(/'/g,"\\'") + '\')" '
                           + 'style="background:rgba(255,255,255,.18);border:none;border-radius:5px;'
-                          + 'padding:2px 7px;cursor:pointer;color:#fff;font-size:.78rem;white-space:nowrap;'
+                          + 'padding:2px 7px;cursor:pointer;color:#fff;font-size: 0.98rem;white-space:nowrap;'
                           + 'transition:background .15s;" title="نسخ">'
                           + '<i class="bi bi-copy"></i></button>'
                           + '</div>'
@@ -738,7 +738,7 @@
     overlay.innerHTML = '<style>@keyframes rcptFI2{from{opacity:0}to{opacity:1}}'
         + '#_invRImg{max-width:92vw;max-height:88vh;border-radius:12px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain;}'
         + '#_invRClose{position:absolute;top:18px;right:22px;background:rgba(255,255,255,.18);border:none;color:#fff;'
-        + 'font-size:1.6rem;width:40px;height:40px;border-radius:50%;cursor:pointer;'
+        + 'font-size: 1.8rem;width:40px;height:40px;border-radius:50%;cursor:pointer;'
         + 'display:flex;align-items:center;justify-content:center;transition:background .15s;}'
         + '#_invRClose:hover{background:rgba(255,255,255,.35);}</style>'
         + '<button id="_invRClose"><i class="bi bi-x"></i></button>'
@@ -857,7 +857,7 @@
         var t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9000;min-width:290px;max-width:380px;background:'+(ok?'#d1fae5':'#fee2e2')+';border:1px solid '+(ok?'#6ee7b7':'#fca5a5')+';border-radius:12px;padding:14px 18px;box-shadow:0 4px 20px rgba(0,0,0,.12);';
         t.innerHTML = '<div style="font-weight:700;color:'+(ok?'#065f46':'#991b1b')+';margin-bottom:3px;"><i class="bi bi-'+(ok?'check-circle':'x-circle')+' me-2"></i>'+title+'</div>'
-            + (msg ? '<div style="font-size:.84rem;color:#374151;">'+msg+'</div>' : '');
+            + (msg ? '<div style="font-size: 1.04rem;color:#374151;">'+msg+'</div>' : '');
         document.body.appendChild(t);
         setTimeout(function () { t.remove(); }, 6000);
     }

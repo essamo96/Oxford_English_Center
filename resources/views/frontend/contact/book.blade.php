@@ -208,7 +208,7 @@
         .step-pane h4.step-heading i,
         .step-pane h4 i {
             color: var(--ink) !important;
-            font-size: 1.6rem !important;
+            font-size: 1.8rem !important;
             font-style: normal;
             filter: none !important;
             margin-right: 0 !important;
@@ -228,7 +228,7 @@
            Larger sentence-case bold navy + matching gold icon. Scannable at a glance. */
         .form-label {
             font-family: var(--font-body) !important;
-            font-size: 1.1rem !important;        /* 17.6px — clearly readable */
+            font-size: 1.3rem !important;        /* 17.6px — clearly readable */
             font-weight: 700 !important;
             color: var(--ink) !important;
             text-transform: none !important;
@@ -241,7 +241,7 @@
         }
         .form-label i {
             color: var(--gold) !important;
-            font-size: 1.25rem !important;       /* scales with label */
+            font-size: 1.45rem !important;       /* scales with label */
             width: 26px;
             height: 26px;
             display: inline-flex;
@@ -271,7 +271,7 @@
         .form-control {
             height: 54px !important;
             font-family: var(--font-body) !important;
-            font-size: 1.02rem !important;       /* 16.3px — easy to read */
+            font-size: 1.22rem !important;       /* 16.3px — easy to read */
             font-weight: 500 !important;
             background: var(--paper) !important;
             border: 1.5px solid var(--rule) !important;
@@ -323,7 +323,7 @@
             color: var(--danger);
             display: block;
             background: transparent;
-            font-size: 0.95rem;
+            font-size: 1.15rem;
             line-height: 1.2;
             z-index: 70;
             padding-left: 10px; /* light left padding */
@@ -342,7 +342,7 @@
             color: var(--success);
             display: block;
             background: transparent;
-            font-size: 0.95rem;
+            font-size: 1.15rem;
             line-height: 1.2;
             z-index: 70;
             margin-bottom: 6px; /* small bottom margin */
@@ -359,7 +359,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 17.2px;
             z-index: 80;
         }
         .input-status-icon.success {
@@ -444,7 +444,7 @@
             font-family: var(--font-display) !important;
             font-weight: 600 !important;
             font-style: italic;
-            font-size: 1.05rem !important;
+            font-size: 1.25rem !important;
             padding: 0 !important;
             background: var(--paper) !important;
             border: 1.5px solid var(--rule) !important;
@@ -482,7 +482,7 @@
             gap: 12px !important;
         }
         @media (max-width: 576px) {
-            .level-radio-item label { width: 54px !important; height: 54px !important; font-size: 0.95rem !important; }
+            .level-radio-item label { width: 54px !important; height: 54px !important; font-size: 1.15rem !important; }
         }
 
         /* ============ Schedule split card (Days | Time) ============ */
@@ -549,14 +549,14 @@
             align-items: center;
             justify-content: center;
             color: var(--ink);
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             flex-shrink: 0;
         }
         .scheduling-sub-header span {
             font-family: var(--font-display);
             font-weight: 600;
             color: var(--ink);
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-style: italic;
             letter-spacing: -0.005em;
             text-transform: none;
@@ -565,7 +565,7 @@
             font-family: var(--font-body);
             font-style: normal;
             font-weight: 700;
-            font-size: 0.72rem;
+            font-size: 0.92rem;
             color: var(--ink-soft);
             letter-spacing: 0.14em;
             margin-left: 6px;
@@ -617,7 +617,7 @@
             top: 4px;
             right: 6px;
             color: var(--gold);
-            font-size: 0.85rem;
+            font-size: 1.05rem;
             line-height: 1;
         }
         [dir="rtl"] .schedule-option:has(input:checked)::after { right: auto; left: 6px; }
@@ -625,7 +625,7 @@
         .option-text {
             font-family: var(--font-body);
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1.15rem;
             color: var(--ink);
             line-height: 1.3;
         }
@@ -688,13 +688,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             font-weight: bold;
             box-shadow: 0 2px 6px rgba(0,51,102,0.15);
         }
         [dir="rtl"] .payment-method-card.active::after { right: auto; left: 10px; }
         .payment-method-card i {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             color: #b8c0cf;
             transition: all 0.25s;
         }
@@ -715,10 +715,10 @@
             font-family: var(--font-body);
             font-weight: 700;
             color: var(--ink);
-            font-size: 1rem;
+            font-size: 1.2rem;
             letter-spacing: 0.01em;
         }
-        .payment-method-card i { font-size: 2.6rem !important; }
+        .payment-method-card i { font-size: 2.8rem !important; }
 
         /* ============ Payment Plan (mode selector) ============ */
         .payment-mode-grid {
@@ -747,7 +747,7 @@
             box-shadow: var(--sh-2);
         }
         .payment-mode-option i {
-            font-size: 1.9rem;
+            font-size: 2.1rem;
             color: var(--ink-soft);
             transition: all 0.25s ease;
             margin-bottom: 4px;
@@ -756,13 +756,13 @@
             font-family: var(--font-display);
             font-style: italic;
             font-weight: 600;
-            font-size: 1.05rem;
+            font-size: 1.25rem;
             color: var(--ink);
             line-height: 1.2;
         }
         .payment-mode-option .pm-sub {
             font-family: var(--font-body);
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             color: var(--ink-soft);
             letter-spacing: 0.04em;
         }
@@ -789,7 +789,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.95rem;
             font-weight: bold;
             box-shadow: 0 2px 6px rgba(0,51,102,0.15);
         }
@@ -826,7 +826,7 @@
             align-items: center;
             justify-content: center;
             color: var(--ink);
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             box-shadow: 0 2px 6px rgba(0, 51, 102, 0.05);
         }
         .payment-note-body {
@@ -836,7 +836,7 @@
         .payment-note-title {
             font-family: var(--font-body);
             font-weight: 700;
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             color: var(--ink);
             line-height: 1.25;
             margin: 0;
@@ -847,7 +847,7 @@
             font-family: var(--font-display);
             font-style: italic;
             font-weight: 600;
-            font-size: 1.55rem;
+            font-size: 1.75rem;
             color: var(--ink);
             line-height: 1;
             letter-spacing: -0.02em;
@@ -860,14 +860,14 @@
             font-family: var(--font-body);
             font-style: normal;
             font-weight: 700;
-            font-size: 0.72rem;
+            font-size: 0.92rem;
             color: var(--ink-soft);
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
         .payment-note-desc {
             font-family: var(--font-body);
-            font-size: 0.88rem;
+            font-size: 1.08rem;
             color: var(--ink-soft);
             line-height: 1.55;
             margin: 0;
@@ -884,10 +884,10 @@
         .payment-note-danger .payment-note-title { color: var(--danger); }
         @media (max-width: 576px) {
             .payment-note { padding: 14px 16px; grid-template-columns: 38px 1fr; column-gap: 14px; }
-            .payment-note-icon { width: 38px; height: 38px; font-size: 1rem; }
-            .payment-note-title { font-size: 0.72rem; }
-            .payment-note-amount { font-size: 1.3rem; }
-            .payment-note-desc { font-size: 0.82rem; }
+            .payment-note-icon { width: 38px; height: 38px; font-size: 1.2rem; }
+            .payment-note-title { font-size: 0.92rem; }
+            .payment-note-amount { font-size: 1.5rem; }
+            .payment-note-desc { font-size: 1.02rem; }
         }
 
         /* ============ Remaining Balance display ============ */
@@ -909,7 +909,7 @@
             font-family: var(--font-display);
             font-style: italic;
             font-weight: 700;
-            font-size: 1.45rem;
+            font-size: 1.65rem;
             color: var(--ink);
             letter-spacing: -0.01em;
             line-height: 1;
@@ -917,14 +917,14 @@
         .remaining-balance-display .rb-currency {
             font-family: var(--font-body);
             font-weight: 700;
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             color: var(--ink-soft);
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
         @media (max-width: 576px) {
             .remaining-balance-display { height: 50px; }
-            .remaining-balance-display .rb-amount { font-size: 1.25rem; }
+            .remaining-balance-display .rb-amount { font-size: 1.45rem; }
         }
 
         /* ============ Credentials display ============ */
@@ -961,7 +961,7 @@
             align-items: center;
             justify-content: center;
             color: var(--ink);
-            font-size: 1.25rem;
+            font-size: 1.45rem;
             flex-shrink: 0;
         }
         .credential-card .credential-body {
@@ -974,7 +974,7 @@
         .credential-card .credential-label {
             color: var(--ink-soft) !important;
             font-family: var(--font-body) !important;
-            font-size: 0.78rem !important;
+            font-size: 0.98rem !important;
             font-weight: 700 !important;
             text-transform: uppercase;
             letter-spacing: 0.12em !important;
@@ -985,7 +985,7 @@
             font-family: var(--font-display) !important;
             font-weight: 600 !important;
             font-style: italic;
-            font-size: 1.15rem !important;
+            font-size: 1.35rem !important;
             letter-spacing: -0.005em;
             line-height: 1.3;
             white-space: nowrap;
@@ -1003,7 +1003,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.2s ease;
             flex-shrink: 0;
@@ -1016,8 +1016,8 @@
         }
         @media (max-width: 576px) {
             .credential-card { grid-template-columns: 40px 1fr auto; gap: 12px; padding: 12px 14px; }
-            .credential-card .credential-icon { width: 38px; height: 38px; font-size: 1.05rem; }
-            .credential-card .credential-value { font-size: 1rem !important; }
+            .credential-card .credential-icon { width: 38px; height: 38px; font-size: 1.25rem; }
+            .credential-card .credential-value { font-size: 1.2rem !important; }
             .credential-card .credential-copy-btn { width: 36px; height: 36px; }
         }
 
@@ -1034,7 +1034,7 @@
             text-transform: uppercase;
             padding: 16px 40px !important;
             border-radius: var(--r-pill) !important;
-            font-size: 0.92rem !important;
+            font-size: 1.12rem !important;
             transition: all 0.25s ease !important;
             border: none;
             min-width: 160px;
@@ -1089,7 +1089,7 @@
             color: var(--ink) !important;
             font-family: var(--font-display);
             font-weight: 700;
-            font-size: 1.25rem !important;
+            font-size: 1.45rem !important;
         }
 
         /* ============ File upload ============ */
@@ -1109,14 +1109,14 @@
         }
         .file-upload-container .bi-cloud-arrow-up {
             color: var(--gold) !important;
-            font-size: 2.3rem !important;
+            font-size: 2.5rem !important;
             transition: color 0.25s ease;
         }
         .file-upload-container:hover .bi-cloud-arrow-up { color: var(--ink) !important; }
         .file-upload-container p {
             font-family: var(--font-body);
             color: var(--ink-soft);
-            font-size: 1rem;
+            font-size: 1.2rem;
             margin-top: 8px !important;
         }
         @keyframes receiptShake {
@@ -1147,7 +1147,7 @@
             font-family: var(--font-display);
             font-weight: 500 !important;
             font-style: italic;
-            font-size: 1.1rem !important;
+            font-size: 1.3rem !important;
             color: var(--ink);
         }
         .agreement-text p { font-size: var(--t-sm); color: var(--ink-soft); }
@@ -1164,7 +1164,7 @@
             font-style: italic !important;
             text-transform: none !important;
             letter-spacing: -0.015em !important;
-            font-size: 1.65rem !important;
+            font-size: 1.85rem !important;
             color: var(--gold) !important;
         }
 
@@ -1237,7 +1237,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             font-weight: 700;
             z-index: 10;
             box-shadow: 0 3px 10px rgba(0,0,0,0.25);
@@ -1261,14 +1261,14 @@
             font-family: var(--font-display);
             font-weight: 600;
             font-style: italic;
-            font-size: 1.22rem;
+            font-size: 1.42rem;
             color: var(--ink);
             letter-spacing: -0.015em;
             line-height: 1.25;
         }
         .tpc-desc {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 1.05rem;
             color: var(--ink-soft);
             line-height: 1.5;
             display: -webkit-box;
@@ -1293,17 +1293,17 @@
             border-radius: var(--r-pill);
             padding: 4px 10px;
             font-family: var(--font-body);
-            font-size: 0.75rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--ink);
             white-space: nowrap;
         }
         .tpc-date-badge i {
-            font-size: 0.82rem;
+            font-size: 1.02rem;
             color: var(--ink-3);
         }
         .tpc-date-sep {
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             color: var(--ink-faint);
             font-weight: 600;
         }
@@ -1339,7 +1339,7 @@
             justify-content: center;
             background: linear-gradient(135deg, var(--ink) 0%, var(--ink-3) 100%);
             color: rgba(255,204,0,0.5);
-            font-size: 3rem;
+            font-size: 3.2rem;
         }
         /* Empty state */
         .tpc-empty-state {
@@ -1355,7 +1355,7 @@
                 gap: 14px;
             }
             .tpc-image-wrap { height: 130px; }
-            .tpc-name { font-size: 1.05rem; }
+            .tpc-name { font-size: 1.25rem; }
             .tpc-body { padding: 14px 14px 12px; }
         }
         @media (max-width: 480px) {
@@ -1386,7 +1386,7 @@
             font-family: var(--font-display) !important;
             font-weight: 500 !important;
             font-style: italic;
-            font-size: 1.5rem !important;
+            font-size: 1.7rem !important;
             color: var(--ink) !important;
             letter-spacing: -0.015em;
         }
@@ -1401,7 +1401,7 @@
             color: var(--ink) !important;
             width: 68px !important;
             height: 68px !important;
-            font-size: 1.9rem !important;
+            font-size: 2.1rem !important;
         }
         .enroll-type-card:hover .type-icon {
             background: var(--ink) !important;
@@ -1464,7 +1464,7 @@
         /* Medium desktops */
         @media (max-width: 1199px) {
             .wizard-body { padding: 56px 56px !important; }
-            .step-pane h3.step-heading, .step-pane h4 { font-size: 1.65rem !important; }
+            .step-pane h3.step-heading, .step-pane h4 { font-size: 1.85rem !important; }
         }
 
         /* Tablets landscape */
@@ -1472,16 +1472,16 @@
             .wizard-body { padding: 44px 40px !important; min-height: auto; }
             .wizard-footer { padding: 20px 40px !important; }
             .step-pane h3.step-heading, .step-pane h4 {
-                font-size: 1.5rem !important;
+                font-size: 1.7rem !important;
                 gap: 14px;
                 padding-bottom: 18px !important;
                 margin-bottom: 32px !important;
             }
             .step-pane h3.step-heading i, .step-pane h4 i {
                 width: 46px; height: 46px;
-                font-size: 1.35rem !important;
+                font-size: 1.55rem !important;
             }
-            .form-control { height: 52px !important; font-size: 1rem !important; }
+            .form-control { height: 52px !important; font-size: 1.2rem !important; }
         }
 
         /* Tablets portrait */
@@ -1490,21 +1490,21 @@
             .wizard-footer { padding: 18px 24px !important; flex-wrap: wrap; gap: 10px; }
             .wizard-footer .btn-wizard { flex: 1; }
             .step-pane h3.step-heading, .step-pane h4 {
-                font-size: 1.35rem !important;
+                font-size: 1.55rem !important;
                 gap: 12px;
                 padding-bottom: 16px !important;
                 margin-bottom: 26px !important;
             }
             .step-pane h3.step-heading i, .step-pane h4 i {
                 width: 42px; height: 42px;
-                font-size: 1.15rem !important;
+                font-size: 1.35rem !important;
                 border-radius: 10px;
             }
             .step-pane .row { row-gap: 1.25rem; }
-            .form-label { font-size: 1.02rem !important; gap: 9px; margin-bottom: 10px !important; }
-            .form-label i { font-size: 1.1rem !important; width: 22px; height: 22px; }
-            .form-control { height: 50px !important; font-size: 0.98rem !important; padding: 0 16px !important; }
-            .btn-wizard { padding: 13px 22px !important; font-size: 0.78rem !important; letter-spacing: 0.05em !important; }
+            .form-label { font-size: 1.22rem !important; gap: 9px; margin-bottom: 10px !important; }
+            .form-label i { font-size: 1.3rem !important; width: 22px; height: 22px; }
+            .form-control { height: 50px !important; font-size: 1.18rem !important; padding: 0 16px !important; }
+            .btn-wizard { padding: 13px 22px !important; font-size: 0.98rem !important; letter-spacing: 0.05em !important; }
             .wizard-main-card::before, .wizard-main-card::after { width: 18px; height: 18px; }
 
             /* Stack scheduling card on small screens */
@@ -1518,20 +1518,20 @@
             .wizard-body { padding: 28px 18px !important; }
             .wizard-footer { padding: 16px 18px !important; }
             .step-pane h3.step-heading, .step-pane h4 {
-                font-size: 1.2rem !important;
+                font-size: 1.4rem !important;
                 gap: 10px;
             }
             .step-pane h3.step-heading i, .step-pane h4 i {
                 width: 38px; height: 38px;
-                font-size: 1.05rem !important;
+                font-size: 1.25rem !important;
             }
-            .form-label { font-size: 0.98rem !important; gap: 8px; }
-            .form-label i { font-size: 1.05rem !important; width: 20px; height: 20px; }
-            .form-control { height: 48px !important; font-size: 0.95rem !important; padding: 0 14px !important; }
+            .form-label { font-size: 1.18rem !important; gap: 8px; }
+            .form-label i { font-size: 1.25rem !important; width: 20px; height: 20px; }
+            .form-control { height: 48px !important; font-size: 1.15rem !important; padding: 0 14px !important; }
             textarea.form-control { min-height: 88px !important; padding: 13px 14px !important; }
             .payment-methods-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .payment-method-card { padding: 20px 12px; }
-            .payment-method-card i { font-size: 1.9rem; }
+            .payment-method-card i { font-size: 2.1rem; }
             .payment-method-card img.payment-logo { width: 46px; height: 46px; }
             .interaction-card { padding: 18px !important; }
             .file-upload-container { padding: 28px 18px !important; }
@@ -1539,19 +1539,19 @@
             /* Enrollment cards stack with more breathing room */
             .enrollment-type-wrapper { gap: 22px !important; }
             .enroll-type-card { padding: 28px 22px !important; }
-            .enroll-type-card h4 { font-size: 1.25rem !important; }
-            .enroll-type-card .type-icon { width: 56px !important; height: 56px !important; font-size: 1.5rem !important; }
+            .enroll-type-card h4 { font-size: 1.45rem !important; }
+            .enroll-type-card .type-icon { width: 56px !important; height: 56px !important; font-size: 1.7rem !important; }
 
             /* Program selection cards become single column */
             .program-selection-wrapper { margin-top: -50px !important; padding: 0 16px 30px !important; gap: 16px !important; }
             .program-card { height: 180px !important; }
-            .program-name { font-size: 1.4rem !important; }
+            .program-name { font-size: 1.6rem !important; }
         }
 
         /* Very small phones */
         @media (max-width: 380px) {
             .wizard-body { padding: 22px 14px !important; }
-            .step-pane h3.step-heading, .step-pane h4 { font-size: 1.1rem !important; }
+            .step-pane h3.step-heading, .step-pane h4 { font-size: 1.3rem !important; }
             .level-radio-group { grid-template-columns: repeat(4, 1fr) !important; }
         }
     </style>
@@ -1702,8 +1702,8 @@
                             <div class="col-md-12 mb-4" id="underage-banner" style="display: none;">
                                 <div class="alert border-0" style="background: var(--gold-soft); border-left: 4px solid var(--gold) !important; color: var(--ink); border-radius: var(--r-sm); padding: 16px 20px;">
                                     <div class="d-flex align-items-center" style="gap:8px;">
-                                        <i class="bi bi-info-circle-fill" style="color: var(--ink); font-size: 1.3rem;"></i>
-                                        <strong style="font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.05rem; margin: 0;">Guardian Information Required</strong>
+                                        <i class="bi bi-info-circle-fill" style="color: var(--ink); font-size: 1.5rem;"></i>
+                                        <strong style="font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.25rem; margin: 0;">Guardian Information Required</strong>
                                     </div>
                                     <div style="margin-top:6px;">
                                         <span style="font-size: var(--t-sm); color: var(--ink-soft);">المتقدم تحت سن 16 — سيتم طلب بيانات ولي الأمر في الخطوة التالية لإتمام التسجيل.</span>
@@ -1871,7 +1871,7 @@
                                                 <div class="tpc-desc">{{ $p->short }}</div>
                                             @endif
                                             <div class="tpc-dates">
-                                                <i class="bi bi-calendar-range" style="color: var(--ink-3); font-size:0.9rem; flex-shrink:0;"></i>
+                                                <i class="bi bi-calendar-range" style="color: var(--ink-3); font-size: 1.1rem; flex-shrink:0;"></i>
                                                 @if($hasStart)
                                                     <span class="tpc-date-badge">
                                                         <i class="bi bi-play-circle"></i>
@@ -1952,12 +1952,12 @@
                             <div class="alert mb-4 border-0"
                                 style="background: var(--gold-soft); border-left: 4px solid var(--gold) !important; color: var(--ink); border-radius: var(--r-sm); padding: 16px 20px;">
                                 <div class="d-flex align-items-center" style="gap:8px;">
-                                    <i class="bi bi-info-circle-fill" style="color: var(--ink); font-size: 1.3rem;"></i>
-                                    <strong style="font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.05rem; margin: 0;">Important</strong>
+                                    <i class="bi bi-info-circle-fill" style="color: var(--ink); font-size: 1.5rem;"></i>
+                                    <strong style="font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.25rem; margin: 0;">Important</strong>
                                 </div>
                                 <div style="margin-top:6px;">
                                     <span style="font-size: var(--t-sm); color: var(--ink-soft);">Placement test fee is <strong style="color: var(--ink);">{{ number_format($placement_test_fee ?? 100, 0) }} ILS</strong>. Please choose your preferred slot. (رسوم اختبار تحديد المستوى)</span>
-                                    <div class="mt-2" style="font-size:0.95rem; color:var(--ink-soft);">
+                                    <div class="mt-2" style="font-size: 1.15rem; color:var(--ink-soft);">
                                         <i class="bi bi-exclamation-circle me-1"></i>
                                         <em>Note: Choosing a preferred slot does not guarantee your test time — the center will allocate slots to suit all students.</em>
                                         <br>
@@ -2129,9 +2129,9 @@
                                     <input type="file" name="payment_receipt" id="receipt_input" accept="image/*,.pdf" style="display: none;" onchange="updateFileName(this)"
                                         {{ (isset($payment_required) && $payment_required) ? 'required' : '' }}>
                                     <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2"></i>
-                                    <p class="mb-1" style="font-size: 1.1rem; font-weight: 700; color: var(--ink); font-family: var(--font-display); font-style: italic;">اضغط لرفع إيصال الدفع</p>
-                                    <p class="mb-0 text-muted" style="font-size: 0.95rem;">Click to upload — PNG, JPG, or PDF (الحد الأقصى 2MB)</p>
-                                    <div id="file-name-preview" class="mt-3 fw-bold text-success" style="font-size: 1rem;"></div>
+                                    <p class="mb-1" style="font-size: 1.3rem; font-weight: 700; color: var(--ink); font-family: var(--font-display); font-style: italic;">اضغط لرفع إيصال الدفع</p>
+                                    <p class="mb-0 text-muted" style="font-size: 1.15rem;">Click to upload — PNG, JPG, or PDF (الحد الأقصى 2MB)</p>
+                                    <div id="file-name-preview" class="mt-3 fw-bold text-success" style="font-size: 1.2rem;"></div>
                                 </div>
                             </div>
                         </div>
@@ -2144,8 +2144,8 @@
                     <div class="step-pane" id="pane-5">
                         <div class="text-center mb-5">
                             <div class="finalize-icon-circle" style="display: inline-flex; align-items: center; justify-content: center; width: 88px; height: 88px; min-width: 88px; min-height: 88px; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--gold-soft); border: 2px solid var(--gold); position: relative; box-shadow: 0 8px 20px rgba(255,204,0,0.18); margin: 0 auto;">
-                                <i class="bi bi-check2-circle" style="font-size: 2.4rem; color: var(--ink); line-height: 1;"></i>
-                                <span style="position: absolute; top: -2px; right: -2px; width: 26px; height: 26px; aspect-ratio: 1 / 1; background: var(--ink); color: var(--gold); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; border: 2px solid var(--paper);"><i class="bi bi-check-lg"></i></span>
+                                <i class="bi bi-check2-circle" style="font-size: 2.6rem; color: var(--ink); line-height: 1;"></i>
+                                <span style="position: absolute; top: -2px; right: -2px; width: 26px; height: 26px; aspect-ratio: 1 / 1; background: var(--ink); color: var(--gold); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.98rem; border: 2px solid var(--paper);"><i class="bi bi-check-lg"></i></span>
                             </div>
                             <h3 class="mt-4" style="font-family: var(--font-display); font-weight: 500; font-style: italic; font-size: var(--t-2xl); color: var(--ink); letter-spacing: -0.02em;">Finalize Registration</h3>
                             <p style="color: var(--ink-soft); font-family: var(--font-body); font-size: var(--t-md);">Review notes and confirm your agreement.</p>
@@ -2161,8 +2161,8 @@
                             <div class="agreement-box d-flex align-items-start p-4 bg-white rounded-3 border" style="gap: 18px;">
                                 <input type="checkbox" id="agree-terms" required class="form-check-input m-0 flex-shrink-0" style="width: 26px; height: 26px; margin-top: 4px !important; cursor: pointer; accent-color: var(--ink);">
                                 <label for="agree-terms" class="agreement-text m-0 cursor-pointer" style="line-height: 1.55;">
-                                    <span class="fw-bold d-block" style="font-size: 1rem; color: var(--ink); margin-bottom: 6px;">I agree to the Terms &amp; Privacy Policy</span>
-                                    <p class="mb-0" style="font-size: 0.88rem; color: var(--ink-soft); line-height: 1.6;">أوافق على جميع الشروط والأحكام الخاصة بالأكاديمية وسياسة الخصوصية.</p>
+                                    <span class="fw-bold d-block" style="font-size: 1.2rem; color: var(--ink); margin-bottom: 6px;">I agree to the Terms &amp; Privacy Policy</span>
+                                    <p class="mb-0" style="font-size: 1.08rem; color: var(--ink-soft); line-height: 1.6;">أوافق على جميع الشروط والأحكام الخاصة بالأكاديمية وسياسة الخصوصية.</p>
                                 </label>
                             </div>
                         </div>

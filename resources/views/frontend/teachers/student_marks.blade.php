@@ -12,7 +12,7 @@
     <div class="container" style="position: relative; z-index: 1;">
 
         {{-- Breadcrumbs Navigation --}}
-        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 13px; color: var(--light-text);">
+        <div class="breadcrumbs-nav" style="margin-bottom: 15px; font-size: 16.2px; color: var(--light-text);">
             <a href="{{ url('/teacher') }}" style="color: var(--primary); text-decoration: none;"><i class="fa fa-home"></i> Dashboard</a>
             <span style="margin: 0 5px;">/</span>
             <span style="color: var(--primary);">Courses</span>
@@ -26,10 +26,10 @@
         <div class="page-header-block d-flex justify-content-between align-items-center">
             <p class="page-title m-0"><i class="fa fa-bar-chart"></i> Academic Performance</p>
             <div class="d-flex align-items-center" style="gap: 10px;">
-                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 13px;" onclick="window.print()">
+                <button type="button" class="btn-modern btn-sm btn-print" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 6px 15px; font-size: 16.2px;" onclick="window.print()">
                     <i class="fa fa-print"></i> Print
                 </button>
-                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 13px;">
+                <a href="{{ url('/teacher') }}" class="btn-modern btn-modern-primary btn-sm btn-back" style="padding: 6px 15px; font-size: 16.2px;">
                     <i class="fa fa-arrow-left"></i> Back
                 </a>
             </div>
@@ -51,10 +51,10 @@
         <div style="background: linear-gradient(135deg, var(--primary) 0%, #2d3748 100%); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; color: white; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; box-shadow: 0 8px 24px rgba(26,39,68,.25);">
             {{-- Group Name Block --}}
             <div style="flex: 1; min-width: 180px;">
-                <div style="font-size: 11px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Group</div>
-                <div style="font-size: 18px; font-weight: 800; color: var(--accent);">{{ $groupName }}</div>
+                <div style="font-size: 14.2px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Group</div>
+                <div style="font-size: 21.2px; font-weight: 800; color: var(--accent);">{{ $groupName }}</div>
                 @if($programTitle)
-                    <div style="font-size: 12px; opacity: .7; margin-top: 2px;">{{ $programTitle }}</div>
+                    <div style="font-size: 15.2px; opacity: .7; margin-top: 2px;">{{ $programTitle }}</div>
                 @endif
             </div>
 
@@ -64,29 +64,29 @@
             {{-- Stats --}}
             <div style="display: flex; gap: 24px; flex-wrap: wrap;">
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1;">{{ $totalStudents }}</div>
-                    <div style="font-size: 11px; opacity: .65; margin-top: 3px;">Students</div>
+                    <div style="font-size: 29.2px; font-weight: 800; color: var(--accent); line-height: 1;">{{ $totalStudents }}</div>
+                    <div style="font-size: 14.2px; opacity: .65; margin-top: 3px;">Students</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: #68d391; line-height: 1;">{{ $evaluated }}</div>
-                    <div style="font-size: 11px; opacity: .65; margin-top: 3px;">Evaluated</div>
+                    <div style="font-size: 29.2px; font-weight: 800; color: #68d391; line-height: 1;">{{ $evaluated }}</div>
+                    <div style="font-size: 14.2px; opacity: .65; margin-top: 3px;">Evaluated</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: #fbd38d; line-height: 1;">{{ $pending }}</div>
-                    <div style="font-size: 11px; opacity: .65; margin-top: 3px;">Pending</div>
+                    <div style="font-size: 29.2px; font-weight: 800; color: #fbd38d; line-height: 1;">{{ $pending }}</div>
+                    <div style="font-size: 14.2px; opacity: .65; margin-top: 3px;">Pending</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: #90cdf4; line-height: 1;">{{ $avgTotal }}</div>
-                    <div style="font-size: 11px; opacity: .65; margin-top: 3px;">Avg. Total</div>
+                    <div style="font-size: 29.2px; font-weight: 800; color: #90cdf4; line-height: 1;">{{ $avgTotal }}</div>
+                    <div style="font-size: 14.2px; opacity: .65; margin-top: 3px;">Avg. Total</div>
                 </div>
             </div>
 
             {{-- Quick Links --}}
             <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto;">
-                <a href="{{ url('group/' . $group_id) }}" style="background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <a href="{{ url('group/' . $group_id) }}" style="background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 8px 14px; font-size: 15.2px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                     <i class="fa fa-pencil-square-o"></i> Record Marks
                 </a>
-                <a href="{{ url('group/attendance/' . $group_id) }}" style="background: rgba(245,197,24,.15); color: var(--accent); border: 1px solid rgba(245,197,24,.25); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .2s;" onmouseover="this.style.background='rgba(245,197,24,.25)'" onmouseout="this.style.background='rgba(245,197,24,.15)'">
+                <a href="{{ url('group/attendance/' . $group_id) }}" style="background: rgba(245,197,24,.15); color: var(--accent); border: 1px solid rgba(245,197,24,.25); border-radius: 8px; padding: 8px 14px; font-size: 15.2px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .2s;" onmouseover="this.style.background='rgba(245,197,24,.25)'" onmouseout="this.style.background='rgba(245,197,24,.15)'">
                     <i class="fa fa-calendar-check-o"></i> Attendance
                 </a>
             </div>
@@ -194,7 +194,7 @@
                         @empty
                             <tr>
                                 <td colspan="9" class="text-center" style="padding: 40px; color: var(--light-text);">
-                                    <i class="fa fa-users" style="font-size: 40px; opacity: .2; display: block; margin-bottom: 10px;"></i>
+                                    <i class="fa fa-users" style="font-size: 43.2px; opacity: .2; display: block; margin-bottom: 10px;"></i>
                                     No students found in this group.
                                 </td>
                             </tr>
@@ -205,7 +205,7 @@
         </div>
 
         {{-- Legend --}}
-        <div class="d-flex gap-15 flex-wrap mt-30" style="font-size: 12px; color: var(--light-text);">
+        <div class="d-flex gap-15 flex-wrap mt-30" style="font-size: 15.2px; color: var(--light-text);">
             <span><span class="mark-chip has-mark">score</span> Progress Test</span>
             <span><span class="mark-chip final">score</span> Final Exam</span>
             <span><span class="mark-chip total">score</span> Total</span>

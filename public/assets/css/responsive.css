@@ -14,7 +14,10 @@
 
 /* ---- Tablet / small laptop ---- */
 @media (max-width: 992px) {
-    :root { --ox-fs-4xl: 2.75rem; --ox-fs-3xl: 2.25rem; --ox-s-24: 72px; }
+    :root { --ox-fs-4xl: 2.75rem; --ox-fs-3xl: 2.25rem; --ox-s-24: 72px; --ox-header-h: 90px; }
+
+    .ox-topbar__brand { display: none; }
+    .ox-brand img { height: 64px; }
 
     .ox-grid--4 { grid-template-columns: repeat(2, 1fr); }
     .ox-grid--3 { grid-template-columns: repeat(2, 1fr); }
@@ -30,10 +33,10 @@
 @media (max-width: 768px) {
     :root {
         --ox-fs-base: 1.0625rem;   /* 17 */
-        --ox-fs-4xl: 2.25rem;      /* 36 */
-        --ox-fs-3xl: 1.875rem;     /* 30 */
+        --ox-fs-4xl: 2.375rem;     /* 38 */
+        --ox-fs-3xl: 2rem;         /* 32 */
         --ox-fs-2xl: 1.625rem;     /* 26 */
-        --ox-s-24: 56px; --ox-s-16: 48px; --ox-header-h: 70px;
+        --ox-s-24: 56px; --ox-s-16: 48px; --ox-header-h: 78px;
     }
 
     .ox-grid--2, .ox-grid--3, .ox-grid--4 { grid-template-columns: 1fr; }
@@ -51,7 +54,7 @@
     .ox-hero__cta { justify-content: center; }
     .ox-hero__badge { margin-inline: auto; }
 
-    .ox-brand img { height: 46px; }
+    .ox-brand img { height: 56px; }
     .ox-stats-band__inner { padding: var(--ox-s-12) var(--ox-s-4); }
     .ox-section { padding-block: var(--ox-s-16); }
     .ox-pagehero { min-height: 240px; }

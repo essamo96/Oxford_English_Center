@@ -16,7 +16,7 @@
     min-height: 48px;            /* a11y touch target */
     padding: 13px 28px;
     font-family: var(--ox-font-body);
-    font-size: 1rem;            /* 16px buttons */
+    font-size: 1.2rem;            /* 16px buttons */
     font-weight: 700;
     line-height: 1.15;
     color: var(--_fg);
@@ -130,7 +130,7 @@
 .ox-card__title { font-size: var(--ox-fs-xl); margin-bottom: var(--ox-s-2); }
 .ox-card__title a { color: inherit; }
 .ox-card__title a:hover { color: var(--ox-secondary-600); }
-.ox-card__text { color: var(--ox-text-soft); font-size: 1.0625rem; margin: 0; }
+.ox-card__text { color: var(--ox-text-soft); font-size: 1.262rem; margin: 0; }
 
 /* date chip used on news cards */
 .ox-datechip {
@@ -159,7 +159,7 @@
 .ox-feature__icon {
     width: 72px; height: 72px; margin: 0 auto var(--ox-s-4);
     display: grid; place-items: center;
-    font-size: 30px; color: #fff;
+    font-size: 33.2px; color: #fff;
     background: var(--ox-gradient-brand);
     border-radius: 20px;
     box-shadow: var(--ox-shadow-sm);
@@ -182,8 +182,8 @@
 }
 .ox-action:hover { transform: translateY(-6px); box-shadow: var(--ox-shadow); color: var(--ox-text); }
 .ox-action__icon {
-    flex: 0 0 auto; width: 60px; height: 60px;
-    display: grid; place-items: center; font-size: 26px;
+    flex: 0 0 auto; width: 80px; height: 80px;
+    display: grid; place-items: center; font-size: 40px;
     color: var(--ox-primary); background: var(--ox-primary-050);
     border-radius: 16px;
 }
@@ -214,7 +214,7 @@
 .ox-quote::before {
     content: "\201C";
     position: absolute; top: 6px; inset-inline-end: 22px;
-    font-family: Georgia, serif; font-size: 90px; line-height: 1;
+    font-family: Georgia, serif; font-size: 93.2px; line-height: 1;
     color: var(--ox-secondary); opacity: .14;
 }
 .ox-quote__stars { color: var(--ox-accent); margin-bottom: var(--ox-s-3); letter-spacing: 2px; }
@@ -316,7 +316,7 @@
 .ox-menu > li.is-active > a { color: var(--ox-primary); }
 .ox-menu > li:hover > a::after,
 .ox-menu > li.is-active > a::after { transform: scaleX(1); }
-.ox-menu .ox-caret { font-size: 10px; opacity: .6; transition: transform var(--ox-dur) var(--ox-ease); }
+.ox-menu .ox-caret { font-size: 13.2px; opacity: .6; transition: transform var(--ox-dur) var(--ox-ease); }
 .ox-menu > li:hover .ox-caret { transform: rotate(180deg); }
 
 /* dropdown */
@@ -335,7 +335,7 @@
 .ox-menu > li:hover > .ox-submenu { opacity: 1; visibility: visible; transform: translateY(0); }
 .ox-submenu a {
     display: block; padding: 11px 14px;
-    font-size: 1rem; font-weight: 500; color: var(--ox-gray-700);
+    font-size: 1.2rem; font-weight: 500; color: var(--ox-gray-700);
     border-radius: var(--ox-radius-sm);
     transition: background var(--ox-dur-fast) var(--ox-ease), color var(--ox-dur-fast) var(--ox-ease), padding-inline-start var(--ox-dur-fast) var(--ox-ease);
 }
@@ -346,7 +346,7 @@
 .ox-iconbtn {
     width: 48px; height: 48px; display: grid; place-items: center;
     border: 1px solid var(--ox-border); border-radius: 50%;
-    background: #fff; color: var(--ox-gray-600); cursor: pointer; font-size: 18px;
+    background: #fff; color: var(--ox-gray-600); cursor: pointer; font-size: 21.2px;
     transition: all var(--ox-dur-fast) var(--ox-ease);
 }
 .ox-iconbtn:hover { background: var(--ox-primary); color: #fff; border-color: var(--ox-primary); transform: translateY(-2px); }
@@ -414,7 +414,7 @@
 .ox-footer a:hover { color: #fff; }
 .ox-footer__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .ox-footer__links a { display: inline-flex; align-items: center; gap: 8px; transition: padding-inline-start var(--ox-dur-fast) var(--ox-ease); }
-.ox-footer__links a::before { content: "\F285"; font-family: "bootstrap-icons"; font-size: 11px; color: var(--ox-accent); }
+.ox-footer__links a::before { content: "\F285"; font-family: "bootstrap-icons"; font-size: 14.2px; color: var(--ox-accent); }
 .ox-footer__links a:hover { padding-inline-start: 6px; }
 .ox-footer__info { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .ox-footer__info li { display: flex; align-items: flex-start; gap: 10px; }
@@ -498,7 +498,7 @@
 .ox-infocard:hover { transform: translateY(-4px); box-shadow: var(--ox-shadow); }
 .ox-infocard__icon {
     flex: 0 0 auto; width: 52px; height: 52px; display: grid; place-items: center;
-    font-size: 22px; color: #fff; border-radius: 14px; background: var(--ox-gradient-brand);
+    font-size: 25.2px; color: #fff; border-radius: 14px; background: var(--ox-gradient-brand);
 }
 .ox-infocard h3 { font-size: var(--ox-fs-base); margin: 0 0 4px; }
 .ox-infocard p { margin: 0; color: var(--ox-text-soft); font-size: var(--ox-fs-sm); word-break: break-word; }
@@ -523,7 +523,7 @@
 }
 .ox-featurelist li:last-child { border-bottom: none; }
 .ox-featurelist b { color: var(--ox-gray-700); display: inline-flex; align-items: center; gap: 8px; }
-.ox-featurelist b::before { content: "\F26A"; font-family: "bootstrap-icons"; color: var(--ox-secondary); font-size: 13px; }
+.ox-featurelist b::before { content: "\F26A"; font-family: "bootstrap-icons"; color: var(--ox-secondary); font-size: 16.2px; }
 .ox-featurelist span { color: var(--ox-primary); font-weight: 600; text-align: end; }
 
 /* embedded map */
@@ -551,3 +551,6 @@
 }
 .ox-totop.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
 .ox-totop:hover { transform: translateY(-4px); }
+
+.ox-action__icon i { font-size: 40px !important; }
+.ox-qr-btn i { font-size: 20px !important; }
