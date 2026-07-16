@@ -479,7 +479,7 @@ class TeacherController extends AdminController {
         if (!empty($studentIds) && is_array($studentIds)) {
             foreach ($studentIds as $sid) {
                 if ($source === 'compo') {
-                    $student = \App\Models\StudentCompo::find($sid);
+                    $student = \App\Models\StudentCompo::with('parents')->find($sid);
                     if (! $student) continue;
                     $mobile = $normalizeMobile($student->phone ?? null);
                     $nameAr = $student->full_name_ar ?? '';
@@ -513,6 +513,8 @@ class TeacherController extends AdminController {
                 $programId = null;
                 $score = '-';
                 $assignedLevel = '-';
+                $email = '';
+                $parentName = '';
 
                 if ($source === 'compo') {
                     $programId = $student->program_id;
@@ -520,6 +522,9 @@ class TeacherController extends AdminController {
                         $prog = \App\Models\Programs::find($programId);
                         if ($prog) $programName = $prog->title ?? '';
                     }
+                    $email = $student->email ?? '';
+                    $parent = $student->parents->first();
+                    if ($parent) $parentName = $parent->parent_name ?? '';
                 } else {
                     $gs = \App\Models\GroupStudents::where('student_id', $student->id)->first();
                     if ($gs) {
@@ -549,6 +554,8 @@ class TeacherController extends AdminController {
                     '$program' => $programName,
                     '$score' => $score,
                     '$assigned_level' => $assignedLevel,
+                    '$email' => $email,
+                    '$parent_name' => $parentName,
                 ];
 
                 $finalMessage = strtr($template, $replacements);

@@ -223,14 +223,22 @@
                     <div class="col-md-12">
                         <label class="form-label fw-bold">نص الرسالة</label>
                         <textarea id="smsMessageText" class="form-control" rows="3" placeholder="اكتب نص الرسالة هنا..."></textarea>
-                        <div class="mt-2 p-2 bg-light rounded fs-8 text-muted" dir="rtl">
-                            <strong>متغيرات متاحة:</strong> 
-                            <code>$name_ar</code> (الاسم عربي)، 
-                            <code>$name_en</code> (الاسم إنجليزي)، 
-                            <code>$program</code> (البرنامج)، 
-                            <code>$group</code> (المجموعة)، 
-                            <code>$score</code> (علامة اختبار المستوى)، 
+                        <div class="mt-2 p-2 bg-light rounded fs-8 text-muted" dir="rtl" id="smsNormalVarsHint">
+                            <strong>متغيرات متاحة:</strong>
+                            <code>$name_ar</code> (الاسم عربي)،
+                            <code>$name_en</code> (الاسم إنجليزي)،
+                            <code>$program</code> (البرنامج)،
+                            <code>$group</code> (المجموعة)،
+                            <code>$score</code> (علامة اختبار المستوى)،
                             <code>$assigned_level</code> (المستوى المستحق).
+                        </div>
+                        <div class="mt-2 p-2 bg-light rounded fs-8 text-muted" dir="rtl" id="smsCompoVarsHint" style="display:none;">
+                            <strong>متغيرات متاحة:</strong>
+                            <code>$name_ar</code> (اسم الطالب عربي)،
+                            <code>$name_en</code> (اسم الطالب إنجليزي)،
+                            <code>$email</code> (بريد الطالب الإلكتروني)،
+                            <code>$program</code> (البرنامج المسجل به الطالب)،
+                            <code>$parent_name</code> (اسم ولي الأمر - إن وجد).
                         </div>
                     </div>
                 </div>
@@ -332,6 +340,8 @@ document.addEventListener('DOMContentLoaded', function() {
             smsMode = 'compo';
             $('#smsNormalFilters').hide();
             $('#smsCompoFilters').show();
+            $('#smsNormalVarsHint').hide();
+            $('#smsCompoVarsHint').show();
             $('#smsModalTitle').html('<i class="fa fa-envelope me-2"></i>إرسال رسائل SMS - طلبات التسجيل الجديدة');
             resetPoolAndBasket();
             var modalEl = document.getElementById('smsShuttleModal');
@@ -344,6 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
             $('#smsCompoFilters').hide();
             $('#smsCompoFilters select, #smsCompoFilters input').val('');
             $('#smsNormalFilters').show();
+            $('#smsCompoVarsHint').hide();
+            $('#smsNormalVarsHint').show();
             $('#smsModalTitle').html('<i class="fa fa-envelope me-2"></i>إرسال رسائل SMS');
             $('#smsCustomNumber').val('');
             $('#smsMessageText').val('');
