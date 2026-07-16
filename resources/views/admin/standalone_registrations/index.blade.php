@@ -276,7 +276,7 @@
                 }
             },
             columns: [
-                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                {data: 'DT_Row_Index', name: 'DT_Row_Index', orderable: false, searchable: false},
                 {data: 'full_name_en', name: 'full_name_en'},
                 {data: 'full_name_ar', name: 'full_name_ar'},
                 {data: 'program_title', name: 'program_id'},
