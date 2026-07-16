@@ -152,7 +152,7 @@ class StandaloneRegistrationAdminController extends AdminController
         $sheet->getColumnDimension('B')->setWidth(25);
         $sheet->freezePane('A2');
 
-        $fileName = 'standalone-registrations-' . now()->format('Y-m-d') . '.xlsx';
+        $fileName = 'new-registrations-' . now()->format('Y-m-d') . '.xlsx';
 
         $writer = new Xlsx($spreadsheet);
 

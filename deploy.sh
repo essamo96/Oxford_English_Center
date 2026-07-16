@@ -5,6 +5,9 @@ set -e
 
 cd "$(dirname "$0")"
 
+echo "Installing/updating composer dependencies..."
+composer install --no-dev --optimize-autoloader
+
 echo "Ensuring storage directories exist..."
 mkdir -p storage/framework/cache/data \
          storage/framework/sessions \
