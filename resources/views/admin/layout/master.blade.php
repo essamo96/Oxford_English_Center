@@ -60,7 +60,7 @@
         $sidebarActiveColor = $siteSettings->sidebar_active_color ?? '';
         $isHeaderLayout     = in_array($sidebarLayout, ['dark-header', 'light-header']);
     @endphp
-    <style>
+    <style id="custom-sidebar-settings">
     @if($sidebarBgColor)
         #kt_app_sidebar { background-color: {{ $sidebarBgColor }} !important; }
     @endif
@@ -210,12 +210,23 @@
     </script>
     <script src="{{ asset('js/realtime-notifications.js') }}?v=8"></script>
     <script>
-        // Sync sidebar theme with global theme
+        // Sync sidebar theme with global theme and manage custom settings priority
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof KTThemeMode !== 'undefined') {
                 var updateSidebarTheme = function() {
                     var theme = KTThemeMode.getMode();
+                    var menuMode = KTThemeMode.getMenuMode(); // "light", "dark", or "system"
                     var body = document.getElementById('kt_app_body');
+                    var customStyles = document.getElementById('custom-sidebar-settings');
+                    
+                    // If user explicitly chose Light or Dark, ignore custom DB settings
+                    if (menuMode === 'light' || menuMode === 'dark') {
+                        if (customStyles) customStyles.disabled = true;
+                    } else {
+                        // If user is on "System" (default), apply custom DB settings
+                        if (customStyles) customStyles.disabled = false;
+                    }
+
                     if (body) {
                         if (theme === 'light') {
                             body.setAttribute('data-kt-app-layout', 'light-sidebar');
