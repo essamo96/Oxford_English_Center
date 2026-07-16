@@ -5,6 +5,8 @@
 @section('css')
 <style>
     .filter-label { font-weight: 600; color: var(--bs-gray-700); }
+    /* qrcodejs renders to a canvas internally, then swaps it for an <img> (data URI) which is the actual visible element */
+    #qrcode img { width: 100% !important; height: 100% !important; display: block !important; }
 </style>
 @stop
 
@@ -173,12 +175,7 @@
             <div class="modal-body text-center">
                 <p class="text-muted mb-5" style="font-family:'Cairo'">امسح الرمز لفتح نموذج طلبات كومبو الخارجي</p>
                 <div id="qrcode-container" style="position: relative; display: inline-block;">
-                    <div id="qrcode" style="width: 250px; height: 250px; overflow: hidden;">
-                        <style>
-                            #qrcode canvas { width: 100% !important; height: 100% !important; }
-                            #qrcode img { display: none !important; } /* qrcodejs sometimes adds img fallback */
-                        </style>
-                    </div>
+                    <div id="qrcode" style="width: 250px; height: 250px; overflow: hidden;"></div>
                     <img src="{{ url('assets/oxford/img/logo.png') }}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: white; padding: 5px; border-radius: 8px;">
                 </div>
                 <div class="mt-6">
@@ -258,7 +255,7 @@
 @stop
 
 @section('js')
-<script src="{{ asset('assets/admin/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -291,7 +288,7 @@
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
+                url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"
             },
             order: [[8, 'desc']]
         });
@@ -411,15 +408,41 @@
             });
         });
 
-        // Generate QR Code
-        var qrUrl = "{{ route('registration.standalone') }}";
-        var qrcode = new QRCode(document.getElementById("qrcode"), {
-            text: qrUrl,
-            width: 1000,
-            height: 1000,
-            colorDark : "#0a2540",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H // High error correction needed when placing an image on top
+        // Generate QR Code (lazily, regenerated each time the modal is shown so a blocked/late CDN load doesn't leave it empty)
+        var qrcodeInstance = null;
+        function generateQrCode() {
+            var qrUrl = "{{ route('registration.standalone') }}";
+            var container = document.getElementById('qrcode');
+
+            if (typeof QRCode === 'undefined') {
+                var script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                script.onload = generateQrCode;
+                script.onerror = function() {
+                    container.innerHTML = '<span class="text-danger">تعذر تحميل مكتبة QR Code، يرجى التحقق من الاتصال بالإنترنت.</span>';
+                };
+                document.head.appendChild(script);
+                return;
+            }
+
+            if (qrcodeInstance) {
+                qrcodeInstance.clear();
+                qrcodeInstance.makeCode(qrUrl);
+            } else {
+                container.innerHTML = '';
+                qrcodeInstance = new QRCode(container, {
+                    text: qrUrl,
+                    width: 1000,
+                    height: 1000,
+                    colorDark : "#0a2540",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H // High error correction needed when placing an image on top
+                });
+            }
+        }
+
+        $('#qrCodeModal').on('shown.bs.modal', function() {
+            generateQrCode();
         });
 
         // Delete Logic

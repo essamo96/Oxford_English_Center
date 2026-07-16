@@ -62,7 +62,7 @@
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
+            url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"
         },
         order: [[6, 'desc']]
     });

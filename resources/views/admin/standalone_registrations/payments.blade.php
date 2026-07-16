@@ -95,7 +95,7 @@
 @stop
 
 @section('js')
-<script src="{{ asset('assets/admin/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
 <script>
     $(document).ready(function() {
         var table = $('#payments_table').DataTable({
@@ -124,7 +124,7 @@
                 {data: 'total_payments', name: 'total_payments', searchable: false, orderable: false},
             ],
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
+                url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"
             },
             order: [[1, 'asc']]
         });

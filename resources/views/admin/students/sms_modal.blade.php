@@ -314,11 +314,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (res.students && res.students.length > 0) {
                         res.students.forEach(s => {
                             let item = $('<li data-id="'+s.id+'"></li>');
-                            let html = '<div><div class="fw-bold text-dark">' + s.name + '</div>';
-                            html += '<div class="text-muted fs-8">' + s.mobile + '</div></div>';
-                            if (s.score !== undefined || s.level !== undefined) {
-                                html += '<div class="text-end fs-8 text-primary">العلامة: '+(s.score||'-')+'<br>المستوى: '+(s.level||'-')+'</div>';
+                            let html = '<div style="width:100%;">';
+                            html += '<div class="d-flex justify-content-between align-items-center">';
+                            html += '<div class="fw-bold text-dark">' + s.name + '</div>';
+                            if (s.score === undefined && s.level === undefined) {
+                                html += '<div class="text-muted fs-8">' + s.mobile + '</div>';
                             }
+                            html += '</div>';
+                            if (s.score !== undefined || s.level !== undefined) {
+                                html += '<div class="d-flex justify-content-between align-items-center">';
+                                html += '<div class="text-muted fs-8">' + s.mobile + '</div>';
+                                html += '<div class="text-end fs-8 text-primary">العلامة: '+(s.score||'-')+' | المستوى: '+(s.level||'-')+'</div>';
+                                html += '</div>';
+                            }
+                            if (s.program_type !== undefined) {
+                                var typeBadge = s.program_type === 'Kids' ? 'badge-light-warning' : 'badge-light-info';
+                                var genderBadge = s.gender === 'Female' ? 'badge-light-danger' : 'badge-light-primary';
+                                var statusBadge = s.is_read ? 'badge-light-success' : 'badge-light-warning';
+                                var statusText = s.is_read ? 'مقروء' : 'جديد';
+                                html += '<div class="mt-2 d-flex flex-wrap gap-1">';
+                                html += '<span class="badge '+typeBadge+'"><i class="fa fa-graduation-cap me-1"></i>'+(s.program_type || '-')+'</span>';
+                                html += '<span class="badge '+genderBadge+'"><i class="fa fa-venus-mars me-1"></i>'+(s.gender || '-')+'</span>';
+                                html += '<span class="badge badge-light-dark"><i class="fa fa-map-marker-alt me-1"></i>'+(s.branch || '-')+'</span>';
+                                html += '<span class="badge '+statusBadge+'"><i class="fa fa-circle-notch me-1"></i>'+statusText+'</span>';
+                                html += '<span class="badge badge-light-secondary"><i class="fa fa-calendar-alt me-1"></i>'+(s.registered_at || '-')+'</span>';
+                                html += '</div>';
+                            }
+                            html += '</div>';
                             item.html(html);
                             $(poolList).append(item);
                         });

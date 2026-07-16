@@ -208,7 +208,7 @@
             locale:           @json(app()->getLocale())
         };
     </script>
-    <script src="{{ asset('js/realtime-notifications.js') }}?v=7"></script>
+    <script src="{{ asset('js/realtime-notifications.js') }}?v=8"></script>
 </body>
 
 </html>

@@ -154,7 +154,7 @@
 @section('js')
 <script>
     $('#logs_table').DataTable({
-        language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json" },
+        language: { url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json" },
         order: [[4, 'desc']]
     });
 

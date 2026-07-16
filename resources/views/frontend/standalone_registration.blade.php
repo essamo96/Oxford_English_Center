@@ -764,12 +764,12 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Full Name (English) <span class="ar">(الاسم الرباعي بالإنجليزية)</span> <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="full_name_en" required placeholder="e.g. John Doe">
+                        <input type="text" class="form-control" name="full_name_en" required placeholder="e.g. John Doe" pattern="[A-Za-z\s]+" title="English letters only">
                         <div class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Full Name (Arabic) <span class="ar">(الاسم الرباعي بالعربية)</span> <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control text-end" name="full_name_ar" required placeholder="مثال: أحمد محمد" dir="rtl">
+                        <input type="text" class="form-control text-end" name="full_name_ar" required placeholder="مثال: أحمد محمد" dir="rtl" pattern="[؀-ۿ\s]+" title="حروف عربية فقط">
                         <div class="invalid-feedback"></div>
                     </div>
 
@@ -1334,9 +1334,11 @@
                 // Frontend JS validation for Arabic Name and Phone
                 let hasError = false;
                 const arNameInput = form.querySelector('[name="full_name_ar"]');
+                const enNameInput = form.querySelector('[name="full_name_en"]');
                 const phoneInput = form.querySelector('[name="phone"]');
-                
+
                 const arRegex = /^[\u0600-\u06FF\s]+$/;
+                const enRegex = /^[A-Za-z\s]+$/;
                 const phoneRegex = /^05[0-9]{8}$/;
 
                 // Clear previous errors
@@ -1346,6 +1348,13 @@
                     arNameInput.classList.add('is-invalid');
                     let feedback = arNameInput.parentNode.querySelector('.invalid-feedback');
                     if(feedback) feedback.textContent = 'الرجاء إدخال حروف عربية فقط.';
+                    hasError = true;
+                }
+
+                if(enNameInput.value && !enRegex.test(enNameInput.value)) {
+                    enNameInput.classList.add('is-invalid');
+                    let feedback = enNameInput.parentNode.querySelector('.invalid-feedback');
+                    if(feedback) feedback.textContent = 'Please enter English letters only.';
                     hasError = true;
                 }
 

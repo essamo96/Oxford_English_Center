@@ -193,11 +193,21 @@ class StandaloneRegistrationAdminController extends AdminController
             $query->where('is_contacted', $request->is_contacted);
         }
 
-        $students = $query->whereNotNull('phone')->where('phone', '!=', '')
+        $students = $query->with('program')
+            ->whereNotNull('phone')->where('phone', '!=', '')
             ->orderBy('full_name_ar')
-            ->get(['id', 'full_name_ar', 'phone'])
+            ->get(['id', 'full_name_ar', 'phone', 'program_id', 'program_type', 'gender', 'branch', 'is_read', 'created_at'])
             ->map(function ($r) {
-                return ['id' => $r->id, 'name' => $r->full_name_ar, 'mobile' => $r->phone];
+                return [
+                    'id' => $r->id,
+                    'name' => $r->full_name_ar,
+                    'mobile' => $r->phone,
+                    'program_type' => $r->program_type,
+                    'gender' => $r->gender,
+                    'branch' => $r->branch,
+                    'is_read' => (bool) $r->is_read,
+                    'registered_at' => optional($r->created_at)->format('Y-m-d'),
+                ];
             });
 
         return response()->json(['students' => $students]);

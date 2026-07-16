@@ -239,7 +239,7 @@
             },
             order: [[5, 'desc']], // newest first by created_at (date / confirmed-by column)
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
+                url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"
             }
         });
 

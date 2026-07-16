@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'date_col',     name: 'date_col',     orderable: false },
             { data: 'actions',      name: 'actions',      orderable: false },
         ],
-        language: { url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json' },
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json' },
         pageLength: 15,
     });
 

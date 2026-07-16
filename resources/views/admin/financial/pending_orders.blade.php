@@ -1095,7 +1095,7 @@
                 { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center align-middle' },
                 { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center align-middle' }
             ],
-            language: { url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json' },
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json' },
             order: [[0, 'desc']],
             pageLength: 15,
             responsive: true,

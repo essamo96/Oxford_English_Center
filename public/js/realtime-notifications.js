@@ -408,7 +408,7 @@
         var pusher = new window.Pusher(CFG.key, opts);
 
         pusher.connection.bind('state_change', function (s) {
-            console.log('[RT] connection:', s.previous, '->', s.current);
+            // console.log('[RT] connection:', s.previous, '->', s.current);
         });
         pusher.connection.bind('connected', function () {
             console.log('%c✅ Real-time connected (socket ' + pusher.connection.socket_id + ')',

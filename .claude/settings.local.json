@@ -39,7 +39,8 @@
       "Bash(mkdir -p public/assets/_preview)",
       "Bash(echo \"pid $!\")",
       "Bash(curl -s -o /dev/null -w '/__TRACKED_VAR__ HTTP %{http_code}\\\\n' http://127.0.0.1:8123/__TRACKED_VAR__)",
-      "Bash(grep -rn \"Spatie\\\\\\\\\\\\\\\\Permission\" /c/laragon/www/oxford/app/Models/User.php /c/laragon/www/oxford/app/Http/Kernel.php)"
+      "Bash(grep -rn \"Spatie\\\\\\\\\\\\\\\\Permission\" /c/laragon/www/oxford/app/Models/User.php /c/laragon/www/oxford/app/Http/Kernel.php)",
+      "Bash(node qr_debug.js)"
     ]
   }
 }
