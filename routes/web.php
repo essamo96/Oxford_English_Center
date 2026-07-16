@@ -268,14 +268,14 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
 
     // Standalone Registrations & Combo Requests
     Route::get('combo-parents', ['as' => 'combo_parents.view', 'uses' => 'StandaloneRegistrationAdminController@comboParents']);
-    Route::get('standalone-registrations', ['as' => 'standalone_registrations.view', 'uses' => 'StandaloneRegistrationAdminController@index']);
-    Route::get('standalone-registrations/export', ['as' => 'admin.standalone_registrations.export', 'middleware' => ['permission:admin.standalone_registrations.export'], 'uses' => 'StandaloneRegistrationAdminController@exportExcel']);
-    Route::get('standalone-registrations/show/{id}', ['as' => 'admin.standalone_registrations.show', 'uses' => 'StandaloneRegistrationAdminController@show']);
-    Route::post('standalone-registrations/delete/{id}', ['as' => 'admin.standalone_registrations.delete', 'uses' => 'StandaloneRegistrationAdminController@destroy']);
-    Route::post('standalone-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);
-    Route::post('standalone-registrations/mark-all-read', ['as' => 'admin.standalone_registrations.markAllAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAllAsRead']);
-    Route::post('standalone-registrations/toggle-contact', ['as' => 'admin.standalone_registrations.toggleContact', 'uses' => 'StandaloneRegistrationAdminController@toggleContact']);
-    Route::post('standalone-registrations/{id}/payment', ['as' => 'admin.standalone_registrations.payment', 'uses' => 'StandaloneRegistrationAdminController@storePayment']);
+    Route::get('new-registrations', ['as' => 'standalone_registrations.view', 'uses' => 'StandaloneRegistrationAdminController@index']);
+    Route::get('new-registrations/export', ['as' => 'admin.standalone_registrations.export', 'middleware' => ['permission:admin.standalone_registrations.export'], 'uses' => 'StandaloneRegistrationAdminController@exportExcel']);
+    Route::get('new-registrations/show/{id}', ['as' => 'admin.standalone_registrations.show', 'uses' => 'StandaloneRegistrationAdminController@show']);
+    Route::post('new-registrations/delete/{id}', ['as' => 'admin.standalone_registrations.delete', 'uses' => 'StandaloneRegistrationAdminController@destroy']);
+    Route::post('new-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);
+    Route::post('new-registrations/mark-all-read', ['as' => 'admin.standalone_registrations.markAllAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAllAsRead']);
+    Route::post('new-registrations/toggle-contact', ['as' => 'admin.standalone_registrations.toggleContact', 'uses' => 'StandaloneRegistrationAdminController@toggleContact']);
+    Route::post('new-registrations/{id}/payment', ['as' => 'admin.standalone_registrations.payment', 'uses' => 'StandaloneRegistrationAdminController@storePayment']);
     Route::get('standalone-registrations-payments', ['as' => 'standalone_registrations.payments.view', 'uses' => 'StudentCompoPaymentController@index']);
     Route::get('standalone-registrations-payments/details/{id}', ['as' => 'standalone_registrations.payments.details', 'uses' => 'StudentCompoPaymentController@details']);
 

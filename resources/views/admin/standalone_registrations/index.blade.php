@@ -97,7 +97,7 @@
     <div class="card-header border-0 pt-6">
         <div class="card-title">
             <span class="card-label fw-bold fs-3 mb-1 text-info">
-                <i class="ki-duotone ki-people fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> Standalone Registrations
+                <i class="ki-duotone ki-people fs-3 text-info me-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i> طلبات التسجيل الجديدة
             </span>
         </div>
         <div class="card-toolbar">
@@ -116,7 +116,7 @@
             <table class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center w-100" id="registrations_table">
                 <thead>
                     <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0 text-center">
-                        <th class="w-30px text-center"> # </th>
+                        <th class="w-30px text-center"> م </th>
                         <th class="min-w-100px text-center">Name (English)</th>
                         <th class="min-w-100px text-center">الاسم (عربي)</th>
                         <th class="min-w-100px text-center">Program</th>
@@ -276,7 +276,7 @@
                 }
             },
             columns: [
-                {data: 'id', name: 'id'},
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'full_name_en', name: 'full_name_en'},
                 {data: 'full_name_ar', name: 'full_name_ar'},
                 {data: 'program_title', name: 'program_id'},
@@ -290,7 +290,7 @@
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json"
             },
-            order: [[7, 'desc']]
+            order: [[8, 'desc']]
         });
 
         $('#btn-filter').click(function() {
@@ -323,7 +323,7 @@
             $('#detailsModal').modal('show');
             $('#detailsContent').html('<div class="text-center py-10"><span class="spinner-border text-primary" role="status"></span></div>');
             
-            $.get("{{ url('admin/standalone-registrations/show') }}/" + id, function(res) {
+            $.get("{{ url('admin/new-registrations/show') }}/" + id, function(res) {
                 if (res.success) {
                     var data = res.data;
                     var parents = res.parents;
@@ -428,7 +428,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '{{ url("admin/standalone-registrations/delete") }}/' + id,
+                        url: '{{ url("admin/new-registrations/delete") }}/' + id,
                         type: 'POST',
                         data: {
                             _token: '{{ csrf_token() }}'
@@ -472,7 +472,7 @@
             var formData = new FormData(this);
 
             $.ajax({
-                url: '{{ url("admin/standalone-registrations") }}/' + id + '/payment',
+                url: '{{ url("admin/new-registrations") }}/' + id + '/payment',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -505,7 +505,7 @@
         $('#detailsModal').modal('show');
 
         $.ajax({
-            url: '{{ url("admin/standalone-registrations/show") }}/' + id,
+            url: '{{ url("admin/new-registrations/show") }}/' + id,
             type: 'GET',
             success: function(response) {
                 if(response.success) {

@@ -193,7 +193,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '{{ url("admin/standalone-registrations/delete") }}/' + id,
+                        url: '{{ url("admin/new-registrations/delete") }}/' + id,
                         type: 'POST',
                         data: {
                             _token: '{{ csrf_token() }}'
@@ -220,7 +220,7 @@
         $('#detailsModal').modal('show');
 
         $.ajax({
-            url: '{{ url("admin/standalone-registrations/show") }}/' + id,
+            url: '{{ url("admin/new-registrations/show") }}/' + id,
             type: 'GET',
             success: function(response) {
                 if(response.success) {

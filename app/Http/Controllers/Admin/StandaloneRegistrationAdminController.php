@@ -44,6 +44,7 @@ class StandaloneRegistrationAdminController extends AdminController
             }
 
             return \Yajra\DataTables\Facades\DataTables::of($query)
+                ->addIndexColumn()
                 ->setRowClass(function ($row) {
                     return $row->is_contacted ? 'bg-light-success' : '';
                 })

@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const item = e.target.closest('.mark-single-combo-read');
         if(item) {
             const id = item.getAttribute('data-id');
-            fetch(`{{ url('admin/standalone-registrations/mark-read') }}/${id}`, {
+            fetch(`{{ url('admin/new-registrations/mark-read') }}/${id}`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
