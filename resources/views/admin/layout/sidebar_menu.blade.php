@@ -14,11 +14,33 @@
             width: 6px !important;
             height: 6px !important;
         }
+        .oxford-sidebar-text {
+            font-family: 'Poppins', 'Cairo', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            line-height: 1.2;
+            color: #181C32; /* Dark text for light mode */
+            margin-right: 12px; /* Margin from the logo in RTL */
+            text-align: right; /* Arabic text should be right-aligned */
+            white-space: nowrap; /* Prevent line breaks */
+        }
+        [data-bs-theme="dark"] .oxford-sidebar-text {
+            color: #FFFFFF; /* White text for dark mode */
+        }
+        html[data-theme="dark"] .oxford-sidebar-text {
+            color: #FFFFFF; /* Fallback for older Metronic dark mode syntax */
+        }
+        body.dark-mode .oxford-sidebar-text {
+            color: #FFFFFF; /* Fallback for alternative dark mode syntax */
+        }
     </style>
 
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
-        <a href="{{ route('dashboard.view') }}">
+        <a href="{{ route('dashboard.view') }}" class="d-flex align-items-center">
             <img alt="Oxford" src="{{ url('assets/oxford/img/logo.png') }}" class="h-40px app-sidebar-logo-default" />
+            <div class="app-sidebar-logo-default oxford-sidebar-text">
+                إدارة مركز أكسفورد
+            </div>
             <img alt="Oxford" src="{{ url('assets/oxford/img/logo.png') }}" class="h-25px app-sidebar-logo-minimize" />
         </a>
         <div id="kt_app_sidebar_toggle"

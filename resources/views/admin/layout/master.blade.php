@@ -209,6 +209,27 @@
         };
     </script>
     <script src="{{ asset('js/realtime-notifications.js') }}?v=8"></script>
+    <script>
+        // Sync sidebar theme with global theme
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof KTThemeMode !== 'undefined') {
+                var updateSidebarTheme = function() {
+                    var theme = KTThemeMode.getMode();
+                    var body = document.getElementById('kt_app_body');
+                    if (body) {
+                        if (theme === 'light') {
+                            body.setAttribute('data-kt-app-layout', 'light-sidebar');
+                        } else {
+                            body.setAttribute('data-kt-app-layout', 'dark-sidebar');
+                        }
+                    }
+                };
+                KTThemeMode.on("kt.thememode.change", updateSidebarTheme);
+                // Initial check after a slight delay to ensure scripts are loaded
+                setTimeout(updateSidebarTheme, 100);
+            }
+        });
+    </script>
 </body>
 
 </html>
