@@ -164,6 +164,45 @@ class StandaloneRegistrationAdminController extends AdminController
         ]);
     }
 
+    public function smsStudents(Request $request)
+    {
+        $query = StudentCompo::query();
+
+        if ($request->filled('program_id')) {
+            $query->where('program_id', $request->program_id);
+        }
+        if ($request->filled('program_type')) {
+            $query->where('program_type', $request->program_type);
+        }
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+        if ($request->filled('branch')) {
+            $query->where('branch', $request->branch);
+        }
+        if ($request->filled('is_invoiced')) {
+            $query->where('is_invoiced', $request->is_invoiced);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('is_contacted')) {
+            $query->where('is_contacted', $request->is_contacted);
+        }
+
+        $students = $query->whereNotNull('phone')->where('phone', '!=', '')
+            ->orderBy('full_name_ar')
+            ->get(['id', 'full_name_ar', 'phone'])
+            ->map(function ($r) {
+                return ['id' => $r->id, 'name' => $r->full_name_ar, 'mobile' => $r->phone];
+            });
+
+        return response()->json(['students' => $students]);
+    }
+
     public function show($id)
     {
         $registration = StudentCompo::with('parents', 'program')->findOrFail($id);

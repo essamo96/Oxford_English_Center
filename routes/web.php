@@ -271,6 +271,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('new-registrations', ['as' => 'standalone_registrations.view', 'uses' => 'StandaloneRegistrationAdminController@index']);
     Route::get('new-registrations/export', ['as' => 'admin.standalone_registrations.export', 'middleware' => ['permission:admin.standalone_registrations.export'], 'uses' => 'StandaloneRegistrationAdminController@exportExcel']);
     Route::get('new-registrations/show/{id}', ['as' => 'admin.standalone_registrations.show', 'uses' => 'StandaloneRegistrationAdminController@show']);
+    Route::get('new-registrations/sms-students', ['as' => 'admin.standalone_registrations.sms_students', 'uses' => 'StandaloneRegistrationAdminController@smsStudents']);
     Route::post('new-registrations/delete/{id}', ['as' => 'admin.standalone_registrations.delete', 'uses' => 'StandaloneRegistrationAdminController@destroy']);
     Route::post('new-registrations/mark-read/{id}', ['as' => 'admin.standalone_registrations.markAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAsRead']);
     Route::post('new-registrations/mark-all-read', ['as' => 'admin.standalone_registrations.markAllAsRead', 'uses' => 'StandaloneRegistrationAdminController@markAllAsRead']);

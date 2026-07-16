@@ -23,7 +23,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold text-primary"><i class="fa fa-envelope me-2"></i>إرسال رسائل SMS</h5>
+                <h5 class="modal-title fw-bold text-primary" id="smsModalTitle"><i class="fa fa-envelope me-2"></i>إرسال رسائل SMS</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -35,70 +35,142 @@
                             <i class="fa fa-money-bill"></i> استعلام الرصيد
                         </button>
                     </div>
-                    <div class="row g-2 align-items-end mb-2">
-                        <div class="col-md-3">
-                            <label class="form-label">نوع البرنامج</label>
-                            <select id="smsFilterProgramType" class="form-select form-select-sm">
-                                <option value="">الكل</option>
-                                <option value="adult">Adults</option>
-                                <option value="kids">Kids</option>
-                            </select>
+                    <div id="smsNormalFilters">
+                        <div class="row g-2 align-items-end mb-2">
+                            <div class="col-md-3">
+                                <label class="form-label">نوع البرنامج</label>
+                                <select id="smsFilterProgramType" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    <option value="adult">Adults</option>
+                                    <option value="kids">Kids</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">البرنامج</label>
+                                <select id="smsFilterProgram" class="form-select form-select-sm">
+                                    <option value="">-- كل البرامج --</option>
+                                    @foreach($programs ?? \App\Models\Programs::all() as $p)
+                                        <option value="{{ $p->id }}">{{ $p->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">المجموعة</label>
+                                <select id="smsFilterGroup" class="form-select form-select-sm">
+                                    <option value="">-- كل المجموعات --</option>
+                                    @foreach(\App\Models\Groups::all() as $g)
+                                        <option value="{{ $g->id }}" data-pid="{{ $g->program_id }}">{{ $g->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" id="smsFetchBtn" class="btn btn-sm btn-primary w-100">
+                                    <i class="fa fa-search"></i> جلب الطلاب
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">البرنامج</label>
-                            <select id="smsFilterProgram" class="form-select form-select-sm">
-                                <option value="">-- كل البرامج --</option>
-                                @foreach($programs ?? \App\Models\Programs::all() as $p)
-                                    <option value="{{ $p->id }}">{{ $p->title }}</option>
-                                @endforeach
-                            </select>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsFilterInactive" value="1">
+                                    <label class="form-check-label fs-8 text-muted" for="smsFilterInactive">طلاب غير فعالين</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsFilterNoGroup" value="1">
+                                    <label class="form-check-label fs-8 text-muted" for="smsFilterNoGroup">غير مسجلين بمجموعة</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsFilterPendingFin" value="1">
+                                    <label class="form-check-label fs-8 text-muted" for="smsFilterPendingFin">طلبات مالية عالقة</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">المجموعة</label>
-                            <select id="smsFilterGroup" class="form-select form-select-sm">
-                                <option value="">-- كل المجموعات --</option>
-                                @foreach(\App\Models\Groups::all() as $g)
-                                    <option value="{{ $g->id }}" data-pid="{{ $g->program_id }}">{{ $g->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" id="smsFetchBtn" class="btn btn-sm btn-primary w-100">
-                                <i class="fa fa-search"></i> جلب الطلاب
-                            </button>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsFilterHasTest" value="1">
+                                    <label class="form-check-label fs-8 text-muted" for="smsFilterHasTest">مسجل في اختبار تحديد مستوى</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsFilterHasScore" value="1">
+                                    <label class="form-check-label fs-8 text-muted" for="smsFilterHasScore">لديه علامة ومستوى محدد في الاختبار</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-md-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="smsFilterInactive" value="1">
-                                <label class="form-check-label fs-8 text-muted" for="smsFilterInactive">طلاب غير فعالين</label>
+                    <!-- Compo (New Registrations) Filters -->
+                    <div id="smsCompoFilters" style="display:none;">
+                        <div class="row g-2 align-items-end mb-2">
+                            <div class="col-md-3">
+                                <label class="form-label">البرنامج</label>
+                                <select id="smsCompoFilterProgram" class="form-select form-select-sm">
+                                    <option value="">-- كل البرامج --</option>
+                                    @foreach(\App\Models\Programs::all() as $p)
+                                        <option value="{{ $p->id }}">{{ $p->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">نوع البرنامج</label>
+                                <select id="smsCompoFilterProgramType" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    <option value="Kids">Kids</option>
+                                    <option value="Adults">Adults</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">الجنس</label>
+                                <select id="smsCompoFilterGender" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">الفرع</label>
+                                <select id="smsCompoFilterBranch" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    @foreach(\App\Models\Branch::where('status', 1)->get() as $b)
+                                        <option value="{{ $b->name_en }}">{{ $b->name_ar }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="smsFilterNoGroup" value="1">
-                                <label class="form-check-label fs-8 text-muted" for="smsFilterNoGroup">غير مسجلين بمجموعة</label>
+                        <div class="row g-2 align-items-end mb-2">
+                            <div class="col-md-3">
+                                <label class="form-label">حالة الفوترة</label>
+                                <select id="smsCompoFilterInvoiced" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    <option value="1">Invoiced</option>
+                                    <option value="0">Not Invoiced</option>
+                                </select>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="smsFilterPendingFin" value="1">
-                                <label class="form-check-label fs-8 text-muted" for="smsFilterPendingFin">طلبات مالية عالقة</label>
+                            <div class="col-md-3">
+                                <label class="form-label">حالة التواصل</label>
+                                <select id="smsCompoFilterContacted" class="form-select form-select-sm">
+                                    <option value="">الكل</option>
+                                    <option value="1">Contacted</option>
+                                    <option value="0">Not Contacted</option>
+                                </select>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="smsFilterHasTest" value="1">
-                                <label class="form-check-label fs-8 text-muted" for="smsFilterHasTest">مسجل في اختبار تحديد مستوى</label>
+                            <div class="col-md-2">
+                                <label class="form-label">من تاريخ</label>
+                                <input type="date" id="smsCompoFilterDateFrom" class="form-control form-control-sm">
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="smsFilterHasScore" value="1">
-                                <label class="form-check-label fs-8 text-muted" for="smsFilterHasScore">لديه علامة ومستوى محدد في الاختبار</label>
+                            <div class="col-md-2">
+                                <label class="form-label">إلى تاريخ</label>
+                                <input type="date" id="smsCompoFilterDateTo" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="smsCompoFetchBtn" class="btn btn-sm btn-primary w-100">
+                                    <i class="fa fa-search"></i> جلب الطلاب
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -209,6 +281,74 @@ document.addEventListener('DOMContentLoaded', function() {
         const basketList = document.getElementById('smsBasketList');
         const poolEmpty = document.getElementById('smsPoolEmpty');
         const basketEmpty = document.getElementById('smsBasketEmpty');
+        let smsMode = 'student';
+
+        function resetPoolAndBasket() {
+            $(poolList).html('<li class="shuttle-empty" id="smsPoolEmpty">قم بالبحث لجلب الطلاب...</li>');
+            $(basketList).html('<li class="shuttle-empty" id="smsBasketEmpty">اسحب طالب إلى هنا لاستبعاده</li>');
+            updateCounts();
+        }
+
+        function fetchStudents(url, data, btn) {
+            var originalHtml = btn.html();
+            btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+            $(poolList).html('<li class="shuttle-empty">جاري التحميل...</li>');
+            $(basketList).html('<li class="shuttle-empty" id="smsBasketEmpty">اسحب طالب إلى هنا لاستبعاده</li>');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: data,
+                success: function(res) {
+                    btn.html(originalHtml).prop('disabled', false);
+                    $(poolList).empty();
+
+                    if (res.students && res.students.length > 0) {
+                        res.students.forEach(s => {
+                            let item = $('<li data-id="'+s.id+'"></li>');
+                            let html = '<div><div class="fw-bold text-dark">' + s.name + '</div>';
+                            html += '<div class="text-muted fs-8">' + s.mobile + '</div></div>';
+                            if (s.score !== undefined || s.level !== undefined) {
+                                html += '<div class="text-end fs-8 text-primary">العلامة: '+(s.score||'-')+'<br>المستوى: '+(s.level||'-')+'</div>';
+                            }
+                            item.html(html);
+                            $(poolList).append(item);
+                        });
+                    } else {
+                        $(poolList).append('<li class="shuttle-empty text-danger">لا توجد نتائج</li>');
+                    }
+                    updateCounts();
+                },
+                error: function() {
+                    btn.html(originalHtml).prop('disabled', false);
+                    $(poolList).html('<li class="shuttle-empty text-danger">خطأ في جلب البيانات</li>');
+                    updateCounts();
+                }
+            });
+        }
+
+        // Open modal in "new registrations" (compo) mode
+        window.openComboSmsModal = function() {
+            smsMode = 'compo';
+            $('#smsNormalFilters').hide();
+            $('#smsCompoFilters').show();
+            $('#smsModalTitle').html('<i class="fa fa-envelope me-2"></i>إرسال رسائل SMS - طلبات التسجيل الجديدة');
+            resetPoolAndBasket();
+            var modalEl = document.getElementById('smsShuttleModal');
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        };
+
+        // Reset back to normal mode when the modal is closed
+        $('#smsShuttleModal').on('hidden.bs.modal', function() {
+            smsMode = 'student';
+            $('#smsCompoFilters').hide();
+            $('#smsCompoFilters select, #smsCompoFilters input').val('');
+            $('#smsNormalFilters').show();
+            $('#smsModalTitle').html('<i class="fa fa-envelope me-2"></i>إرسال رسائل SMS');
+            $('#smsCustomNumber').val('');
+            $('#smsMessageText').val('');
+            resetPoolAndBasket();
+        });
 
         let sortablePool = new Sortable(poolList, {
             group: 'sms-shuttle',
@@ -248,53 +388,32 @@ document.addEventListener('DOMContentLoaded', function() {
             $('#smsFilterGroup').val('');
         });
 
-        // Fetch students
+        // Fetch students (normal / students mode)
         $('#smsFetchBtn').on('click', function() {
-            var btn = $(this);
-            var originalHtml = btn.html();
-            btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
-            $(poolList).html('<li class="shuttle-empty">جاري التحميل...</li>');
-            $(basketList).html('<li class="shuttle-empty" id="smsBasketEmpty">اسحب طالب إلى هنا لاستبعاده</li>');
+            fetchStudents('{{ route("admin.sms.shuttle.students") }}', {
+                program_type: $('#smsFilterProgramType').val(),
+                program_id: $('#smsFilterProgram').val(),
+                group_id: $('#smsFilterGroup').val(),
+                has_placement_test: $('#smsFilterHasTest').is(':checked') ? 1 : 0,
+                has_score: $('#smsFilterHasScore').is(':checked') ? 1 : 0,
+                inactive: $('#smsFilterInactive').is(':checked') ? 1 : 0,
+                no_group: $('#smsFilterNoGroup').is(':checked') ? 1 : 0,
+                pending_fin: $('#smsFilterPendingFin').is(':checked') ? 1 : 0
+            }, $(this));
+        });
 
-            $.ajax({
-                url: '{{ route("admin.sms.shuttle.students") }}',
-                type: 'GET',
-                data: {
-                    program_type: $('#smsFilterProgramType').val(),
-                    program_id: $('#smsFilterProgram').val(),
-                    group_id: $('#smsFilterGroup').val(),
-                    has_placement_test: $('#smsFilterHasTest').is(':checked') ? 1 : 0,
-                    has_score: $('#smsFilterHasScore').is(':checked') ? 1 : 0,
-                    inactive: $('#smsFilterInactive').is(':checked') ? 1 : 0,
-                    no_group: $('#smsFilterNoGroup').is(':checked') ? 1 : 0,
-                    pending_fin: $('#smsFilterPendingFin').is(':checked') ? 1 : 0
-                },
-                success: function(res) {
-                    btn.html(originalHtml).prop('disabled', false);
-                    $(poolList).empty();
-                    
-                    if (res.students && res.students.length > 0) {
-                        res.students.forEach(s => {
-                            let item = $('<li data-id="'+s.id+'"></li>');
-                            let html = '<div><div class="fw-bold text-dark">' + s.name + '</div>';
-                            html += '<div class="text-muted fs-8">' + s.mobile + '</div></div>';
-                            if (s.score !== null || s.level !== null) {
-                                html += '<div class="text-end fs-8 text-primary">العلامة: '+(s.score||'-')+'<br>المستوى: '+(s.level||'-')+'</div>';
-                            }
-                            item.html(html);
-                            $(poolList).append(item);
-                        });
-                    } else {
-                        $(poolList).append('<li class="shuttle-empty text-danger">لا توجد نتائج</li>');
-                    }
-                    updateCounts();
-                },
-                error: function() {
-                    btn.html(originalHtml).prop('disabled', false);
-                    $(poolList).html('<li class="shuttle-empty text-danger">خطأ في جلب البيانات</li>');
-                    updateCounts();
-                }
-            });
+        // Fetch students (new-registrations / compo mode)
+        $('#smsCompoFetchBtn').on('click', function() {
+            fetchStudents('{{ route("admin.standalone_registrations.sms_students") }}', {
+                program_id: $('#smsCompoFilterProgram').val(),
+                program_type: $('#smsCompoFilterProgramType').val(),
+                gender: $('#smsCompoFilterGender').val(),
+                branch: $('#smsCompoFilterBranch').val(),
+                is_invoiced: $('#smsCompoFilterInvoiced').val(),
+                is_contacted: $('#smsCompoFilterContacted').val(),
+                date_from: $('#smsCompoFilterDateFrom').val(),
+                date_to: $('#smsCompoFilterDateTo').val()
+            }, $(this));
         });
 
         // Search in pool
@@ -400,7 +519,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     note: note 
                 };
                 if (task.customNumber) dataPayload.customNumber = task.customNumber;
-                if (task.studentIds) dataPayload.studentIds = task.studentIds;
+                if (task.studentIds) {
+                    dataPayload.studentIds = task.studentIds;
+                    dataPayload.source = smsMode;
+                }
 
                 $.ajax({
                     type: 'POST',

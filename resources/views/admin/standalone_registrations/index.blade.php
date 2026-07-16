@@ -101,6 +101,9 @@
             </span>
         </div>
         <div class="card-toolbar">
+            <button type="button" id="btn-sms" class="btn btn-sm btn-light-primary me-2">
+                <i class="fa fa-envelope me-1"></i> رسائل SMS
+            </button>
             @can('admin.standalone_registrations.export')
             <button type="button" id="btn-export-excel" class="btn btn-sm btn-light-success me-2">
                 <i class="ki-duotone ki-file-up fs-2"><span class="path1"></span><span class="path2"></span></i> تصدير اكسل
@@ -309,6 +312,12 @@
                 date_to: $('input[name="date_to"]').val()
             });
             window.location.href = "{{ route('admin.standalone_registrations.export') }}?" + params;
+        });
+
+        $('#btn-sms').click(function() {
+            if (typeof window.openComboSmsModal === 'function') {
+                window.openComboSmsModal();
+            }
         });
 
         $('#btn-reset').click(function() {

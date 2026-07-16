@@ -456,6 +456,7 @@ class TeacherController extends AdminController {
         $studentIds = $request->input('studentIds', []);
         $customNumber = $request->input('customNumber');
         $message = $request->input('note') ?? $request->input('message') ?? '';
+        $source = $request->input('source', 'student');
 
         $successCount = 0;
         $errorCount = 0;
@@ -477,13 +478,24 @@ class TeacherController extends AdminController {
         // If student IDs provided, resolve each student and perform template replacements
         if (!empty($studentIds) && is_array($studentIds)) {
             foreach ($studentIds as $sid) {
-                $student = \App\Models\Students::find($sid);
-                if (! $student) continue;
-                $mobile = $normalizeMobile($student->mobile ?? null);
+                if ($source === 'compo') {
+                    $student = \App\Models\StudentCompo::find($sid);
+                    if (! $student) continue;
+                    $mobile = $normalizeMobile($student->phone ?? null);
+                    $nameAr = $student->full_name_ar ?? '';
+                    $nameEn = $student->full_name_en ?? '';
+                } else {
+                    $student = \App\Models\Students::find($sid);
+                    if (! $student) continue;
+                    $mobile = $normalizeMobile($student->mobile ?? null);
+                    $nameAr = $student->name ?? '';
+                    $nameEn = $student->name_en ?? '';
+                }
+
                 if (! $mobile) {
                     \App\Models\SmsArchive::create([
                         'student_id' => $student->id,
-                        'receiver_name' => $student->name,
+                        'receiver_name' => $nameAr,
                         'mobile' => 'لا يوجد رقم',
                         'message' => $message,
                         'status' => 'failed',
@@ -499,40 +511,52 @@ class TeacherController extends AdminController {
                 $programName = '';
                 $groupId = null;
                 $programId = null;
+                $score = '-';
+                $assignedLevel = '-';
 
-                $gs = \App\Models\GroupStudents::where('student_id', $student->id)->first();
-                if ($gs) {
-                    $groupId = $gs->group_id;
-                    $group = \App\Models\Groups::find($gs->group_id);
-                    if ($group) {
-                        $groupName = $group->name ?? '';
-                        if (isset($group->program_id)) {
-                            $programId = $group->program_id;
-                            $prog = \App\Models\Programs::find($group->program_id);
-                            if ($prog) $programName = $prog->title ?? '';
+                if ($source === 'compo') {
+                    $programId = $student->program_id;
+                    if ($programId) {
+                        $prog = \App\Models\Programs::find($programId);
+                        if ($prog) $programName = $prog->title ?? '';
+                    }
+                } else {
+                    $gs = \App\Models\GroupStudents::where('student_id', $student->id)->first();
+                    if ($gs) {
+                        $groupId = $gs->group_id;
+                        $group = \App\Models\Groups::find($gs->group_id);
+                        if ($group) {
+                            $groupName = $group->name ?? '';
+                            if (isset($group->program_id)) {
+                                $programId = $group->program_id;
+                                $prog = \App\Models\Programs::find($group->program_id);
+                                if ($prog) $programName = $prog->title ?? '';
+                            }
                         }
                     }
+
+                    // Fetch latest placement test
+                    $test = $student->placementTests()->latest()->first();
+                    $score = $test && $test->score !== null ? $test->score : '-';
+                    $assignedLevel = $test && $test->assigned_level !== null ? $test->assigned_level : '-';
                 }
 
                 $replacements = [
-                    '$name' => $student->name ?? '',
-                    '$name_ar' => $student->name ?? '',
-                    '$name_en' => $student->name_en ?? '',
+                    '$name' => $nameAr,
+                    '$name_ar' => $nameAr,
+                    '$name_en' => $nameEn,
                     '$group' => $groupName,
                     '$program' => $programName,
+                    '$score' => $score,
+                    '$assigned_level' => $assignedLevel,
                 ];
-
-                // Fetch latest placement test
-                $test = $student->placementTests()->latest()->first();
-                $replacements['$score'] = $test && $test->score !== null ? $test->score : '-';
-                $replacements['$assigned_level'] = $test && $test->assigned_level !== null ? $test->assigned_level : '-';
 
                 $finalMessage = strtr($template, $replacements);
                 $result = $smsService->send($mobile, $finalMessage);
-                
+
                 \App\Models\SmsArchive::create([
                     'student_id' => $student->id,
-                    'receiver_name' => $student->name,
+                    'receiver_name' => $nameAr,
                     'mobile' => $mobile,
                     'message' => $finalMessage,
                     'status' => $result['success'] ? 'success' : 'failed',
