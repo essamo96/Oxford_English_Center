@@ -39,6 +39,13 @@
                         </div>
                     </div>
                 </div>
+                <!--begin::Clear Cache Button-->
+                <div class="app-navbar-item ms-1 ms-md-3">
+                    <a href="javascript:;" onclick="clearApplicationCache(event)" class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-30px h-30px w-md-40px h-md-40px" title="تحديث الكاش (Clear Cache)">
+                        <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                    </a>
+                </div>
+                <!--end::Clear Cache Button-->
                 <!--begin::SMS Shuttle Button-->
                 <div class="app-navbar-item ms-1 ms-md-3">
                     <button type="button" class="btn btn-sm btn-light-primary fw-bold px-4 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#smsShuttleModal">
@@ -241,6 +248,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function clearApplicationCache(e) {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+    
+    if(typeof toastr !== 'undefined') toastr.info('جاري حذف الكاش...');
+    
+    fetch('{{ url("/clear-cache") }}')
+    .then(response => {
+        if(typeof toastr !== 'undefined') toastr.success('تم حذف الكاش بنجاح، جاري التحديث...');
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 1000);
+    })
+    .catch(error => {
+        if(typeof toastr !== 'undefined') toastr.error('حدث خطأ أثناء حذف الكاش');
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+        console.error(error);
+    });
+}
 </script>
 
 <style>
