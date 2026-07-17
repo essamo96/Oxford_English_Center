@@ -314,9 +314,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (res.students && res.students.length > 0) {
                         res.students.forEach(s => {
                             let item = $('<li data-id="'+s.id+'"></li>');
-                            let html = '<div style="width:100%;">';
+                            let html = '<div style="width:100%; display:flex; align-items:center;">';
+                            html += '<div style="flex:1; overflow:hidden;">';
                             html += '<div class="d-flex justify-content-between align-items-center">';
-                            html += '<div class="fw-bold text-dark">' + s.name + '</div>';
+                            html += '<div class="fw-bold text-dark text-truncate">' + s.name + '</div>';
                             if (s.score === undefined && s.level === undefined) {
                                 html += '<div class="text-muted fs-8">' + s.mobile + '</div>';
                             }
@@ -340,7 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 html += '<span class="badge badge-light-secondary"><i class="fa fa-calendar-alt me-1"></i>'+(s.registered_at || '-')+'</span>';
                                 html += '</div>';
                             }
+                            html += '</div>'; // end inner div
+                            html += '<div class="ms-2">';
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-danger shuttle-action-btn" title="استثناء / إرجاع"><i class="fa fa-exchange-alt"></i></button>';
                             html += '</div>';
+                            html += '</div>'; // end outer div
                             item.html(html);
                             $(poolList).append(item);
                         });
@@ -487,14 +492,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
+        // Handle single click exclude/include
+        $(document).on('click', '.shuttle-list li:not(.shuttle-empty)', function(e) {
+            e.preventDefault();
+            var li = $(this);
+            if (li.parent().attr('id') === 'smsPoolList') {
+                $(basketList).append(li);
+            } else {
+                $(poolList).append(li);
+            }
+            updateCounts();
+            $('#smsPoolSearch').trigger('input');
+        });
+
         // Submit SMS
         $('#smsSubmitBtn').on('click', function() {
             var note = $('#smsMessageText').val().trim();
             var customNumber = $('#smsCustomNumber').val().trim();
             
             var studentIds = [];
-            // Get all ids from the POOL list (The ones we want to send to)
-            $(poolList).children('li:not(.shuttle-empty)').each(function() {
+            // Get all ids from the POOL list (The ones we want to send to - must be visible)
+            $(poolList).children('li:not(.shuttle-empty):visible').each(function() {
                 studentIds.push($(this).data('id'));
             });
 
@@ -519,10 +537,10 @@ document.addEventListener('DOMContentLoaded', function() {
             $('#smsProgressDetails').hide().empty();
             $('#smsProgressBar').css('width', '0%').removeClass('bg-success bg-danger').addClass('bg-primary progress-bar-animated');
             
-            var totalTasks = studentIds.length;
-            if (customNumber) totalTasks++;
+            var totalStudents = studentIds.length;
+            if (customNumber) totalStudents++;
             
-            $('#smsTotalCount').text(totalTasks);
+            $('#smsTotalCount').text(totalStudents);
             $('#smsSuccessCount').text(0);
             $('#smsFailCount').text(0);
             
@@ -532,14 +550,17 @@ document.addEventListener('DOMContentLoaded', function() {
             var errors = [];
             var startTime = new Date().getTime();
 
-            // Prepare tasks
+            // Prepare tasks in chunks of 20
             var tasks = [];
             if (customNumber) {
-                tasks.push({ customNumber: customNumber });
+                tasks.push({ customNumber: customNumber, count: 1 });
             }
-            studentIds.forEach(function(sid) {
-                tasks.push({ studentIds: [sid] });
-            });
+            
+            var chunk = 20;
+            for (var i = 0; i < studentIds.length; i += chunk) {
+                var chunkIds = studentIds.slice(i, i + chunk);
+                tasks.push({ studentIds: chunkIds, count: chunkIds.length });
+            }
 
             function processNextTask() {
                 if (currentIndex >= tasks.length) {
@@ -563,15 +584,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     url: '{{ route("send.admin.sms") }}',
                     data: dataPayload,
                     success: function(res) {
-                        successCount++;
+                        if (res.successCount !== undefined) {
+                            successCount += res.successCount;
+                            failCount += res.errorCount;
+                        } else {
+                            successCount += task.count;
+                        }
                         updateProgress();
                         currentIndex++;
                         processNextTask();
                     },
                     error: function(err) {
-                        failCount++;
+                        failCount += task.count;
                         var errorMsg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'خطأ غير معروف';
-                        var target = task.customNumber ? task.customNumber : 'طالب ID: ' + task.studentIds[0];
+                        var target = task.customNumber ? task.customNumber : 'مجموعة طلاب (العدد ' + task.count + ')';
                         errors.push(target + ': ' + errorMsg);
                         updateProgress();
                         currentIndex++;
@@ -582,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function updateProgress() {
                 var processed = successCount + failCount;
-                var percent = Math.round((processed / totalTasks) * 100);
+                var percent = Math.round((processed / totalStudents) * 100);
                 $('#smsProgressBar').css('width', percent + '%');
                 $('#smsSuccessCount').text(successCount);
                 $('#smsFailCount').text(failCount);
@@ -591,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var elapsed = (now - startTime) / 1000; // in seconds
                 if (processed > 0) {
                     var avgTimePerTask = elapsed / processed;
-                    var remainingTasks = totalTasks - processed;
+                    var remainingTasks = totalStudents - processed;
                     var remainingSeconds = Math.round(avgTimePerTask * remainingTasks);
                     $('#smsProgressTime').text('الوقت المتبقي المتوقع: ' + remainingSeconds + ' ثانية');
                 }

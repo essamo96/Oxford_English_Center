@@ -226,9 +226,9 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('student/CEmail/Birthday', ['as' => 'send.CEmail.Birthday', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'StudentsController@SendCustomEmail2']);
     Route::post('teacher/notify', ['as' => 'send.teacher.message', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'TeacherController@SendMessage']);
     Route::post('student/admin/messages', ['as' => 'student.admin.messages', 'middleware' => ['permission:admin.students.status|admin.groups.view|admin.groups.add|admin.groups.edit|admin.groups.delete|admin.groups.status'], 'uses' => 'StudentsController@StudentsSendMessage']);
-    Route::post('sms', ['as' => 'send.admin.sms', 'uses' => 'TeacherController@SMS']);
+    Route::post('sms', ['as' => 'send.admin.sms', 'uses' => 'SmsController@sendSms']);
     Route::post('groups/sms', ['as' => 'send.groups.sms', 'uses' => 'StudentsController@SMSGruop']);
-    Route::get('sms/balance', ['as' => 'admin.sms.balance', 'uses' => 'TeacherController@checkSmsBalance']);
+    Route::get('sms/balance', ['as' => 'admin.sms.balance', 'uses' => 'SmsController@checkSmsBalance']);
     Route::get('sms/archive', ['as' => 'sms_archive.view', 'middleware' => ['permission:admin.sms_archive.view'], 'uses' => 'SmsArchiveController@index']);
     Route::get('sms/archive/data', ['as' => 'admin.sms.archive.data', 'uses' => 'SmsArchiveController@getData']);
     Route::get('programs/students', ['as' => 'admin.program.students', 'uses' => 'StudentsController@getStudentsByProgram']);
