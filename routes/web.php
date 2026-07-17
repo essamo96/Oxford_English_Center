@@ -201,6 +201,11 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('notifications/dropdown-partial', ['as' => 'admin.notifications.dropdown', 'uses' => 'MarkNotificationReadController@dropdownPartial']);
     Route::get('lang/{lang}', ['as' => 'dashboard.lang', 'uses' => 'DashboardController@getLang']);
 
+    // User Profile
+    Route::get('profile', ['as' => 'admin.profile.index', 'uses' => 'ProfileController@index']);
+    Route::post('profile', ['as' => 'admin.profile.update', 'uses' => 'ProfileController@update']);
+    Route::get('profile/check-unique', ['as' => 'admin.profile.check_unique', 'uses' => 'ProfileController@checkUnique']);
+
     // Route::get('/generat_pdf/{id}', ['as' => 'students.groups.pdf', 'middleware' => ['permission:admin.students.edit'], 'uses' => 'StudentsController@generat_pdf']);
     Route::get('generat_pdf/{id}', ['as' => 'students.groups.pdf', 'middleware' => ['permission:admin.students.edit'], 'uses' => 'CertificatesController@generat_pdf']);
 
@@ -285,8 +290,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     // Financial Center dashboard (tab beside the main dashboard)
     Route::get('financial-center', ['as' => 'financial_dashboard.view', 'middleware' => ['permission:admin.financial_dashboard.view|admin.financial.view'], 'uses' => 'FinancialDashboardController@getIndex']);
     Route::get('financial-center/data', ['as' => 'dashboard.financial.data', 'middleware' => ['permission:admin.financial_dashboard.view|admin.financial.view'], 'uses' => 'FinancialDashboardController@getData']);
-    Route::get('profile', ['as' => 'dashboard.profile', 'uses' => 'DashboardController@getProfile']);
-    Route::get('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@getPassword']);
+    Route::get('dashboard-profile', ['as' => 'dashboard.profile', 'uses' => 'DashboardController@getProfile']);
+    Route::get('dashboard-password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@getPassword']);
     Route::post('password', ['as' => 'dashboard.password', 'uses' => 'DashboardController@postPassword']);
 
     // Calendar Routes

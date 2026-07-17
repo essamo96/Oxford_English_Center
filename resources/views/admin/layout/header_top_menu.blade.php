@@ -80,9 +80,10 @@
                     </div>
                     
                     <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">
-                        <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-color: #0A2540;">
-                            <h3 class="text-white fw-semibold px-9 mt-10 mb-6">طلبات كومبو
-                            <span class="fs-8 opacity-75 ps-3 combo-badge-count"><span data-live-counter="unread_combo_registrations_title">{{ $standalone_unread }}</span> طلبات جديدة</span></h3>
+                        <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-image:url('{{ asset('assets/media/misc/menu-header-bg.jpg') }}')">
+                            <h3 class="text-white fw-semibold px-9 mt-10 mb-2">الإشعارات</h3>
+                            <h4 class="text-white fw-semibold px-9 mb-6 fs-5">طلبات كومبو
+                            <span class="fs-8 opacity-75 ps-3 combo-badge-count"><span data-live-counter="unread_combo_registrations_title">{{ $standalone_unread }}</span> طلبات جديدة</span></h4>
                         </div>
                         <div class="scroll-y mh-325px my-5 px-8" id="combo-notifications-list">
                             @if($standalone_unread > 0)
@@ -108,7 +109,10 @@
                                 </div>
                             @empty
                                 <div class="text-center py-5">
-                                    <span class="text-muted">لا يوجد طلبات تسجيل جديدة</span>
+                                    <img src="{{ url('assets/media/illustrations/sketchy-1/17.png') }}" alt="Empty" class="w-100px mb-3 theme-light-show" />
+                                    <img src="{{ url('assets/media/illustrations/sketchy-1/17-dark.png') }}" alt="Empty" class="w-100px mb-3 theme-dark-show" />
+                                    <br>
+                                    <span class="text-muted fw-bold">لا يوجد طلبات تسجيل جديدة</span>
                                 </div>
                             @endforelse
                         </div>
@@ -168,20 +172,23 @@
                         <img src="{{ url('assets/media/avatars/blank.png') }}" alt="user" />
                     </div>
                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
-                        <div class="menu-item px-3">
-                            <div class="menu-content d-flex align-items-center px-3">
+                        <div class="menu-item px-3 mt-3">
+                            <div class="menu-content d-flex align-items-center px-3 py-4 bgi-no-repeat bgi-position-center bgi-size-cover rounded" style="background-image:url('{{ asset('assets/media/misc/menu-header-bg.jpg') }}')">
                                 <div class="symbol symbol-50px me-5">
                                     <img alt="Logo" src="{{ url('assets/media/avatars/blank.png') }}" />
                                 </div>
                                 <div class="d-flex flex-column">
-                                    <div class="fw-bold d-flex align-items-center fs-5">
+                                    <div class="fw-bold d-flex align-items-center fs-5 text-white">
                                         {{ auth()->user()->name }}
                                     </div>
-                                    <a href="#" class="fw-semibold text-muted text-hover-info fs-7">{{ auth()->user()->email }}</a>
+                                    <a href="#" class="fw-semibold text-white opacity-75 text-hover-primary fs-7">{{ auth()->user()->email }}</a>
                                 </div>
                             </div>
                         </div>
                         <div class="separator my-2"></div>
+                        <div class="menu-item px-5">
+                            <a href="{{ route('admin.profile.index') }}" class="menu-link px-5">إعدادات الملف الشخصي</a>
+                        </div>
                         <div class="menu-item px-5">
                             <a href="{{ route('app.logout') }}" class="menu-link px-5">تسجيل الخروج</a>
                         </div>

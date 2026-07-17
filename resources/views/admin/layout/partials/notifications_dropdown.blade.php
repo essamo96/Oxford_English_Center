@@ -100,8 +100,8 @@
 @else
 <div id="rt-notif-empty" class="d-flex flex-column px-9 items-center justify-content-center py-10">
     <div class="text-center">
-        <img class="mw-100 mh-200px mb-5 theme-light-show" src="{{ asset('assets/media/illustrations/sketchy-1/1.png') }}" alt="">
-        <img class="mw-100 mh-200px mb-5 theme-dark-show" src="{{ asset('assets/media/illustrations/sketchy-1/1-dark.png') }}" alt="">
+        <img class="mw-100 mh-200px mb-5 theme-light-show" src="{{ asset('assets/media/illustrations/sketchy-1/5.png') }}" alt="">
+        <img class="mw-100 mh-200px mb-5 theme-dark-show" src="{{ asset('assets/media/illustrations/sketchy-1/5-dark.png') }}" alt="">
         <div class="fw-bold fs-6 text-gray-800">لا توجد إشعارات جديدة</div>
         <div class="text-gray-400 fs-7 mt-1">أنت مطلع على كل شيء حالياً</div>
     </div>
