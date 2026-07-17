@@ -1,0 +1,361 @@
+{
+    "db_images_count": 428,
+    "found_in_old": 384,
+    "copied_count": 384,
+    "missing_count": 44,
+    "modified_paths_count": 330,
+    "missing_list": [
+        {
+            "table": "settings",
+            "record_id": 1,
+            "column": "logo",
+            "file_name": "logo_1523901873.png",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\logo_1523901873.png",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 3,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 5,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 13,
+            "column": "banner",
+            "file_name": "5d3ee2e597dad.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\uploads\\photos\\shares\\5d3ee2e597dad.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 15,
+            "column": "image",
+            "file_name": "image_1566297084.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1566297084.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 15,
+            "column": "banner",
+            "file_name": "5d5bcbed2478b.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\uploads\\photos\\shares\\banner\\5d5bcbed2478b.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 16,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 17,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 18,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 19,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "pages",
+            "record_id": 20,
+            "column": "image",
+            "file_name": "image_1563348770.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\image_1563348770.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "partner",
+            "record_id": 46,
+            "column": "image",
+            "file_name": "LMvQ43Ba126NEZ9qnaGX1ZTm0AnsWV7WEfJNBBAc.png",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\uploads\\files\\shares\\A1 Beginner\\A1_GR\\LMvQ43Ba126NEZ9qnaGX1ZTm0AnsWV7WEfJNBBAc.png",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "partner",
+            "record_id": 47,
+            "column": "image",
+            "file_name": "LMvQ43Ba126NEZ9qnaGX1ZTm0AnsWV7WEfJNBBAc.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\uploads\\files\\shares\\A1 Beginner\\A1_GR\\LMvQ43Ba126NEZ9qnaGX1ZTm0AnsWV7WEfJNBBAc.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 1,
+            "column": "image",
+            "file_name": "5d39d32e46ac9_1564070702.jpeg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d39d32e46ac9_1564070702.jpeg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 2,
+            "column": "image",
+            "file_name": "5d39d32e47c51_1564070702.jpeg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d39d32e47c51_1564070702.jpeg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 4,
+            "column": "image",
+            "file_name": "5d39d32e46ac9_1564070702.jpeg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d39d32e46ac9_1564070702.jpeg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 5,
+            "column": "image",
+            "file_name": "5d3d62a0922b8_1564304032.JPG",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62a0922b8_1564304032.JPG",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 6,
+            "column": "image",
+            "file_name": "5d3d62a351613_1564304035.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62a351613_1564304035.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 7,
+            "column": "image",
+            "file_name": "5d3d62a5d3b6e_1564304037.JPG",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62a5d3b6e_1564304037.JPG",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 8,
+            "column": "image",
+            "file_name": "5d3d62ad3d86b_1564304045.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62ad3d86b_1564304045.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 9,
+            "column": "image",
+            "file_name": "5d3d62add3d74_1564304045.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62add3d74_1564304045.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 10,
+            "column": "image",
+            "file_name": "5d3d62cc38601_1564304076.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62cc38601_1564304076.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 11,
+            "column": "image",
+            "file_name": "5d3d62d24adbf_1564304082.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62d24adbf_1564304082.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 12,
+            "column": "image",
+            "file_name": "5d3d62e73c405_1564304103.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62e73c405_1564304103.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 13,
+            "column": "image",
+            "file_name": "5d3d62f223bd0_1564304114.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62f223bd0_1564304114.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 14,
+            "column": "image",
+            "file_name": "5d3d62f63b69d_1564304118.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62f63b69d_1564304118.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 15,
+            "column": "image",
+            "file_name": "5d3d62f8cdf84_1564304120.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62f8cdf84_1564304120.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 16,
+            "column": "image",
+            "file_name": "5d3d62fd1b014_1564304125.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d62fd1b014_1564304125.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 17,
+            "column": "image",
+            "file_name": "5d3d630081c74_1564304128.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d630081c74_1564304128.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 18,
+            "column": "image",
+            "file_name": "5d3d630830bfd_1564304136.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d630830bfd_1564304136.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 19,
+            "column": "image",
+            "file_name": "5d3d63099fa39_1564304137.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d63099fa39_1564304137.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 20,
+            "column": "image",
+            "file_name": "5d3d630aa144e_1564304138.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d630aa144e_1564304138.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 21,
+            "column": "image",
+            "file_name": "5d3d630b7ed12_1564304139.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d630b7ed12_1564304139.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 22,
+            "column": "image",
+            "file_name": "5d3d631025ec7_1564304144.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d631025ec7_1564304144.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 23,
+            "column": "image",
+            "file_name": "5d3d6315b36a4_1564304149.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d6315b36a4_1564304149.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 24,
+            "column": "image",
+            "file_name": "5d3d631ab4e7c_1564304154.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d631ab4e7c_1564304154.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 25,
+            "column": "image",
+            "file_name": "5d3d6324de23c_1564304164.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d6324de23c_1564304164.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 26,
+            "column": "image",
+            "file_name": "5d3d632b82a51_1564304171.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d632b82a51_1564304171.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 27,
+            "column": "image",
+            "file_name": "5d3d635a559c2_1564304218.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d635a559c2_1564304218.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 28,
+            "column": "image",
+            "file_name": "5d3d64779f2ca_1564304503.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d64779f2ca_1564304503.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 29,
+            "column": "image",
+            "file_name": "5d3d647e97af5_1564304510.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d647e97af5_1564304510.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 31,
+            "column": "image",
+            "file_name": "5d3d64adc62e0_1564304557.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d64adc62e0_1564304557.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 33,
+            "column": "image",
+            "file_name": "5d3d6af4cc45e_1564306164.JPG",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3d6af4cc45e_1564306164.JPG",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        },
+        {
+            "table": "photos_images",
+            "record_id": 114,
+            "column": "image",
+            "file_name": "5d3dc8b563f65_1564330165.jpg",
+            "expected_path": "C:\\laragon\\www\\oxford\\public\\5d3dc8b563f65_1564330165.jpg",
+            "reason": "Image does not exist in the old project, or path mismatch"
+        }
+    ]
+}

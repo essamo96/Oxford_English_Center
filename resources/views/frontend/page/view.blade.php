@@ -34,7 +34,7 @@
                 <div data-reveal="left">
                     @if($page->image)
                         <div class="ox-media" style="aspect-ratio:auto;margin-bottom:24px">
-                            <img src="{{ url('uploads/image/'.$page->image) }}" alt="{{ $page->title }}">
+                            <img src="{{ url($page->image) }}" alt="{{ $page->title }}">
                         </div>
                     @endif
 

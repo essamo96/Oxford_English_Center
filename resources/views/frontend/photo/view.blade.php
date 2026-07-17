@@ -462,7 +462,7 @@
           // 2) fall back to first image in album
           if(!$hasFeatured) {
               $firstImg = $album->images->first();
-              $coverUrl = $firstImg ? asset('File/Images/photo/'.$firstImg->image) : null;
+              $coverUrl = $firstImg ? asset($firstImg->image) : null;
           }
         @endphp
         <a href="{{ url('gallary/'.$album->id) }}"

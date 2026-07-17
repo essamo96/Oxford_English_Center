@@ -316,7 +316,7 @@
         <div class="galc-item galc-reveal {{ $img->feature ? 'galc-item--cover' : '' }}"
              data-index="{{ $index }}"
              style="transition-delay:{{ ($index % 12) * 40 }}ms">
-          <img src="{{ asset('File/Images/photo/'.$img->image) }}"
+          <img src="{{ asset($img->image) }}"
                alt="Photo {{ $index + 1 }}"
                loading="lazy">
           <div class="galc-item__overlay">
@@ -371,7 +371,7 @@
 (function(){
   var IMAGES = [
     @foreach($pics as $img)
-    '{{ asset("File/Images/photo/".$img->image) }}',
+    '{{ asset($img->image) }}',
     @endforeach
   ];
 

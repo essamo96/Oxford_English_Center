@@ -29,7 +29,7 @@ class Helper {
         $image = $imge->getCoverImage($alubm_id);
         //print_r($image);
         if ($image) {
-            return url('File/Images/photo/' . $image->image);
+            return url($image->image);
         }
         return url('File/Images/photo/noimage.jpg');
     }
