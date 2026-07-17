@@ -242,3 +242,109 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* ACG Scanner Wrapper to prevent scroll */
+.acg-scanner-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* ACG Scanner Beam */
+.acg-scanner-beam {
+    position: absolute;
+    top: 0;
+    right: -200px;
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(to left, transparent, #268aff, #268aff, transparent);
+    box-shadow: 0 0 15px #268aff, 0 0 5px #268aff;
+    border-radius: 50%;
+    display: none; /* Initially hidden to prevent scroll */
+}
+
+/* Icon Pulse Animation */
+@keyframes acgIconPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(38, 138, 255, 0)); }
+    50% { transform: scale(1.2); filter: drop-shadow(0 0 10px rgba(38, 138, 255, 1)); color: #268aff !important; }
+    100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(38, 138, 255, 0)); }
+}
+
+.acg-icon-pulsing {
+    animation: acgIconPulse 0.6s ease-out;
+}
+.acg-icon-pulsing.ki-duotone i,
+.acg-icon-pulsing.ki-duotone span {
+    color: #268aff !important;
+}
+</style>
+
+<div class="acg-scanner-wrapper">
+    <div id="acg_scanner" class="acg-scanner-beam"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scanner = document.getElementById('acg_scanner');
+    // Select the icons within the top bar AND the sidebar logo/name
+    const icons = document.querySelectorAll('#kt_app_header_wrapper .ki-duotone, #kt_app_header_wrapper img, #kt_app_sidebar_logo img, #kt_app_sidebar_logo .oxford-sidebar-text');
+    
+    let currentRight = -200;
+    const speed = 4; // speed in pixels per frame
+    
+    // Find the leftmost bound of all icons to know when to stop/hide the scanner
+    let minLeft = window.innerWidth;
+    icons.forEach(icon => {
+        const rect = icon.getBoundingClientRect();
+        if (rect.left < minLeft && rect.left > 0) {
+            minLeft = rect.left;
+        }
+    });
+
+    scanner.style.display = 'block';
+
+    function animateScanner() {
+        currentRight += speed;
+        scanner.style.right = currentRight + 'px';
+        
+        const scannerRect = scanner.getBoundingClientRect();
+        const scannerCenter = scannerRect.left + (scannerRect.width / 2);
+        
+        // Reset when it goes past the leftmost icon (the user profile)
+        if (scannerRect.right < minLeft - 50) {
+            currentRight = -200;
+            // Add a small pause before it restarts
+            setTimeout(() => {
+                requestAnimationFrame(animateScanner);
+            }, 2000);
+            return;
+        }
+        
+        // Check intersections with icons
+        icons.forEach(icon => {
+            const rect = icon.getBoundingClientRect();
+            if (scannerCenter >= rect.left && scannerCenter <= rect.right) {
+                if (!icon.classList.contains('acg-icon-pulsing')) {
+                    icon.classList.add('acg-icon-pulsing');
+                    setTimeout(() => {
+                        icon.classList.remove('acg-icon-pulsing');
+                    }, 600);
+                }
+            }
+        });
+        
+        requestAnimationFrame(animateScanner);
+    }
+    
+    // Initial delay
+    setTimeout(() => {
+        requestAnimationFrame(animateScanner);
+    }, 1000);
+});
+</script>
