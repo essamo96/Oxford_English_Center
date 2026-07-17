@@ -116,6 +116,61 @@
                 </div>
             </div>
 
+            {{-- قسم خصائص الدورة --}}
+            <h3 class="card-title align-items-start flex-column mt-5 mb-5">
+                <span class="card-label fw-bold fs-4 mb-1">خصائص الدورة</span>
+            </h3>
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الفئة العمرية (Age Range)</label>
+                    <input type="text" name="age" value="{{ old('age') }}" class="form-control form-control-solid" placeholder="مثال: 16 years old and older">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">المستوى (Level)</label>
+                    <input type="text" name="level" value="{{ old('level') }}" class="form-control form-control-solid" placeholder="مثال: Intermediate and above">
+                </div>
+            </div>
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الأسابيع (Weeks)</label>
+                    <input type="text" name="weeks" value="{{ old('weeks') }}" class="form-control form-control-solid" placeholder="مثال: 5 weeks">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الساعات (Hours)</label>
+                    <input type="text" name="hours" value="{{ old('hours') }}" class="form-control form-control-solid" placeholder="مثال: 30 hours">
+                </div>
+            </div>
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الامتحانات التجريبية (Mocks Exam)</label>
+                    <input type="text" name="mock" value="{{ old('mock') }}" class="form-control form-control-solid" placeholder="مثال: 3 (hours 10)">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">المدة (Duration)</label>
+                    <input type="text" name="duration" value="{{ old('duration') }}" class="form-control form-control-solid" placeholder="مثال: 15 sessions (2 hours each)">
+                </div>
+            </div>
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">حجم الفصل (Class Size)</label>
+                    <input type="text" name="class_size" value="{{ old('class_size') }}" class="form-control form-control-solid" placeholder="مثال: Average 10, Maximum 15">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">البدء (Start)</label>
+                    <input type="text" name="start" value="{{ old('start') }}" class="form-control form-control-solid" placeholder="مثال: Monthly">
+                </div>
+            </div>
+            <div class="row g-9 mb-8">
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الأيام (Days)</label>
+                    <input type="text" name="days" value="{{ old('days') }}" class="form-control form-control-solid" placeholder="مثال: Saturday-Monday-Wednesday">
+                </div>
+                <div class="col-md-6 fv-row">
+                    <label class="fs-6 fw-semibold mb-2">الوقت (Time)</label>
+                    <input type="text" name="time" value="{{ old('time') }}" class="form-control form-control-solid" placeholder="مثال: 02:00 PM - 04:00 PM">
+                </div>
+            </div>
+
             {{-- قسم البروشور PDF --}}
             <div class="row g-9 mb-8">
                 <div class="col-md-6 fv-row">

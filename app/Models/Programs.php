@@ -50,6 +50,10 @@ class Programs extends Model {
         return $this->hasMany('App\Models\Groups', 'program_id');
     }
 
+    public function feeSettings() {
+        return $this->hasMany('App\Models\FeeSettings', 'program_id');
+    }
+
     public function groupStudents() {
         return $this->hasManyThrough('App\Models\GroupStudents', 'App\Models\Groups', 'program_id', 'group_id');
     }

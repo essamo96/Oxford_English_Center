@@ -8,6 +8,7 @@
     $isTeacher = Auth::guard('teachers')->check();
     $onStudent = Request::is('student');
     $onTeacher = Request::is('teacher');
+    $navCourses = \App\Models\Pages::whereNotNull('program_id')->where('status', 1)->get();
 @endphp
 
 <header class="ox-header" data-nav-sentinel>
@@ -91,12 +92,9 @@
                         <li>
                             <a href="#">Courses <i class="bi bi-chevron-down ox-caret"></i></a>
                             <ul class="ox-submenu">
-                                <li><a href="{{ url('page/ielts') }}">IELTS Preparation Course</a></li>
-                                <li><a href="{{ url('page/general') }}">General English Levels</a></li>
-                                <li><a href="{{ url('page/speaking') }}">Speaking Course</a></li>
-                                <li><a href="{{ url('page/writing') }}">Academic Writing Course</a></li>
-                                <li><a href="{{ url('page/business') }}">Business English Course</a></li>
-                                <li><a href="{{ url('page/esp') }}">ESP Course</a></li>
+                                @foreach($navCourses as $navCourse)
+                                    <li><a href="{{ url('page/'.$navCourse->slug) }}">{{ $navCourse->title }}</a></li>
+                                @endforeach
                             </ul>
                         </li>
                         <li><a href="{{ url('page/prize') }}">IELTS Prize</a></li>
@@ -174,12 +172,9 @@
             <li>
                 <a href="#" data-submenu-toggle>Our Courses <i class="bi bi-chevron-down"></i></a>
                 <ul>
-                    <li><a href="{{ url('page/ielts') }}">IELTS Preparation Course</a></li>
-                    <li><a href="{{ url('page/general') }}">General English Levels</a></li>
-                    <li><a href="{{ url('page/speaking') }}">Speaking Course</a></li>
-                    <li><a href="{{ url('page/writing') }}">Academic Writing Course</a></li>
-                    <li><a href="{{ url('page/business') }}">Business English Course</a></li>
-                    <li><a href="{{ url('page/esp') }}">ESP Course</a></li>
+                    @foreach($navCourses as $navCourse)
+                        <li><a href="{{ url('page/'.$navCourse->slug) }}">{{ $navCourse->title }}</a></li>
+                    @endforeach
                 </ul>
             </li>
             <li><a href="{{ url('page/prize') }}">Oxford IELTS Prize</a></li>

@@ -11,8 +11,12 @@ class Pages extends Model {
 
     protected $table = 'pages';
     protected $fillable = [
-        'title', 'details', 'image', 'tags', 'status',
+        'title', 'details', 'image', 'tags', 'status', 'program_id'
     ];
+
+    public function program() {
+        return $this->belongsTo(Programs::class, 'program_id');
+    }
 
     //////////////////////////////////
     function updatePage($obj, $title, $details, $image, $banner, $tags, $url, $status, $age, $level, $weeks, $hours, $mock, $duration, $class_size, $fees, $price, $start, $days, $time) {

@@ -281,6 +281,17 @@ class ProgramsController extends AdminController
                     $add->registration_end   = $request->get('registration_end') ?: null;
                     $add->program_type       = $request->get('program_type') ?: null;
                     $add->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
+                    
+                    $add->age = $request->get('age') ?: null;
+                    $add->level = $request->get('level') ?: null;
+                    $add->weeks = $request->get('weeks') ?: null;
+                    $add->hours = $request->get('hours') ?: null;
+                    $add->mock = $request->get('mock') ?: null;
+                    $add->duration = $request->get('duration') ?: null;
+                    $add->class_size = $request->get('class_size') ?: null;
+                    $add->start = $request->get('start') ?: null;
+                    $add->days = $request->get('days') ?: null;
+                    $add->time = $request->get('time') ?: null;
 
                     // Synchronous file upload removed; handled by chunked upload endpoint.
                     
@@ -381,6 +392,17 @@ class ProgramsController extends AdminController
                     $info->registration_end   = $request->get('registration_end') ?: null;
                     $info->program_type       = $request->get('program_type') ?: null;
                     $info->is_placement_test  = $request->boolean('is_placement_test') ? 1 : 0;
+                    
+                    $info->age = $request->get('age') ?: null;
+                    $info->level = $request->get('level') ?: null;
+                    $info->weeks = $request->get('weeks') ?: null;
+                    $info->hours = $request->get('hours') ?: null;
+                    $info->mock = $request->get('mock') ?: null;
+                    $info->duration = $request->get('duration') ?: null;
+                    $info->class_size = $request->get('class_size') ?: null;
+                    $info->start = $request->get('start') ?: null;
+                    $info->days = $request->get('days') ?: null;
+                    $info->time = $request->get('time') ?: null;
 
                     // Synchronous file upload removed; handled by chunked upload endpoint.
 
