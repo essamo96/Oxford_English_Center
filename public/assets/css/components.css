@@ -264,9 +264,10 @@
 .ox-topbar__contact i { color: var(--ox-accent); }
 .ox-topbar__cta { display: flex; align-items: center; gap: var(--ox-s-2); list-style: none; margin: 0; padding: 0; }
 .ox-toplink {
-    display: inline-flex; align-items: center; gap: 6px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 10px 19px; border-radius: var(--ox-radius-pill);
     font-weight: 600; font-size: var(--ox-fs-xs);
+    white-space: nowrap;
     background: rgba(255,255,255,.08);
     transition: background var(--ox-dur-fast) var(--ox-ease), transform var(--ox-dur-fast) var(--ox-ease);
 }
@@ -554,3 +555,65 @@
 
 .ox-action__icon i { font-size: 40px !important; }
 .ox-qr-btn i { font-size: 20px !important; }
+
+/* ----------------------------------------------------
+   AJAX Search Dropdown
+   ---------------------------------------------------- */
+.ox-ajax-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--ox-white);
+    border: 1px solid var(--ox-border);
+    border-radius: var(--ox-radius-md);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+}
+[dir="rtl"] .ox-ajax-dropdown {
+    text-align: right;
+}
+.ox-ajax-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.ox-ajax-dropdown li {
+    border-bottom: 1px solid var(--ox-border);
+}
+.ox-ajax-dropdown li:last-child {
+    border-bottom: none;
+}
+.ox-ajax-dropdown a {
+    display: block;
+    padding: 12px 16px;
+    color: var(--ox-gray-800);
+    text-decoration: none;
+    transition: background var(--ox-speed);
+}
+.ox-ajax-dropdown a:hover {
+    background: var(--ox-gray-50);
+}
+.ox-ajax-dropdown .ox-search-title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    color: var(--ox-primary);
+}
+.ox-ajax-dropdown .ox-search-type {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ox-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ox-ajax-dropdown .ox-search-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--ox-gray-500);
+    font-size: 0.9rem;
+}

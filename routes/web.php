@@ -96,6 +96,9 @@ Route::group(['middleware' => ['web']], function () {
     // Standalone Registration Routes
     Route::get('registration/program', ['as' => 'registration.standalone', 'uses' => 'StandaloneRegistrationController@index']);
     Route::post('registration/program', ['as' => 'registration.standalone.store', 'uses' => 'StandaloneRegistrationController@store']);
+    // Search Routes
+    Route::get('search/ajax', ['as' => 'search.ajax', 'uses' => 'Frontend\SearchController@ajaxSearch']);
+    Route::get('search', ['as' => 'search.full', 'uses' => 'Frontend\SearchController@fullSearch']);
 });
 
 

@@ -101,5 +101,72 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
+
+        /* ---- AJAX Search ---- */
+        var searchInput = document.getElementById('ajax-search-input');
+        var searchDropdown = document.getElementById('ajax-search-dropdown');
+        var searchResults = document.getElementById('ajax-search-results');
+        var searchSpinner = document.getElementById('ajax-search-spinner');
+        var searchTimeout = null;
+
+        if (searchInput && searchDropdown && searchResults) {
+            searchInput.addEventListener('input', function () {
+                var query = searchInput.value.trim();
+
+                clearTimeout(searchTimeout);
+
+                if (query.length < 2) {
+                    searchDropdown.style.display = 'none';
+                    if(searchSpinner) searchSpinner.style.display = 'none';
+                    return;
+                }
+
+                if(searchSpinner) searchSpinner.style.display = 'block';
+
+                searchTimeout = setTimeout(function () {
+                    fetch('/search/ajax?q=' + encodeURIComponent(query))
+                        .then(response => response.json())
+                        .then(data => {
+                            if(searchSpinner) searchSpinner.style.display = 'none';
+                            searchResults.innerHTML = '';
+                            
+                            if (data.status === 'success' && data.data.length > 0) {
+                                data.data.forEach(function (item) {
+                                    var li = document.createElement('li');
+                                    li.innerHTML = '<a href="' + item.url + '">' +
+                                                   '<span class="ox-search-title">' + item.title + '</span>' +
+                                                   '<span class="ox-search-type">' + item.type + '</span>' +
+                                                   '</a>';
+                                    searchResults.appendChild(li);
+                                });
+                            } else {
+                                var li = document.createElement('li');
+                                li.innerHTML = '<div class="ox-search-empty">لا توجد نتائج مطابقة، جرب كلمات أخرى</div>';
+                                searchResults.appendChild(li);
+                            }
+                            
+                            searchDropdown.style.display = 'block';
+                        })
+                        .catch(error => {
+                            console.error('Search error:', error);
+                            if(searchSpinner) searchSpinner.style.display = 'none';
+                        });
+                }, 400); // 400ms debounce
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+
+            // Re-open if clicking on input and there are results
+            searchInput.addEventListener('focus', function () {
+                if (searchResults.children.length > 0 && searchInput.value.trim().length >= 2) {
+                    searchDropdown.style.display = 'block';
+                }
+            });
+        }
     });
 })();

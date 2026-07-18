@@ -146,14 +146,14 @@
     new WOW().init();
 
     /*-------------------------------------
-     Jquery Scollup
+     Jquery Scollup (Disabled to prevent duplicate button)
      -------------------------------------*/
-    $.scrollUp({
+    /* $.scrollUp({
         scrollText: '<i class="fa fa-arrow-up"></i>',
         easingType: 'linear',
         scrollSpeed: 900,
         animation: 'fade'
-    });
+    }); */
 
     /*-------------------------------------
      Window load function

@@ -118,9 +118,19 @@
                 <button class="ox-iconbtn" data-search-toggle aria-label="Search"><i class="bi bi-search"></i></button>
                 <button class="ox-iconbtn ox-burger" data-drawer-open aria-label="Open menu"><i class="bi bi-list"></i></button>
                 <div class="ox-search-box" data-search-box>
-                    <form action="#" style="display:flex;gap:8px;width:100%">
-                        <input class="ox-input" type="text" placeholder="Search…." aria-label="Search">
+                    <form action="{{ route('search.full') }}" method="GET" style="display:flex;gap:8px;width:100%;position:relative;">
+                        <div style="position:relative; width: 100%;">
+                            <input class="ox-input" type="text" name="q" id="ajax-search-input" placeholder="Search…." aria-label="Search" autocomplete="off">
+                            <div id="ajax-search-spinner" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+                                <i class="fa fa-spinner fa-spin" style="color: var(--ox-primary)"></i>
+                            </div>
+                        </div>
                         <button type="submit" class="ox-btn ox-btn--primary ox-btn--sm" aria-label="Search"><i class="bi bi-search"></i></button>
+
+                        {{-- Dropdown Container --}}
+                        <div id="ajax-search-dropdown" class="ox-ajax-dropdown" style="display:none;">
+                            <ul id="ajax-search-results"></ul>
+                        </div>
                     </form>
                 </div>
             </div>
