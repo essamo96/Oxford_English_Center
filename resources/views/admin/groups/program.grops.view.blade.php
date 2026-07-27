@@ -41,11 +41,12 @@
                             <i class="fa fa-backward" style="color: #ffc038"></i> <strong style="color: #ffffff"> رجوع
                             </strong> </a>
                     </div>
-                    <div class="actions" style="width: 160px;">
+                    <div class="actions" style="width: 160px; max-width: 100%;">
                         <select class="form-select form-select-lg" aria-label=".form-select-sm example"
                             aria-placeholder=">اختر مجموعة..."
                             style=" color: #030303;
                             width: 150px;
+                            max-width: 100%;
                             border-radius: 8px;
                             border: 2px solid #ffc038;">
                             <option selected>اختر مجموعة...</option>
@@ -59,6 +60,7 @@
 
                 <div class="portlet-body">
                     @include('admin.layout.error')
+                    <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover table-checkable order-column"
                         id="categories_table">
                         <thead>
@@ -75,6 +77,7 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    </div>
                 </div>
             </div>
             <!-- END EXAMPLE TABLE PORTLET-->

@@ -63,6 +63,7 @@
                 </div>
                 <div class="portlet-body">
                     @include('admin.layout.error')
+                    <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover table-checkable order-column" id="categories_table">
                         <thead>
                         <tr>
@@ -75,6 +76,7 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    </div>
                 </div>
             </div>
             <!-- END EXAMPLE TABLE PORTLET-->

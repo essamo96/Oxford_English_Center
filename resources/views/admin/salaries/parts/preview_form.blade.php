@@ -107,6 +107,7 @@
     </div>
 
     {{-- Figures --}}
+    <div style="overflow-x:auto;">
     <table style="margin-bottom:18px; font-size:14px;">
         <tbody>
             <tr>
@@ -135,10 +136,12 @@
             </tr>
         </tbody>
     </table>
+    </div>
 
     {{-- Lecture details --}}
     @if($lines->count())
         <div class="sp-strong" style="font-weight:700; margin-bottom:8px;">تفاصيل المحاضرات المحتسبة ({{ $lines->count() }})</div>
+        <div style="overflow-x:auto;">
         <table style="font-size:12.5px; margin-bottom:22px;">
             <thead>
                 <tr class="sp-head-row">
@@ -159,6 +162,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @endif
 
     {{-- Signatures --}}

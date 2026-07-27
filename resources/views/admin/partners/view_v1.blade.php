@@ -36,6 +36,7 @@
                     </div>
                     <div class="card-body py-4">
                         @include('admin.layout2.error')
+                        <div class="table-responsive">
                         <table id="kt_table" class="table table-row-bordered gy-5">
                             <thead>
                                 <tr class="fw-semibold fs-6 text-muted">
@@ -47,6 +48,7 @@
                             </thead>
                             <tbody></tbody>
                         </table>
+                        </div>
 
                     </div>
                 </div>

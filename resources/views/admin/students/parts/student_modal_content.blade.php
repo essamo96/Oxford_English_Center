@@ -350,6 +350,7 @@
                     <span class="badge badge-light-primary fw-bold ms-auto">{{ $student->gropes ? $student->gropes->count() : 0 }}</span>
                 </div>
                 @if($student->gropes && $student->gropes->count())
+                    <div class="table-responsive">
                     <table class="sd-groups-table">
                         <thead>
                             <tr>
@@ -374,6 +375,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @else
                     <div class="sd-empty-row">
                         <i class="bi bi-inbox fs-3 d-block mb-1"></i>

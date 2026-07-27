@@ -33,6 +33,7 @@
     @endif
 
     <h6 class="fw-bold mb-2"><i class="bi bi-list-check me-1"></i> المحاضرات المحتسبة ({{ $lines->count() }})</h6>
+    <div class="table-responsive">
     <table class="table table-row-bordered align-middle fs-7 text-center">
         <thead class="bg-light-secondary"><tr class="fw-bold text-muted">
             <th>#</th><th>التاريخ</th><th>المجموعة</th><th>الأجر</th>
@@ -53,4 +54,5 @@
             <tr class="fw-bold"><td colspan="3" class="text-end">إجمالي المحاضرات</td><td class="text-success">{{ number_format($total, 2) }} ILS</td></tr>
         </tfoot>
     </table>
+    </div>
 </div>

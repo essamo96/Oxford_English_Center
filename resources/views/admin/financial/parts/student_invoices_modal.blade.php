@@ -86,6 +86,7 @@
                 </div>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table table-row-bordered table-row-gray-200 align-middle mb-0 fs-7">
                     <thead class="bg-light-secondary">
                         <tr class="text-muted fw-bold fs-8 text-uppercase">
@@ -141,6 +142,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     @endforeach

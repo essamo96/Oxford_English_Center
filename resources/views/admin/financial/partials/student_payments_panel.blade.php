@@ -8,14 +8,14 @@
 .modal-receipt-img { max-width:100%; max-height:70vh; border-radius:10px; }
 </style>
 <div class="filter-bar">
-    <select id="filterStatus" class="form-select" style="width:180px;">
+    <select id="filterStatus" class="form-select" style="width:180px; min-width:140px;">
         <option value="pending">بانتظار المراجعة</option>
         <option value="approved">مقبول</option>
         <option value="rejected">مرفوض</option>
         <option value="">الكل</option>
     </select>
     @if(!isset($isBranchScoped) || !$isBranchScoped)
-    <select id="filterBranch" class="form-select" style="width:180px;">
+    <select id="filterBranch" class="form-select" style="width:180px; min-width:140px;">
         <option value="">كل الفروع</option>
         @foreach(\App\Models\Branch::all() as $br)
             <option value="{{ $br->id }}">{{ $br->name_ar }}</option>
@@ -25,6 +25,7 @@
     <button id="filterBtn" class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i>تطبيق</button>
 </div>
 
+<div class="table-responsive">
 <table id="payRequestsTable" class="table table-striped table-hover dt-responsive" style="width:100%">
     <thead>
         <tr>
@@ -40,6 +41,7 @@
     </thead>
     <tbody></tbody>
 </table>
+</div>
 
 {{-- Approve Modal --}}
 <div class="modal fade" id="approveModal" tabindex="-1">

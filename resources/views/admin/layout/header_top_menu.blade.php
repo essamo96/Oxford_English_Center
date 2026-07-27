@@ -204,6 +204,9 @@
             </div>
         </div>
     </div>
+    <div class="acg-scanner-wrapper">
+        <div id="acg_scanner" class="acg-scanner-beam"></div>
+    </div>
 </div>
 <!--end::Header-->
 
@@ -274,16 +277,18 @@ function clearApplicationCache(e) {
 </script>
 
 <style>
-/* ACG Scanner Wrapper to prevent scroll */
+/* ACG Scanner Wrapper — nested inside #kt_app_header so it stays within the header's own
+   stacking context and can never render above dropdown/menu panels opened from the header.
+   width:100% (not 100vw) avoids the classic 100vw-includes-scrollbar horizontal overflow bug. */
 .acg-scanner-wrapper {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100px;
     overflow: hidden;
     pointer-events: none;
-    z-index: 1000;
+    z-index: 2;
 }
 
 /* ACG Scanner Beam */
@@ -314,10 +319,6 @@ function clearApplicationCache(e) {
     color: #268aff !important;
 }
 </style>
-
-<div class="acg-scanner-wrapper">
-    <div id="acg_scanner" class="acg-scanner-beam"></div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

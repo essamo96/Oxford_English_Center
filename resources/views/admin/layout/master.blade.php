@@ -33,6 +33,13 @@
             font-family: 'Cairo', sans-serif !important;
         }
     </style>
+    {{-- RTL off-canvas sidebar fix: in dir="rtl" pages the closed drawer sits translated
+         past the right edge of the viewport, and Chromium counts that positive-x overflow
+         toward document.scrollWidth (it wouldn't in LTR, where the drawer is translated
+         to the left instead) — producing a phantom horizontal scrollbar on mobile. --}}
+    <style>
+        html, body { overflow-x: hidden; max-width: 100%; }
+    </style>
     {{-- Global table alignment fix: keep every cell vertically centred so multi-line cells
          (stacked badges, dates, action buttons) stay consistent across ALL admin tables. --}}
     <style>

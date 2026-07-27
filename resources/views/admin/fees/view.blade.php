@@ -35,6 +35,7 @@
     </div>
     <div class="card-body py-4">
         @include('admin.layout.masterLayouts.error')
+        <div class="table-responsive">
         <table id="fees_table" class="table align-middle table-row-dashed fs-6 gy-5 table-striped table-bordered text-center">
             <thead>
                 <tr class="text-center text-muted fw-bold fs-7 text-uppercase gs-0">
@@ -49,6 +50,7 @@
             </thead>
             <tbody class="text-gray-600 fw-semibold text-center"></tbody>
         </table>
+        </div>
     </div>
 </div>
 

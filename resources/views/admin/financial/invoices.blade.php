@@ -84,20 +84,20 @@
             <div class="d-flex invoice-filters" style="overflow-x:auto;">
                 <div class="d-flex align-items-center position-relative flex-shrink-0">
                     <i class="ki-duotone ki-magnifier fs-4 position-absolute ms-4"><span class="path1"></span><span class="path2"></span></i>
-                    <input type="text" id="invoice_search" class="form-control form-control-solid form-control-sm ps-11" placeholder="بحث..." style="width:180px;" />
+                    <input type="text" id="invoice_search" class="form-control form-control-solid form-control-sm ps-11" style="width:180px; min-width:120px;" placeholder="بحث..." />
                 </div>
-                <select id="invoice_program_type" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:130px;">
+                <select id="invoice_program_type" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:130px; min-width:100px;">
                     <option value="">النوع</option>
                     <option value="adult">كبار</option>
                     <option value="kids">أطفال</option>
                 </select>
-                <select id="invoice_program_id" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:160px;">
+                <select id="invoice_program_id" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:160px; min-width:120px;">
                     <option value="">البرنامج</option>
                     @foreach($programs_filter ?? [] as $p)
                         <option value="{{ $p->id }}">{{ $p->title }}</option>
                     @endforeach
                 </select>
-                <select id="invoice_level" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:120px;">
+                <select id="invoice_level" class="form-select form-select-solid form-select-sm flex-shrink-0" style="width:120px; min-width:100px;">
                     <option value="">المستوى</option>
                     @foreach($levels_filter ?? [] as $lv)
                         <option value="{{ $lv }}">{{ $lv }}</option>
@@ -116,6 +116,7 @@
         </div>
     </div>
     <div class="card-body pt-0">
+        <div class="table-responsive">
         <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_invoices_table">
             <thead>
                 <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
@@ -132,6 +133,7 @@
                 {{-- Loaded via DataTable --}}
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @stop
