@@ -41,19 +41,33 @@
 .ox-chat__send:disabled { opacity: .4; cursor: not-allowed; }
 .ox-chat__send:not(:disabled):hover { background: #2563eb; }
 
-/* ── message bubble (shared by initial render + realtime append) ── */
-.ox-msg { display: flex; gap: 10px; max-width: 100%; }
-.ox-msg__avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #2c3547; }
-.ox-msg__col { display: flex; flex-direction: column; max-width: 78%; }
-.ox-msg__meta { margin-bottom: 3px; }
-.ox-msg__name { font-size: .74rem; font-weight: 700; color: #93a1b8; }
-.ox-msg__bubble { background: #262f42; color: #e7ecf5; padding: 9px 13px; border-radius: 12px 12px 12px 3px; font-size: .87rem; line-height: 1.5; word-break: break-word; white-space: pre-line; }
-.ox-msg__time { margin-top: 3px; font-size: .68rem; color: #6b7994; }
+/* ── message bubble (WhatsApp-style: avatar, name+gender, bubble with inline time) ── */
+.ox-msg { display: flex; gap: 8px; max-width: 100%; align-items: flex-end; }
+.ox-msg__avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #2c3547; border: 1px solid #2c3547; }
+.ox-msg__col { display: flex; flex-direction: column; max-width: 80%; min-width: 0; }
+.ox-msg__meta { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; padding: 0 4px; }
+.ox-msg__name { font-size: .72rem; font-weight: 700; color: #93a1b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ox-msg__gender { font-size: .78rem; line-height: 1; }
+.ox-msg__bubble {
+    position: relative;
+    background: #262f42; color: #e7ecf5;
+    padding: 8px 10px 6px 10px; border-radius: 14px 14px 14px 4px;
+    font-size: .89rem; line-height: 1.45; word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,.25);
+    display: inline-flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 10px;
+}
+.ox-msg__text { white-space: pre-line; flex: 1 1 auto; }
+.ox-msg__time { flex-shrink: 0; font-size: .64rem; color: #93a1b8; opacity: .85; margin-inline-start: auto; align-self: flex-end; }
 
+/* incoming (other members / the teacher) */
+.ox-msg--theirs .ox-msg__bubble { border-inline-start: 2px solid #3b82f6; }
+
+/* my own messages: WhatsApp hides the name on your own bubbles and flips the tail */
 .ox-msg--mine { flex-direction: row-reverse; margin-inline-start: auto; }
 .ox-msg--mine .ox-msg__col { align-items: flex-end; }
-.ox-msg--mine .ox-msg__bubble { background: #3b82f6; color: #fff; border-radius: 12px 12px 3px 12px; }
-.ox-msg--mine .ox-msg__time { align-self: flex-end; }
+.ox-msg--mine .ox-msg__meta { display: none; }
+.ox-msg--mine .ox-msg__bubble { background: #3b82f6; color: #fff; border-radius: 14px 14px 4px 14px; }
+.ox-msg--mine .ox-msg__time { color: rgba(255,255,255,.75); }
 
 .chat_box .loader { color: #93a1b8; font-size: 1.2rem; align-self: center; }
 </style>

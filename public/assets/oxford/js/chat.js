@@ -251,18 +251,39 @@ function escapeHtml(str)
     });
 }
 
-function getMessageSenderHtml(message)
+// gender: 1 = male (🦁), 2 or legacy 0 = female (🦋) — only ever set for students, teachers
+// have no gender column so their messages simply carry no emoji.
+function chatGenderEmoji(message)
 {
+    var g = parseInt(message.gender, 10);
+    if (g === 1) return '🦁';
+    if (g === 2 || g === 0) return '🦋';
+    return '';
+}
+
+function chatBubbleHtml(message, mine)
+{
+    var emoji = chatGenderEmoji(message);
     return `
-    <div class="ox-msg msg_container ox-msg--mine base_sent" data-message-id="${message.id}">
+    <div class="ox-msg msg_container ${mine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive'}" data-message-id="${message.id}">
         <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
         <div class="ox-msg__col">
-            <div class="ox-msg__meta"><span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span></div>
-            <div class="ox-msg__bubble">${escapeHtml(message.content).replace(/\n/g, '<br>')}</div>
-            <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
+            <div class="ox-msg__meta">
+                <span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span>
+                ${emoji ? '<span class="ox-msg__gender">' + emoji + '</span>' : ''}
+            </div>
+            <div class="ox-msg__bubble">
+                <span class="ox-msg__text">${escapeHtml(message.content).replace(/\n/g, '<br>')}</span>
+                <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
+            </div>
         </div>
     </div>
     `;
+}
+
+function getMessageSenderHtml(message)
+{
+    return chatBubbleHtml(message, true);
 }
 
 /**
@@ -275,16 +296,7 @@ function getMessageSenderHtml(message)
  */
 function getMessageReceiverHtml(message)
 {
-    return `
-    <div class="ox-msg msg_container ox-msg--theirs base_receive" data-message-id="${message.id}">
-        <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
-        <div class="ox-msg__col">
-            <div class="ox-msg__meta"><span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span></div>
-            <div class="ox-msg__bubble">${escapeHtml(message.content).replace(/\n/g, '<br>')}</div>
-            <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
-        </div>
-    </div>
-    `;
+    return chatBubbleHtml(message, false);
 }
 
 /**

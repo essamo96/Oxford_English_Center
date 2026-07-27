@@ -70,6 +70,7 @@ class MessagesController extends Controller {
         $message->fromUserName = $message->name ?? $user->name;
         $message->from_user_id = $user->id;
         $message->image = $user->image ?? null;
+        $message->gender = $type == 'student' ? ($user->gender ?? null) : null;
         PusherFactory::make()->trigger('chat', 'send', ['data' => $message]);
 
         return response()->json(['state' => 1, 'data' => $message]);

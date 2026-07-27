@@ -906,7 +906,7 @@
     });
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
-<script src="{{ url('assets/oxford/js/chat.js') }}" type="text/javascript"></script>
+<script src="{{ url('assets/oxford/js/chat.js') }}?v={{ @filemtime(public_path('assets/oxford/js/chat.js')) ?: time() }}" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         $('.userinfo').click(function() {

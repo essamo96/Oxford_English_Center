@@ -33,7 +33,12 @@ class Message extends Model {
                             WHEN user_type =0 THEN (select image FROM students where id=messages.from_user)
                             ELSE  (select image FROM teachers where id=messages.from_user)
                         END
-                    ) as image ")->where('group_id', $group_id)->orderBy('messages.created_at', 'desc')->limit(10)->get();
+                    ) as image,(
+                        CASE
+                            WHEN user_type =0 THEN (select gender FROM students where id=messages.from_user)
+                            ELSE NULL
+                        END
+                    ) as gender ")->where('group_id', $group_id)->orderBy('messages.created_at', 'desc')->limit(10)->get();
     }
 
 }
