@@ -8,6 +8,7 @@
                     <span class="ox-chat__header-sub">محادثة المجموعة</span>
                 </div>
             </div>
+            
             <span class="ox-chat__close close-chat" title="إغلاق"><i class="fa fa-times"></i></span>
         </div>
         <div class="ox-chat__body chat-area"></div>
