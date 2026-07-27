@@ -67,8 +67,9 @@ class MessagesController extends Controller {
         // prepare some data to send with the response
         $message->dateTimeStr = date("Y-m-dTH:i", strtotime($message->created_at->toDateTimeString()));
         $message->dateHumanReadable = $message->created_at->diffForHumans();
-        $message->fromUserName = $message->name;
+        $message->fromUserName = $message->name ?? $user->name;
         $message->from_user_id = $user->id;
+        $message->image = $user->image ?? null;
         PusherFactory::make()->trigger('chat', 'send', ['data' => $message]);
 
         return response()->json(['state' => 1, 'data' => $message]);

@@ -66,9 +66,16 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script src="{{ url('assets/js/dashboard.js?v=1') }}"></script>
 
+        {{-- Pusher library — needed by both roles: chat.js (group chat) runs for students AND
+             teachers, plus the student-only real-time notification channel below. Loading it
+             only under @if($isStudent) left teachers with no window.Pusher at all, so their
+             chat.js never even finished initializing (ReferenceError on the very first line). --}}
+        @if($isStudent || $isTeacher)
+        <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+        @endif
+
         {{-- ── Student real-time notifications (Pusher) ─────────────────── --}}
         @if($isStudent)
-        <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
         @auth('students')
         <script>
         (function () {

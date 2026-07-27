@@ -1,29 +1,24 @@
-@if($message->from_user == \Auth::user()->id)
-
-    <div class="row msg_container base_sent" data-message-id="{{ $message->id }}">
-        <div class="col-md-10 col-xs-10">
-            <div class="messages msg_sent text-right">
-                <p>{!! $message->content !!}</p>
-                <time datetime="{{ date("Y-m-dTH:i", strtotime($message->created_at->toDateTimeString())) }}">{{ $message->name }} • {{ $message->created_at->diffForHumans() }}</time>
-            </div>
+@php
+    // \Auth::user()->id relies on the DEFAULT guard (students) — on a teacher's session that
+    // guard's user() is null, which would fatal-error here ("member function on null").
+    // Resolve the id from whichever guard is actually authenticated instead.
+    $currentId = \Auth::guard('students')->check()
+        ? \Auth::guard('students')->id()
+        : (\Auth::guard('teachers')->check() ? \Auth::guard('teachers')->id() : null);
+    $isMine = $message->from_user == $currentId;
+    $avatarUrl = ($message->image ?? null) && file_exists(public_path($message->image))
+        ? asset($message->image)
+        : asset('assets/oxford/images/user-avatar.png');
+@endphp
+<div class="ox-msg msg_container {{ $isMine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive' }}" data-message-id="{{ $message->id }}">
+    <img class="ox-msg__avatar" src="{{ $avatarUrl }}" alt="{{ $message->name }}">
+    <div class="ox-msg__col">
+        <div class="ox-msg__meta">
+            <span class="ox-msg__name">{{ $message->name }}</span>
         </div>
-        <div class="col-md-2 col-xs-2 avatar">
-            <img src="{{ url('assets/oxford/images/user-avatar.png') }}" width="50" height="50" class="img-responsive">
-        </div>
+        <div class="ox-msg__bubble">{!! nl2br(e($message->content)) !!}</div>
+        <time class="ox-msg__time" datetime="{{ date("Y-m-dTH:i", strtotime($message->created_at->toDateTimeString())) }}">
+            {{ $message->created_at->diffForHumans() }}
+        </time>
     </div>
-
-@else
-
-    <div class="row msg_container base_receive" data-message-id="{{ $message->id }}">
-        <div class="col-md-2 col-xs-2 avatar">
-            <img src="{{ url('assets/oxford/images/user-avatar.png') }}" width="50" height="50" class=" img-responsive ">
-        </div>
-        <div class="col-md-10 col-xs-10">
-            <div class="messages msg_receive text-left">
-                <p>{!! $message->content !!}</p>
-                <time datetime="{{ date("Y-m-dTH:i", strtotime($message->created_at->toDateTimeString())) }}">{{ $message->name }} • {{ $message->created_at->diffForHumans() }}</time>
-            </div>
-        </div>
-    </div>
-
-@endif
+</div>

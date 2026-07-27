@@ -33,24 +33,30 @@ $(function () {
     });
 
     // on close chat close the chat box but don't remove it from the dom
-    $(".close-chat").on("click", function (e) {
+    // delegated for the same reason as .chat_input above — real chat boxes are clones of the
+    // hidden #chat_box template, so their .close-chat is a different DOM node each time.
+    $(document).on("click", ".close-chat", function (e) {
 
         $(this).parents("div.chat-opened").removeClass("chat-opened").slideUp("fast");
     });
 
 
     // on change chat input text toggle the chat btn disabled state
-    $(".chat_input").on("change keyup", function (e) {
+    // NOTE: delegated on document — the chat box (and its .chat_input) is cloned into the DOM
+    // dynamically after the page loads, so a direct $(".chat_input").on(...) binding here would
+    // never actually attach to it and the send button would stay disabled forever.
+    $(document).on("change keyup input", ".chat_input", function (e) {
+        let box = $(this).closest(".chat_box, [id^='chat_box_']");
         if ($(this).val() != "") {
-            $(this).parents(".form-controls").find(".btn-chat").prop("disabled", false);
+            box.find(".btn-chat").prop("disabled", false);
         } else {
-            $(this).parents(".form-controls").find(".btn-chat").prop("disabled", true);
+            box.find(".btn-chat").prop("disabled", true);
         }
     });
 
 
     // on click the btn send the message
-    $(".btn-chat").on("click", function (e) {
+    $(document).on("click", ".btn-chat", function (e) {
         send($(this).attr('data-to-user'), $("#chat_box_" + $(this).attr('data-to-user')).find(".chat_input").val());
     });
 
@@ -233,18 +239,27 @@ function fetchOldMessages(to_user, old_message_id)
  * @param message
  * @returns {string}
  */
+function chatAvatarUrl(message)
+{
+    return message.image ? (base_url + '/' + message.image) : (base_url + '/assets/oxford/images/user-avatar.png');
+}
+
+function escapeHtml(str)
+{
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (m) {
+        return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m];
+    });
+}
+
 function getMessageSenderHtml(message)
 {
     return `
-           <div class="row msg_container base_sent" data-message-id="${message.id}">
-        <div class="col-md-10 col-xs-10">
-            <div class="messages msg_sent text-right">
-                <p>${message.content}</p>
-                <time datetime="${message.dateTimeStr}"> ${message.fromUserName} • ${message.dateHumanReadable} </time>
-            </div>
-        </div>
-        <div class="col-md-2 col-xs-2 avatar">
-            <img src="` + base_url + '/assets/oxford/images/user-avatar.png' + `" width="50" height="50" class="img-responsive">
+    <div class="ox-msg msg_container ox-msg--mine base_sent" data-message-id="${message.id}">
+        <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
+        <div class="ox-msg__col">
+            <div class="ox-msg__meta"><span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span></div>
+            <div class="ox-msg__bubble">${escapeHtml(message.content).replace(/\n/g, '<br>')}</div>
+            <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
         </div>
     </div>
     `;
@@ -261,16 +276,12 @@ function getMessageSenderHtml(message)
 function getMessageReceiverHtml(message)
 {
     return `
-           <div class="row msg_container base_receive" data-message-id="${message.id}">
-           <div class="col-md-2 col-xs-2 avatar">
-             <img src="` + base_url + '/assets/oxford/images/user-avatar.png' + `" width="50" height="50" class="img-responsive">
-             samer
-           </div>
-        <div class="col-md-10 col-xs-10">
-            <div class="messages msg_receive text-left">
-                <p>${message.content}</p>
-                <time datetime="${message.dateTimeStr}"> ${message.fromUserName}  • ${message.dateHumanReadable} </time>
-            </div>
+    <div class="ox-msg msg_container ox-msg--theirs base_receive" data-message-id="${message.id}">
+        <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
+        <div class="ox-msg__col">
+            <div class="ox-msg__meta"><span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span></div>
+            <div class="ox-msg__bubble">${escapeHtml(message.content).replace(/\n/g, '<br>')}</div>
+            <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
         </div>
     </div>
     `;
@@ -292,7 +303,7 @@ function displayMessage(message)
 
         $("#chat_box_" + message.group_id).find(".chat-area").append(messageLine);
 
-    } else if ($.inArray('"' + message.group_id + '"', mygroups)) {
+    } else if ($.inArray(String(message.group_id), mygroups) !== -1) {
 
         alert_sound.play();
 

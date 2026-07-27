@@ -537,7 +537,7 @@ $('.date-picker').datepicker();
 });
 </script>
 <script>
-    var base_url = '{{ url(' / ') }}';
+    var base_url = '{{ url('/') }}';
 </script>
 <script>
 /* ---- Dashboard KPI count-up + charts (theme-aware) ---- */
