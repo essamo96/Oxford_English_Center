@@ -6,6 +6,7 @@
         ? \Auth::guard('students')->id()
         : (\Auth::guard('teachers')->check() ? \Auth::guard('teachers')->id() : null);
     $isMine = $message->from_user == $currentId;
+    $isTeacherMsg = ((int) ($message->user_type ?? 0) === 1);
     $avatarUrl = ($message->image ?? null) && file_exists(public_path($message->image))
         ? asset($message->image)
         : asset('assets/oxford/images/user-avatar.png');
@@ -13,11 +14,15 @@
     // gender column), so a teacher's message simply shows no emoji.
     $genderEmoji = ((int) ($message->gender ?? 0) === 1) ? '🦁' : (in_array((int) ($message->gender ?? -1), [2, 0], true) ? '🦋' : '');
 @endphp
-<div class="ox-msg msg_container {{ $isMine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive' }}" data-message-id="{{ $message->id }}">
-    <img class="ox-msg__avatar" src="{{ $avatarUrl }}" alt="{{ $message->name }}">
+<div class="ox-msg msg_container {{ $isMine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive' }} {{ $isTeacherMsg ? 'ox-msg--teacher' : '' }}" data-message-id="{{ $message->id }}">
+    <div class="ox-msg__avatar-wrap">
+        <img class="ox-msg__avatar" src="{{ $avatarUrl }}" alt="{{ $message->name }}">
+        @if($isTeacherMsg)<span class="ox-msg__crown" title="المعلم">👑</span>@endif
+    </div>
     <div class="ox-msg__col">
         <div class="ox-msg__meta">
             <span class="ox-msg__name">{{ $message->name }}</span>
+            @if($isTeacherMsg)<span class="ox-msg__role">المعلم</span>@endif
             @if($genderEmoji)<span class="ox-msg__gender">{{ $genderEmoji }}</span>@endif
         </div>
         <div class="ox-msg__bubble">

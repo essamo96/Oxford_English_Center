@@ -43,11 +43,13 @@
 
 /* ── message bubble (WhatsApp-style: avatar, name+gender, bubble with inline time) ── */
 .ox-msg { display: flex; gap: 8px; max-width: 100%; align-items: flex-end; }
-.ox-msg__avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #2c3547; border: 1px solid #2c3547; }
+.ox-msg__avatar-wrap { position: relative; flex-shrink: 0; }
+.ox-msg__avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block; background: #2c3547; border: 1px solid #2c3547; }
 .ox-msg__col { display: flex; flex-direction: column; max-width: 80%; min-width: 0; }
 .ox-msg__meta { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; padding: 0 4px; }
 .ox-msg__name { font-size: .72rem; font-weight: 700; color: #93a1b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ox-msg__gender { font-size: .78rem; line-height: 1; }
+.ox-msg__role { font-size: .62rem; font-weight: 700; color: #17263b; background: #f5c518; border-radius: 999px; padding: 1px 7px; line-height: 1.5; flex-shrink: 0; }
 .ox-msg__bubble {
     position: relative;
     background: #262f42; color: #e7ecf5;
@@ -59,8 +61,20 @@
 .ox-msg__text { white-space: pre-line; flex: 1 1 auto; }
 .ox-msg__time { flex-shrink: 0; font-size: .64rem; color: #93a1b8; opacity: .85; margin-inline-start: auto; align-self: flex-end; }
 
-/* incoming (other members / the teacher) */
+/* incoming (other members) */
 .ox-msg--theirs .ox-msg__bubble { border-inline-start: 2px solid #3b82f6; }
+
+/* ── teacher: gold crown badge on the avatar + a distinct gold-accented bubble so the
+   teacher always stands out from regular students, for every viewer in the group ── */
+.ox-msg__crown {
+    position: absolute; top: -6px; inset-inline-end: -6px;
+    font-size: .72rem; line-height: 1;
+    background: #f5c518; border: 2px solid #1b2130; border-radius: 50%;
+    width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+}
+.ox-msg--teacher .ox-msg__avatar { border-color: #f5c518; }
+.ox-msg--teacher.ox-msg--theirs .ox-msg__bubble { background: #3a2f14; border-inline-start: 2px solid #f5c518; }
+.ox-msg--teacher.ox-msg--theirs .ox-msg__name { color: #f5c518; }
 
 /* my own messages: WhatsApp hides the name on your own bubbles and flips the tail */
 .ox-msg--mine { flex-direction: row-reverse; margin-inline-start: auto; }
@@ -68,6 +82,8 @@
 .ox-msg--mine .ox-msg__meta { display: none; }
 .ox-msg--mine .ox-msg__bubble { background: #3b82f6; color: #fff; border-radius: 14px 14px 4px 14px; }
 .ox-msg--mine .ox-msg__time { color: rgba(255,255,255,.75); }
+/* even on your own bubble (teacher viewing their own message) keep the crown on the avatar */
+.ox-msg--mine.ox-msg--teacher .ox-msg__bubble { background: linear-gradient(135deg, #3b82f6, #2f6fe0); }
 
 .chat_box .loader { color: #93a1b8; font-size: 1.2rem; align-self: center; }
 </style>

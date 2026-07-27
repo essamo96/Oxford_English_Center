@@ -264,12 +264,18 @@ function chatGenderEmoji(message)
 function chatBubbleHtml(message, mine)
 {
     var emoji = chatGenderEmoji(message);
+    // user_type: 0 = student, 1 = teacher (see Message model / MessagesController)
+    var isTeacher = parseInt(message.user_type, 10) === 1;
     return `
-    <div class="ox-msg msg_container ${mine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive'}" data-message-id="${message.id}">
-        <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
+    <div class="ox-msg msg_container ${mine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive'} ${isTeacher ? 'ox-msg--teacher' : ''}" data-message-id="${message.id}">
+        <div class="ox-msg__avatar-wrap">
+            <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
+            ${isTeacher ? '<span class="ox-msg__crown" title="المعلم">👑</span>' : ''}
+        </div>
         <div class="ox-msg__col">
             <div class="ox-msg__meta">
                 <span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span>
+                ${isTeacher ? '<span class="ox-msg__role">المعلم</span>' : ''}
                 ${emoji ? '<span class="ox-msg__gender">' + emoji + '</span>' : ''}
             </div>
             <div class="ox-msg__bubble">
