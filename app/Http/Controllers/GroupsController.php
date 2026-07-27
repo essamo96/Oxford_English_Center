@@ -16,6 +16,7 @@ use App\Models\Absent_Teacher;
 use Illuminate\Http\Request;
 use App\Models\GroupStudents;
 use App\Models\Evaluate_Items;
+use App\Models\Teacher_Evaluate_Student;
 use App\Models\GroupExamDates;
 use App\Models\Absent_Student;
 use App\Models\TeacherLibrary;
@@ -24,7 +25,6 @@ use App\Services\ScheduleParser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Teacher_Evaluate_Student;
 use App\Models\Teacher_Evaluate_Answer;
 
 class GroupsController extends Controller {
@@ -486,6 +486,12 @@ class GroupsController extends Controller {
         if ($curent_groups_infos != null) {
             parent::$data['data'] = $curent_groups_infos;
             parent::$data['group_image'] = $curent_groups_infos->group->image;
+            parent::$data['student_notes'] = Teacher_Evaluate_Student::with('students')
+                ->where('group_id', $group_id)
+                ->whereNotNull('notes')
+                ->where('notes', '!=', '')
+                ->orderBy('created_at', 'desc')
+                ->get();
             return view('frontend.teachers.teacher_grope_info', parent::$data);
         }
 

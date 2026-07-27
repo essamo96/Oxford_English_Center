@@ -9,7 +9,10 @@ $(function () {
 
 
     // on click on any chat btn render the chat box
-    $(".chat-toggle").on("click", function (e) {
+    // delegated on document: chat-toggle buttons also appear inside content loaded later via
+    // AJAX (e.g. the "Launch Group Chat" button on the group-details/#Info screen) — a direct
+    // binding here would only ever reach the buttons that existed at page load.
+    $(document).on("click", ".chat-toggle", function (e) {
         e.preventDefault();
 
         let ele = $(this);

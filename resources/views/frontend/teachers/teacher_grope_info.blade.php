@@ -77,6 +77,30 @@
                         <strong>Pro Tip:</strong> Ensure you record attendance within the first 15 minutes of the session. Students can view their marks and progress in real-time once you save them.
                     </p>
                 </div>
+
+                {{-- Student notes recorded during evaluation — previously saved but never shown anywhere --}}
+                <div class="dash-card mt-20">
+                    <h4 class="mb-20" style="font-weight:700;border-bottom:2px solid var(--border-color);padding-bottom:10px;">
+                        <i class="fa fa-sticky-note-o"></i> Student Notes
+                    </h4>
+                    @forelse(($student_notes ?? []) as $note)
+                        <div class="d-flex gap-15 mb-15 pb-15" style="border-bottom:1px dashed var(--border-color);">
+                            <div class="symbol symbol-40px flex-shrink-0" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:#2c3547;">
+                                <img src="{{ $note->students && $note->students->image && file_exists(public_path($note->students->image)) ? asset($note->students->image) : asset('assets/oxford/images/user-avatar.png') }}"
+                                     alt="{{ $note->students->name ?? '—' }}" style="width:100%;height:100%;object-fit:cover;">
+                            </div>
+                            <div class="flex-grow-1" style="min-width:0;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong style="color:var(--text-primary);">{{ $note->students->name ?? 'Unknown Student' }}</strong>
+                                    <span class="small" style="color:var(--light-text);">{{ $note->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="m-0 small" style="color:var(--text-primary); line-height:1.6; white-space:pre-line;">{{ $note->notes }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="m-0 small" style="color: var(--light-text);">No notes recorded yet for this group's students.</p>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>

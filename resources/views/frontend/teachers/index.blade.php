@@ -580,14 +580,22 @@
                                                     onclick="openTeacherQrModal(this)">
                                                 <i class="fa fa-qrcode"></i> QR
                                             </button>
-                                            <button class="btn-stop-group staus_course"
-                                                    data-end-date="{{ $group->end_date }}"
-                                                    data-group-id="{{ $group->id }}">
-                                                <i class="fa fa-stop-circle"></i> Close
-                                            </button>
+                                            @if($group->status == 1)
+                                                <button class="btn-stop-group staus_course"
+                                                        data-end-date="{{ $group->end_date }}"
+                                                        data-group-id="{{ $group->id }}">
+                                                    <i class="fa fa-stop-circle"></i> Close
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
-                                    
+                                    <div class="mb-10">
+                                        <span class="status-badge {{ $group->status == 1 ? 'status-active' : 'status-delayed' }}">
+                                            <i class="fa {{ $group->status == 1 ? 'fa-play-circle' : 'fa-check-circle' }}"></i>
+                                            {{ $group->status == 1 ? 'Active' : 'Finished' }}
+                                        </span>
+                                    </div>
+
                                     <div class="course-meta">
                                         <div class="meta-item" title="Group Name">
                                             <i class="fa fa-tag"></i> {{ $group->name }}
