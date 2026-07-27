@@ -33,6 +33,15 @@
         body.dark-mode .oxford-sidebar-text {
             color: #FFFFFF; /* Fallback for alternative dark mode syntax */
         }
+
+        /* Metronic hides .app-sidebar-logo below 991.98px by design (the header shows its own
+           compact mobile logo instead). We want the drawer to always carry its own branding
+           when opened on mobile, so the sidebar never looks "cut off" from its logo. */
+        @media (max-width: 991.98px) {
+            #kt_app_sidebar_logo {
+                display: flex !important;
+            }
+        }
     </style>
 
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">

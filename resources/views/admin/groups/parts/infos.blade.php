@@ -53,6 +53,7 @@
             <div class="col-md-6 col-lg-4 col-xl-3">
                 <div class="card h-100 border-dashed border-danger">
                     <div class="card-body d-flex flex-center flex-column py-5">
+                        <i class="ki-duotone ki-user-minus fs-2x text-danger mb-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                         <span class="fs-2hx fw-bold text-danger">{{ $countUnActiveStudent }}</span>
                         <span class="fs-6 fw-semibold text-gray-400">غير فعالين</span>
                     </div>

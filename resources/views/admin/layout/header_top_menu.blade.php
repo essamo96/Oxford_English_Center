@@ -48,7 +48,10 @@
                 <!--end::Clear Cache Button-->
                 <!--begin::SMS Shuttle Button-->
                 <div class="app-navbar-item ms-1 ms-md-3">
-                    <button type="button" class="btn btn-sm btn-light-primary fw-bold px-4 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#smsShuttleModal">
+                    <button type="button" class="btn btn-sm btn-icon btn-light-primary d-md-none" data-bs-toggle="modal" data-bs-target="#smsShuttleModal" title="رسائل SMS">
+                        <i class="fa fa-envelope fs-5"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light-primary fw-bold px-4 d-none d-md-flex align-items-center" data-bs-toggle="modal" data-bs-target="#smsShuttleModal">
                         <i class="fa fa-envelope fs-5 me-1"></i>
                         رسائل SMS
                     </button>
@@ -57,16 +60,16 @@
                 <!--begin::Branch Indicator-->
                 @if(isset($isBranchScoped) && $isBranchScoped && isset($activeBranch) && $activeBranch)
                 <div class="app-navbar-item ms-1 ms-md-3">
-                    <span class="badge badge-light-info fs-7 fw-bold px-4 py-2 d-flex align-items-center gap-2">
+                    <span class="badge badge-light-info fs-7 fw-bold px-2 px-md-4 py-2 d-flex align-items-center gap-2" title="{{ $activeBranch->name_ar }}">
                         <i class="ki-duotone ki-geolocation fs-5 text-info"><span class="path1"></span><span class="path2"></span></i>
-                        {{ $activeBranch->name_ar }}
+                        <span class="d-none d-md-inline">{{ $activeBranch->name_ar }}</span>
                     </span>
                 </div>
                 @elseif(!isset($isBranchScoped) || !$isBranchScoped)
                 <div class="app-navbar-item ms-1 ms-md-3">
-                    <span class="badge badge-light-success fs-7 fw-bold px-4 py-2 d-flex align-items-center gap-2" title="تعرض جميع الفروع">
+                    <span class="badge badge-light-success fs-7 fw-bold px-2 px-md-4 py-2 d-flex align-items-center gap-2" title="تعرض جميع الفروع">
                         <i class="ki-duotone ki-geolocation fs-5 text-success"><span class="path1"></span><span class="path2"></span></i>
-                        كل الفروع
+                        <span class="d-none d-md-inline">كل الفروع</span>
                     </span>
                 </div>
                 @endif
@@ -317,6 +320,22 @@ function clearApplicationCache(e) {
 .acg-icon-pulsing.ki-duotone i,
 .acg-icon-pulsing.ki-duotone span {
     color: #268aff !important;
+}
+
+/* Mobile navbar safety net: the topbar can carry many items (theme toggle, cache button,
+   SMS shortcut, branch badge, notifications, user menu). On narrow screens tighten the gap
+   and allow horizontal scroll instead of silently pushing icons off-screen unreachable. */
+@media (max-width: 575.98px) {
+    .app-navbar {
+        gap: 0.35rem !important;
+        overflow-x: auto;
+        max-width: 100%;
+        flex-wrap: nowrap;
+    }
+    .app-navbar-item {
+        margin-inline-start: 0 !important;
+        flex-shrink: 0;
+    }
 }
 </style>
 
