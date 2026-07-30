@@ -85,5 +85,66 @@
 /* even on your own bubble (teacher viewing their own message) keep the crown on the avatar */
 .ox-msg--mine.ox-msg--teacher .ox-msg__bubble { background: linear-gradient(135deg, #3b82f6, #2f6fe0); }
 
+/* ── admin (الإدارة): red shield badge + red-accented bubble, so an official
+   comment is never mistaken for a classmate's or the teacher's message ── */
+.ox-msg__role--admin { background: #ef4444; color: #fff; }
+.ox-msg__shield { background: #ef4444; }
+.ox-msg--admin .ox-msg__avatar { border-color: #ef4444; }
+.ox-msg--admin.ox-msg--theirs .ox-msg__bubble { background: #3a1d20; border-inline-start: 2px solid #ef4444; }
+.ox-msg--admin.ox-msg--theirs .ox-msg__name { color: #ff8a8a; }
+
+/* ── attachments: image preview, voice note player, generic file chip ── */
+.ox-msg__attachment { display: block; flex: 1 1 100%; margin-top: 4px; }
+.ox-msg__image { max-width: 100%; max-height: 200px; border-radius: 10px; display: block; object-fit: cover; }
+
+/* voice note — WhatsApp-style player, matching the admin monitor's markup so a
+   note renders identically for students, teachers and admins */
+.ox-voice { display: flex; align-items: center; gap: 8px; min-width: 200px; max-width: 240px; }
+.ox-voice__btn {
+    width: 32px; height: 32px; flex-shrink: 0; border: none; border-radius: 50%;
+    background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; cursor: pointer; transition: background .15s, transform .1s; padding: 0;
+}
+.ox-voice__btn:hover { background: #2563eb; }
+.ox-voice__btn:active { transform: scale(.94); }
+.ox-voice__body { flex: 1; min-width: 0; display: block; }
+.ox-voice__wave {
+    position: relative; display: flex; align-items: center; gap: 2px;
+    height: 22px; cursor: pointer; overflow: hidden;
+}
+.ox-voice__bar { flex: 1; min-width: 2px; border-radius: 2px; background: rgba(255,255,255,.35); }
+.ox-voice__progress {
+    position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 0;
+    background: #fff; opacity: .30; border-radius: 3px; pointer-events: none;
+    transition: width .1s linear;
+}
+.ox-voice__meta { display: block; font-size: .64rem; color: #93a1b8; margin-top: 1px; }
+.ox-msg--mine .ox-voice__meta { color: rgba(255,255,255,.75); }
+.ox-msg--mine .ox-voice__btn { background: #fff; color: #3b82f6; }
+.ox-msg__file {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    color: #cfe0f7; text-decoration: none; border-radius: 8px; padding: 6px 10px; font-size: .8rem;
+}
+.ox-msg__file:hover { background: rgba(255,255,255,.16); color: #fff; }
+
+/* read-only notice replacing the composer when the group is frozen or the
+   student is banned — history stays readable, only sending is refused */
+.ox-chat__blocked {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px; border-top: 1px solid #2c3547; background: #2a1c1f;
+    color: #ffb4b4; font-size: .8rem; line-height: 1.5;
+}
+.ox-chat__blocked i { flex-shrink: 0; opacity: .8; }
+
+/* full ban: the conversation itself is withheld, not just the composer */
+.ox-chat__banned {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    padding: 30px 24px; text-align: center;
+}
+.ox-chat__banned-icon { font-size: 2.6rem; line-height: 1; opacity: .9; }
+.ox-chat__banned-text { color: #ffb4b4; font-size: .86rem; line-height: 1.7; }
+
 .chat_box .loader { color: #93a1b8; font-size: 1.2rem; align-self: center; }
 </style>

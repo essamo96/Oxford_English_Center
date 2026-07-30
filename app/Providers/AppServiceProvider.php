@@ -19,7 +19,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Safe route helper: returns '#' instead of throwing if route name is missing.
         // Usage in views: {{ safe_route('some.route') }}
-        if (!function_exists('safe_route')) {
+        // The guard has to name the function as declared — this file is namespaced, so the
+        // declaration below is App\Providers\safe_route, while function_exists('safe_route')
+        // asks about the *global* one and always answers false. That let a second boot() in
+        // the same process (any test run with more than one test) fatal on redeclaration.
+        if (!function_exists(__NAMESPACE__ . '\\safe_route')) {
             function safe_route(string $name, $parameters = [], bool $absolute = true): string
             {
                 try {

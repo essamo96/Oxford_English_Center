@@ -134,6 +134,12 @@ Route::group(['middleware' => ['auth:teachers']], function () {
     Route::post('send_teacher', 'MessagesController@postSendMessage')->defaults('type', 'teacher');
     Route::get('fetch-old-messages', 'MessagesController@getOldMessages');
     Route::post('teachers/admin/messages', ['as' => 'teachers.admin.messages', 'uses' => 'TeachersController@TeachersSendMessage']);
+
+    // Chat moderation — a teacher may mute/ban students inside groups they teach.
+    // Ownership is re-checked in the controller on every call.
+    Route::get('teacher/chat/student-state', ['as' => 'teacher.chat.student_state', 'uses' => 'TeacherChatModerationController@getStudentState']);
+    Route::post('teacher/chat/restrict', ['as' => 'teacher.chat.restrict', 'uses' => 'TeacherChatModerationController@postRestrict']);
+    Route::post('teacher/chat/lift', ['as' => 'teacher.chat.lift', 'uses' => 'TeacherChatModerationController@postLift']);
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Route::group(['middleware' => ['auth:students']], function () {
@@ -498,6 +504,21 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('groups/program-levels/{programId}', ['as' => 'groups.program_levels', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getProgramLevels']);
     Route::get('groups/student-history/{studentId}', ['as' => 'groups.student_history', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getStudentGroupsHistory']);
     Route::get('groups/roster/{groupId}', ['as' => 'groups.roster', 'middleware' => ['permission:admin.groups.view'], 'uses' => 'GroupsController@getGroupRoster']);
+    // Group chat monitor — admin oversight of every student/teacher group conversation.
+    // Registered before groups/{id}-style routes so 'group-chat/...' is never swallowed by one.
+    Route::get('group-chat', ['as' => 'group_chat.view', 'middleware' => ['permission:admin.group_chat.view'], 'uses' => 'GroupChatController@getIndex']);
+    Route::get('group-chat/{id}', ['as' => 'group_chat.show', 'middleware' => ['permission:admin.group_chat.view'], 'uses' => 'GroupChatController@getShow'])->where('id', '[0-9]+');
+    Route::get('group-chat/{id}/messages', ['as' => 'group_chat.messages', 'middleware' => ['permission:admin.group_chat.view'], 'uses' => 'GroupChatController@getMessages'])->where('id', '[0-9]+');
+    Route::post('group-chat/{id}/send', ['as' => 'group_chat.send', 'middleware' => ['permission:admin.group_chat.send'], 'uses' => 'GroupChatController@postSend'])->where('id', '[0-9]+');
+    Route::post('group-chat/message/delete', ['as' => 'group_chat.delete', 'middleware' => ['permission:admin.group_chat.delete'], 'uses' => 'GroupChatController@postDelete']);
+    Route::get('group-chat-unread', ['as' => 'group_chat.unread', 'middleware' => ['permission:admin.group_chat.view'], 'uses' => 'GroupChatController@getUnread']);
+    Route::get('group-chat/{id}/search', ['as' => 'group_chat.search', 'middleware' => ['permission:admin.group_chat.view'], 'uses' => 'GroupChatController@getSearch'])->where('id', '[0-9]+');
+    Route::post('group-chat/{id}/clear', ['as' => 'group_chat.clear', 'middleware' => ['permission:admin.group_chat.moderate'], 'uses' => 'GroupChatController@postClear'])->where('id', '[0-9]+');
+    Route::post('group-chat/{id}/toggle-lock', ['as' => 'group_chat.toggle_lock', 'middleware' => ['permission:admin.group_chat.moderate'], 'uses' => 'GroupChatController@postToggleLock'])->where('id', '[0-9]+');
+    Route::get('group-chat/{id}/student-state', ['as' => 'group_chat.student_state', 'middleware' => ['permission:admin.group_chat.moderate'], 'uses' => 'GroupChatController@getStudentState'])->where('id', '[0-9]+');
+    Route::post('group-chat/{id}/ban', ['as' => 'group_chat.ban', 'middleware' => ['permission:admin.group_chat.moderate'], 'uses' => 'GroupChatController@postBan'])->where('id', '[0-9]+');
+    Route::post('group-chat/{id}/unban', ['as' => 'group_chat.unban', 'middleware' => ['permission:admin.group_chat.moderate'], 'uses' => 'GroupChatController@postUnban'])->where('id', '[0-9]+');
+
     Route::post('groups/bulk-assign', ['as' => 'groups.bulk_assign', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkAssign']);
     Route::post('groups/bulk-promote', ['as' => 'groups.bulk_promote', 'middleware' => ['permission:admin.groups.edit'], 'uses' => 'GroupsController@postBulkPromote']);
     Route::get('groups/add', ['as' => 'groups.add', 'middleware' => ['permission:admin.groups.add'], 'uses' => 'GroupsController@getAdd']);

@@ -61,6 +61,9 @@ class SidebarSeeder extends Seeder
             ['id' => 68,  'parent_id' => 0,   'sort' => 170, 'name' => 'birthdayes',             'name_ar' => 'أعياد الميلاد',                    'icon' => 'ki-duotone ki-gift',                  'color' => '#c474a0'],
             ['id' => 23,  'parent_id' => 0,   'sort' => 180, 'name' => 'progress_menu',          'name_ar' => 'مستوى التقدم',                     'icon' => 'ki-duotone ki-graph-up',              'color' => '#c474a0'],
 
+            // Admin oversight of the student/teacher group chat (route: group_chat.view)
+            ['id' => 76,  'parent_id' => 0,   'sort' => 65,  'name' => 'group_chat',             'name_ar' => 'مراقبة المحادثات',                  'icon' => 'ki-duotone ki-messages',              'color' => '#50cd89'],
+
             // ── CHILDREN OF 41: academy_management ────────────────────────────
             ['id' => 42,  'parent_id' => 41,  'sort' => 1,   'name' => 'branches',               'name_ar' => 'الفروع',                           'icon' => '',  'color' => '#c474a0'],
             ['id' => 12,  'parent_id' => 41,  'sort' => 2,   'name' => 'programs',               'name_ar' => 'البرامج',                          'icon' => '',  'color' => '#c474a0'],
@@ -245,6 +248,11 @@ class SidebarSeeder extends Seeder
             ['name' => 'admin.groups.edit',          'group_id' => 13],
             ['name' => 'admin.groups.delete',        'group_id' => 13],
             ['name' => 'admin.groups.status',        'group_id' => 13],
+            // group chat monitor (group 76)
+            ['name' => 'admin.group_chat.view',   'group_id' => 76],
+            ['name' => 'admin.group_chat.send',   'group_id' => 76],
+            ['name' => 'admin.group_chat.delete', 'group_id' => 76],
+
             ['name' => 'admin.groups.student.view',  'group_id' => 13],
             ['name' => 'admin.groups.student.add',   'group_id' => 13],
             ['name' => 'admin.groups.student.delete','group_id' => 13],

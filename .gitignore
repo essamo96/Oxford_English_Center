@@ -17,6 +17,7 @@ yarn-error.log
 *.sql
 *.bak
 /scratch/
+.phpunit.result.cache
 /.vscode/
 /.agents
 /metronic_html_v8.1.8_demo1

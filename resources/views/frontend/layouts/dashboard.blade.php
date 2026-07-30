@@ -98,8 +98,27 @@
             var pusher = new Pusher(key, opts);
             var ch = pusher.subscribe('student-notifications-' + sid);
 
+            // Chat moderation events carry no invoice and must not touch the finance
+            // badge — they are about the group chat, not the student's account.
+            var CHAT_TYPES = ['group_chat_banned', 'group_chat_muted', 'group_chat_unbanned',
+                              'group_chat_locked', 'group_chat_unlocked'];
+
             ch.bind('student.notification', function (data) {
                 var type = data.type || '';
+
+                if (CHAT_TYPES.indexOf(type) !== -1) {
+                    var good = (type === 'group_chat_unbanned' || type === 'group_chat_unlocked');
+                    _playStudentChime(good);
+                    _showChatToast(data, good);
+                    // Flip the open chat box between writable, read-only and fully
+                    // blocked right away. can_view is false only for a full ban,
+                    // which also withholds the conversation itself.
+                    if (window.oxSetChatPermission) {
+                        var canView = (typeof data.can_view === 'undefined') ? true : !!data.can_view;
+                        window.oxSetChatPermission(data.group_id, good, good ? null : data.message, canView);
+                    }
+                    return;
+                }
 
                 // Always play notification sound
                 _playStudentChime(type === 'payment_status_updated' && data.status === 'approved');
@@ -110,6 +129,32 @@
                 // Show toast for new invoice or payment status
                 if (type === 'new_invoice' || type === 'payment_status_updated') { _showStudentToast(data); }
             });
+
+            function _showChatToast(data, good) {
+                var accent = good ? '#22c55e' : '#ef4444';
+                var t = document.createElement('div');
+                t.style.cssText = 'position:fixed;bottom:24px;left:24px;z-index:99999;'
+                    + 'min-width:300px;max-width:400px;'
+                    + 'background:linear-gradient(135deg,#1b2130,#171c28);'
+                    + 'border:1px solid ' + accent + ';border-left:4px solid ' + accent + ';'
+                    + 'border-radius:12px;padding:16px;color:#fff;'
+                    + 'font-family:Cairo,sans-serif;direction:rtl;text-align:right;'
+                    + 'box-shadow:0 8px 32px rgba(0,0,0,.45);'
+                    + 'opacity:0;transform:translateX(-60px);'
+                    + 'transition:opacity .35s ease,transform .35s ease;';
+                t.innerHTML = '<div style="font-weight:700;font-size:1.1rem;margin-bottom:6px;color:' + accent + ';">'
+                    + (good ? '✅ ' : '🚫 ') + _esc(data.title || '') + '</div>'
+                    + '<div style="font-size:.98rem;opacity:.92;line-height:1.5;">'
+                    + _esc(data.message || '') + '</div>';
+                document.body.appendChild(t);
+                requestAnimationFrame(function () {
+                    t.style.opacity = '1'; t.style.transform = 'translateX(0)';
+                });
+                setTimeout(function () {
+                    t.style.opacity = '0'; t.style.transform = 'translateX(-60px)';
+                    setTimeout(function () { if (t.parentNode) t.remove(); }, 400);
+                }, 9000);
+            }
 
             window.studentPusher  = pusher;
             window.studentChannel = ch;

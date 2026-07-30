@@ -89,6 +89,15 @@ $(function () {
     channel.bind('oldMsgs', function (data) {
         displayOldMessages(data);
     });
+
+    // an admin (or the teacher) deleted a message — drop it from this box too,
+    // instead of leaving it on screen until the next reload
+    channel.bind('message-deleted', function (data) {
+        if (!data || !data.data) return;
+        $("#chat_box_" + data.data.group_id)
+            .find('.msg_container[data-message-id="' + data.data.message_id + '"]')
+            .fadeOut(200, function () { $(this).remove(); });
+    });
 });
 
 /**
@@ -99,6 +108,74 @@ $(function () {
 function loaderHtml() {
     return '<i class="glyphicon glyphicon-refresh loader"></i>';
 }
+
+/**
+ * Upgrade any voice notes inside a freshly injected node into the styled player.
+ * No-op when voice-player.js is not on the page.
+ */
+function chatEnhance(scope) {
+    if (window.OxVoicePlayer) {
+        window.OxVoicePlayer.initAll(scope || document);
+    }
+}
+
+/**
+ * Switch one group's chat box between writable and read-only.
+ *
+ * Read-only is used when an admin freezes the group's chat or bans this student:
+ * the history stays fully readable, only the composer is replaced by a notice.
+ * The server enforces the same rule, so this is presentation, not security.
+ *
+ * Exposed on window so the notification channel in the dashboard layout can flip
+ * an already-open box the moment the ban/lock event arrives.
+ */
+function setChatPermission(group_id, canSend, reason, canView) {
+    var box = $("#chat_box_" + group_id);
+    if (box.length === 0) return;
+
+    var footer = box.find(".ox-chat__footer");
+    var notice = box.find(".ox-chat__blocked");
+    // canView defaults to true: only a full ban passes it as false.
+    var viewable = (typeof canView === "undefined") ? true : !!canView;
+
+    if (canSend && viewable) {
+        footer.show();
+        notice.remove();
+        box.find(".chat-area").show();
+        box.find(".ox-chat__banned").remove();
+        return;
+    }
+
+    footer.hide();
+
+    if (!viewable) {
+        // A full ban withholds the history entirely. The server already refuses to
+        // send it, so this only makes the box honest about why it is empty.
+        box.find(".chat-area").empty().hide();
+        if (box.find(".ox-chat__banned").length === 0) {
+            $('<div class="ox-chat__banned">'
+                + '<div class="ox-chat__banned-icon">⛔</div>'
+                + '<div class="ox-chat__banned-text"></div>'
+                + '</div>').appendTo(box.find(".ox-chat"));
+        }
+        box.find(".ox-chat__banned-text")
+           .text(reason || "تم حظرك من هذه المجموعة.");
+        notice.remove();
+        return;
+    }
+
+    var text = reason || "لا يمكنك إرسال رسائل في هذه المجموعة حالياً.";
+    if (notice.length) {
+        notice.find(".ox-chat__blocked-text").text(text);
+    } else {
+        $('<div class="ox-chat__blocked">'
+            + '<i class="fa fa-lock"></i> '
+            + '<span class="ox-chat__blocked-text"></span>'
+            + '</div>').appendTo(box.find(".ox-chat")).find(".ox-chat__blocked-text").text(text);
+    }
+}
+
+window.oxSetChatPermission = setChatPermission;
 
 /**
  * cloneChatBox
@@ -160,6 +237,13 @@ function loadLatestMessages(container, group_id, user_type)
                 response.messages.map(function (val, index) {
                     $(val).appendTo(chat_area);
                 });
+                chatEnhance(chat_area[0]);
+
+                // A frozen group or a banned student gets a read-only composer with
+                // the reason shown, instead of a send button that would 403.
+                if (typeof response.can_send !== 'undefined') {
+                    setChatPermission(group_id, response.can_send, response.block_reason, response.can_view);
+                }
             }
         },
         complete: function () {
@@ -193,6 +277,15 @@ function send(to_user, message)
             }
         },
         success: function (response) {
+        },
+        error: function (xhr) {
+            // 403 = the group was frozen or this student was banned since the box
+            // was opened. Show the reason and lock the composer rather than
+            // silently swallowing the failure.
+            var res = xhr.responseJSON;
+            if (xhr.status === 403 && res) {
+                setChatPermission(to_user, false, res.message, res.can_view);
+            }
         },
         complete: function () {
             chat_area.find(".loader").remove();
@@ -242,9 +335,28 @@ function fetchOldMessages(to_user, old_message_id)
  * @param message
  * @returns {string}
  */
+function chatDefaultAvatar()
+{
+    return base_url + '/assets/oxford/images/user-avatar.png';
+}
+
 function chatAvatarUrl(message)
 {
-    return message.image ? (base_url + '/' + message.image) : (base_url + '/assets/oxford/images/user-avatar.png');
+    // The server resolves this now (App\Support\ChatAvatar): the three sender tables
+    // store `image` in three different shapes — a bare filename for admins, an
+    // absolute URL for teachers, a relative path for students — so prefixing base_url
+    // produced a broken avatar for everyone except students.
+    if (message.avatar_url) {
+        return message.avatar_url;
+    }
+    if (!message.image) {
+        return chatDefaultAvatar();
+    }
+    // Older payloads (or a cached tab) without avatar_url: handle the shapes inline.
+    if (/^https?:\/\//i.test(message.image)) {
+        return message.image;
+    }
+    return base_url + '/' + String(message.image).replace(/^\/+/, '');
 }
 
 function escapeHtml(str)
@@ -264,25 +376,78 @@ function chatGenderEmoji(message)
     return '';
 }
 
+// Renders an attachment (image / voice note / generic file) inside the bubble.
+// Admin comments are the only sender that can currently carry one.
+function chatAttachmentHtml(message)
+{
+    if (!message.attachment) return '';
+
+    var url = base_url + '/' + message.attachment;
+    var name = escapeHtml(message.attachment_name || 'مرفق');
+
+    if (message.attachment_type === 'image') {
+        return '<span class="ox-msg__attachment"><a href="' + url + '" target="_blank" rel="noopener">' +
+               '<img class="ox-msg__image" src="' + url + '" alt="' + name + '"></a></span>';
+    }
+    if (message.attachment_type === 'audio') {
+        // Mirrors resources/views/frontend/chat/message-line.blade.php so a live voice
+        // note looks the same as one loaded from history. voice-player.js enhances it.
+        var bars = '';
+        for (var i = 0; i < 24; i++) {
+            bars += '<span class="ox-voice__bar" style="height:' + (25 + ((message.id * (i + 3)) % 70)) + '%"></span>';
+        }
+        return '<span class="ox-msg__attachment">' +
+               '<span class="ox-voice" data-voice-player>' +
+                   '<button type="button" class="ox-voice__btn" data-voice-toggle aria-label="تشغيل">' +
+                       '<i class="fa fa-play" data-voice-icon data-icon-play="fa-play" data-icon-pause="fa-pause"></i>' +
+                   '</button>' +
+                   '<span class="ox-voice__body">' +
+                       '<span class="ox-voice__wave" data-voice-seek>' +
+                           '<span class="ox-voice__progress" data-voice-progress></span>' + bars +
+                       '</span>' +
+                       '<span class="ox-voice__meta"><span data-voice-time>0:00</span></span>' +
+                   '</span>' +
+                   '<audio preload="metadata" src="' + url + '" data-voice-audio style="display:none"></audio>' +
+               '</span></span>';
+    }
+    return '<span class="ox-msg__attachment"><a class="ox-msg__file" href="' + url + '" target="_blank" rel="noopener">' +
+           '<i class="fa fa-paperclip"></i> ' + name + '</a></span>';
+}
+
 function chatBubbleHtml(message, mine)
 {
     var emoji = chatGenderEmoji(message);
-    // user_type: 0 = student, 1 = teacher (see Message model / MessagesController)
-    var isTeacher = parseInt(message.user_type, 10) === 1;
+    // user_type: 0 = student, 1 = teacher, 2 = admin (see Message model / MessagesController)
+    var type = parseInt(message.user_type, 10);
+    var isTeacher = type === 1;
+    var isAdmin   = type === 2;
+    var text = message.content ? escapeHtml(message.content).replace(/\n/g, '<br>') : '';
+
+    // The owning teacher can moderate students from a live bubble too — the flag
+    // is set by whoever set up the moderation menu for this page.
+    var canModerate = (type === 0) && window.oxChatCanModerate === true;
+    var modAttr = canModerate
+        ? ' data-moderate-student="' + escapeHtml(message.from_user_id || message.from_user) + '"'
+        : '';
+
     return `
-    <div class="ox-msg msg_container ${mine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive'} ${isTeacher ? 'ox-msg--teacher' : ''}" data-message-id="${message.id}">
-        <div class="ox-msg__avatar-wrap">
-            <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}">
+    <div class="ox-msg msg_container ${mine ? 'ox-msg--mine base_sent' : 'ox-msg--theirs base_receive'} ${isTeacher ? 'ox-msg--teacher' : ''} ${isAdmin ? 'ox-msg--admin' : ''}" data-message-id="${message.id}">
+        <div class="ox-msg__avatar-wrap"${modAttr}>
+            <img class="ox-msg__avatar" src="${chatAvatarUrl(message)}" alt="${escapeHtml(message.fromUserName)}"
+                 onerror="this.onerror=null;this.src='${chatDefaultAvatar()}';">
             ${isTeacher ? '<span class="ox-msg__crown" title="المعلم">👑</span>' : ''}
+            ${isAdmin ? '<span class="ox-msg__crown ox-msg__shield" title="الإدارة">🛡️</span>' : ''}
         </div>
         <div class="ox-msg__col">
             <div class="ox-msg__meta">
                 <span class="ox-msg__name">${escapeHtml(message.fromUserName)}</span>
                 ${isTeacher ? '<span class="ox-msg__role">المعلم</span>' : ''}
+                ${isAdmin ? '<span class="ox-msg__role ox-msg__role--admin">الإدارة</span>' : ''}
                 ${emoji ? '<span class="ox-msg__gender">' + emoji + '</span>' : ''}
             </div>
             <div class="ox-msg__bubble">
-                <span class="ox-msg__text">${escapeHtml(message.content).replace(/\n/g, '<br>')}</span>
+                ${text ? '<span class="ox-msg__text">' + text + '</span>' : ''}
+                ${chatAttachmentHtml(message)}
                 <time class="ox-msg__time" datetime="${message.dateTimeStr}">${message.dateHumanReadable}</time>
             </div>
         </div>
@@ -318,11 +483,20 @@ function displayMessage(message)
     let current_group = $("#current_group").val();
     let alert_sound = document.getElementById("chat-alert-sound");
     mygroups = current_group.split(",");
-    if ($("#current_user").val() == message.from_user_id) {
+
+    // Admin senders (user_type 2) come from the `users` table, whose ids overlap with
+    // student/teacher ids — without the type check an admin comment whose id happened to
+    // match the viewer's would render as the viewer's own outgoing message.
+    let my_type = parseInt($("#user_type").val() === 'teacher' ? 1 : 0, 10);
+    let msg_type = parseInt(message.user_type, 10);
+
+    if (msg_type === my_type && $("#current_user").val() == message.from_user_id) {
 
         let messageLine = getMessageSenderHtml(message);
 
-        $("#chat_box_" + message.group_id).find(".chat-area").append(messageLine);
+        let area = $("#chat_box_" + message.group_id).find(".chat-area");
+        area.append(messageLine);
+        chatEnhance(area[0]);
 
     } else if ($.inArray(String(message.group_id), mygroups) !== -1) {
 
@@ -337,7 +511,9 @@ function displayMessage(message)
 
                 chatBox.addClass("chat-opened").slideDown("fast");
 
-                loadLatestMessages(chatBox, message.group_id);
+                // user_type was omitted here, producing "/load-latest-messages_undefined"
+                // and leaving a freshly auto-opened box permanently empty.
+                loadLatestMessages(chatBox, message.group_id, $("#user_type").val());
 
                 chatBox.find(".chat-area").animate({scrollTop: chatBox.find(".chat-area").offset().top + chatBox.find(".chat-area").outerHeight(true)}, 800, 'swing');
             } else {
@@ -345,7 +521,9 @@ function displayMessage(message)
                 let messageLine = getMessageReceiverHtml(message);
 
                 // append the message for the receiver user
-                $("#chat_box_" + message.group_id).find(".chat-area").append(messageLine);
+                let rArea = $("#chat_box_" + message.group_id).find(".chat-area");
+                rArea.append(messageLine);
+                chatEnhance(rArea[0]);
             }
         });
     }
