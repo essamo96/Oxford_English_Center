@@ -914,7 +914,38 @@
     });
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+<link href="{{ url('assets/oxford/css/chat-moderation.css') }}?v={{ @filemtime(public_path('assets/oxford/css/chat-moderation.css')) ?: time() }}" rel="stylesheet" />
+<script src="{{ url('assets/oxford/js/voice-player.js') }}?v={{ @filemtime(public_path('assets/oxford/js/voice-player.js')) ?: time() }}" type="text/javascript"></script>
+<script src="{{ url('assets/oxford/js/chat-moderation.js') }}?v={{ @filemtime(public_path('assets/oxford/js/chat-moderation.js')) ?: time() }}" type="text/javascript"></script>
 <script src="{{ url('assets/oxford/js/chat.js') }}?v={{ @filemtime(public_path('assets/oxford/js/chat.js')) ?: time() }}" type="text/javascript"></script>
+<script>
+    // A teacher moderates students inside the groups they teach: clicking a
+    // student's avatar in the chat opens the same mute/ban menu the admin gets.
+    // The endpoints re-check group ownership on every call.
+    window.oxChatCanModerate = true;
+
+    $(function () {
+        if (!window.OxChatModeration) return;
+
+        // Bound once to the overlay that holds every chat box. A teacher can have
+        // several groups open at once, so the group is read from whichever box
+        // the clicked avatar sits in rather than fixed at setup time.
+        window.OxChatModeration.init({
+            container: '#chat-overlay',
+            avatar: '[data-moderate-student]',
+            token: $('meta[name="csrf-token"]').attr('content'),
+            groupId: function (anchor) {
+                var box = anchor.closest('[id^="chat_box_"]');
+                return box ? box.id.replace('chat_box_', '') : null;
+            },
+            urls: {
+                state:    "{{ route('teacher.chat.student_state') }}",
+                restrict: "{{ route('teacher.chat.restrict') }}",
+                lift:     "{{ route('teacher.chat.lift') }}"
+            }
+        });
+    });
+</script>
 <script>
     $(document).ready(function() {
         $('.userinfo').click(function() {

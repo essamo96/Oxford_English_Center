@@ -1,0 +1,169 @@
+/**
+ * Group chat — admin monitor styling.
+ *
+ * Follows the Metronic chat app (apps/chat/group.html): light-tinted bubbles,
+ * 35px circular avatars, muted meta text. Everything below is the additional
+ * chrome that page does not ship: role-coloured avatar rings, a WhatsApp-style
+ * voice-note player, file chips, and the recording/attachment composer bar.
+ */
+
+/* ── avatar rings: role is readable at a glance, even before the badge ── */
+.gc-ring-admin   img { box-shadow: 0 0 0 2px var(--bs-danger); }
+.gc-ring-teacher img { box-shadow: 0 0 0 2px var(--bs-warning); }
+.gc-ring-student img { box-shadow: 0 0 0 2px var(--bs-info); }
+.gc-ring-admin img,
+.gc-ring-teacher img,
+.gc-ring-student img { object-fit: cover; }
+
+/* ── bubble ─────────────────────────────────────────────────────────── */
+.gc-bubble { box-shadow: 0 1px 3px rgba(0, 0, 0, .06); max-width: 100%; }
+.gc-text { white-space: pre-line; word-break: break-word; }
+.gc-img { max-width: 100%; max-height: 260px; object-fit: cover; display: block; }
+
+.gc-msg .gc-delete { opacity: 0; transition: opacity .15s ease; }
+.gc-msg:hover .gc-delete { opacity: .55; }
+.gc-msg .gc-delete:hover { opacity: 1; }
+
+/* ── file chip ──────────────────────────────────────────────────────── */
+.gc-file {
+    display: inline-flex; align-items: center; gap: .625rem;
+    background: var(--bs-body-bg); border: 1px solid var(--bs-border-color);
+    border-radius: .625rem; padding: .625rem .875rem;
+    text-decoration: none; color: var(--bs-gray-800); max-width: 100%;
+    transition: border-color .15s ease, background .15s ease;
+}
+.gc-file:hover { border-color: var(--bs-primary); color: var(--bs-primary); }
+.gc-file__icon {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: .5rem;
+    background: var(--bs-light-primary); color: var(--bs-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+}
+.gc-file__name { font-size: .9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── voice note player (WhatsApp-style, Metronic palette) ───────────── */
+.gc-voice {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--bs-body-bg); border: 1px solid var(--bs-border-color);
+    border-radius: 2rem; padding: .5rem .75rem;
+    min-width: 240px; max-width: 320px;
+}
+.gc-voice__btn {
+    width: 38px; height: 38px; flex-shrink: 0; border: none; border-radius: 50%;
+    background: var(--bs-primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; cursor: pointer; transition: background .15s ease, transform .1s ease;
+}
+.gc-voice__btn:hover { background: var(--bs-primary-active, #0095e8); }
+.gc-voice__btn:active { transform: scale(.94); }
+.gc-voice__body { flex: 1; min-width: 0; }
+
+/* waveform: evenly spaced ticks with a progress overlay clipped over them */
+.gc-voice__wave {
+    position: relative; display: flex; align-items: center; gap: 2px;
+    height: 26px; cursor: pointer; overflow: hidden;
+}
+.gc-voice__bar {
+    flex: 1; min-width: 2px; border-radius: 2px;
+    background: var(--bs-gray-400); transition: background .2s ease;
+}
+.gc-voice__progress {
+    position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 0;
+    background: var(--bs-primary); opacity: .28; border-radius: 3px;
+    pointer-events: none; transition: width .1s linear;
+}
+.gc-voice__meta {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: .7rem; color: var(--bs-gray-600); margin-top: 2px;
+}
+.gc-voice__mic { font-size: .75rem; opacity: .6; }
+
+/* ── composer: attachment preview + recording bar ───────────────────── */
+#gc_attachment_preview { display: none; }
+.gc-preview {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--bs-light); border: 1px solid var(--bs-border-color);
+    border-radius: .75rem; padding: .625rem .75rem;
+}
+.gc-preview__thumb {
+    width: 44px; height: 44px; flex-shrink: 0; border-radius: .5rem; object-fit: cover;
+    background: var(--bs-light-primary); color: var(--bs-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.gc-preview__name { font-weight: 600; font-size: .875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gc-preview__size { font-size: .75rem; color: var(--bs-gray-600); }
+
+/* recording bar replaces the composer row while the mic is live */
+#gc_recording_bar { display: none; }
+.gc-rec {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--bs-light-danger); border-radius: .75rem; padding: .625rem .875rem;
+}
+.gc-rec__dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--bs-danger); flex-shrink: 0;
+    animation: gcRecPulse 1.2s infinite;
+}
+@keyframes gcRecPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+.gc-rec__time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--bs-danger); min-width: 46px; }
+.gc-rec__hint { color: var(--bs-gray-700); font-size: .8rem; flex: 1; }
+
+/* live equaliser bars while recording */
+.gc-rec__eq { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+.gc-rec__eq span {
+    width: 3px; border-radius: 2px; background: var(--bs-danger); opacity: .75;
+    animation: gcEq .9s ease-in-out infinite;
+}
+.gc-rec__eq span:nth-child(1) { animation-delay: 0s; }
+.gc-rec__eq span:nth-child(2) { animation-delay: .12s; }
+.gc-rec__eq span:nth-child(3) { animation-delay: .24s; }
+.gc-rec__eq span:nth-child(4) { animation-delay: .36s; }
+.gc-rec__eq span:nth-child(5) { animation-delay: .48s; }
+@keyframes gcEq { 0%, 100% { height: 6px; } 50% { height: 22px; } }
+
+/* mic button turns into a live red control while recording */
+#gc_record.recording { background: var(--bs-danger) !important; color: #fff !important; }
+
+/* drag & drop target */
+#kt_chat_messenger.gc-dragover { outline: 2px dashed var(--bs-primary); outline-offset: -6px; }
+
+/* ── live status dot ────────────────────────────────────────────────── */
+.gc-live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--bs-success);
+    display: inline-block; box-shadow: 0 0 0 0 rgba(80, 205, 137, .7);
+    animation: gcPulse 1.8s infinite;
+}
+.gc-live-dot.gc-offline { background: var(--bs-danger); animation: none; }
+@keyframes gcPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(80, 205, 137, .7); }
+    70%  { box-shadow: 0 0 0 10px rgba(80, 205, 137, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(80, 205, 137, 0); }
+}
+
+/* ── search ─────────────────────────────────────────────────────────── */
+.gc-search-hit { cursor: pointer; border: 1px solid transparent; transition: background .15s ease, border-color .15s ease; }
+.gc-search-hit:hover { background: var(--bs-light); border-color: var(--bs-border-color); }
+.gc-search-hit__body { word-break: break-word; }
+.gc-hl { background: var(--bs-warning); color: var(--bs-gray-900); padding: 0 2px; border-radius: 3px; }
+
+/* the message a search hit jumps to, briefly highlighted so the eye finds it */
+.gc-flash .gc-bubble {
+    animation: gcFlash 1.6s ease-out;
+}
+@keyframes gcFlash {
+    0%, 40% { box-shadow: 0 0 0 3px var(--bs-warning); }
+    100%    { box-shadow: 0 1px 3px rgba(0, 0, 0, .06); }
+}
+
+/* ── moderation ─────────────────────────────────────────────────────── */
+.gc-ring-banned img { box-shadow: 0 0 0 2px var(--bs-danger); filter: grayscale(.6); }
+.gc-media-thumb { aspect-ratio: 1 / 1; object-fit: cover; transition: transform .15s ease; }
+.gc-media-thumb:hover { transform: scale(1.04); }
+
+/* ── unread badge on the group cards ────────────────────────────────── */
+.gc-unread {
+    min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+    background: var(--bs-danger); color: #fff; font-size: .75rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.gc-card { transition: transform .15s ease, box-shadow .15s ease; }
+.gc-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .12) !important; }
+.gc-card.gc-has-unread { border-color: var(--bs-danger) !important; }

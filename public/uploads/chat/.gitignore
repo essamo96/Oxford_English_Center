@@ -1,0 +1,5 @@
+# Chat attachments and voice notes are user uploads — the directory has to exist
+# on the server (the controller writes into it), but its contents must never be
+# committed or shipped by the FTP deploy.
+*
+!.gitignore

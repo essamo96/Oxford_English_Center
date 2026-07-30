@@ -576,6 +576,7 @@ $('.date-picker').datepicker();
 })();
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+<script src="{{ url('assets/oxford/js/voice-player.js') }}?v={{ @filemtime(public_path('assets/oxford/js/voice-player.js')) ?: time() }}" type="text/javascript"></script>
 <script src="{{ url('assets/oxford/js/chat.js') }}?v={{ @filemtime(public_path('assets/oxford/js/chat.js')) ?: time() }}" type="text/javascript"></script>
 <script>
     $(document).on('click', ".joinG", function (e) {
