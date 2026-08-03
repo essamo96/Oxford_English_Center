@@ -1,13 +1,13 @@
 <div class="dash-card dash-card--flush ajax-content">
     <!-- Modern Header -->
     <div class="detail-header" style="padding: 18px 22px; border-radius: 12px 12px 0 0;">
-        <div class="d-flex justify-content-between align-items-center mb-10">
-            <div style="font-size: 19.2px; font-weight:700; color:#fff;"><i class="fa fa-graduation-cap" style="color:var(--gold-mid);"></i> {{ $data->group->program->title }}</div>
-            <button href="#Courses" class="dash-btn dash-btn--sm" id="go-back" data-toggle="tab">
+        <div class="d-flex justify-content-between align-items-center mb-10" style="flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 19.2px; font-weight:700; color:#fff; min-width:0; flex: 1 1 200px;"><i class="fa fa-graduation-cap" style="color:var(--gold-mid);"></i> {{ $data->group->program->title }}</div>
+            <button href="#Courses" class="dash-btn dash-btn--sm" id="go-back" data-toggle="tab" style="flex: 0 0 auto;">
                 <i class="fa fa-arrow-left"></i> Back
             </button>
         </div>
-        <div class="d-flex align-items-center gap-15">
+        <div class="d-flex align-items-center gap-15" style="flex-wrap: wrap;">
             <span class="badge-warning">{{ $data->group->name }}</span>
             <span style="color:#fff;opacity:.75;"><i class="fa fa-clock-o"></i> {{ $data->group->ctime->times }}</span>
         </div>

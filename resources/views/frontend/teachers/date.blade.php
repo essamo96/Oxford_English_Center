@@ -42,13 +42,13 @@
                 <div class="info-card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:none; overflow:hidden;">
                     {{-- Card header: title + subtitle + back button (all inside the form card) --}}
                     <div class="d-flex justify-content-between align-items-center"
-                         style="gap:12px; padding:18px 20px; background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff;">
-                        <div>
+                         style="gap:12px; padding:18px 20px; background:linear-gradient(135deg,#14213d,#1f2d50); color:#fff; flex-wrap:wrap;">
+                        <div style="min-width:0; flex:1 1 200px;">
                             <div style="font-size: 19.2px; font-weight:800;"><i class="fa fa-calendar-plus-o" style="color:var(--accent,#f5c518);"></i> جدولة امتحانات «{{ $group->name }}»</div>
                             <div style="font-size: 15.7px; opacity:.8; margin-top:3px;">حدّد مواعيد الاختبارات لتظهر لطلاب المجموعة</div>
                         </div>
                         <a href="{{ route('teacher.ExamDates', Auth::guard('teachers')->user()->id) }}"
-                           class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; padding:7px 16px; font-size: 16.2px; white-space:nowrap;">
+                           class="btn-modern btn-sm" style="background:rgba(255,255,255,.15); color:#fff; padding:7px 16px; font-size: 16.2px; white-space:nowrap; flex:0 0 auto;">
                             <i class="fa fa-arrow-left"></i> رجوع
                         </a>
                     </div>
