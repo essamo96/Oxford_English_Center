@@ -1107,6 +1107,29 @@
 }
 
 /* ============================================
+   GROUPS SCREEN — small phones (student & teacher)
+   Keeps the exact same cards/elements, just lets
+   them breathe on narrow screens instead of
+   cramping the title, badges and action buttons.
+   ============================================ */
+@media (max-width: 480px) {
+    .course-grid { gap: 18px; }
+    .course-img-wrapper { height: 130px; margin: 12px 12px 0 12px; }
+    .course-body { padding: 16px 16px 18px; margin: -34px 12px 12px 12px; }
+    .course-title { font-size: 15.5px; }
+
+    .course-meta { gap: 8px; }
+    .meta-item { font-size: 11.5px; padding: 4px 8px; }
+
+    .course-body .d-flex.gap-10 {
+        flex-direction: column;
+    }
+    .course-body .d-flex.gap-10 .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================
    PAGE HEADER BLOCK — Sub-pages Typography Fix
    Replaces large h1 with compact styled headers
    ============================================ */

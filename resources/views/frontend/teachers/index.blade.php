@@ -78,6 +78,19 @@
     .course-actions .btn-qr-group,
     .course-actions .btn-stop-group { white-space: nowrap; flex: 0 0 auto; }
 
+    /* On narrow phones there isn't room for a truncated title beside two
+       buttons — give the title its own line and let it wrap fully instead. */
+    @media (max-width: 480px) {
+        .course-head-row { flex-wrap: wrap; }
+        .course-head-row .course-title {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            flex-basis: 100%;
+        }
+        .course-actions { flex-basis: 100%; justify-content: flex-start; }
+    }
+
     /* Teacher QR Modal — themed header + animated overlay (mirrors admin side) */
     #teacherQrModal .modal-content { border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 24px 60px rgba(0, 51, 102, 0.25); }
     #teacherQrModal .modal-header {
