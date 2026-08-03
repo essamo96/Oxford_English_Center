@@ -112,8 +112,6 @@ class TeacherController extends AdminController {
         $cv = $request->get('cv');
         $image = $request->get('image');
         $status = (int) $request->get('status');
-        $username = $this->split_myString($mobile);
-        $password = $this->split_myString($mobile);
         $validator = Validator::make([
                     'name' => $name,
                     'mobile' => $mobile,
@@ -131,6 +129,8 @@ class TeacherController extends AdminController {
             $request->session()->flash('danger', $validator->messages());
             return redirect(route('teachers.add'))->withInput();
         } else {
+            $username = $this->split_myString($mobile);
+            $password = $this->split_myString($mobile);
             $teachers = new Teachers();
             $add = $teachers->addTeacher($name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
             if ($add) {
@@ -191,9 +191,7 @@ class TeacherController extends AdminController {
             $cv = $request->get('cv');
             $image = $request->get('image');
             $status = (int) $request->get('status');
-            $username = $this->split_myString($mobile);
-            $password = $this->split_myString($mobile);
-            
+
             $validator = Validator::make([
                         'name' => $name,
                         'mobile' => $mobile,
@@ -212,6 +210,8 @@ class TeacherController extends AdminController {
                 $request->session()->flash('danger', $validator->messages());
                 return redirect(route('teachers.edit', ['id' => $encrypted_id]))->withInput();
             } else {
+                $username = $this->split_myString($mobile);
+                $password = $this->split_myString($mobile);
                 $update = $teachers->updateTeacher($info, $name, $username, Hash::make($password), $mobile, $dob, $email, $join_date, $cv, $status, $image);
                 if ($update) {
                     $branchId = $request->get('branch_id');
@@ -400,8 +400,8 @@ class TeacherController extends AdminController {
  
     /////////////////////////////////////////
     function split_myString($str) {
-        $myString = str_split($str, 4);
-        return  $myString[1] . $myString[2];
+        $myString = str_split((string) $str, 4);
+        return  ($myString[1] ?? '') . ($myString[2] ?? '');
     }
     /////////////////////////////
     public function SendMessage(Request $request)
