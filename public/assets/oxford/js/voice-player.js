@@ -68,6 +68,7 @@
             current = audio;
             setIcon(true);
         });
+        //test
         audio.addEventListener('pause', function () { setIcon(false); });
         audio.addEventListener('ended', function () {
             setIcon(false);
