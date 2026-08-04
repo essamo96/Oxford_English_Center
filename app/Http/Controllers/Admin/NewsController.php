@@ -220,9 +220,15 @@ class NewsController extends AdminController {
                 $thumb = $final_explode[0] . 'thumbs/' . $image_name;
                 $old_category_id = $info->category_id;
 ////////////////////////////////////////////
+                $old_publish = $info->publish;
                 $update = $news->updateNews($info, $title, $onwer, $source, $sub, $descs, $thumb, $image, $img_notes, $category_id, $tags, $resort, $pub_date, $publish, $sidebar);
                 if ($update) {
-                    if ($info->publish == 1) {
+                    // Clear the cache whenever the article was published before the edit,
+                    // is published after the edit, or moved category — otherwise turning
+                    // publish on/off (or switching category) during the same edit leaves
+                    // the homepage slider/news cache stale until an unrelated news change
+                    // happens to clear it.
+                    if ($old_publish == 1 || $publish == 1) {
                         if ($old_category_id != $category_id) {
                             $this->clearCache($old_category_id);
                         }
