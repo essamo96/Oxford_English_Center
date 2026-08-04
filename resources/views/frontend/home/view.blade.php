@@ -7,7 +7,7 @@
     <section class="ox-hero" data-hero data-hero-interval="6000">
         <div class="ox-hero__slides">
             @forelse($sliders as $item)
-                <div class="ox-hero__slide {{ $loop->first ? 'is-active' : '' }}" style="background-image:url('{{ url($item->image) }}')"></div>
+                <div class="ox-hero__slide {{ $loop->first ? 'is-active' : '' }}" style="background-image:url('{{ url($item->image) }}?v={{ $item->updated_at ? $item->updated_at->timestamp : time() }}')"></div>
             @empty
                 <div class="ox-hero__slide is-active" style="background-image:url('{{ url('assets/oxford/img/banner/1.jpg') }}')"></div>
             @endforelse
@@ -177,7 +177,7 @@
                     @endphp
                     <article class="ox-card" data-reveal="up" data-reveal-delay="{{ $loop->index * 0.1 }}s">
                         <div class="ox-card__media">
-                            <img src="{{ URL::to(Helper::get_image($img)) }}" alt="{{ str_replace('"','',$item->title) }}">
+                            <img src="{{ URL::to(Helper::get_image($img)) }}?v={{ $item->updated_at ? $item->updated_at->timestamp : time() }}" alt="{{ str_replace('"','',$item->title) }}">
                             <span class="ox-datechip">
                                 <b>{{ date('d', strtotime($item->pub_date)) }}</b>
                                 <span>{{ date('M Y', strtotime($item->pub_date)) }}</span>
