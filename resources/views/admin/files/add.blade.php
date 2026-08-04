@@ -139,7 +139,7 @@
 <!-- BEGIN PAGE LEVEL SCRIPTS -->
 <script src="assets/admin/pages/scripts/components-multi-select.min.js?v=3" type="text/javascript"></script>
 <!-- END PAGE LEVEL SCRIPTS -->
-<script src="vendor/laravel-filemanager/js/lfm.js"></script>
+<script src="vendor/laravel-filemanager/js/lfm.js?v=2"></script>
 <script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
 <script src="{{asset('assets/oxford/vendor/date/bootstrap-datepicker.min.js')}}" type="text/javascript"></script>
 

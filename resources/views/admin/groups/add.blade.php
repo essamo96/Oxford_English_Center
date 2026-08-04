@@ -192,7 +192,7 @@
 @stop
 
 @section('js')
-    <script src="{{ asset('vendor/laravel-filemanager/js/lfm.js') }}"></script>
+    <script src="{{ asset('vendor/laravel-filemanager/js/lfm.js') }}?v=2"></script>
     <script>
         $(document).ready(function() {
             // Format teacher option with image

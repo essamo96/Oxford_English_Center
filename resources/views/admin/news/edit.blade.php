@@ -158,7 +158,7 @@
 @stop
 
 @section('js')
-<script src="{{ asset('vendor/laravel-filemanager/js/lfm.js') }}"></script>
+<script src="{{ asset('vendor/laravel-filemanager/js/lfm.js') }}?v=2"></script>
 <script src="{{ asset('assets/admin/ckeditor/ckeditor.js') }}" type="text/javascript"></script>
 <script type="text/javascript">
     if ($('#descs').length) {
