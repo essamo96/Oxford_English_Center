@@ -5,9 +5,19 @@
 
     this.on('click', function(e) {
       var route_prefix = (options && options.prefix) ? options.prefix : '/laravel-filemanager';
-      localStorage.setItem('target_input', $(this).data('input'));
-      localStorage.setItem('target_preview', $(this).data('preview'));
-      window.open(route_prefix + '?type=' + type, 'FileManager', 'width=900,height=600');
+      var target_input = $(this).data('input');
+      var target_preview = $(this).data('preview');
+      localStorage.setItem('target_input', target_input);
+      localStorage.setItem('target_preview', target_preview);
+
+      // The custom file manager (admin/file_manager) reads the picked file's
+      // target back via a `target=<inputId>` query param and calls
+      // window.opener.metronicFilePickerCallback(url, targetId) — it never
+      // calls the legacy SetUrl() below. Without this param the popup has no
+      // way to know which input/preview to fill, so nothing happened on pick.
+      window.open(route_prefix + '?type=' + type + '&target=' + encodeURIComponent(target_input), 'FileManager', 'width=1000,height=700');
+
+      // Kept for backward compatibility with any picker still using the old contract.
       window.SetUrl = function (url, file_path) {
           //set the value of the desired input to image url
           var target_input = $('#' + localStorage.getItem('target_input'));
