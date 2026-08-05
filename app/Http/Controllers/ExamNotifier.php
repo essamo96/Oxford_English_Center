@@ -128,6 +128,52 @@ class ExamNotifier
         }
     }
 
+    // A student requested a review of a graded attempt -> notify BOTH the admin bell and the
+    // owning teacher (when the exam is a group exam with an assigned teacher). Review requests
+    // are always admin-visible regardless of category, unlike attempt-submitted/cheating alerts
+    // which are routed to only one side.
+    public static function notifyReviewRequested(ExamReviewRequest $review): void
+    {
+        $attempt = $review->attempt;
+        $exam = $attempt->exam;
+        $studentName = $review->student->name ?? '';
+
+        try {
+            broadcast(new AdminExamNotificationBroadcast([
+                'type' => 'exam_review_requested',
+                'title' => 'طلب مراجعة جديد',
+                'message' => 'طلب الطالب «' . $studentName . '» مراجعة نتيجته في امتحان «' . $exam->title . '»',
+                'icon' => '📝',
+                'link' => route('exam_reviews.view'),
+                'created_at' => now()->diffForHumans(),
+            ], $exam->branch_id));
+        } catch (\Throwable $e) {
+            Log::error('[RT] ExamReviewRequested admin broadcast failed: ' . $e->getMessage());
+        }
+
+        if ($exam->category === 'group' && $exam->teacher_id) {
+            $teacher = Teachers::find($exam->teacher_id);
+            if ($teacher) {
+                $teacher->notify(new \App\Notifications\ExamReviewRequestedNotification(
+                    $attempt->id, $exam->title, $studentName, $review->message
+                ));
+
+                try {
+                    broadcast(new TeacherNotificationBroadcast((int) $teacher->id, [
+                        'type' => 'exam_review_requested',
+                        'title' => 'طلب مراجعة جديد',
+                        'message' => 'طلب الطالب «' . $studentName . '» مراجعة نتيجته في امتحان «' . $exam->title . '»',
+                        'icon' => '📝',
+                        'link' => route('teacher.exam_reviews.view'),
+                        'created_at' => now()->diffForHumans(),
+                    ]));
+                } catch (\Throwable $e) {
+                    Log::error('[RT] ExamReviewRequested broadcast failed for teacher ' . $teacher->id . ': ' . $e->getMessage());
+                }
+            }
+        }
+    }
+
     // A review request was approved/rejected -> notify the requesting student.
     public static function notifyReviewDecision(ExamReviewRequest $review): void
     {

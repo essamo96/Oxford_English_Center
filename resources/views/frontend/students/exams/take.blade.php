@@ -16,18 +16,51 @@
     .exam-question-card__marks { background: #eef1f7; color: #14213d; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
     .exam-question-text { font-size: 16px; line-height: 1.8; color: #1b1f2a; margin-bottom: 16px; }
 
+    /* Printed-paper-style inline options row: "A some   B any   C the   D a" */
+    .exam-options-row { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 4px; }
     .exam-option-label {
         cursor: pointer;
-        display: block;
-        padding: 12px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
         border: 1px solid #dfe3ea;
-        border-radius: 10px;
-        margin-bottom: 10px;
+        border-radius: 8px;
         transition: background .15s, border-color .15s;
+        white-space: nowrap;
     }
     .exam-option-label:hover { background: #f7f9fc; }
-    .exam-option-label input:checked + span { font-weight: 700; color: #14213d; }
+    .exam-option-label__letter { font-weight: 800; color: #7a8296; }
+    .exam-option-label input:checked ~ .exam-option-label__letter,
+    .exam-option-label input:checked ~ span { font-weight: 700; color: #14213d; }
     .exam-option-label:has(input:checked) { border-color: #14213d; background: #f2f4fa; }
+    .exam-option-label:has(input:checked) .exam-option-label__letter { color: #14213d; }
+
+    /* Exam cover page, matching the printed placement-test cover */
+    .exam-cover {
+        background: #fff; border-radius: 14px; padding: 32px;
+        margin-bottom: 24px; box-shadow: 0 1px 4px rgba(20,33,61,.08); border: 1px solid #e7eaf0;
+        text-align: center;
+    }
+    .exam-cover__top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e7eaf0; padding-bottom: 14px; margin-bottom: 24px; }
+    .exam-cover__logos { display: flex; align-items: center; gap: 10px; }
+    .exam-cover__logos img { height: 46px; }
+    .exam-cover__kicker { font-weight: 700; color: #14213d; }
+    .exam-cover__title { font-size: 26px; font-weight: 800; color: #14213d; margin: 0 0 6px; }
+    .exam-cover__subtitle { color: #7a8296; font-weight: 600; margin-bottom: 26px; }
+    .exam-cover__fields { max-width: 420px; margin: 0 auto 20px; text-align: right; }
+    .exam-cover__field { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px dotted #c7ccd6; font-size: 15px; }
+    .exam-cover__field b { color: #14213d; white-space: nowrap; }
+    .exam-cover__field span { color: #1b1f2a; }
+    .exam-cover__instructions {
+        text-align: right; max-width: 480px; margin: 0 auto; background: #f7f9fc;
+        border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #3a4257;
+    }
+    .exam-cover__instructions b { display: block; margin-bottom: 8px; color: #14213d; }
+    .exam-cover__instructions ul { margin: 0; padding-inline-start: 20px; }
+    .exam-cover__instructions li { margin-bottom: 6px; }
+    .exam-cover__footer { margin-top: 26px; }
+    .exam-cover__footer img { height: 60px; }
 
     .exam-anti-cheat-notice {
         background: #fff7e6;
@@ -119,6 +152,39 @@
 @endif
 
 <div class="exam-shell__body {{ $exam->anti_cheat_enabled ? 'exam-locked-area' : '' }}">
+    <div class="exam-cover">
+        <div class="exam-cover__top">
+            <div class="exam-cover__logos">
+                <img src="{{ url('assets/oxford/img/OTE-Approved-Test-Centre-Logo.png') }}" alt="OTE Approved Test Centre">
+                <img src="{{ url('assets/oxford/img/logo.png') }}" alt="Oxford English Centre">
+            </div>
+            <div class="exam-cover__kicker">{{ $exam->category === 'placement' ? 'Placement Test' : $exam->title }}</div>
+        </div>
+
+        <h2 class="exam-cover__title">{{ $exam->category === 'placement' ? 'Test Your English' : $exam->title }}</h2>
+        <div class="exam-cover__subtitle">Test Time: {{ $exam->duration_minutes >= 60 ? round($exam->duration_minutes / 60, 1) . ' hours' : $exam->duration_minutes . ' minutes' }}</div>
+
+        <div class="exam-cover__fields">
+            <div class="exam-cover__field"><b>Test taker name:</b> <span dir="auto">{{ $attempt->student->name ?? '—' }}</span></div>
+            <div class="exam-cover__field"><b>Date taken:</b> <span>{{ $attempt->started_at?->format('Y-m-d') ?? now()->format('Y-m-d') }}</span></div>
+            <div class="exam-cover__field"><b>Mobile:</b> <span>{{ $attempt->student->mobile ?? '—' }}</span></div>
+        </div>
+
+        <div class="exam-cover__instructions">
+            <b>INSTRUCTIONS TO CANDIDATE</b>
+            <ul>
+                <li>Spend no more than {{ $exam->duration_minutes >= 60 ? round($exam->duration_minutes / 60, 1) . ' hours' : $exam->duration_minutes . ' minutes' }} on the test.</li>
+                <li>Choose the best answer for each question.</li>
+                <li>Stop when the questions become too difficult.</li>
+                <li>Your answers are saved automatically as you select them below.</li>
+            </ul>
+        </div>
+
+        <div class="exam-cover__footer">
+            <img src="{{ url('assets/oxford/img/footer-logo.png') }}" alt="Oxford English Centre">
+        </div>
+    </div>
+
     @if($exam->anti_cheat_enabled)
     <div class="exam-anti-cheat-notice">
         <i class="bi bi-shield-exclamation"></i>
@@ -146,13 +212,16 @@
             @endif
 
             @if(in_array($q->type, ['mcq', 'true_false']))
-                @foreach($q->options as $opt)
-                    <label class="exam-option-label">
-                        <input type="radio" name="q_{{ $q->id }}" class="answer-input" data-question="{{ $q->id }}" value="{{ $opt->id }}"
-                            {{ ($existingAnswers[$q->id] ?? null) == $opt->id ? 'checked' : '' }}>
-                        <span dir="auto">{{ $opt->option_text }}</span>
-                    </label>
-                @endforeach
+                <div class="exam-options-row">
+                    @foreach($q->options as $optIndex => $opt)
+                        <label class="exam-option-label">
+                            <input type="radio" name="q_{{ $q->id }}" class="answer-input" data-question="{{ $q->id }}" value="{{ $opt->id }}"
+                                {{ ($existingAnswers[$q->id] ?? null) == $opt->id ? 'checked' : '' }}>
+                            <span class="exam-option-label__letter">{{ chr(65 + $optIndex) }}</span>
+                            <span dir="auto">{{ $opt->option_text }}</span>
+                        </label>
+                    @endforeach
+                </div>
             @elseif($q->type === 'text')
                 <textarea class="form-control answer-text" dir="auto" data-question="{{ $q->id }}" rows="4" placeholder="اكتب إجابتك هنا..."></textarea>
             @elseif($q->type === 'voice')

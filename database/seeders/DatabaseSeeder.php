@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call(SidebarSeeder::class);
         $this->call(ExamSkillsSeeder::class);
         $this->call(ExamQuestionBankSeeder::class);
+        $this->call(ExamPlacementQuestionsSeeder::class);
+        $this->call(ExamPlacementAnswersSeeder::class);
         // 1. Create Admin Role
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'admin']);
 

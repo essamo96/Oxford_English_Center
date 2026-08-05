@@ -118,7 +118,7 @@
                 </div>
             @endforeach
 
-            <div class="exam-result-card">
+            <div class="exam-result-card" id="review_request_card">
                 <label class="fw-bold mb-2 d-block">طلب مراجعة</label>
                 <textarea id="review_request_message" class="form-control mb-2" rows="2" placeholder="اشرح سبب طلب المراجعة..."></textarea>
                 <button type="button" id="send_review_request" class="btn btn-outline-dark btn-sm">إرسال طلب المراجعة</button>
@@ -146,14 +146,36 @@ $('#toggle_review_btn').on('click', function () {
 });
 
 $(document).on('click', '#send_review_request', function () {
-    var message = $('#review_request_message').val();
+    var $btn = $(this);
+    var message = $('#review_request_message').val().trim();
+
+    if (message === '') {
+        Swal.fire({ icon: 'warning', title: 'يرجى كتابة سبب طلب المراجعة أولاً', confirmButtonText: 'حسناً' });
+        return;
+    }
+
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> جاري الإرسال...');
+
     $.post("{{ route('student.exams.request_review', ['attempt' => Crypt::encrypt($attempt->id)]) }}", {
         message: message, _token: '{{ csrf_token() }}'
     }, function (data) {
-        Swal.fire({
-            toast: true, position: 'top', showConfirmButton: false, timer: 3000,
-            icon: data.status, title: data.message
-        });
+        if (data.status === 'success') {
+            // close the review-request panel and replace it with a clear confirmation,
+            // so the student knows the request was actually sent (not left hanging).
+            $('#review_request_card').html(
+                '<div class="text-center py-2">' +
+                '<i class="bi bi-check-circle-fill fs-1 text-success mb-2 d-block"></i>' +
+                '<h6 class="mb-1">تم إرسال طلب المراجعة بنجاح</h6>' +
+                '<p class="text-muted mb-0">سيتم إبلاغ المدرس/الإدارة فوراً، وسيصلك إشعار عند الرد على طلبك.</p>' +
+                '</div>'
+            );
+        } else {
+            Swal.fire({ icon: 'error', title: data.message || 'تعذر إرسال الطلب', confirmButtonText: 'حسناً' });
+            $btn.prop('disabled', false).text('إرسال طلب المراجعة');
+        }
+    }).fail(function () {
+        Swal.fire({ icon: 'error', title: 'تعذر إرسال الطلب، حاول مرة أخرى', confirmButtonText: 'حسناً' });
+        $btn.prop('disabled', false).text('إرسال طلب المراجعة');
     });
 });
 </script>

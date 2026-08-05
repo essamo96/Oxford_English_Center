@@ -118,7 +118,7 @@ class StudentExamsController extends Controller
             abort(404);
         }
 
-        $attempt = ExamAttempt::with('exam')->where('student_id', Auth::guard('students')->id())->find($attemptId);
+        $attempt = ExamAttempt::with(['exam', 'student'])->where('student_id', Auth::guard('students')->id())->find($attemptId);
         if (!$attempt) {
             abort(404, self::NOT_FOUND);
         }
@@ -346,12 +346,14 @@ class StudentExamsController extends Controller
             return response()->json(['status' => 'error', 'message' => self::NOT_FOUND]);
         }
 
-        ExamReviewRequest::create([
+        $review = ExamReviewRequest::create([
             'attempt_id' => $attempt->id,
             'student_id' => Auth::guard('students')->id(),
             'message' => $request->get('message'),
             'status' => 'pending',
         ]);
+
+        ExamNotifier::notifyReviewRequested($review->fresh(['attempt.exam', 'student']));
 
         return response()->json(['status' => 'success', 'message' => 'تم إرسال طلب المراجعة بنجاح']);
     }
