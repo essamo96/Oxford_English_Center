@@ -145,6 +145,11 @@ Route::group(['middleware' => ['auth:teachers']], function () {
     Route::post('teacher/exam-reviews/grade/{id}', ['as' => 'teacher.exam_reviews.grade', 'uses' => 'TeacherExamReviewsController@postGrade']);
     Route::post('teacher/exam-reviews/approve', ['as' => 'teacher.exam_reviews.approve', 'uses' => 'TeacherExamReviewsController@postApproveReview']);
 
+    // Examination Center - teacher attempts overview (own groups only)
+    Route::get('teacher/exam-attempts', ['as' => 'teacher.exam_attempts.view', 'uses' => 'TeacherExamAttemptsController@getIndex']);
+    Route::post('teacher/exam-attempts/answers', ['as' => 'teacher.exam_attempts.answers', 'uses' => 'TeacherExamAttemptsController@getAnswers']);
+    Route::post('teacher/exam-attempts/wrong-answers', ['as' => 'teacher.exam_attempts.wrong_answers', 'uses' => 'TeacherExamAttemptsController@getWrongAnswers']);
+
     //Chat
     Route::get('load-latest-messages_teacher', 'MessagesController@getLoadLatestMessages')->defaults('type', 'teacher');
     Route::post('send_teacher', 'MessagesController@postSendMessage')->defaults('type', 'teacher');
@@ -720,6 +725,12 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('exam_reviews/grade/{id}', ['as' => 'exam_reviews.grade', 'middleware' => ['permission:admin.exam_reviews.grade'], 'uses' => 'ExamReviewsController@getGrade']);
     Route::post('exam_reviews/grade/{id}', ['as' => 'exam_reviews.grade', 'middleware' => ['permission:admin.exam_reviews.grade'], 'uses' => 'ExamReviewsController@postGrade']);
     Route::post('exam_reviews/approve', ['as' => 'exam_reviews.approve', 'middleware' => ['permission:admin.exam_reviews.approve'], 'uses' => 'ExamReviewsController@postApproveReview']);
+
+    // Examination Center - Attempts (read-only overview of every student's attempts/scores)
+    Route::get('exam_attempts', ['as' => 'exam_attempts.view', 'middleware' => ['permission:admin.exam_attempts.view'], 'uses' => 'ExamAttemptsController@getIndex']);
+    Route::get('exam_attempts/list', ['as' => 'exam_attempts.list', 'middleware' => ['permission:admin.exam_attempts.view'], 'uses' => 'ExamAttemptsController@getList']);
+    Route::post('exam_attempts/answers', ['as' => 'exam_attempts.answers', 'middleware' => ['permission:admin.exam_attempts.view'], 'uses' => 'ExamAttemptsController@getAnswers']);
+    Route::post('exam_attempts/wrong-answers', ['as' => 'exam_attempts.wrong_answers', 'middleware' => ['permission:admin.exam_attempts.view'], 'uses' => 'ExamAttemptsController@getWrongAnswers']);
 
     Route::get('logout', ['as' => 'app.logout', 'uses' => 'LoginController@getLogout']);
 

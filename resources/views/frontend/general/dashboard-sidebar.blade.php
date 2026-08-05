@@ -157,6 +157,10 @@
                     @endphp
                     <span class="ox-dash__navbadge" style="{{ $teacherPendingReviewsCount > 0 ? '' : 'display:none;' }}">{{ $teacherPendingReviewsCount }}</span>
                 </a>
+                <a class="ox-dash__navlink {{ Request::is('teacher/exam-attempts*') ? 'is-active' : '' }}"
+                   href="{{ route('teacher.exam_attempts.view') }}">
+                    <i class="bi bi-clipboard-data"></i><span class="ox-dash__navtext">محاولات طلابي</span>
+                </a>
             </div>
 
             <div class="ox-dash__group">
