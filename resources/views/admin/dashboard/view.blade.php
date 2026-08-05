@@ -488,6 +488,76 @@
         <!--end::Weekly Calendar Widget-->
     </div>
 </div>
+
+@can('admin.exam_dashboard.view')
+<div class="row g-5 g-xl-8 mt-2">
+    <div class="col-12">
+        <h3 class="fw-bold mb-4">
+            <i class="ki-duotone ki-abstract-26 text-warning fs-2 me-2"><span class="path1"></span><span class="path2"></span></i>
+            مركز الامتحانات
+        </h3>
+    </div>
+    @php
+        $examCards = [
+            ['label' => 'إجمالي الامتحانات', 'value' => $exam_total_count, 'icon' => 'ki-book-open', 'color' => 'primary'],
+            ['label' => 'امتحانات منشورة', 'value' => $exam_published_count, 'icon' => 'ki-verify', 'color' => 'success'],
+            ['label' => 'امتحانات مجدولة', 'value' => $exam_scheduled_count, 'icon' => 'ki-calendar', 'color' => 'warning'],
+            ['label' => 'امتحانات مغلقة', 'value' => $exam_closed_count, 'icon' => 'ki-lock', 'color' => 'secondary'],
+            ['label' => 'اختبارات تحديد مستوى', 'value' => $exam_placement_count, 'icon' => 'ki-abstract-26', 'color' => 'info'],
+            ['label' => 'امتحانات مجموعات', 'value' => $exam_group_count, 'icon' => 'ki-people', 'color' => 'primary'],
+            ['label' => 'أسئلة بنك الأسئلة', 'value' => $exam_questions_count, 'icon' => 'ki-question-2', 'color' => 'dark'],
+            ['label' => 'طلاب يؤدون الامتحان الآن', 'value' => $exam_students_taking_now, 'icon' => 'ki-pulse', 'color' => 'danger'],
+            ['label' => 'امتحانات اليوم', 'value' => $exam_today_count, 'icon' => 'ki-calendar-8', 'color' => 'warning'],
+            ['label' => 'بانتظار التصحيح', 'value' => $exam_pending_reviews, 'icon' => 'ki-check-square', 'color' => 'danger'],
+            ['label' => 'متوسط الدرجات', 'value' => $exam_average_score . '%', 'icon' => 'ki-chart-line-up', 'color' => 'success'],
+            ['label' => 'نسبة النجاح', 'value' => $exam_pass_rate . '%', 'icon' => 'ki-medal-star', 'color' => 'success'],
+        ];
+    @endphp
+    @foreach($examCards as $card)
+    <div class="col-xl-3 col-md-6">
+        <div class="card shadow-sm mb-5">
+            <div class="card-body d-flex align-items-center">
+                <i class="ki-duotone {{ $card['icon'] }} fs-2x text-{{ $card['color'] }} me-4"><span class="path1"></span><span class="path2"></span></i>
+                <div>
+                    <div class="fs-2 fw-bold">{{ $card['value'] }}</div>
+                    <div class="text-muted fs-7">{{ $card['label'] }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endforeach
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header"><h4 class="card-title">أحدث المحاولات</h4></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-row-dashed align-middle text-center">
+                        <thead>
+                            <tr class="text-muted fw-bold text-uppercase">
+                                <th>الطالب</th><th>الامتحان</th><th>الحالة</th><th>الدرجة</th><th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($exam_recent_attempts as $attempt)
+                                <tr>
+                                    <td>{{ $attempt->student->name ?? '—' }}</td>
+                                    <td>{{ $attempt->exam->title ?? '—' }}</td>
+                                    <td>{{ $attempt->status }}</td>
+                                    <td>{{ $attempt->percentage !== null ? $attempt->percentage . '%' : '—' }}</td>
+                                    <td>{{ $attempt->created_at->format('Y-m-d H:i') }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5">لا توجد محاولات بعد</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endcan
 @stop
 
 @section('css')

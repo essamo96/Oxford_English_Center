@@ -852,6 +852,42 @@
         </div>
     </div>
 </div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-journal-check"></i> مركز الامتحانات</h5>
+        <div class="d-flex gap-2">
+            <a href="{{ route('teacher.exams.view') }}" class="btn btn-sm btn-primary">إدارة الامتحانات</a>
+            <a href="{{ route('teacher.exam_reviews.view') }}" class="btn btn-sm btn-outline-primary">التصحيح والمراجعة</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row text-center g-3 mb-3">
+            <div class="col-6 col-md-2"><div class="fs-3 fw-bold">{{ $exam_kpis['total_exams'] }}</div><div class="text-muted small">إجمالي الامتحانات</div></div>
+            <div class="col-6 col-md-2"><div class="fs-3 fw-bold">{{ $exam_kpis['published_exams'] }}</div><div class="text-muted small">منشورة</div></div>
+            <div class="col-6 col-md-2"><div class="fs-3 fw-bold">{{ $exam_kpis['upcoming_exams'] }}</div><div class="text-muted small">قادمة</div></div>
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold text-danger">{{ $exam_kpis['pending_reviews'] }}</div><div class="text-muted small">بانتظار التصحيح</div></div>
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold text-success">{{ $exam_kpis['avg_score'] }}%</div><div class="text-muted small">متوسط الدرجات</div></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped text-center mb-0">
+                <thead><tr><th>الطالب</th><th>الامتحان</th><th>الحالة</th><th>الدرجة</th></tr></thead>
+                <tbody>
+                    @forelse($exam_recent_attempts as $attempt)
+                        <tr>
+                            <td>{{ $attempt->student->name ?? '—' }}</td>
+                            <td>{{ $attempt->exam->title ?? '—' }}</td>
+                            <td>{{ $attempt->status }}</td>
+                            <td>{{ $attempt->percentage !== null ? $attempt->percentage . '%' : '—' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4">لا توجد محاولات بعد</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')

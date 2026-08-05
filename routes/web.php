@@ -129,6 +129,22 @@ Route::group(['middleware' => ['auth:teachers']], function () {
     Route::get('students/grope/{group_id}/{teacher_id}', ['as' => 'teacher.showGroueStudents', 'uses' => 'GroupsController@postTeacherGroueStudents']);
     Route::get('grope/Exam/{teacher_id}', ['as' => 'teacher.ExamDates', 'uses' => 'GroupsController@getGroupExamDates']);
     Route::get('teacher/my-salaries', ['as' => 'teacher.my_salaries', 'uses' => 'TeachersController@mySalaries']);
+
+    // Examination Center - Group Exams (teacher, restricted to own groups; no Placement Tests, no global Question Bank)
+    Route::get('teacher/exams', ['as' => 'teacher.exams.view', 'uses' => 'TeacherExamsController@getIndex']);
+    Route::get('teacher/exams/add', ['as' => 'teacher.exams.add', 'uses' => 'TeacherExamsController@getAdd']);
+    Route::post('teacher/exams/add', ['as' => 'teacher.exams.add', 'uses' => 'TeacherExamsController@postAdd']);
+    Route::get('teacher/exams/edit/{id}', ['as' => 'teacher.exams.edit', 'uses' => 'TeacherExamsController@getEdit']);
+    Route::post('teacher/exams/edit/{id}', ['as' => 'teacher.exams.edit', 'uses' => 'TeacherExamsController@postEdit']);
+    Route::post('teacher/exams/delete', ['as' => 'teacher.exams.delete', 'uses' => 'TeacherExamsController@postDelete']);
+    Route::post('teacher/exams/publish', ['as' => 'teacher.exams.publish', 'uses' => 'TeacherExamsController@postPublish']);
+
+    // Examination Center - teacher manual review/grading (own groups only)
+    Route::get('teacher/exam-reviews', ['as' => 'teacher.exam_reviews.view', 'uses' => 'TeacherExamReviewsController@getIndex']);
+    Route::get('teacher/exam-reviews/grade/{id}', ['as' => 'teacher.exam_reviews.grade', 'uses' => 'TeacherExamReviewsController@getGrade']);
+    Route::post('teacher/exam-reviews/grade/{id}', ['as' => 'teacher.exam_reviews.grade', 'uses' => 'TeacherExamReviewsController@postGrade']);
+    Route::post('teacher/exam-reviews/approve', ['as' => 'teacher.exam_reviews.approve', 'uses' => 'TeacherExamReviewsController@postApproveReview']);
+
     //Chat
     Route::get('load-latest-messages_teacher', 'MessagesController@getLoadLatestMessages')->defaults('type', 'teacher');
     Route::post('send_teacher', 'MessagesController@postSendMessage')->defaults('type', 'teacher');
@@ -170,6 +186,17 @@ Route::group(['middleware' => ['auth:students']], function () {
     Route::post('student/admin/send-message', ['as' => 'student.send_admin_message', 'uses' => 'StudentsController@postSendMessageToAdmin']);
     //Chat
     Route::post('student/ask_update/profile', ['as' => 'ask.update.profile', 'uses' => 'StudentsController@updateProfile']);
+    // Examination Center - student exam-taking (Placement Tests + own Group Exams only)
+    Route::get('student/exams', ['as' => 'student.exams.view', 'uses' => 'StudentExamsController@getIndex']);
+    Route::get('student/exams/start/{id}', ['as' => 'student.exams.start', 'uses' => 'StudentExamsController@start']);
+    Route::get('student/exams/take/{attempt}', ['as' => 'student.exams.take', 'uses' => 'StudentExamsController@take']);
+    Route::post('student/exams/answer/{attempt}', ['as' => 'student.exams.answer', 'uses' => 'StudentExamsController@saveAnswer']);
+    Route::post('student/exams/voice-answer/{attempt}', ['as' => 'student.exams.voice_answer', 'uses' => 'StudentExamsController@saveVoiceAnswer']);
+    Route::post('student/exams/violation/{attempt}', ['as' => 'student.exams.violation', 'uses' => 'StudentExamsController@logViolation']);
+    Route::post('student/exams/submit/{attempt}', ['as' => 'student.exams.submit', 'uses' => 'StudentExamsController@submit']);
+    Route::get('student/exams/result/{attempt}', ['as' => 'student.exams.result', 'uses' => 'StudentExamsController@result']);
+    Route::post('student/exams/review/{attempt}', ['as' => 'student.exams.request_review', 'uses' => 'StudentExamsController@requestReview']);
+
     Route::get('load-latest-messages_student', 'MessagesController@getLoadLatestMessages')->defaults('type', 'student');
     Route::post('send_student', ['as' => 'student.postSendMessage', 'uses' => 'MessagesController@postSendMessage'])->defaults('type', 'student');
     Route::get('fetch-old-messages', 'MessagesController@getOldMessages');
@@ -639,6 +666,53 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('files/edit/{id}', ['as' => 'files.edit', 'middleware' => ['permission:admin.files.edit'], 'uses' => 'FilesController@postEdit']);
     Route::post('files/delete', ['as' => 'files.delete', 'middleware' => ['permission:admin.files.delete'], 'uses' => 'FilesController@postDelete']);
     Route::post('files/status', ['as' => 'files.status', 'middleware' => ['permission:admin.files.status'], 'uses' => 'FilesController@postStatus']);
+
+    // Examination Center - Question Categories (Skills)
+    Route::get('exam_skills', ['as' => 'exam_skills.view', 'middleware' => ['permission:admin.exam_skills.view|admin.exam_skills.add|admin.exam_skills.edit|admin.exam_skills.delete|admin.exam_skills.status'], 'uses' => 'ExamSkillsController@getIndex']);
+    Route::get('exam_skills/list', ['as' => 'exam_skills.list', 'middleware' => ['permission:admin.exam_skills.view|admin.exam_skills.add|admin.exam_skills.edit|admin.exam_skills.delete|admin.exam_skills.status'], 'uses' => 'ExamSkillsController@getList']);
+    Route::get('exam_skills/add', ['as' => 'exam_skills.add', 'middleware' => ['permission:admin.exam_skills.add'], 'uses' => 'ExamSkillsController@getAdd']);
+    Route::post('exam_skills/add', ['as' => 'exam_skills.add', 'middleware' => ['permission:admin.exam_skills.add'], 'uses' => 'ExamSkillsController@postAdd']);
+    Route::get('exam_skills/edit/{id}', ['as' => 'exam_skills.edit', 'middleware' => ['permission:admin.exam_skills.edit'], 'uses' => 'ExamSkillsController@getEdit']);
+    Route::post('exam_skills/edit/{id}', ['as' => 'exam_skills.edit', 'middleware' => ['permission:admin.exam_skills.edit'], 'uses' => 'ExamSkillsController@postEdit']);
+    Route::post('exam_skills/delete', ['as' => 'exam_skills.delete', 'middleware' => ['permission:admin.exam_skills.delete'], 'uses' => 'ExamSkillsController@postDelete']);
+    Route::post('exam_skills/status', ['as' => 'exam_skills.status', 'middleware' => ['permission:admin.exam_skills.status'], 'uses' => 'ExamSkillsController@postStatus']);
+
+    // Examination Center - Question Bank
+    Route::get('exam_questions', ['as' => 'exam_questions.view', 'middleware' => ['permission:admin.exam_questions.view|admin.exam_questions.add|admin.exam_questions.edit|admin.exam_questions.delete|admin.exam_questions.status'], 'uses' => 'ExamQuestionsController@getIndex']);
+    Route::get('exam_questions/list', ['as' => 'exam_questions.list', 'middleware' => ['permission:admin.exam_questions.view|admin.exam_questions.add|admin.exam_questions.edit|admin.exam_questions.delete|admin.exam_questions.status'], 'uses' => 'ExamQuestionsController@getList']);
+    Route::get('exam_questions/add', ['as' => 'exam_questions.add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@getAdd']);
+    Route::post('exam_questions/add', ['as' => 'exam_questions.add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@postAdd']);
+    Route::get('exam_questions/edit/{id}', ['as' => 'exam_questions.edit', 'middleware' => ['permission:admin.exam_questions.edit'], 'uses' => 'ExamQuestionsController@getEdit']);
+    Route::post('exam_questions/edit/{id}', ['as' => 'exam_questions.edit', 'middleware' => ['permission:admin.exam_questions.edit'], 'uses' => 'ExamQuestionsController@postEdit']);
+    Route::post('exam_questions/delete', ['as' => 'exam_questions.delete', 'middleware' => ['permission:admin.exam_questions.delete'], 'uses' => 'ExamQuestionsController@postDelete']);
+    Route::post('exam_questions/status', ['as' => 'exam_questions.status', 'middleware' => ['permission:admin.exam_questions.status'], 'uses' => 'ExamQuestionsController@postStatus']);
+
+    // Examination Center - Placement Tests bank (admin only; distinct from the placement-test
+    // appointment/payment booking feature which already owns the "placement_tests" route names below)
+    Route::get('exam_placement_tests', ['as' => 'exam_placement_tests.view', 'middleware' => ['permission:admin.exam_placement_tests.view|admin.exam_placement_tests.add|admin.exam_placement_tests.edit|admin.exam_placement_tests.delete|admin.exam_placement_tests.status'], 'uses' => 'ExamsController@getIndex']);
+    Route::get('exam_placement_tests/list', ['as' => 'exam_placement_tests.list', 'middleware' => ['permission:admin.exam_placement_tests.view|admin.exam_placement_tests.add|admin.exam_placement_tests.edit|admin.exam_placement_tests.delete|admin.exam_placement_tests.status'], 'uses' => 'ExamsController@getList']);
+    Route::get('exam_placement_tests/add', ['as' => 'exam_placement_tests.add', 'middleware' => ['permission:admin.exam_placement_tests.add'], 'uses' => 'ExamsController@getAdd']);
+    Route::post('exam_placement_tests/add', ['as' => 'exam_placement_tests.add', 'middleware' => ['permission:admin.exam_placement_tests.add'], 'uses' => 'ExamsController@postAdd']);
+    Route::get('exam_placement_tests/edit/{id}', ['as' => 'exam_placement_tests.edit', 'middleware' => ['permission:admin.exam_placement_tests.edit'], 'uses' => 'ExamsController@getEdit']);
+    Route::post('exam_placement_tests/edit/{id}', ['as' => 'exam_placement_tests.edit', 'middleware' => ['permission:admin.exam_placement_tests.edit'], 'uses' => 'ExamsController@postEdit']);
+    Route::post('exam_placement_tests/delete', ['as' => 'exam_placement_tests.delete', 'middleware' => ['permission:admin.exam_placement_tests.delete'], 'uses' => 'ExamsController@postDelete']);
+    Route::post('exam_placement_tests/status', ['as' => 'exam_placement_tests.status', 'middleware' => ['permission:admin.exam_placement_tests.publish'], 'uses' => 'ExamsController@postStatus']);
+
+    // Examination Center - Group Exams (admin; teachers manage their own via the teacher portal)
+    Route::get('group_exams', ['as' => 'group_exams.view', 'middleware' => ['permission:admin.group_exams.view|admin.group_exams.add|admin.group_exams.edit|admin.group_exams.delete|admin.group_exams.status'], 'uses' => 'ExamsController@getIndex']);
+    Route::get('group_exams/list', ['as' => 'group_exams.list', 'middleware' => ['permission:admin.group_exams.view|admin.group_exams.add|admin.group_exams.edit|admin.group_exams.delete|admin.group_exams.status'], 'uses' => 'ExamsController@getList']);
+    Route::get('group_exams/add', ['as' => 'group_exams.add', 'middleware' => ['permission:admin.group_exams.add'], 'uses' => 'ExamsController@getAdd']);
+    Route::post('group_exams/add', ['as' => 'group_exams.add', 'middleware' => ['permission:admin.group_exams.add'], 'uses' => 'ExamsController@postAdd']);
+    Route::get('group_exams/edit/{id}', ['as' => 'group_exams.edit', 'middleware' => ['permission:admin.group_exams.edit'], 'uses' => 'ExamsController@getEdit']);
+    Route::post('group_exams/edit/{id}', ['as' => 'group_exams.edit', 'middleware' => ['permission:admin.group_exams.edit'], 'uses' => 'ExamsController@postEdit']);
+    Route::post('group_exams/delete', ['as' => 'group_exams.delete', 'middleware' => ['permission:admin.group_exams.delete'], 'uses' => 'ExamsController@postDelete']);
+    Route::post('group_exams/status', ['as' => 'group_exams.status', 'middleware' => ['permission:admin.group_exams.publish'], 'uses' => 'ExamsController@postStatus']);
+
+    // Examination Center - Manual Review / Grading
+    Route::get('exam_reviews', ['as' => 'exam_reviews.view', 'middleware' => ['permission:admin.exam_reviews.view'], 'uses' => 'ExamReviewsController@getIndex']);
+    Route::get('exam_reviews/grade/{id}', ['as' => 'exam_reviews.grade', 'middleware' => ['permission:admin.exam_reviews.grade'], 'uses' => 'ExamReviewsController@getGrade']);
+    Route::post('exam_reviews/grade/{id}', ['as' => 'exam_reviews.grade', 'middleware' => ['permission:admin.exam_reviews.grade'], 'uses' => 'ExamReviewsController@postGrade']);
+    Route::post('exam_reviews/approve', ['as' => 'exam_reviews.approve', 'middleware' => ['permission:admin.exam_reviews.approve'], 'uses' => 'ExamReviewsController@postApproveReview']);
 
     Route::get('logout', ['as' => 'app.logout', 'uses' => 'LoginController@getLogout']);
 

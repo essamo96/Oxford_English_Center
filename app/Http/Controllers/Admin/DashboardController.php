@@ -113,6 +113,33 @@ class DashboardController extends AdminController
         ->take(6)
         ->get();
 
+        // Examination Center widgets
+        $exams = \App\Models\Exam::whereNull('deleted_at')->get(); // BranchScope auto-applies
+        parent::$data['exam_total_count'] = $exams->count();
+        parent::$data['exam_scheduled_count'] = $exams->where('status', 'scheduled')->count();
+        parent::$data['exam_published_count'] = $exams->where('status', 'published')->count();
+        parent::$data['exam_closed_count'] = $exams->where('status', 'closed')->count();
+        parent::$data['exam_placement_count'] = $exams->where('category', 'placement')->count();
+        parent::$data['exam_group_count'] = $exams->where('category', 'group')->count();
+        parent::$data['exam_questions_count'] = \App\Models\ExamQuestion::where('status', 'active')->count();
+
+        $examIds = $exams->pluck('id');
+        parent::$data['exam_students_taking_now'] = \App\Models\ExamAttempt::whereIn('exam_id', $examIds)->where('status', 'in_progress')->count();
+        parent::$data['exam_today_count'] = $exams->filter(fn($e) => $e->start_date && $e->start_date->isToday())->count();
+        parent::$data['exam_pending_reviews'] = \App\Models\ExamAttempt::whereIn('exam_id', $examIds)->where('status', 'submitted')->count();
+
+        $gradedAttempts = \App\Models\ExamAttempt::whereIn('exam_id', $examIds)->where('status', 'graded')->whereNotNull('percentage');
+        parent::$data['exam_average_score'] = round($gradedAttempts->avg('percentage') ?? 0, 1);
+        $gradedTotal = (clone $gradedAttempts)->count();
+        $gradedPassed = (clone $gradedAttempts)->whereColumn('percentage', '>=', DB::raw('(select passing_score from exams where exams.id = exam_attempts.exam_id)'))->count();
+        parent::$data['exam_pass_rate'] = $gradedTotal > 0 ? round($gradedPassed / $gradedTotal * 100, 1) : 0;
+
+        parent::$data['exam_recent_attempts'] = \App\Models\ExamAttempt::with(['exam', 'student'])
+            ->whereIn('exam_id', $examIds)
+            ->orderBy('id', 'desc')
+            ->take(5)
+            ->get();
+
         return view('admin.dashboard.view', parent::$data);
 
     }

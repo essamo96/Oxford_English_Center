@@ -232,6 +232,22 @@ class TeachersController extends Controller {
             ];
         });
 
+        // Examination Center KPIs for this teacher's own groups only
+        $teacherExams = \App\Models\Exam::where('category', 'group')->whereIn('group_id', $gids)->get();
+        $teacherExamIds = $teacherExams->pluck('id');
+        parent::$data['exam_kpis'] = [
+            'total_exams' => $teacherExams->count(),
+            'published_exams' => $teacherExams->where('status', 'published')->count(),
+            'pending_reviews' => \App\Models\ExamAttempt::whereIn('exam_id', $teacherExamIds)->where('status', 'submitted')->count(),
+            'upcoming_exams' => $teacherExams->filter(fn($e) => $e->start_date && $e->start_date->isFuture())->count(),
+            'avg_score' => round(\App\Models\ExamAttempt::whereIn('exam_id', $teacherExamIds)->whereNotNull('percentage')->avg('percentage') ?? 0, 1),
+        ];
+        parent::$data['exam_recent_attempts'] = \App\Models\ExamAttempt::with(['exam', 'student'])
+            ->whereIn('exam_id', $teacherExamIds)
+            ->orderBy('id', 'desc')
+            ->take(5)
+            ->get();
+
         return view('frontend.teachers.index', parent::$data);
     }
     public function getIndex2($id) {
