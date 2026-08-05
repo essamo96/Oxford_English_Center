@@ -30,6 +30,7 @@
                         <th class="text-center">الطالب</th>
                         <th class="text-center">الامتحان</th>
                         <th class="text-center">تاريخ التسليم</th>
+                        <th class="text-center">مخالفات الغش</th>
                         <th class="text-center">العمليات</th>
                     </tr>
                 </thead>
@@ -41,6 +42,13 @@
                             <td>{{ $attempt->exam->title ?? '—' }}</td>
                             <td>{{ $attempt->submitted_at?->format('Y-m-d H:i') }}</td>
                             <td>
+                                @if($attempt->violations_count > 0)
+                                    <span class="badge badge-light-danger"><i class="bi bi-shield-exclamation"></i> {{ $attempt->violations_count }}</span>
+                                @else
+                                    <span class="badge badge-light-success">0</span>
+                                @endif
+                            </td>
+                            <td>
                                 @can('admin.exam_reviews.grade')
                                 <a href="{{ route('exam_reviews.grade', ['id' => Crypt::encrypt($attempt->id)]) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-pencil-square"></i> تصحيح
@@ -49,7 +57,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5">لا توجد محاولات بانتظار التصحيح</td></tr>
+                        <tr><td colspan="6">لا توجد محاولات بانتظار التصحيح</td></tr>
                     @endforelse
                 </tbody>
             </table>

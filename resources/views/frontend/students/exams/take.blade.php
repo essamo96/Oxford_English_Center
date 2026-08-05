@@ -46,6 +46,30 @@
     }
     .exam-submit-btn:hover { background: #17703f; }
 
+    .exam-violation-counter {
+        background: rgba(255,255,255,.12);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    .exam-violation-counter.exam-violation-counter--danger { background: #b3261e; }
+
+    .exam-fullscreen-gate {
+        position: fixed;
+        inset: 0;
+        background: #14213d;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+    }
+    .exam-fullscreen-gate__box { max-width: 420px; padding: 24px; }
+    .exam-fullscreen-gate__box p { color: #cbd3e6; }
+
     /* Anti-cheat: block text selection on the exam content itself, but keep it
        usable inside actual answer inputs (typing/selecting your own answer is fine). */
     .exam-locked-area, .exam-locked-area * {
@@ -64,8 +88,28 @@
 @section('content')
 <div class="exam-shell__header">
     <h1 class="exam-shell__title">{{ $exam->title }}</h1>
-    <div class="exam-timer" id="exam_timer">--:--</div>
+    <div class="d-flex align-items-center gap-3">
+        @if($exam->anti_cheat_enabled)
+        <div class="exam-violation-counter" id="exam_violation_counter" title="عدد المخالفات المرصودة">
+            <i class="bi bi-shield-exclamation"></i> <span id="exam_violation_count">0</span>/{{ $exam->anti_cheat_violation_limit }}
+        </div>
+        @endif
+        <div class="exam-timer" id="exam_timer">--:--</div>
+    </div>
 </div>
+
+@if($exam->anti_cheat_enabled)
+<div class="exam-fullscreen-gate" id="exam_fullscreen_gate">
+    <div class="exam-fullscreen-gate__box">
+        <i class="bi bi-arrows-fullscreen fs-1 mb-3 d-block"></i>
+        <h4 class="mb-2">اضغط للمتابعة بوضع ملء الشاشة</h4>
+        <p class="text-muted mb-4">هذا الامتحان مراقب ويجب أن يبقى بملء الشاشة طوال المدة. الخروج من وضع ملء الشاشة يُحتسب كمخالفة.</p>
+        <button type="button" id="exam_fullscreen_start_btn" class="exam-submit-btn">
+            <i class="bi bi-play-fill"></i> متابعة الآن
+        </button>
+    </div>
+</div>
+@endif
 
 <div class="exam-shell__body {{ $exam->anti_cheat_enabled ? 'exam-locked-area' : '' }}">
     @if($exam->anti_cheat_enabled)
@@ -215,18 +259,33 @@
 
     // ── Lightweight anti-cheat (no AI proctoring) ──
     var submitted = false;
+    var violationLabels = {
+        copy: 'نسخ', paste: 'لصق', cut: 'قص', right_click: 'زر الفأرة الأيمن / أدوات المطوّر',
+        tab_switch: 'تبديل النافذة/التبويب', window_blur: 'الخروج من نافذة الامتحان',
+        window_focus: 'العودة إلى نافذة الامتحان', fullscreen_exit: 'الخروج من وضع ملء الشاشة'
+    };
+
     function reportViolation(type) {
         if (!antiCheatEnabled || submitted) return;
         $.post(urlFor('violation'), { type: type, _token: csrf }, function (data) {
+            // always keep the on-screen counter (next to the timer) in sync, every single time
+            var $counter = $('#exam_violation_count');
+            var $counterBox = $('#exam_violation_counter');
+            if ($counter.length) {
+                $counter.text(data.violations_count);
+                if (data.violations_count >= data.limit) $counterBox.addClass('exam-violation-counter--danger');
+            }
+
+            // always tell the student what just happened, not only once the limit is hit
+            Swal.fire({
+                toast: true, position: 'top', icon: 'warning', showConfirmButton: false, timer: 3000,
+                title: 'تم رصد مخالفة: ' + (violationLabels[type] || type) + ' (' + data.violations_count + '/' + data.limit + ')'
+            });
+
             if (data.exceeded) {
                 if (data.action === 'auto_submit') {
                     Swal.fire({ icon: 'error', title: 'تم تجاوز عدد المخالفات المسموح', text: 'سيتم تسليم الامتحان تلقائياً', confirmButtonText: 'حسناً' });
                     doSubmit();
-                } else if (data.action === 'warning') {
-                    Swal.fire({
-                        toast: true, position: 'top', icon: 'warning', showConfirmButton: false, timer: 3500,
-                        title: 'تحذير: تم رصد ' + data.violations_count + ' مخالفة من أصل ' + data.limit + ' مسموح بها'
-                    });
                 } else if (data.action === 'notify_teacher') {
                     Swal.fire({
                         toast: true, position: 'top', icon: 'warning', showConfirmButton: false, timer: 3500,
@@ -234,6 +293,36 @@
                     });
                 }
             }
+        });
+    }
+
+    // ── Fullscreen gate: exam must run in fullscreen; leaving it counts as a violation ──
+    var $gate = $('#exam_fullscreen_gate');
+    function enterFullscreen() {
+        var el = document.documentElement;
+        var request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (request) request.call(el).catch(function () {});
+    }
+    function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    }
+
+    if (antiCheatEnabled && $gate.length) {
+        $('#exam_fullscreen_start_btn').on('click', function () {
+            enterFullscreen();
+            $gate.fadeOut(150);
+        });
+
+        ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(function (evt) {
+            document.addEventListener(evt, function () {
+                if (submitted) return;
+                if (!isFullscreen()) {
+                    reportViolation('fullscreen_exit');
+                    $gate.find('h4').text('غادرت وضع ملء الشاشة');
+                    $gate.find('p').text('يجب العودة لوضع ملء الشاشة لمتابعة الامتحان. هذا يُحتسب كمخالفة.');
+                    $gate.fadeIn(150);
+                }
+            });
         });
     }
 
@@ -278,6 +367,7 @@
         if (submitted) return;
         submitted = true;
         clearInterval(timerInterval);
+        if (document.exitFullscreen) { document.exitFullscreen().catch(function () {}); }
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = urlFor('submit');

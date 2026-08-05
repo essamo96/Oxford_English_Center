@@ -49,7 +49,7 @@ class TeacherExamReviewsController extends Controller
             return redirect(route('teacher.exam_reviews.view'))->with('danger', self::NOT_FOUND);
         }
 
-        $attempt = $this->ownedAttemptsQuery()->with(['exam', 'student', 'answers.question.options'])->find($id);
+        $attempt = $this->ownedAttemptsQuery()->with(['exam', 'student', 'answers.question.options', 'violations'])->find($id);
         if (!$attempt) {
             return redirect(route('teacher.exam_reviews.view'))->with('danger', self::NOT_FOUND);
         }

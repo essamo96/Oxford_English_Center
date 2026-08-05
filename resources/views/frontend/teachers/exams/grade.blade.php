@@ -10,6 +10,26 @@
     </div>
 </div>
 
+@if($attempt->violations_count > 0)
+@php
+    $violationLabels = ['copy' => 'نسخ', 'paste' => 'لصق', 'cut' => 'قص', 'right_click' => 'زر الفأرة الأيمن/أدوات المطوّر', 'tab_switch' => 'تبديل النافذة/التبويب', 'window_blur' => 'خروج من النافذة', 'window_focus' => 'عودة للنافذة', 'fullscreen_exit' => 'خروج من ملء الشاشة'];
+    $violationCounts = $attempt->violations->groupBy('type')->map->count();
+@endphp
+<div class="card border-danger border-2 mb-4">
+    <div class="card-body">
+        <h6 class="text-danger mb-3"><i class="bi bi-shield-exclamation"></i> مخالفات مراقبة الغش: {{ $attempt->violations_count }}</h6>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach($violationCounts as $type => $count)
+                <span class="badge bg-danger-subtle text-danger">{{ $violationLabels[$type] ?? $type }}: {{ $count }}</span>
+            @endforeach
+        </div>
+        @if($attempt->is_auto_submitted)
+            <div class="text-danger small mt-2"><i class="bi bi-exclamation-triangle"></i> تم تسليم هذه المحاولة تلقائياً بسبب تجاوز حد المخالفات.</div>
+        @endif
+    </div>
+</div>
+@endif
+
 <form method="post" action="{{ route('teacher.exam_reviews.grade', ['id' => Crypt::encrypt($attempt->id)]) }}">
     {{ csrf_field() }}
     @foreach($attempt->answers as $answer)

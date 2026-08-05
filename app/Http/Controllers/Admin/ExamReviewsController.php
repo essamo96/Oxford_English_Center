@@ -48,7 +48,7 @@ class ExamReviewsController extends AdminController
             return redirect(route('exam_reviews.view'));
         }
 
-        $attempt = ExamAttempt::with(['exam', 'student', 'answers.question.options'])->find($id);
+        $attempt = ExamAttempt::with(['exam', 'student', 'answers.question.options', 'violations'])->find($id);
         if (!$attempt) {
             $request->session()->flash('danger', self::NOT_FOUND);
             return redirect(route('exam_reviews.view'));
