@@ -59,16 +59,23 @@
     .exam-fullscreen-gate {
         position: fixed;
         inset: 0;
-        background: #14213d;
+        background: #ffcc00;
         z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
+        color: #14213d;
         text-align: center;
     }
-    .exam-fullscreen-gate__box { max-width: 420px; padding: 24px; }
-    .exam-fullscreen-gate__box p { color: #cbd3e6; }
+    .exam-fullscreen-gate__box { max-width: 460px; padding: 24px; }
+    .exam-fullscreen-gate__box i { color: #14213d; }
+    .exam-fullscreen-gate__box h4 { color: #14213d; font-weight: 800; }
+    .exam-fullscreen-gate__box p { color: #4a3d00; font-weight: 500; }
+    .exam-fullscreen-gate__btn {
+        background: #14213d; color: #ffcc00; border: none; border-radius: 10px;
+        padding: 14px 36px; font-weight: 800; font-size: 16px; cursor: pointer;
+    }
+    .exam-fullscreen-gate__btn:hover { background: #1c2d54; }
 
     /* Anti-cheat: block text selection on the exam content itself, but keep it
        usable inside actual answer inputs (typing/selecting your own answer is fine). */
@@ -101,11 +108,11 @@
 @if($exam->anti_cheat_enabled)
 <div class="exam-fullscreen-gate" id="exam_fullscreen_gate">
     <div class="exam-fullscreen-gate__box">
-        <i class="bi bi-arrows-fullscreen fs-1 mb-3 d-block"></i>
-        <h4 class="mb-2">اضغط للمتابعة بوضع ملء الشاشة</h4>
-        <p class="text-muted mb-4">هذا الامتحان مراقب ويجب أن يبقى بملء الشاشة طوال المدة. الخروج من وضع ملء الشاشة يُحتسب كمخالفة.</p>
-        <button type="button" id="exam_fullscreen_start_btn" class="exam-submit-btn">
-            <i class="bi bi-play-fill"></i> متابعة الآن
+        <i class="bi bi-record-circle fs-1 mb-3 d-block"></i>
+        <h4 class="mb-2">هذا الامتحان مراقب — انقر للبدء بوضع ملء الشاشة</h4>
+        <p class="mb-4">يجب أن تبقى الشاشة بوضع ملء الشاشة طوال مدة الامتحان. الخروج من وضع ملء الشاشة يُحتسب كمخالفة مراقبة.</p>
+        <button type="button" id="exam_fullscreen_start_btn" class="exam-fullscreen-gate__btn">
+            <i class="bi bi-play-fill"></i> بدء الامتحان الآن
         </button>
     </div>
 </div>
@@ -298,32 +305,53 @@
 
     // ── Fullscreen gate: exam must run in fullscreen; leaving it counts as a violation ──
     var $gate = $('#exam_fullscreen_gate');
+    var fullscreenEverEntered = false;
+    var gateShowingExitWarning = false;
+
     function enterFullscreen() {
         var el = document.documentElement;
         var request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-        if (request) request.call(el).catch(function () {});
+        if (!request) return;
+        var result = request.call(el);
+        if (result && result.then) result.catch(function () {});
     }
     function isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    }
+    function showExitWarning() {
+        if (gateShowingExitWarning) return;
+        gateShowingExitWarning = true;
+        reportViolation('fullscreen_exit');
+        $gate.find('h4').text('غادرت وضع ملء الشاشة');
+        $gate.find('p').text('يجب العودة لوضع ملء الشاشة لمتابعة الامتحان. هذا يُحتسب كمخالفة مراقبة.');
+        $gate.find('#exam_fullscreen_start_btn').html('<i class="bi bi-arrows-fullscreen"></i> العودة لملء الشاشة الآن');
+        $gate.fadeIn(150);
     }
 
     if (antiCheatEnabled && $gate.length) {
         $('#exam_fullscreen_start_btn').on('click', function () {
             enterFullscreen();
+            gateShowingExitWarning = false;
             $gate.fadeOut(150);
         });
 
         ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(function (evt) {
             document.addEventListener(evt, function () {
                 if (submitted) return;
-                if (!isFullscreen()) {
-                    reportViolation('fullscreen_exit');
-                    $gate.find('h4').text('غادرت وضع ملء الشاشة');
-                    $gate.find('p').text('يجب العودة لوضع ملء الشاشة لمتابعة الامتحان. هذا يُحتسب كمخالفة.');
-                    $gate.fadeIn(150);
+                if (isFullscreen()) {
+                    fullscreenEverEntered = true;
+                } else if (fullscreenEverEntered) {
+                    showExitWarning();
                 }
             });
         });
+
+        // Backup check every 2s: some browsers don't fire fullscreenchange reliably —
+        // this catches an actual exit even if the event itself never arrives.
+        setInterval(function () {
+            if (submitted || !fullscreenEverEntered) return;
+            if (!isFullscreen() && !gateShowingExitWarning) showExitWarning();
+        }, 2000);
     }
 
     if (antiCheatEnabled) {
@@ -367,6 +395,12 @@
         if (submitted) return;
         submitted = true;
         clearInterval(timerInterval);
+
+        // Immediate visual feedback — the page is about to navigate away for grading, which can
+        // take a moment; without this the button looks unresponsive/stuck.
+        var $btn = $('#submit_exam_btn');
+        $btn.prop('disabled', true).css('opacity', '0.75').html('<span class="spinner-border spinner-border-sm"></span> جاري التسليم...');
+
         if (document.exitFullscreen) { document.exitFullscreen().catch(function () {}); }
         var form = document.createElement('form');
         form.method = 'POST';

@@ -238,6 +238,14 @@ class StudentExamsController extends Controller
             $autoSubmit = true;
         }
 
+        // Actually notify the teacher/admin when the exam is configured to do so (or when the
+        // violation forced an auto-submit — that's serious enough to flag regardless of the
+        // configured action). Previously the student saw "the teacher has been notified" but
+        // nothing was ever sent — this is the real notification.
+        if ($exceeded && in_array($attempt->exam->anti_cheat_action, ['notify_teacher', 'auto_submit'])) {
+            ExamNotifier::notifyCheatingSuspected($attempt->fresh(['exam', 'student']));
+        }
+
         return response()->json([
             'status' => 'success',
             'violations_count' => $attempt->violations_count,

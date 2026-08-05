@@ -85,6 +85,49 @@ class ExamNotifier
         }
     }
 
+    // A student's attempt exceeded the anti-cheat violation limit -> notify the owning teacher
+    // (group exams) or the admin bell (placement tests). Mirrors notifyAttemptSubmitted's targeting.
+    public static function notifyCheatingSuspected(ExamAttempt $attempt): void
+    {
+        $exam = $attempt->exam;
+        $studentName = $attempt->student->name ?? '';
+
+        if ($exam->category === 'group' && $exam->teacher_id) {
+            $teacher = Teachers::find($exam->teacher_id);
+            if ($teacher) {
+                $teacher->notify(new \App\Notifications\ExamCheatingSuspectedNotification(
+                    $attempt->id, $exam->title, $studentName, $attempt->violations_count, $attempt->is_auto_submitted
+                ));
+
+                try {
+                    broadcast(new TeacherNotificationBroadcast((int) $teacher->id, [
+                        'type' => 'exam_cheating_suspected',
+                        'title' => 'اشتباه غش في امتحان',
+                        'message' => 'الطالب «' . $studentName . '» تجاوز الحد المسموح من المخالفات في امتحان «' . $exam->title . '»',
+                        'icon' => '⚠️',
+                        'link' => route('teacher.exam_reviews.view'),
+                        'created_at' => now()->diffForHumans(),
+                    ]));
+                } catch (\Throwable $e) {
+                    Log::error('[RT] ExamCheatingSuspected broadcast failed for teacher ' . $teacher->id . ': ' . $e->getMessage());
+                }
+            }
+        } else {
+            try {
+                broadcast(new AdminExamNotificationBroadcast([
+                    'type' => 'exam_cheating_suspected',
+                    'title' => 'اشتباه غش في امتحان',
+                    'message' => 'الطالب «' . $studentName . '» تجاوز الحد المسموح من المخالفات في امتحان «' . $exam->title . '»',
+                    'icon' => '⚠️',
+                    'link' => route('exam_reviews.view'),
+                    'created_at' => now()->diffForHumans(),
+                ], $exam->branch_id));
+            } catch (\Throwable $e) {
+                Log::error('[RT] ExamCheatingSuspected admin broadcast failed: ' . $e->getMessage());
+            }
+        }
+    }
+
     // A review request was approved/rejected -> notify the requesting student.
     public static function notifyReviewDecision(ExamReviewRequest $review): void
     {
