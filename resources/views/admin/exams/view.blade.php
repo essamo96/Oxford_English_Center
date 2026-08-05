@@ -10,6 +10,8 @@
     $editRouteName = $isPlacement ? 'exam_placement_tests.edit' : 'group_exams.edit';
     $statusRoute = $isPlacement ? 'exam_placement_tests.status' : 'group_exams.status';
     $deleteRoute = $isPlacement ? 'exam_placement_tests.delete' : 'group_exams.delete';
+    $previewRoute = $isPlacement ? 'exam_placement_tests.preview' : 'group_exams.preview';
+    $questionsRoute = $isPlacement ? 'exam_placement_tests.questions' : 'group_exams.questions';
     $permPrefix = $isPlacement ? 'exam_placement_tests' : 'group_exams';
 @endphp
 
@@ -109,6 +111,20 @@
 
 @section('modal')
     @include('admin.layout.masterLayouts.modal')
+
+    <div class="modal fade" id="exam_preview_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-800px">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <h5 class="modal-title" id="exam_preview_modal_title">معاينة</h5>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+                <div class="modal-body scroll-y pt-3 pb-10" id="exam_preview_modal_content" style="max-height: 75vh; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('js')
@@ -163,7 +179,32 @@
                 }
             });
         });
+
+        $(document).on('click', '.preview-exam', function () {
+            showExamModal("{{ route($previewRoute) }}", $(this).data('href'), 'معاينة الامتحان كما سيراه الطالب');
+        });
+
+        $(document).on('click', '.exam-questions', function () {
+            showExamModal("{{ route($questionsRoute) }}", $(this).data('href'), 'الأسئلة المرتبطة بالامتحان');
+        });
     });
+
+    function showExamModal(url, id, title) {
+        $('#exam_preview_modal_title').text(title);
+        $('#exam_preview_modal_content').html('<div class="text-center py-10"><span class="spinner-border w-50px h-50px" role="status"></span></div>');
+        $('#exam_preview_modal').modal('show');
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: { id: id, _token: '{{ csrf_token() }}' },
+            success: function (response) {
+                $('#exam_preview_modal_content').html(response);
+            },
+            error: function () {
+                $('#exam_preview_modal_content').html('<div class="alert alert-danger">حدث خطأ أثناء تحميل البيانات</div>');
+            }
+        });
+    }
 </script>
 @include('admin.layout.masterLayouts.datatableMaster', ['active_menu' => $active_menu])
 @stop

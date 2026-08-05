@@ -39,7 +39,7 @@
         <select name="group_id" data-control="select2" class="form-select form-select-solid" required>
             <option value="">اختر مجموعة...</option>
             @foreach($groups as $group)
-                <option value="{{ $group->id }}" {{ old('group_id', $info->group_id ?? '') == $group->id ? 'selected' : '' }}>{{ $group->title }}</option>
+                <option value="{{ $group->id }}" {{ old('group_id', $info->group_id ?? '') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
             @endforeach
         </select>
     </div>

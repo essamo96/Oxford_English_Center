@@ -38,7 +38,7 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $exam->title }}</td>
-                            <td>{{ $exam->group->title ?? '—' }}</td>
+                            <td>{{ $exam->group->name ?? '—' }}</td>
                             <td>{{ $exam->duration_minutes }}</td>
                             <td>
                                 <button data-href="{{ Crypt::encrypt($exam->id) }}" class="btn btn-sm publish-toggle {{ $exam->status === 'published' ? 'btn-success' : 'btn-secondary' }}">

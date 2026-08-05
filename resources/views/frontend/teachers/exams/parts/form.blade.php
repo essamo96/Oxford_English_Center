@@ -7,7 +7,7 @@
         <label class="form-label">المجموعة</label>
         <select name="group_id" class="form-select" {{ isset($info) ? 'disabled' : 'required' }}>
             @foreach($groups as $group)
-                <option value="{{ $group->id }}" {{ old('group_id', $info->group_id ?? '') == $group->id ? 'selected' : '' }}>{{ $group->title }}</option>
+                <option value="{{ $group->id }}" {{ old('group_id', $info->group_id ?? '') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
             @endforeach
         </select>
         @isset($info)<input type="hidden" name="group_id" value="{{ $info->group_id }}">@endisset

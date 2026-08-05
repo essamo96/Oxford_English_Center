@@ -42,7 +42,7 @@ class TeacherExamsController extends Controller
 
     public function getAdd()
     {
-        $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())->where('status', 1)->orderBy('title')->get();
+        $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())->where('status', 1)->orderBy('name')->get();
         // teachers see their own questions + the global admin bank, never other teachers' questions
         $questions = ExamQuestion::visibleToTeacher(Auth::guard('teachers')->id())
             ->where('status', 'active')
@@ -131,7 +131,7 @@ class TeacherExamsController extends Controller
             return redirect(route('teacher.exams.view'));
         }
 
-        $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())->where('status', 1)->orderBy('title')->get();
+        $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())->where('status', 1)->orderBy('name')->get();
         $questions = ExamQuestion::visibleToTeacher(Auth::guard('teachers')->id())->where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
 
         return view('frontend.teachers.exams.edit', ['info' => $exam, 'groups' => $groups, 'questions' => $questions]);

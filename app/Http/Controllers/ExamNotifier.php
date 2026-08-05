@@ -27,7 +27,7 @@ class ExamNotifier
 
         $students = \App\Models\Students::whereIn('id', $studentIds)->get();
         foreach ($students as $student) {
-            $student->notify(new \App\Notifications\ExamPublishedNotification($exam->id, $exam->title, $exam->group->title ?? ''));
+            $student->notify(new \App\Notifications\ExamPublishedNotification($exam->id, $exam->title, $exam->group->name ?? ''));
 
             try {
                 broadcast(new StudentNotificationBroadcast((int) $student->id, [

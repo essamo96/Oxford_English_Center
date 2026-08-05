@@ -82,7 +82,7 @@ class ExamsController extends AdminController
         parent::$data['active_menu'] = $category === 'placement' ? 'exam_placement_tests' : 'group_exams';
         parent::$data['category'] = $category;
         parent::$data['programs'] = Programs::orderBy('title')->get();
-        parent::$data['groups'] = $category === 'group' ? Groups::where('status', 1)->orderBy('title')->get() : collect();
+        parent::$data['groups'] = $category === 'group' ? Groups::where('status', 1)->orderBy('name')->get() : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
         parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.add', parent::$data);
@@ -163,7 +163,7 @@ class ExamsController extends AdminController
         parent::$data['category'] = $exam->category;
         parent::$data['info'] = $exam;
         parent::$data['programs'] = Programs::orderBy('title')->get();
-        parent::$data['groups'] = $exam->category === 'group' ? Groups::where('status', 1)->orderBy('title')->get() : collect();
+        parent::$data['groups'] = $exam->category === 'group' ? Groups::where('status', 1)->orderBy('name')->get() : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
         parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.edit', parent::$data);
@@ -232,6 +232,42 @@ class ExamsController extends AdminController
 
         $request->session()->flash('success', self::UPDATE_SUCCESS);
         return redirect($exam->category === 'placement' ? route('exam_placement_tests.view') : route('group_exams.view'));
+    }
+
+    // Renders a read-only simulation of exactly what the student will see when taking the exam
+    // (title/description/instructions + questions with unmarked options), for modal preview.
+    public function getPreview(Request $request)
+    {
+        try {
+            $id = Crypt::decrypt($request->get('id'));
+        } catch (DecryptException $e) {
+            return '<div class="alert alert-danger">تعذر العثور على الامتحان.</div>';
+        }
+
+        $exam = Exam::with(['questions.options', 'questions.skill'])->find($id);
+        if (!$exam) {
+            return '<div class="alert alert-danger">' . self::NOT_FOUND . '</div>';
+        }
+
+        return view('admin.exams.parts.preview', ['exam' => $exam])->render();
+    }
+
+    // Renders the admin-facing list of the exam's questions (with correct answers marked),
+    // so the admin/teacher can double-check content before publishing.
+    public function getQuestionsList(Request $request)
+    {
+        try {
+            $id = Crypt::decrypt($request->get('id'));
+        } catch (DecryptException $e) {
+            return '<div class="alert alert-danger">تعذر العثور على الامتحان.</div>';
+        }
+
+        $exam = Exam::with(['questions.options', 'questions.skill'])->find($id);
+        if (!$exam) {
+            return '<div class="alert alert-danger">' . self::NOT_FOUND . '</div>';
+        }
+
+        return view('admin.exams.parts.questions_list', ['exam' => $exam])->render();
     }
 
     public function postDelete(Request $request)

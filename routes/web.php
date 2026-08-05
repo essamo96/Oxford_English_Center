@@ -699,6 +699,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('exam_placement_tests/edit/{id}', ['as' => 'exam_placement_tests.edit', 'middleware' => ['permission:admin.exam_placement_tests.edit'], 'uses' => 'ExamsController@postEdit']);
     Route::post('exam_placement_tests/delete', ['as' => 'exam_placement_tests.delete', 'middleware' => ['permission:admin.exam_placement_tests.delete'], 'uses' => 'ExamsController@postDelete']);
     Route::post('exam_placement_tests/status', ['as' => 'exam_placement_tests.status', 'middleware' => ['permission:admin.exam_placement_tests.publish'], 'uses' => 'ExamsController@postStatus']);
+    Route::post('exam_placement_tests/preview', ['as' => 'exam_placement_tests.preview', 'middleware' => ['permission:admin.exam_placement_tests.view'], 'uses' => 'ExamsController@getPreview']);
+    Route::post('exam_placement_tests/questions', ['as' => 'exam_placement_tests.questions', 'middleware' => ['permission:admin.exam_placement_tests.view'], 'uses' => 'ExamsController@getQuestionsList']);
 
     // Examination Center - Group Exams (admin; teachers manage their own via the teacher portal)
     Route::get('group_exams', ['as' => 'group_exams.view', 'middleware' => ['permission:admin.group_exams.view|admin.group_exams.add|admin.group_exams.edit|admin.group_exams.delete|admin.group_exams.status'], 'uses' => 'ExamsController@getIndex']);
@@ -709,6 +711,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('group_exams/edit/{id}', ['as' => 'group_exams.edit', 'middleware' => ['permission:admin.group_exams.edit'], 'uses' => 'ExamsController@postEdit']);
     Route::post('group_exams/delete', ['as' => 'group_exams.delete', 'middleware' => ['permission:admin.group_exams.delete'], 'uses' => 'ExamsController@postDelete']);
     Route::post('group_exams/status', ['as' => 'group_exams.status', 'middleware' => ['permission:admin.group_exams.publish'], 'uses' => 'ExamsController@postStatus']);
+    Route::post('group_exams/preview', ['as' => 'group_exams.preview', 'middleware' => ['permission:admin.group_exams.view'], 'uses' => 'ExamsController@getPreview']);
+    Route::post('group_exams/questions', ['as' => 'group_exams.questions', 'middleware' => ['permission:admin.group_exams.view'], 'uses' => 'ExamsController@getQuestionsList']);
 
     // Examination Center - Manual Review / Grading
     Route::get('exam_reviews', ['as' => 'exam_reviews.view', 'middleware' => ['permission:admin.exam_reviews.view'], 'uses' => 'ExamReviewsController@getIndex']);
