@@ -58,13 +58,22 @@ class ExamQuestionsController extends AdminController
 
         $datatable->editColumn('type', function ($row) {
             $labels = ['mcq' => 'اختيار من متعدد', 'true_false' => 'صح/خطأ', 'text' => 'إجابة نصية', 'voice' => 'إجابة صوتية'];
-            return $labels[$row->type] ?? $row->type;
+            $icons = ['mcq' => 'bi-ui-radios', 'true_false' => 'bi-toggle2-on', 'text' => 'bi-pencil-square', 'voice' => 'bi-mic-fill'];
+            $classes = ['mcq' => 'primary', 'true_false' => 'info', 'text' => 'dark', 'voice' => 'danger'];
+            $class = $classes[$row->type] ?? 'secondary';
+            $icon = $icons[$row->type] ?? 'bi-question-circle';
+            $label = $labels[$row->type] ?? $row->type;
+            return '<span class="badge badge-light-' . $class . '"><i class="bi ' . $icon . ' me-1"></i>' . $label . '</span>';
         });
 
         $datatable->editColumn('difficulty', function ($row) {
             $labels = ['easy' => 'سهل', 'medium' => 'متوسط', 'hard' => 'صعب', 'custom' => 'مخصص'];
             $classes = ['easy' => 'success', 'medium' => 'warning', 'hard' => 'danger', 'custom' => 'info'];
-            return '<span class="badge badge-light-' . ($classes[$row->difficulty] ?? 'secondary') . '">' . ($labels[$row->difficulty] ?? $row->difficulty) . '</span>';
+            $icons = ['easy' => 'bi-emoji-smile', 'medium' => 'bi-emoji-neutral', 'hard' => 'bi-emoji-frown', 'custom' => 'bi-sliders'];
+            $class = $classes[$row->difficulty] ?? 'secondary';
+            $icon = $icons[$row->difficulty] ?? 'bi-dash-circle';
+            $label = $labels[$row->difficulty] ?? $row->difficulty;
+            return '<span class="badge badge-light-' . $class . '"><i class="bi ' . $icon . ' me-1"></i>' . $label . '</span>';
         });
 
         $datatable->editColumn('skill', function ($row) {
@@ -79,8 +88,8 @@ class ExamQuestionsController extends AdminController
             return view('admin.exam_questions.parts.actions', ['id' => $row->id])->render();
         });
 
-        $datatable->rawColumns(['difficulty']);
-        $datatable->escapeColumns(['question_text', 'type', 'skill']);
+        $datatable->rawColumns(['difficulty', 'type']);
+        $datatable->escapeColumns(['question_text', 'skill']);
         return $datatable->make(true);
     }
 

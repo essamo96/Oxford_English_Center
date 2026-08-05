@@ -713,6 +713,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('group_exams/status', ['as' => 'group_exams.status', 'middleware' => ['permission:admin.group_exams.publish'], 'uses' => 'ExamsController@postStatus']);
     Route::post('group_exams/preview', ['as' => 'group_exams.preview', 'middleware' => ['permission:admin.group_exams.view'], 'uses' => 'ExamsController@getPreview']);
     Route::post('group_exams/questions', ['as' => 'group_exams.questions', 'middleware' => ['permission:admin.group_exams.view'], 'uses' => 'ExamsController@getQuestionsList']);
+    Route::post('group_exams/groups-by-program', ['as' => 'group_exams.groups_by_program', 'middleware' => ['permission:admin.group_exams.add|admin.group_exams.edit'], 'uses' => 'ExamsController@getGroupsByProgram']);
 
     // Examination Center - Manual Review / Grading
     Route::get('exam_reviews', ['as' => 'exam_reviews.view', 'middleware' => ['permission:admin.exam_reviews.view'], 'uses' => 'ExamReviewsController@getIndex']);

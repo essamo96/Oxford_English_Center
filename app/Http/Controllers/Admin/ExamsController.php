@@ -31,6 +31,20 @@ class ExamsController extends AdminController
         return str_starts_with($request->route()->getName(), 'exam_placement_tests.') ? 'placement' : 'group';
     }
 
+    // Group Exams only make sense against an active program that actually has at least one
+    // group to attach the exam to; Placement Tests are independent of groups so all active
+    // programs remain selectable there.
+    private function programsForCategory(string $category)
+    {
+        $query = Programs::where('status', 1)->orderBy('title');
+
+        if ($category === 'group') {
+            $query->whereHas('grope');
+        }
+
+        return $query->get();
+    }
+
     public function __construct()
     {
         parent::__construct();
@@ -61,7 +75,7 @@ class ExamsController extends AdminController
 
         $datatable = Datatables::of($info);
 
-        $datatable->editColumn('group', fn($row) => $row->group?->title ?? '—');
+        $datatable->editColumn('group', fn($row) => $row->group?->name ?? '—');
         $datatable->editColumn('program', fn($row) => $row->program?->title ?? '—');
 
         $datatable->editColumn('status', function ($row) {
@@ -81,8 +95,10 @@ class ExamsController extends AdminController
         $category = $this->category($request);
         parent::$data['active_menu'] = $category === 'placement' ? 'exam_placement_tests' : 'group_exams';
         parent::$data['category'] = $category;
-        parent::$data['programs'] = Programs::orderBy('title')->get();
-        parent::$data['groups'] = $category === 'group' ? Groups::where('status', 1)->orderBy('name')->get() : collect();
+        parent::$data['programs'] = $this->programsForCategory($category);
+        parent::$data['groups'] = $category === 'group' && isset($exam)
+            ? Groups::where('program_id', $exam->program_id)->where('status', 1)->orderBy('name')->get()
+            : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
         parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.add', parent::$data);
@@ -162,8 +178,19 @@ class ExamsController extends AdminController
         parent::$data['active_menu'] = $exam->category === 'placement' ? 'exam_placement_tests' : 'group_exams';
         parent::$data['category'] = $exam->category;
         parent::$data['info'] = $exam;
-        parent::$data['programs'] = Programs::orderBy('title')->get();
-        parent::$data['groups'] = $exam->category === 'group' ? Groups::where('status', 1)->orderBy('name')->get() : collect();
+        $programs = $this->programsForCategory($exam->category);
+        if ($exam->program_id && !$programs->contains('id', $exam->program_id)) {
+            // keep the exam's current program selectable even if it no longer qualifies
+            // (deactivated, or its last group was later removed) so editing doesn't break.
+            $currentProgram = Programs::find($exam->program_id);
+            if ($currentProgram) {
+                $programs->push($currentProgram);
+            }
+        }
+        parent::$data['programs'] = $programs;
+        parent::$data['groups'] = $exam->category === 'group'
+            ? Groups::where('program_id', $exam->program_id)->where('status', 1)->orderBy('name')->get()
+            : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
         parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.edit', parent::$data);
@@ -232,6 +259,22 @@ class ExamsController extends AdminController
 
         $request->session()->flash('success', self::UPDATE_SUCCESS);
         return redirect($exam->category === 'placement' ? route('exam_placement_tests.view') : route('group_exams.view'));
+    }
+
+    // AJAX: populates the Group select once a Program is chosen in the exam builder form.
+    public function getGroupsByProgram(Request $request)
+    {
+        $programId = $request->get('program_id');
+        if (!$programId) {
+            return response()->json([]);
+        }
+
+        $groups = Groups::where('program_id', $programId)
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json($groups);
     }
 
     // Renders a read-only simulation of exactly what the student will see when taking the exam

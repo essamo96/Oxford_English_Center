@@ -6,7 +6,11 @@
 
 @php
     $typeLabels = ['mcq' => 'اختيار من متعدد', 'true_false' => 'صح/خطأ', 'text' => 'إجابة نصية', 'voice' => 'إجابة صوتية'];
+    $typeIcons = ['mcq' => 'bi-ui-radios', 'true_false' => 'bi-toggle2-on', 'text' => 'bi-pencil-square', 'voice' => 'bi-mic-fill'];
+    $typeClasses = ['mcq' => 'primary', 'true_false' => 'info', 'text' => 'dark', 'voice' => 'danger'];
     $difficultyLabels = ['easy' => 'سهل', 'medium' => 'متوسط', 'hard' => 'صعب', 'custom' => 'مخصص'];
+    $difficultyIcons = ['easy' => 'bi-emoji-smile', 'medium' => 'bi-emoji-neutral', 'hard' => 'bi-emoji-frown', 'custom' => 'bi-sliders'];
+    $difficultyClasses = ['easy' => 'success', 'medium' => 'warning', 'hard' => 'danger', 'custom' => 'info'];
 @endphp
 
 @forelse($exam->questions as $index => $q)
@@ -14,9 +18,13 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
             <span class="fw-bold">{{ $index + 1 }}. {!! $q->question_text !!}</span>
-            <div class="d-flex gap-1 flex-shrink-0">
-                <span class="badge bg-light text-dark">{{ $typeLabels[$q->type] ?? $q->type }}</span>
-                <span class="badge bg-light text-dark">{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}</span>
+            <div class="d-flex gap-1 flex-shrink-0 flex-wrap">
+                <span class="badge badge-light-{{ $typeClasses[$q->type] ?? 'secondary' }}">
+                    <i class="bi {{ $typeIcons[$q->type] ?? 'bi-question-circle' }} me-1"></i>{{ $typeLabels[$q->type] ?? $q->type }}
+                </span>
+                <span class="badge badge-light-{{ $difficultyClasses[$q->difficulty] ?? 'secondary' }}">
+                    <i class="bi {{ $difficultyIcons[$q->difficulty] ?? 'bi-dash-circle' }} me-1"></i>{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}
+                </span>
                 @if($q->skill)<span class="badge bg-light-info text-info">{{ $q->skill->name_ar }}</span>@endif
                 <span class="badge bg-light-primary text-primary">{{ $q->pivot->marks_override ?? $q->marks }} درجة</span>
             </div>
