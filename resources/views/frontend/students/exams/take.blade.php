@@ -92,37 +92,28 @@
     .exam-fullscreen-gate {
         position: fixed;
         inset: 0;
-        background: #ffcc00;
+        background: #0b3d91;
         z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #14213d;
+        color: #000;
         text-align: center;
     }
     .exam-fullscreen-gate__box { max-width: 460px; padding: 24px; }
-    .exam-fullscreen-gate__box i { color: #14213d; }
-    .exam-fullscreen-gate__box h4 { color: #14213d; font-weight: 800; }
-    .exam-fullscreen-gate__box p { color: #4a3d00; font-weight: 500; }
+    .exam-fullscreen-gate__box i { color: #ffcc00; }
+    .exam-fullscreen-gate__box h4 { color: #ffcc00; font-weight: 800; }
+    .exam-fullscreen-gate__box p { color: #000; font-weight: 600; background: #fff; border-radius: 8px; padding: 10px 14px; }
     .exam-fullscreen-gate__btn {
-        background: #14213d; color: #ffcc00; border: none; border-radius: 10px;
+        background: #ffcc00; color: #000; border: none; border-radius: 10px;
         padding: 14px 36px; font-weight: 800; font-size: 16px; cursor: pointer;
     }
-    .exam-fullscreen-gate__btn:hover { background: #1c2d54; }
-
-    /* Non-blocking reminder banner shown after leaving fullscreen mid-exam — unlike the
-       initial gate, this NEVER covers the page or blocks clicking Submit/answering. */
-    .exam-fullscreen-banner {
-        display: none;
-        background: #ffcc00; color: #14213d; padding: 10px 20px;
-        display: none; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
-        font-weight: 700; text-align: center;
+    .exam-fullscreen-gate__btn:hover { background: #e0b400; }
+    .exam-fullscreen-gate__submit-btn {
+        background: transparent; color: #ffcc00; border: 2px solid #ffcc00; border-radius: 10px;
+        padding: 10px 28px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 14px;
     }
-    .exam-fullscreen-banner.is-visible { display: flex; }
-    .exam-fullscreen-banner__btn {
-        background: #14213d; color: #ffcc00; border: none; border-radius: 8px;
-        padding: 6px 18px; font-weight: 700; cursor: pointer; font-size: 13px;
-    }
+    .exam-fullscreen-gate__submit-btn:hover { background: rgba(255,204,0,.15); }
 
     /* Anti-cheat: block text selection on the exam content itself, but keep it
        usable inside actual answer inputs (typing/selecting your own answer is fine). */
@@ -153,13 +144,6 @@
 </div>
 
 @if($exam->anti_cheat_enabled)
-<div class="exam-fullscreen-banner" id="exam_fullscreen_banner">
-    <span><i class="bi bi-arrows-fullscreen"></i> غادرت وضع ملء الشاشة — تم احتسابها كمخالفة. يمكنك المتابعة والتسليم بشكل طبيعي.</span>
-    <button type="button" id="exam_fullscreen_return_btn" class="exam-fullscreen-banner__btn">العودة لملء الشاشة</button>
-</div>
-@endif
-
-@if($exam->anti_cheat_enabled)
 <div class="exam-fullscreen-gate" id="exam_fullscreen_gate">
     <div class="exam-fullscreen-gate__box">
         <i class="bi bi-record-circle fs-1 mb-3 d-block"></i>
@@ -167,6 +151,10 @@
         <p class="mb-4">يجب أن تبقى الشاشة بوضع ملء الشاشة طوال مدة الامتحان. الخروج من وضع ملء الشاشة يُحتسب كمخالفة مراقبة.</p>
         <button type="button" id="exam_fullscreen_start_btn" class="exam-fullscreen-gate__btn">
             <i class="bi bi-play-fill"></i> بدء الامتحان الآن
+        </button>
+        <br>
+        <button type="button" id="exam_fullscreen_gate_submit_btn" class="exam-fullscreen-gate__submit-btn">
+            <i class="bi bi-check-circle"></i> تسليم الامتحان الآن
         </button>
     </div>
 </div>
@@ -412,15 +400,13 @@
         });
     }
 
-    // ── Fullscreen: the initial gate (click-to-start) is the ONLY thing allowed to cover the
-    // whole screen. Leaving fullscreen afterwards is reported as a violation and shown via a
-    // small non-blocking banner — it must NEVER cover or disable the exam content, the answer
-    // inputs, or the Submit button. (A previous version re-showed the full gate on exit, which
-    // could trap the student and make Submit unclickable — that is exactly what this fixes.)
+    // ── Fullscreen: the gate covers the whole screen both at the start AND whenever the
+    // student leaves fullscreen mid-exam (reported as a violation each time). Submission must
+    // ALWAYS stay reachable even while the gate is showing, so the gate itself carries its own
+    // "Submit now" button wired to the exact same confirm+submit flow as the main one.
     var $gate = $('#exam_fullscreen_gate');
-    var $banner = $('#exam_fullscreen_banner');
     var fullscreenEverEntered = false;
-    var exitWarningShown = false;
+    var gateShowingExitWarning = false;
 
     function enterFullscreen() {
         var el = document.documentElement;
@@ -433,20 +419,20 @@
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
     }
     function showExitWarning() {
-        if (exitWarningShown) return;
-        exitWarningShown = true;
+        if (gateShowingExitWarning) return;
+        gateShowingExitWarning = true;
         reportViolation('fullscreen_exit');
-        $banner.addClass('is-visible');
+        $gate.find('h4').text('غادرت وضع ملء الشاشة');
+        $gate.find('p').text('يجب العودة لوضع ملء الشاشة لمتابعة الامتحان. هذا يُحتسب كمخالفة مراقبة. يمكنك أيضاً تسليم الامتحان مباشرة من هنا.');
+        $gate.find('#exam_fullscreen_start_btn').html('<i class="bi bi-arrows-fullscreen"></i> العودة لملء الشاشة الآن');
+        $gate.fadeIn(150);
     }
 
     if (antiCheatEnabled && $gate.length) {
         $('#exam_fullscreen_start_btn').on('click', function () {
             enterFullscreen();
+            gateShowingExitWarning = false;
             $gate.fadeOut(150);
-        });
-
-        $('#exam_fullscreen_return_btn').on('click', function () {
-            enterFullscreen();
         });
 
         ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(function (evt) {
@@ -454,8 +440,6 @@
                 if (submitted) return;
                 if (isFullscreen()) {
                     fullscreenEverEntered = true;
-                    exitWarningShown = false;
-                    $banner.removeClass('is-visible');
                 } else if (fullscreenEverEntered) {
                     showExitWarning();
                 }
@@ -463,11 +447,10 @@
         });
 
         // Backup check every 2s: some browsers don't fire fullscreenchange reliably —
-        // this catches an actual exit even if the event itself never arrives. Only ever
-        // shows the non-blocking banner, never the full gate.
+        // this catches an actual exit even if the event itself never arrives.
         setInterval(function () {
             if (submitted || !fullscreenEverEntered) return;
-            if (!isFullscreen() && !exitWarningShown) showExitWarning();
+            if (!isFullscreen() && !gateShowingExitWarning) showExitWarning();
         }, 2000);
     }
 
@@ -494,8 +477,9 @@
         });
     }
 
-    // ── Submit ──
-    document.getElementById('submit_exam_btn').addEventListener('click', function () {
+    // ── Submit — wired to BOTH the main button and the one on the fullscreen gate, so
+    // submitting always works no matter what's showing on screen. ──
+    function confirmAndSubmit() {
         Swal.fire({
             title: 'هل أنت متأكد من تسليم الامتحان؟',
             text: 'لن تتمكن من التعديل بعد التسليم.',
@@ -506,7 +490,10 @@
         }).then(function (result) {
             if (result.isConfirmed) doSubmit();
         });
-    });
+    }
+    document.getElementById('submit_exam_btn').addEventListener('click', confirmAndSubmit);
+    var gateSubmitBtn = document.getElementById('exam_fullscreen_gate_submit_btn');
+    if (gateSubmitBtn) gateSubmitBtn.addEventListener('click', confirmAndSubmit);
 
     function doSubmit() {
         if (submitted) return;
@@ -515,8 +502,9 @@
 
         // Immediate visual feedback — the page is about to navigate away for grading, which can
         // take a moment; without this the button looks unresponsive/stuck.
-        var $btn = $('#submit_exam_btn');
-        $btn.prop('disabled', true).css('opacity', '0.75').html('<span class="spinner-border spinner-border-sm"></span> جاري التسليم...');
+        $('#submit_exam_btn, #exam_fullscreen_gate_submit_btn')
+            .prop('disabled', true).css('opacity', '0.75')
+            .html('<span class="spinner-border spinner-border-sm"></span> جاري التسليم...');
 
         if (document.exitFullscreen) { document.exitFullscreen().catch(function () {}); }
         var form = document.createElement('form');
