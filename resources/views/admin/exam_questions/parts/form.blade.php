@@ -23,7 +23,7 @@
 <div class="row g-9 mb-8">
     <div class="col-md-12 fv-row">
         <label class="fs-6 fw-semibold mb-2">نص السؤال <span class="text-danger">*</span></label>
-        <textarea name="question_text" class="form-control form-control-solid" rows="3" required>{{ old('question_text', $info->question_text ?? '') }}</textarea>
+        <textarea name="question_text" id="question_text" class="form-control form-control-solid ckeditor" rows="3" required>{{ old('question_text', $info->question_text ?? '') }}</textarea>
     </div>
 </div>
 
@@ -91,7 +91,7 @@
 <div class="row g-9 mb-8">
     <div class="col-md-12 fv-row">
         <label class="fs-6 fw-semibold mb-2">الشرح (يظهر للطالب عند المراجعة)</label>
-        <textarea name="explanation" class="form-control form-control-solid" rows="2">{{ old('explanation', $info->explanation ?? '') }}</textarea>
+        <textarea name="explanation" id="explanation" class="form-control form-control-solid ckeditor" rows="2">{{ old('explanation', $info->explanation ?? '') }}</textarea>
     </div>
 </div>
 

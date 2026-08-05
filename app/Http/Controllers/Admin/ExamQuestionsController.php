@@ -91,6 +91,122 @@ class ExamQuestionsController extends AdminController
         return view('admin.exam_questions.add', parent::$data);
     }
 
+    // Simplified multi-question add screen: a repeater of lightweight rows (no rich text,
+    // MCQ limited to 4 fixed options / True-False fixed to two) for fast bulk entry.
+    public function getBulkAdd()
+    {
+        parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
+        parent::$data['programs'] = Programs::orderBy('title')->get();
+        return view('admin.exam_questions.bulk_add', parent::$data);
+    }
+
+    public function postBulkAdd(Request $request)
+    {
+        $rows = $request->get('rows', []);
+        $errors = [];
+        $validRows = [];
+
+        if (empty($rows)) {
+            $request->session()->flash('danger', 'يجب إضافة سؤال واحد على الأقل قبل الحفظ.');
+            return redirect(route('exam_questions.bulk_add'))->withInput();
+        }
+
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 1;
+            $type = $row['type'] ?? null;
+            $text = trim(strip_tags($row['question_text'] ?? ''));
+
+            if (!in_array($type, ['mcq', 'true_false', 'text', 'voice'])) {
+                $errors[] = "السؤال رقم {$rowNumber}: نوع السؤال غير صحيح.";
+                continue;
+            }
+            if ($text === '') {
+                $errors[] = "السؤال رقم {$rowNumber}: نص السؤال مطلوب ولا يمكن أن يكون فارغاً.";
+                continue;
+            }
+            if (!in_array($row['difficulty'] ?? '', ['easy', 'medium', 'hard', 'custom'])) {
+                $errors[] = "السؤال رقم {$rowNumber}: يجب اختيار مستوى الصعوبة.";
+                continue;
+            }
+            if (!is_numeric($row['marks'] ?? null) || (float) $row['marks'] <= 0) {
+                $errors[] = "السؤال رقم {$rowNumber}: الدرجة يجب أن تكون رقماً أكبر من صفر.";
+                continue;
+            }
+
+            $options = [];
+            if ($type === 'mcq') {
+                $optionTexts = array_filter(array_map('trim', $row['options'] ?? []), fn($v) => $v !== '');
+                if (count($optionTexts) < 2) {
+                    $errors[] = "السؤال رقم {$rowNumber}: يجب إدخال خيارين على الأقل لسؤال الاختيار من متعدد.";
+                    continue;
+                }
+                $correctIndex = $row['correct_option'] ?? null;
+                if ($correctIndex === null || !isset($row['options'][$correctIndex]) || trim($row['options'][$correctIndex]) === '') {
+                    $errors[] = "السؤال رقم {$rowNumber}: يجب تحديد الإجابة الصحيحة من بين الخيارات.";
+                    continue;
+                }
+                foreach ($row['options'] as $optIndex => $optText) {
+                    $optText = trim($optText);
+                    if ($optText === '') {
+                        continue;
+                    }
+                    $options[] = ['text' => $optText, 'is_correct' => ((string) $optIndex === (string) $correctIndex)];
+                }
+            } elseif ($type === 'true_false') {
+                $correct = $row['tf_correct'] ?? null;
+                if (!in_array($correct, ['true', 'false'])) {
+                    $errors[] = "السؤال رقم {$rowNumber}: يجب تحديد الإجابة الصحيحة (صح أو خطأ).";
+                    continue;
+                }
+                $options = [
+                    ['text' => 'صح', 'is_correct' => $correct === 'true'],
+                    ['text' => 'خطأ', 'is_correct' => $correct === 'false'],
+                ];
+            }
+
+            $validRows[] = [
+                'type' => $type,
+                'difficulty' => $row['difficulty'],
+                'skill_id' => $row['skill_id'] ?: null,
+                'marks' => $row['marks'],
+                'question_text' => $text,
+                'options' => $options,
+            ];
+        }
+
+        if (!empty($errors)) {
+            $request->session()->flash('danger', implode('<br>', $errors));
+            return redirect(route('exam_questions.bulk_add'))->withInput();
+        }
+
+        foreach ($validRows as $row) {
+            $question = ExamQuestion::create([
+                'branch_id' => auth()->guard('admin')->user()->branch_id ?? null,
+                'skill_id' => $row['skill_id'],
+                'type' => $row['type'],
+                'difficulty' => $row['difficulty'],
+                'question_text' => $row['question_text'],
+                'marks' => $row['marks'],
+                'estimated_time_seconds' => 60,
+                'status' => 'active',
+                'created_by_type' => 'admin',
+                'created_by_id' => Auth::guard('admin')->id(),
+            ]);
+
+            foreach ($row['options'] as $sortOrder => $opt) {
+                ExamQuestionOption::create([
+                    'question_id' => $question->id,
+                    'option_text' => $opt['text'],
+                    'is_correct' => $opt['is_correct'],
+                    'sort_order' => $sortOrder,
+                ]);
+            }
+        }
+
+        $request->session()->flash('success', 'تم إضافة ' . count($validRows) . ' سؤال بنجاح.');
+        return redirect(route('exam_questions.view'));
+    }
+
     public function postAdd(Request $request)
     {
         $validator = $this->validateQuestion($request);

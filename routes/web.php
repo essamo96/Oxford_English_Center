@@ -682,6 +682,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::get('exam_questions/list', ['as' => 'exam_questions.list', 'middleware' => ['permission:admin.exam_questions.view|admin.exam_questions.add|admin.exam_questions.edit|admin.exam_questions.delete|admin.exam_questions.status'], 'uses' => 'ExamQuestionsController@getList']);
     Route::get('exam_questions/add', ['as' => 'exam_questions.add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@getAdd']);
     Route::post('exam_questions/add', ['as' => 'exam_questions.add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@postAdd']);
+    Route::get('exam_questions/bulk-add', ['as' => 'exam_questions.bulk_add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@getBulkAdd']);
+    Route::post('exam_questions/bulk-add', ['as' => 'exam_questions.bulk_add', 'middleware' => ['permission:admin.exam_questions.add'], 'uses' => 'ExamQuestionsController@postBulkAdd']);
     Route::get('exam_questions/edit/{id}', ['as' => 'exam_questions.edit', 'middleware' => ['permission:admin.exam_questions.edit'], 'uses' => 'ExamQuestionsController@getEdit']);
     Route::post('exam_questions/edit/{id}', ['as' => 'exam_questions.edit', 'middleware' => ['permission:admin.exam_questions.edit'], 'uses' => 'ExamQuestionsController@postEdit']);
     Route::post('exam_questions/delete', ['as' => 'exam_questions.delete', 'middleware' => ['permission:admin.exam_questions.delete'], 'uses' => 'ExamQuestionsController@postDelete']);

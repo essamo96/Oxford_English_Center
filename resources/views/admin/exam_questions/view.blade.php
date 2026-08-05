@@ -77,6 +77,9 @@
                 <a href="{{ route('exam_questions.add') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i> إضافة سؤال
                 </a>
+                <a href="{{ route('exam_questions.bulk_add') }}" class="btn btn-light-primary btn-sm">
+                    <i class="bi bi-list-check"></i> إضافة عدة أسئلة
+                </a>
             @endcan
         </div>
     </div>

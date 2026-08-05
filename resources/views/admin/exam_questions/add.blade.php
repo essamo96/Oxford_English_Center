@@ -38,3 +38,16 @@
     </div>
 </div>
 @stop
+
+@section('js')
+<script src="{{ asset('vendor/laravel-filemanager/js/lfm.js') }}?v=2"></script>
+<script src="{{ asset('assets/admin/ckeditor/ckeditor.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    if ($('#question_text').length) {
+        CKEDITOR.replace('question_text', { language: 'ar', height: 180 });
+    }
+    if ($('#explanation').length) {
+        CKEDITOR.replace('explanation', { language: 'ar', height: 140 });
+    }
+</script>
+@stop
