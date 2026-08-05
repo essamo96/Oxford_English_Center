@@ -37,7 +37,7 @@ class TeacherExamsController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return view('frontend.teachers.exams.view', ['exams' => $exams]);
+        return view('frontend.teachers.exams.view', array_merge(parent::$data, ['exams' => $exams]));
     }
 
     public function getAdd()
@@ -51,7 +51,7 @@ class TeacherExamsController extends Controller
             ->limit(300)
             ->get();
 
-        return view('frontend.teachers.exams.add', ['groups' => $groups, 'questions' => $questions]);
+        return view('frontend.teachers.exams.add', array_merge(parent::$data, ['groups' => $groups, 'questions' => $questions]));
     }
 
     public function postAdd(Request $request)
@@ -134,7 +134,7 @@ class TeacherExamsController extends Controller
         $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())->where('status', 1)->orderBy('name')->get();
         $questions = ExamQuestion::visibleToTeacher(Auth::guard('teachers')->id())->where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
 
-        return view('frontend.teachers.exams.edit', ['info' => $exam, 'groups' => $groups, 'questions' => $questions]);
+        return view('frontend.teachers.exams.edit', array_merge(parent::$data, ['info' => $exam, 'groups' => $groups, 'questions' => $questions]));
     }
 
     public function postEdit(Request $request, $id)

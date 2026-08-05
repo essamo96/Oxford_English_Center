@@ -38,7 +38,7 @@ class TeacherExamReviewsController extends Controller
             $q->whereHas('exam', fn($qq) => $qq->where('category', 'group')->whereIn('group_id', $this->ownedGroupIds()));
         })->with(['attempt.exam', 'student'])->where('status', 'pending')->orderBy('created_at')->get();
 
-        return view('frontend.teachers.exams.reviews', compact('pendingAttempts', 'reviewRequests'));
+        return view('frontend.teachers.exams.reviews', array_merge(parent::$data, compact('pendingAttempts', 'reviewRequests')));
     }
 
     public function getGrade(Request $request, $id)
@@ -54,7 +54,7 @@ class TeacherExamReviewsController extends Controller
             return redirect(route('teacher.exam_reviews.view'))->with('danger', self::NOT_FOUND);
         }
 
-        return view('frontend.teachers.exams.grade', compact('attempt'));
+        return view('frontend.teachers.exams.grade', array_merge(parent::$data, compact('attempt')));
     }
 
     public function postGrade(Request $request, $id)

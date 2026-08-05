@@ -54,7 +54,7 @@ class StudentExamsController extends Controller
                 return $exam;
             });
 
-        return view('frontend.students.exams.view', ['exams' => $exams]);
+        return view('frontend.students.exams.view', array_merge(parent::$data, ['exams' => $exams]));
     }
 
     // Creates (or resumes) an attempt and redirects to the taking screen.
@@ -145,12 +145,12 @@ class StudentExamsController extends Controller
 
         $existingAnswers = ExamAttemptAnswer::where('attempt_id', $attempt->id)->pluck('selected_option_id', 'question_id');
 
-        return view('frontend.students.exams.take', [
+        return view('frontend.students.exams.take', array_merge(parent::$data, [
             'attempt' => $attempt,
             'exam' => $exam,
             'questions' => $questions,
             'existingAnswers' => $existingAnswers,
-        ]);
+        ]));
     }
 
     // AJAX: save a single answer as the student progresses through the exam.
@@ -322,7 +322,7 @@ class StudentExamsController extends Controller
             abort(404, self::NOT_FOUND);
         }
 
-        return view('frontend.students.exams.result', ['attempt' => $attempt]);
+        return view('frontend.students.exams.result', array_merge(parent::$data, ['attempt' => $attempt]));
     }
 
     public function requestReview(Request $request, $id)
