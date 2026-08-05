@@ -232,16 +232,11 @@ class StudentExamsController extends Controller
         $exceeded = $attempt->exam->anti_cheat_enabled
             && $attempt->violations_count >= $attempt->exam->anti_cheat_violation_limit;
 
-        $autoSubmit = false;
-        if ($exceeded && $attempt->exam->anti_cheat_action === 'auto_submit') {
-            $this->finalizeAttempt($attempt, true);
-            $autoSubmit = true;
-        }
-
-        // Actually notify the teacher/admin when the exam is configured to do so (or when the
-        // violation forced an auto-submit — that's serious enough to flag regardless of the
-        // configured action). Previously the student saw "the teacher has been notified" but
-        // nothing was ever sent — this is the real notification.
+        // Violations are tracked and reported, but NEVER force-submit or otherwise interrupt the
+        // student's ability to keep answering and to save/finish the exam normally — exceeding
+        // the limit only triggers a notification, it must not risk cutting the attempt short or
+        // interfering with saving answers/submission. (Deliberately not calling finalizeAttempt()
+        // here even when the exam's configured action is 'auto_submit'.)
         if ($exceeded && in_array($attempt->exam->anti_cheat_action, ['notify_teacher', 'auto_submit'])) {
             ExamNotifier::notifyCheatingSuspected($attempt->fresh(['exam', 'student']));
         }
@@ -252,7 +247,6 @@ class StudentExamsController extends Controller
             'limit' => $attempt->exam->anti_cheat_violation_limit,
             'exceeded' => $exceeded,
             'action' => $attempt->exam->anti_cheat_action,
-            'auto_submitted' => $autoSubmit,
         ]);
     }
 

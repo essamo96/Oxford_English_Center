@@ -48,12 +48,12 @@
     .exam-cover__kicker { font-weight: 700; color: #14213d; }
     .exam-cover__title { font-size: 26px; font-weight: 800; color: #14213d; margin: 0 0 6px; }
     .exam-cover__subtitle { color: #7a8296; font-weight: 600; margin-bottom: 26px; }
-    .exam-cover__fields { max-width: 420px; margin: 0 auto 20px; text-align: right; }
+    .exam-cover__fields { max-width: 420px; margin: 0 auto 20px; text-align: left; }
     .exam-cover__field { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px dotted #c7ccd6; font-size: 15px; }
     .exam-cover__field b { color: #14213d; white-space: nowrap; }
     .exam-cover__field span { color: #1b1f2a; }
     .exam-cover__instructions {
-        text-align: right; max-width: 480px; margin: 0 auto; background: #f7f9fc;
+        text-align: left; max-width: 480px; margin: 0 auto; background: #f7f9fc;
         border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #3a4257;
     }
     .exam-cover__instructions b { display: block; margin-bottom: 8px; color: #14213d; }
@@ -151,7 +151,7 @@
 </div>
 @endif
 
-<div class="exam-shell__body {{ $exam->anti_cheat_enabled ? 'exam-locked-area' : '' }}">
+<div class="exam-shell__body {{ $exam->anti_cheat_enabled ? 'exam-locked-area' : '' }}" dir="ltr">
     <div class="exam-cover">
         <div class="exam-cover__top">
             <div class="exam-cover__logos">
@@ -186,7 +186,7 @@
     </div>
 
     @if($exam->anti_cheat_enabled)
-    <div class="exam-anti-cheat-notice">
+    <div class="exam-anti-cheat-notice" dir="rtl">
         <i class="bi bi-shield-exclamation"></i>
         هذا الامتحان مراقب: يُمنع النسخ واللصق والقص والنقر بزر الفأرة الأيمن وتبديل النوافذ أثناء الامتحان.
         عدد المخالفات المسموح: {{ $exam->anti_cheat_violation_limit }}
@@ -341,9 +341,31 @@
         window_focus: 'العودة إلى نافذة الامتحان', fullscreen_exit: 'الخروج من وضع ملء الشاشة'
     };
 
+    // Short bell/alert tone via the Web Audio API (no external sound file needed).
+    var audioCtx = null;
+    function playViolationBell() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            [880, 660].forEach(function (freq, i) {
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.value = 0.15;
+                osc.connect(gain).connect(audioCtx.destination);
+                var startAt = audioCtx.currentTime + i * 0.18;
+                osc.start(startAt);
+                gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.35);
+                osc.stop(startAt + 0.35);
+            });
+        } catch (e) { /* Web Audio unsupported — silently skip the sound, the toast still shows */ }
+    }
+
     function reportViolation(type) {
         if (!antiCheatEnabled || submitted) return;
         $.post(urlFor('violation'), { type: type, _token: csrf }, function (data) {
+            playViolationBell();
+
             // always keep the on-screen counter (next to the timer) in sync, every single time
             var $counter = $('#exam_violation_count');
             var $counterBox = $('#exam_violation_counter');
@@ -358,16 +380,13 @@
                 title: 'تم رصد مخالفة: ' + (violationLabels[type] || type) + ' (' + data.violations_count + '/' + data.limit + ')'
             });
 
-            if (data.exceeded) {
-                if (data.action === 'auto_submit') {
-                    Swal.fire({ icon: 'error', title: 'تم تجاوز عدد المخالفات المسموح', text: 'سيتم تسليم الامتحان تلقائياً', confirmButtonText: 'حسناً' });
-                    doSubmit();
-                } else if (data.action === 'notify_teacher') {
-                    Swal.fire({
-                        toast: true, position: 'top', icon: 'warning', showConfirmButton: false, timer: 3500,
-                        title: 'تم إبلاغ المدرس بمحاولة غش محتملة'
-                    });
-                }
+            // Exceeding the limit is only ever reported/notified — it never interrupts the
+            // exam, saving answers, or the student's ability to finish and submit normally.
+            if (data.exceeded && data.action === 'notify_teacher') {
+                Swal.fire({
+                    toast: true, position: 'top', icon: 'warning', showConfirmButton: false, timer: 3500,
+                    title: 'تم إبلاغ المدرس بمحاولة غش محتملة'
+                });
             }
         });
     }
