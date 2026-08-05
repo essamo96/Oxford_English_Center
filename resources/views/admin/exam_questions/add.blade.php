@@ -1,6 +1,16 @@
 @extends('admin.layout.master')
 @section('title', 'إضافة سؤال')
 
+@section('css')
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4/dist/tagify.css" rel="stylesheet" type="text/css">
+<style>
+    /* Match Metronic's form-control-solid look */
+    .tagify { --tag-bg: #f1faff; --tag-text-color: #009ef7; --tag-remove-btn-color: #009ef7; border-color: var(--bs-gray-300); background-color: var(--bs-gray-100); border-radius: 0.475rem; }
+    .tagify:hover { border-color: var(--bs-gray-300); }
+    .tagify--focus { border-color: #009ef7; box-shadow: none; }
+</style>
+@stop
+
 @section('page-breadcrumb')
 <li class="breadcrumb-item text-muted">
     <a href="{{ route('dashboard.view') }}" class="text-muted text-hover-info">الرئيسية</a>
@@ -48,6 +58,19 @@
     }
     if ($('#explanation').length) {
         CKEDITOR.replace('explanation', { language: 'ar', height: 140 });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4"></script>
+<script type="text/javascript">
+    if (document.getElementById('question_tags')) {
+        var tagifyInput = document.getElementById('question_tags');
+        var tagify = new Tagify(tagifyInput, {
+            delimiters: ',',
+            trim: true,
+            originalInputValueFormat: function (valuesArr) {
+                return valuesArr.map(function (item) { return item.value; }).join(',');
+            }
+        });
     }
 </script>
 @stop

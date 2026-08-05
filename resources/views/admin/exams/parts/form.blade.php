@@ -19,7 +19,7 @@
 <div class="row g-9 mb-8">
     <div class="col-md-12 fv-row">
         <label class="fs-6 fw-semibold mb-2">الوصف / التعليمات</label>
-        <textarea name="description" class="form-control form-control-solid" rows="2">{{ old('description', $info->description ?? '') }}</textarea>
+        <textarea name="description" id="exam_description" class="form-control form-control-solid ckeditor" rows="2">{{ old('description', $info->description ?? '') }}</textarea>
     </div>
 </div>
 
@@ -123,6 +123,7 @@
         <ul class="nav nav-tabs mb-4" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#manual_tab">اختيار يدوي</a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#auto_tab">توليد تلقائي حسب الصعوبة</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#new_questions_tab">إنشاء أسئلة جديدة</a></li>
         </ul>
 
         <div class="tab-content">
@@ -173,6 +174,85 @@
                 </div>
                 <div class="form-text mt-2">سيتم اختيار الأسئلة عشوائياً وبدون تكرار عند الحفظ حسب الأعداد المحددة.</div>
             </div>
+
+            {{-- Create brand-new questions of any type/skill directly while building the exam.
+                 These are additive: they get created in the Question Bank AND attached to this
+                 exam in the same save, regardless of what's chosen in the tabs above. --}}
+            <div class="tab-pane fade" id="new_questions_tab">
+                <div class="form-text mb-3">الأسئلة التي تنشئها هنا ستُضاف إلى بنك الأسئلة العام وتُربط بهذا الامتحان مباشرة، بالإضافة إلى أي أسئلة اخترتها من التبويبات الأخرى.</div>
+
+                <div class="new_questions_repeater">
+                    <div class="new_question_row card bg-light-warning border-0 mb-4" data-index="0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fw-bold row-number">سؤال جديد 1</span>
+                                <button type="button" class="btn btn-icon btn-light-danger btn-sm remove-new-row">
+                                    <i class="bi bi-trash fs-5"></i>
+                                </button>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-3">
+                                    <label class="fs-7 fw-semibold mb-1">النوع</label>
+                                    <select name="new_questions[0][type]" class="form-select form-select-solid new-row-type">
+                                        <option value="mcq">اختيار من متعدد</option>
+                                        <option value="true_false">صح / خطأ</option>
+                                        <option value="text">إجابة نصية</option>
+                                        <option value="voice">إجابة صوتية</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fs-7 fw-semibold mb-1">الصعوبة</label>
+                                    <select name="new_questions[0][difficulty]" class="form-select form-select-solid">
+                                        <option value="easy">سهل</option>
+                                        <option value="medium" selected>متوسط</option>
+                                        <option value="hard">صعب</option>
+                                        <option value="custom">مخصص</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fs-7 fw-semibold mb-1">المهارة</label>
+                                    <select name="new_questions[0][skill_id]" class="form-select form-select-solid">
+                                        <option value="">بدون تصنيف</option>
+                                        @foreach($skills as $skill)
+                                            <option value="{{ $skill->id }}">{{ $skill->name_ar }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fs-7 fw-semibold mb-1">الدرجة</label>
+                                    <input type="number" step="0.5" min="0.5" value="1" name="new_questions[0][marks]" class="form-control form-control-solid">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fs-7 fw-semibold mb-1">نص السؤال</label>
+                                <textarea name="new_questions[0][question_text]" class="form-control form-control-solid" rows="2" placeholder="اكتب نص السؤال هنا..."></textarea>
+                            </div>
+                            <div class="new_mcq_options">
+                                <label class="fs-7 fw-semibold mb-2 d-block">الخيارات (حدد الإجابة الصحيحة)</label>
+                                <div class="row g-2">
+                                    @for($i = 0; $i < 4; $i++)
+                                    <div class="col-md-6 mb-2 d-flex align-items-center gap-2">
+                                        <input type="radio" name="new_questions[0][correct_option]" value="{{ $i }}" {{ $i == 0 ? 'checked' : '' }}>
+                                        <input type="text" name="new_questions[0][options][{{ $i }}]" class="form-control form-control-solid" placeholder="الخيار {{ $i + 1 }}">
+                                    </div>
+                                    @endfor
+                                </div>
+                            </div>
+                            <div class="new_tf_options d-none">
+                                <label class="fs-7 fw-semibold mb-2 d-block">الإجابة الصحيحة</label>
+                                <div class="d-flex gap-4">
+                                    <label><input type="radio" name="new_questions[0][tf_correct]" value="true" checked> صح</label>
+                                    <label><input type="radio" name="new_questions[0][tf_correct]" value="false"> خطأ</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="add_new_question_btn" class="btn btn-light-warning btn-sm">
+                    <i class="bi bi-plus-lg"></i> إضافة سؤال جديد آخر
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -183,9 +263,67 @@
             var target = e.target.getAttribute('href');
             if (target === '#auto_tab') {
                 document.querySelector('.auto-radio').checked = true;
-            } else {
+            } else if (target === '#manual_tab') {
                 document.querySelector('.manual-radio').checked = true;
             }
+            // '#new_questions_tab' is additive and doesn't touch generation_mode
         });
     });
+
+    (function () {
+        var newRowIndex = 1;
+
+        function toggleNewOptions($row) {
+            var type = $row.find('.new-row-type').val();
+            $row.find('.new_mcq_options').toggleClass('d-none', type !== 'mcq');
+            $row.find('.new_tf_options').toggleClass('d-none', type !== 'true_false');
+        }
+
+        function renumberNewRows() {
+            document.querySelectorAll('.new_question_row').forEach(function (row, i) {
+                row.querySelector('.row-number').textContent = 'سؤال جديد ' + (i + 1);
+            });
+        }
+
+        toggleNewOptions($('.new_question_row[data-index="0"]'));
+
+        $(document).on('change', '.new-row-type', function () {
+            toggleNewOptions($(this).closest('.new_question_row'));
+        });
+
+        $('#add_new_question_btn').on('click', function () {
+            var $template = $('.new_questions_repeater .new_question_row').first();
+            var $clone = $template.clone();
+            var idx = newRowIndex++;
+
+            $clone.find('[name]').each(function () {
+                var name = $(this).attr('name').replace(/new_questions\[\d+\]/, 'new_questions[' + idx + ']');
+                $(this).attr('name', name);
+            });
+            $clone.attr('data-index', idx);
+
+            $clone.find('textarea').val('');
+            $clone.find('input[type="text"]').val('');
+            $clone.find('input[type="number"]').val(1);
+            $clone.find('select.new-row-type').val('mcq');
+            $clone.find('select').not('.new-row-type').prop('selectedIndex', 0);
+            $clone.find('input[type="radio"]').prop('checked', false);
+            $clone.find('input[type="radio"][value="0"], input[type="radio"][value="true"]').prop('checked', true);
+
+            $('.new_questions_repeater').append($clone);
+            toggleNewOptions($clone);
+            renumberNewRows();
+        });
+
+        $(document).on('click', '.remove-new-row', function () {
+            if ($('.new_question_row').length <= 1) {
+                $(this).closest('.new_question_row').find('textarea, input[type="text"]').val('');
+                return;
+            }
+            $(this).closest('.new_question_row').fadeOut(200, function () {
+                $(this).remove();
+                renumberNewRows();
+            });
+        });
+    })();
 </script>

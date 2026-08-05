@@ -39,3 +39,12 @@
     </div>
 </div>
 @stop
+
+@section('js')
+<script src="{{ asset('assets/admin/ckeditor/ckeditor.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    if ($('#exam_description').length) {
+        CKEDITOR.replace('exam_description', { language: 'ar', height: 160 });
+    }
+</script>
+@stop

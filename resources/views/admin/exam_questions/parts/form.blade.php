@@ -97,8 +97,9 @@
 
 <div class="row g-9 mb-8">
     <div class="col-md-12 fv-row">
-        <label class="fs-6 fw-semibold mb-2">الوسوم (Tags) مفصولة بفاصلة</label>
-        <input type="text" value="{{ old('tags', isset($info) && $info->tags ? implode(', ', $info->tags) : '') }}" name="tags" class="form-control form-control-solid" placeholder="present simple, verbs">
+        <label class="fs-6 fw-semibold mb-2">الوسوم (Tags)</label>
+        <input type="text" id="question_tags" value="{{ old('tags', isset($info) && $info->tags ? implode(',', $info->tags) : '') }}" name="tags" class="form-control form-control-solid" placeholder="اكتب وسماً واضغط Enter...">
+        <div class="form-text">مثال: present simple, verbs, unit-3</div>
     </div>
 </div>
 

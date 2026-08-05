@@ -11,6 +11,8 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Yajra\DataTables\DataTables;
 use App\Models\Exam;
 use App\Models\ExamQuestion;
+use App\Models\ExamQuestionOption;
+use App\Models\ExamSkill;
 use App\Models\Programs;
 use App\Models\Groups;
 use App\Models\Teachers;
@@ -82,6 +84,7 @@ class ExamsController extends AdminController
         parent::$data['programs'] = Programs::orderBy('title')->get();
         parent::$data['groups'] = $category === 'group' ? Groups::where('status', 1)->orderBy('title')->get() : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
+        parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.add', parent::$data);
     }
 
@@ -92,6 +95,12 @@ class ExamsController extends AdminController
 
         if ($validator->fails()) {
             $request->session()->flash('danger', $validator->messages());
+            return redirect()->back()->withInput();
+        }
+
+        $newQuestionErrors = $this->validateNewQuestionRows($request->get('new_questions', []));
+        if (!empty($newQuestionErrors)) {
+            $request->session()->flash('danger', implode('<br>', $newQuestionErrors));
             return redirect()->back()->withInput();
         }
 
@@ -156,6 +165,7 @@ class ExamsController extends AdminController
         parent::$data['programs'] = Programs::orderBy('title')->get();
         parent::$data['groups'] = $exam->category === 'group' ? Groups::where('status', 1)->orderBy('title')->get() : collect();
         parent::$data['questions'] = ExamQuestion::where('status', 'active')->with('skill')->orderBy('id', 'desc')->limit(300)->get();
+        parent::$data['skills'] = ExamSkill::where('status', 1)->orderBy('name_ar')->get();
         return view('admin.exams.edit', parent::$data);
     }
 
@@ -178,6 +188,12 @@ class ExamsController extends AdminController
         $validator = $this->validateExam($request, $exam->category);
         if ($validator->fails()) {
             $request->session()->flash('danger', $validator->messages());
+            return redirect()->back()->withInput();
+        }
+
+        $newQuestionErrors = $this->validateNewQuestionRows($request->get('new_questions', []));
+        if (!empty($newQuestionErrors)) {
+            $request->session()->flash('danger', implode('<br>', $newQuestionErrors));
             return redirect()->back()->withInput();
         }
 
@@ -284,9 +300,107 @@ class ExamsController extends AdminController
         return Validator::make($request->all(), $rules);
     }
 
+    // Validates the "new_questions" repeater rows. Rows left completely blank (the default
+    // template row when the tab isn't used) are silently ignored, not treated as errors.
+    private function validateNewQuestionRows(array $rows): array
+    {
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 1;
+            $text = trim(strip_tags($row['question_text'] ?? ''));
+            $type = $row['type'] ?? null;
+
+            $isBlankRow = $text === ''
+                && empty(array_filter($row['options'] ?? [], fn($v) => trim((string) $v) !== ''));
+            if ($isBlankRow) {
+                continue;
+            }
+
+            if ($text === '') {
+                $errors[] = "سؤال جديد رقم {$rowNumber}: نص السؤال مطلوب ولا يمكن أن يكون فارغاً.";
+                continue;
+            }
+            if (!in_array($type, ['mcq', 'true_false', 'text', 'voice'])) {
+                $errors[] = "سؤال جديد رقم {$rowNumber}: نوع السؤال غير صحيح.";
+                continue;
+            }
+            if (!is_numeric($row['marks'] ?? null) || (float) $row['marks'] <= 0) {
+                $errors[] = "سؤال جديد رقم {$rowNumber}: الدرجة يجب أن تكون رقماً أكبر من صفر.";
+                continue;
+            }
+
+            if ($type === 'mcq') {
+                $optionTexts = array_filter(array_map('trim', $row['options'] ?? []), fn($v) => $v !== '');
+                if (count($optionTexts) < 2) {
+                    $errors[] = "سؤال جديد رقم {$rowNumber}: يجب إدخال خيارين على الأقل لسؤال الاختيار من متعدد.";
+                    continue;
+                }
+                $correctIndex = $row['correct_option'] ?? null;
+                if ($correctIndex === null || !isset($row['options'][$correctIndex]) || trim($row['options'][$correctIndex]) === '') {
+                    $errors[] = "سؤال جديد رقم {$rowNumber}: يجب تحديد الإجابة الصحيحة من بين الخيارات.";
+                }
+            } elseif ($type === 'true_false') {
+                if (!in_array($row['tf_correct'] ?? null, ['true', 'false'])) {
+                    $errors[] = "سؤال جديد رقم {$rowNumber}: يجب تحديد الإجابة الصحيحة (صح أو خطأ).";
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Creates the validated "new_questions" rows in the Question Bank and attaches them to the exam.
+    private function createAndAttachNewQuestions(Exam $exam, array $rows, int $startingSortOrder): void
+    {
+        $sortOrder = $startingSortOrder;
+
+        foreach ($rows as $row) {
+            $text = trim(strip_tags($row['question_text'] ?? ''));
+            if ($text === '') {
+                continue; // blank template row, already validated as skippable
+            }
+
+            $question = ExamQuestion::create([
+                'branch_id' => auth()->guard('admin')->user()->branch_id ?? null,
+                'skill_id' => $row['skill_id'] ?: null,
+                'type' => $row['type'],
+                'difficulty' => $row['difficulty'],
+                'question_text' => $text,
+                'marks' => $row['marks'],
+                'estimated_time_seconds' => 60,
+                'status' => 'active',
+                'created_by_type' => 'admin',
+                'created_by_id' => Auth::guard('admin')->id(),
+            ]);
+
+            if ($row['type'] === 'mcq') {
+                $correctIndex = (string) $row['correct_option'];
+                foreach ($row['options'] as $optIndex => $optText) {
+                    $optText = trim($optText);
+                    if ($optText === '') {
+                        continue;
+                    }
+                    ExamQuestionOption::create([
+                        'question_id' => $question->id,
+                        'option_text' => $optText,
+                        'is_correct' => ((string) $optIndex === $correctIndex),
+                        'sort_order' => $optIndex,
+                    ]);
+                }
+            } elseif ($row['type'] === 'true_false') {
+                ExamQuestionOption::create(['question_id' => $question->id, 'option_text' => 'صح', 'is_correct' => $row['tf_correct'] === 'true', 'sort_order' => 0]);
+                ExamQuestionOption::create(['question_id' => $question->id, 'option_text' => 'خطأ', 'is_correct' => $row['tf_correct'] === 'false', 'sort_order' => 1]);
+            }
+
+            $exam->questions()->attach($question->id, ['sort_order' => $sortOrder++]);
+        }
+    }
+
     private function attachQuestions(Exam $exam, Request $request): void
     {
         $mode = $request->get('generation_mode', 'manual');
+        $newQuestionRows = $request->get('new_questions', []);
 
         if ($mode === 'auto') {
             $rules = [
@@ -316,11 +430,18 @@ class ExamsController extends AdminController
             }
 
             $exam->update(['generation_rules' => array_merge($rules, ['skill_id' => $skillId, 'type' => $type])]);
+            $nextSortOrder = $order;
         } else {
             $questionIds = $request->get('question_ids', []);
-            foreach ($questionIds as $order => $questionId) {
-                $exam->questions()->attach($questionId, ['sort_order' => $order]);
+            $order = 0;
+            foreach ($questionIds as $questionId) {
+                $exam->questions()->attach($questionId, ['sort_order' => $order++]);
             }
+            $nextSortOrder = $order;
+        }
+
+        if (!empty($newQuestionRows)) {
+            $this->createAndAttachNewQuestions($exam, $newQuestionRows, $nextSortOrder);
         }
     }
 }
