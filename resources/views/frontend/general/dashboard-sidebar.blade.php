@@ -29,6 +29,26 @@
 
             <div class="ox-dash__group">
                 <div class="ox-dash__group-label">Academics</div>
+                <a class="ox-dash__navlink" data-tab-target="#MyExams"
+                   href="{{ $onStudent ? '#MyExams' : url('/student#MyExams') }}" @if($onStudent) data-toggle="tab" @endif>
+                    <i class="bi bi-journal-check"></i><span class="ox-dash__navtext">الامتحانات</span>
+                    @php
+                        $studentAvailableExamsCount = 0;
+                        if (Auth::guard('students')->check()) {
+                            $sidStudent = Auth::guard('students')->id();
+                            $sidGroupIds = \App\Models\GroupStudents::where('student_id', $sidStudent)->pluck('group_id');
+                            $studentAvailableExamsCount = \App\Models\Exam::where('status', 'published')
+                                ->where(function ($q) { $q->whereNull('start_date')->orWhere('start_date', '<=', now()); })
+                                ->where(function ($q) { $q->whereNull('end_date')->orWhere('end_date', '>=', now()); })
+                                ->where(function ($q) use ($sidGroupIds) {
+                                    $q->where('category', 'placement')
+                                      ->orWhere(function ($qq) use ($sidGroupIds) { $qq->where('category', 'group')->whereIn('group_id', $sidGroupIds); });
+                                })
+                                ->count();
+                        }
+                    @endphp
+                    <span class="ox-dash__navbadge" style="{{ $studentAvailableExamsCount > 0 ? '' : 'display:none;' }}">{{ $studentAvailableExamsCount }}</span>
+                </a>
                 <a class="ox-dash__navlink" data-tab-target="#Exam"
                    href="{{ $onStudent ? '#Exam' : url('/student#Exam') }}" @if($onStudent) data-toggle="tab" @endif>
                     <i class="bi bi-calendar-check"></i><span class="ox-dash__navtext">Exam Data</span>
@@ -117,6 +137,25 @@
                 <a class="ox-dash__navlink {{ Request::is('progress*') ? 'is-active' : '' }}"
                    href="{{ route('teacher.progress', $tid) }}">
                     <i class="bi bi-graph-up"></i><span class="ox-dash__navtext">Progress</span>
+                </a>
+                <a class="ox-dash__navlink {{ Request::is('teacher/exams*') ? 'is-active' : '' }}"
+                   href="{{ route('teacher.exams.view') }}">
+                    <i class="bi bi-journal-check"></i><span class="ox-dash__navtext">امتحانات مجموعاتي</span>
+                </a>
+                <a class="ox-dash__navlink {{ Request::is('teacher/exam-reviews*') ? 'is-active' : '' }}"
+                   href="{{ route('teacher.exam_reviews.view') }}">
+                    <i class="bi bi-check2-square"></i><span class="ox-dash__navtext">تصحيح ومراجعة الإجابات</span>
+                    @php
+                        $teacherPendingReviewsCount = 0;
+                        if (Auth::guard('teachers')->check()) {
+                            $tidPending = Auth::guard('teachers')->id();
+                            $teacherGroupIds = \App\Models\Groups::where('teacher_id', $tidPending)->pluck('id');
+                            $teacherPendingReviewsCount = \App\Models\ExamAttempt::whereHas('exam', function ($q) use ($teacherGroupIds) {
+                                $q->where('category', 'group')->whereIn('group_id', $teacherGroupIds);
+                            })->where('status', 'submitted')->count();
+                        }
+                    @endphp
+                    <span class="ox-dash__navbadge" style="{{ $teacherPendingReviewsCount > 0 ? '' : 'display:none;' }}">{{ $teacherPendingReviewsCount }}</span>
                 </a>
             </div>
 

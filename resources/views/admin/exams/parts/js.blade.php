@@ -46,9 +46,12 @@
         })();
         @endif
 
-        // ── Live question filter (search text && type && difficulty, all combined with AND) ──
+        // ── Live question filter (search text && type && difficulty, all combined with AND)
+        //    + select-all/clear-all + live selected-questions summary (count / by type / total marks) ──
         (function () {
             var $rows = $('.question-row');
+            var typeLabels = { mcq: 'اختيار من متعدد', true_false: 'صح/خطأ', text: 'إجابة نصية', voice: 'إجابة صوتية' };
+            var typeClasses = { mcq: 'primary', true_false: 'info', text: 'dark', voice: 'danger' };
 
             function applyQuestionFilter() {
                 var keyword = $('#question_search_filter').val().toLowerCase().trim();
@@ -69,10 +72,47 @@
                 $('#question_filter_count').text(visible + ' من ' + $rows.length + ' سؤال');
             }
 
+            function updateSelectionSummary() {
+                var count = 0, totalMarks = 0, byType = {};
+
+                $rows.find('.question-checkbox:checked').each(function () {
+                    var $row = $(this).closest('.question-row');
+                    var type = $row.data('type');
+                    count++;
+                    totalMarks += parseFloat($row.data('marks')) || 0;
+                    byType[type] = (byType[type] || 0) + 1;
+                });
+
+                $('#summary_selected_count').text(count);
+                $('#summary_total_marks').text(totalMarks % 1 === 0 ? totalMarks : totalMarks.toFixed(1));
+
+                var typeHtml = '';
+                Object.keys(typeLabels).forEach(function (type) {
+                    if (byType[type]) {
+                        typeHtml += '<span class="badge badge-light-' + typeClasses[type] + '">' + typeLabels[type] + ': ' + byType[type] + '</span>';
+                    }
+                });
+                $('#summary_by_type').html(typeHtml || '<span class="text-muted">لا يوجد</span>');
+            }
+
             $('#question_search_filter').on('keyup input change', applyQuestionFilter);
             $('#question_type_filter').on('change', applyQuestionFilter);
             $('#question_difficulty_filter').on('change', applyQuestionFilter);
             applyQuestionFilter();
+
+            $(document).on('change', '.question-checkbox', updateSelectionSummary);
+            updateSelectionSummary();
+
+            // selects/deselects only the rows currently visible under the active filter
+            $('#select_all_questions_btn').on('click', function () {
+                $rows.filter(':visible').find('.question-checkbox').prop('checked', true);
+                updateSelectionSummary();
+            });
+
+            $('#clear_all_questions_btn').on('click', function () {
+                $rows.find('.question-checkbox').prop('checked', false);
+                updateSelectionSummary();
+            });
         })();
 
         // ── Tabs: keep generation_mode radio in sync with the visible tab ──

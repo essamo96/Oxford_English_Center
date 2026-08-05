@@ -409,6 +409,58 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tab-pane fade" id="MyExams">
+                        <div class="info-card">
+                            <h3><i class="fa fa-pencil-square-o"></i> امتحاناتي</h3>
+
+                            @if(!empty($upcomingExamDates))
+                            <div class="alert" style="background:#eaf4ff;border:1px solid #b6dcff;color:#0b3d91;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+                                <strong><i class="fa fa-calendar"></i> مواعيد قادمة:</strong>
+                                <ul style="margin:8px 0 0;padding-inline-start:20px;">
+                                    @foreach($upcomingExamDates as $d)
+                                        <li>{{ $d['title'] }} — {{ $d['group'] }} — {{ $d['date']->format('Y-m-d H:i') }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            @endif
+
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>الامتحان</th>
+                                            <th>النوع</th>
+                                            <th>المدة</th>
+                                            <th>المحاولات</th>
+                                            <th class="text-center">الإجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($availableExams as $exam)
+                                        @php $remaining = $exam->max_attempts - $exam->my_attempts_count; @endphp
+                                        <tr>
+                                            <td><strong>{{ $exam->title }}</strong></td>
+                                            <td>{{ $exam->category === 'placement' ? 'تحديد مستوى' : ($exam->group->name ?? 'مجموعة') }}</td>
+                                            <td>{{ $exam->duration_minutes }} دقيقة</td>
+                                            <td>{{ max($remaining, 0) }} من {{ $exam->max_attempts }}</td>
+                                            <td class="text-center">
+                                                @if($remaining > 0)
+                                                    <a href="{{ route('student.exams.start', ['id' => Crypt::encrypt($exam->id)]) }}" class="btn btn-sm btn-modern btn-modern-accent">
+                                                        <i class="fa fa-play"></i> بدء الامتحان
+                                                    </a>
+                                                @else
+                                                    <span class="text-danger">لا توجد محاولات متبقية</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr><td colspan="5" class="text-center">لا توجد امتحانات متاحة حالياً</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                     <div class="tab-pane fade" id="Teacher_Evaluations">
                         <div class="info-card">
                             <h3><i class="fa fa-star-o"></i> Teacher Evaluations</h3>

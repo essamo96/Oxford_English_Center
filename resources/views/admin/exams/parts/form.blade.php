@@ -160,6 +160,17 @@
                     </div>
                 </div>
 
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <button type="button" id="select_all_questions_btn" class="btn btn-sm btn-light-primary">
+                            <i class="bi bi-check2-square"></i> تحديد الكل (الظاهر حسب الفلتر)
+                        </button>
+                        <button type="button" id="clear_all_questions_btn" class="btn btn-sm btn-light-danger">
+                            <i class="bi bi-x-square"></i> إلغاء التحديد
+                        </button>
+                    </div>
+                </div>
+
                 <div class="table-responsive" style="max-height:350px; overflow-y:auto;">
                     <table class="table table-sm table-striped" id="manual_questions_table">
                         <thead><tr><th></th><th>السؤال</th><th>النوع</th><th>الصعوبة</th></tr></thead>
@@ -174,8 +185,8 @@
                                 $difficultyIcons = ['easy' => 'bi-emoji-smile', 'medium' => 'bi-emoji-neutral', 'hard' => 'bi-emoji-frown', 'custom' => 'bi-sliders'];
                                 $difficultyClasses = ['easy' => 'success', 'medium' => 'warning', 'hard' => 'danger', 'custom' => 'info'];
                             @endphp
-                            <tr class="question-row" data-type="{{ $q->type }}" data-difficulty="{{ $q->difficulty }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}">
-                                <td><input type="checkbox" name="question_ids[]" value="{{ $q->id }}" {{ in_array($q->id, $selectedIds) ? 'checked' : '' }}></td>
+                            <tr class="question-row" data-type="{{ $q->type }}" data-difficulty="{{ $q->difficulty }}" data-marks="{{ $q->marks }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}">
+                                <td><input type="checkbox" name="question_ids[]" class="question-checkbox" value="{{ $q->id }}" {{ in_array($q->id, $selectedIds) ? 'checked' : '' }}></td>
                                 <td>{{ \Illuminate\Support\Str::limit(strip_tags($q->question_text), 70) }}</td>
                                 <td>
                                     <span class="badge badge-light-{{ $typeClasses[$q->type] ?? 'secondary' }}">
@@ -191,6 +202,25 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <div class="card bg-light-success border-0 mt-3" id="selected_questions_summary">
+                    <div class="card-body py-3">
+                        <div class="row g-3 align-items-center text-center">
+                            <div class="col-md-3">
+                                <div class="fw-bold fs-4" id="summary_selected_count">0</div>
+                                <div class="text-muted small">عدد الأسئلة المحددة</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-center gap-3 flex-wrap" id="summary_by_type"></div>
+                                <div class="text-muted small mt-1">توزيع الأنواع</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="fw-bold fs-4" id="summary_total_marks">0</div>
+                                <div class="text-muted small">إجمالي الدرجات</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="auto_tab">

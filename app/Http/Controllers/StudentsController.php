@@ -141,6 +141,40 @@ class StudentsController extends Controller {
         usort($upcoming, fn ($a, $b) => $a['date'] <=> $b['date']);
         parent::$data['upcoming'] = array_slice($upcoming, 0, 5);
 
+        // Examination Center: exams currently available to this student (Placement Tests +
+        // published Group Exams for groups they're actually enrolled in), plus a quick list of
+        // upcoming start dates so they show up alongside the legacy progress-test dates above.
+        $now = now();
+        $availableExams = \App\Models\Exam::with('group')
+            ->where('status', 'published')
+            ->where(function ($q) use ($now) { $q->whereNull('start_date')->orWhere('start_date', '<=', $now); })
+            ->where(function ($q) use ($now) { $q->whereNull('end_date')->orWhere('end_date', '>=', $now); })
+            ->where(function ($q) use ($group) {
+                $q->where('category', 'placement')
+                  ->orWhere(function ($qq) use ($group) { $qq->where('category', 'group')->whereIn('group_id', $group); });
+            })
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($exam) use ($user_id) {
+                $exam->my_attempts_count = \App\Models\ExamAttempt::where('exam_id', $exam->id)->where('student_id', $user_id)->count();
+                return $exam;
+            });
+        parent::$data['availableExams'] = $availableExams;
+
+        $upcomingExamDates = \App\Models\Exam::with('group')
+            ->where('status', 'scheduled')
+            ->whereNotNull('start_date')
+            ->where('start_date', '>', $now)
+            ->where(function ($q) use ($group) {
+                $q->where('category', 'placement')
+                  ->orWhere(function ($qq) use ($group) { $qq->where('category', 'group')->whereIn('group_id', $group); });
+            })
+            ->orderBy('start_date')
+            ->limit(5)
+            ->get()
+            ->map(fn ($exam) => ['title' => $exam->title, 'group' => $exam->group->name ?? 'تحديد مستوى', 'date' => $exam->start_date]);
+        parent::$data['upcomingExamDates'] = $upcomingExamDates;
+
         return view('frontend.students.index', parent::$data);
     }
 

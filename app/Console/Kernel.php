@@ -31,6 +31,12 @@ class Kernel extends ConsoleKernel
                  ->everyMinute()
                  ->withoutOverlapping(5);
 
+        // Examination Center: auto-publish Group Exams once their start_date arrives, and
+        // notify enrolled students at that exact moment (see PublishScheduledExams for why).
+        $schedule->command('exams:publish-scheduled')
+                 ->everyMinute()
+                 ->withoutOverlapping(5);
+
         // $schedule->call(function () {
         //     GroupStudents::where('has_evaluation', 1)
         //     ->where('evaluation_at', '<=', now()->subWeek(3))
