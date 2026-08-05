@@ -49,48 +49,6 @@
     @endif
 </div>
 
-@if($category === 'group')
-<script>
-    (function () {
-        var groupsByProgramUrl = "{{ route('group_exams.groups_by_program') }}";
-        var currentGroupId = "{{ old('group_id', $info->group_id ?? '') }}";
-
-        $('#exam_program_id').on('change', function () {
-            var programId = $(this).val();
-            var $groupSelect = $('#exam_group_id');
-
-            $groupSelect.html('<option value="">جاري التحميل...</option>').trigger('change');
-
-            if (!programId) {
-                $groupSelect.html('<option value="">اختر برنامجاً أولاً...</option>').trigger('change');
-                return;
-            }
-
-            $.ajax({
-                url: groupsByProgramUrl,
-                type: 'POST',
-                data: { program_id: programId, _token: '{{ csrf_token() }}' },
-                success: function (groups) {
-                    var options = '<option value="">اختر مجموعة...</option>';
-                    if (groups.length === 0) {
-                        options = '<option value="">لا توجد مجموعات فعالة لهذا البرنامج</option>';
-                    } else {
-                        groups.forEach(function (g) {
-                            var selected = (String(g.id) === String(currentGroupId)) ? 'selected' : '';
-                            options += '<option value="' + g.id + '" ' + selected + '>' + g.name + '</option>';
-                        });
-                    }
-                    $groupSelect.html(options).trigger('change');
-                },
-                error: function () {
-                    $groupSelect.html('<option value="">تعذر تحميل المجموعات</option>').trigger('change');
-                }
-            });
-        });
-    })();
-</script>
-@endif
-
 <div class="row g-9 mb-8">
     <div class="col-md-3 fv-row">
         <label class="fs-6 fw-semibold mb-2">المدة (دقيقة)</label>
@@ -176,10 +134,10 @@
                 <input type="radio" name="generation_mode" value="manual" checked class="d-none manual-radio">
 
                 <div class="row g-3 mb-3">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <input type="text" id="question_search_filter" class="form-control form-control-solid form-control-sm" placeholder="ابحث في نص السؤال...">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <select id="question_type_filter" class="form-select form-select-solid form-select-sm">
                             <option value="">كل الأنواع</option>
                             <option value="mcq">اختيار من متعدد</option>
@@ -189,6 +147,15 @@
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <select id="question_difficulty_filter" class="form-select form-select-solid form-select-sm">
+                            <option value="">كل مستويات الصعوبة</option>
+                            <option value="easy">سهل</option>
+                            <option value="medium">متوسط</option>
+                            <option value="hard">صعب</option>
+                            <option value="custom">مخصص</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <span class="text-muted small" id="question_filter_count"></span>
                     </div>
                 </div>
@@ -207,7 +174,7 @@
                                 $difficultyIcons = ['easy' => 'bi-emoji-smile', 'medium' => 'bi-emoji-neutral', 'hard' => 'bi-emoji-frown', 'custom' => 'bi-sliders'];
                                 $difficultyClasses = ['easy' => 'success', 'medium' => 'warning', 'hard' => 'danger', 'custom' => 'info'];
                             @endphp
-                            <tr class="question-row" data-type="{{ $q->type }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}">
+                            <tr class="question-row" data-type="{{ $q->type }}" data-difficulty="{{ $q->difficulty }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}">
                                 <td><input type="checkbox" name="question_ids[]" value="{{ $q->id }}" {{ in_array($q->id, $selectedIds) ? 'checked' : '' }}></td>
                                 <td>{{ \Illuminate\Support\Str::limit(strip_tags($q->question_text), 70) }}</td>
                                 <td>
@@ -225,33 +192,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <script>
-                    (function () {
-                        var $rows = $('.question-row');
-
-                        function applyQuestionFilter() {
-                            var keyword = $('#question_search_filter').val().toLowerCase().trim();
-                            var type = $('#question_type_filter').val();
-                            var visible = 0;
-
-                            $rows.each(function () {
-                                var $row = $(this);
-                                var matchesType = !type || $row.data('type') === type;
-                                var matchesText = !keyword || String($row.data('text')).indexOf(keyword) !== -1;
-                                var show = matchesType && matchesText;
-                                $row.toggle(show);
-                                if (show) visible++;
-                            });
-
-                            $('#question_filter_count').text(visible + ' من ' + $rows.length + ' سؤال');
-                        }
-
-                        $('#question_search_filter').on('input', applyQuestionFilter);
-                        $('#question_type_filter').on('change', applyQuestionFilter);
-                        applyQuestionFilter();
-                    })();
-                </script>
             </div>
             <div class="tab-pane fade" id="auto_tab">
                 <input type="radio" name="generation_mode" value="auto" class="d-none auto-radio">
@@ -363,74 +303,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function (tab) {
-        tab.addEventListener('shown.bs.tab', function (e) {
-            var target = e.target.getAttribute('href');
-            if (target === '#auto_tab') {
-                document.querySelector('.auto-radio').checked = true;
-            } else if (target === '#manual_tab') {
-                document.querySelector('.manual-radio').checked = true;
-            }
-            // '#new_questions_tab' is additive and doesn't touch generation_mode
-        });
-    });
-
-    (function () {
-        var newRowIndex = 1;
-
-        function toggleNewOptions($row) {
-            var type = $row.find('.new-row-type').val();
-            $row.find('.new_mcq_options').toggleClass('d-none', type !== 'mcq');
-            $row.find('.new_tf_options').toggleClass('d-none', type !== 'true_false');
-        }
-
-        function renumberNewRows() {
-            document.querySelectorAll('.new_question_row').forEach(function (row, i) {
-                row.querySelector('.row-number').textContent = 'سؤال جديد ' + (i + 1);
-            });
-        }
-
-        toggleNewOptions($('.new_question_row[data-index="0"]'));
-
-        $(document).on('change', '.new-row-type', function () {
-            toggleNewOptions($(this).closest('.new_question_row'));
-        });
-
-        $('#add_new_question_btn').on('click', function () {
-            var $template = $('.new_questions_repeater .new_question_row').first();
-            var $clone = $template.clone();
-            var idx = newRowIndex++;
-
-            $clone.find('[name]').each(function () {
-                var name = $(this).attr('name').replace(/new_questions\[\d+\]/, 'new_questions[' + idx + ']');
-                $(this).attr('name', name);
-            });
-            $clone.attr('data-index', idx);
-
-            $clone.find('textarea').val('');
-            $clone.find('input[type="text"]').val('');
-            $clone.find('input[type="number"]').val(1);
-            $clone.find('select.new-row-type').val('mcq');
-            $clone.find('select').not('.new-row-type').prop('selectedIndex', 0);
-            $clone.find('input[type="radio"]').prop('checked', false);
-            $clone.find('input[type="radio"][value="0"], input[type="radio"][value="true"]').prop('checked', true);
-
-            $('.new_questions_repeater').append($clone);
-            toggleNewOptions($clone);
-            renumberNewRows();
-        });
-
-        $(document).on('click', '.remove-new-row', function () {
-            if ($('.new_question_row').length <= 1) {
-                $(this).closest('.new_question_row').find('textarea, input[type="text"]').val('');
-                return;
-            }
-            $(this).closest('.new_question_row').fadeOut(200, function () {
-                $(this).remove();
-                renumberNewRows();
-            });
-        });
-    })();
-</script>

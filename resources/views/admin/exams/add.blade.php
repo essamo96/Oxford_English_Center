@@ -47,4 +47,5 @@
         CKEDITOR.replace('exam_description', { language: 'ar', height: 160 });
     }
 </script>
+@include('admin.exams.parts.js')
 @stop
