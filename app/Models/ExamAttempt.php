@@ -24,9 +24,15 @@ class ExamAttempt extends Model
         'is_auto_submitted' => 'boolean',
     ];
 
+    // withTrashed(): deleting an Exam only soft-deletes it (SoftDeletes on the Exam model), but
+    // an attempt must always be able to resolve its exam — otherwise an in-progress attempt for
+    // a since-deleted exam hard-crashes the student's take/submit/result screens, and every
+    // historical grading/report screen (admin, teacher) breaks for any attempt tied to a deleted
+    // exam. Deleting an exam already blocks NEW attempts (Exam::find() in start()/getIndex()
+    // correctly excludes trashed rows) — this only keeps EXISTING attempts functional.
     public function exam()
     {
-        return $this->belongsTo(Exam::class, 'exam_id');
+        return $this->belongsTo(Exam::class, 'exam_id')->withTrashed();
     }
 
     public function student()

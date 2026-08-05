@@ -123,6 +123,10 @@ class StudentExamsController extends Controller
             abort(404, self::NOT_FOUND);
         }
 
+        if (!$attempt->exam) {
+            return redirect(route('student.exams.view'))->with('danger', 'هذا الامتحان لم يعد متاحاً.');
+        }
+
         if ($attempt->status !== 'in_progress') {
             return redirect(route('student.exams.result', ['attempt' => Crypt::encrypt($attempt->id)]));
         }
@@ -216,7 +220,7 @@ class StudentExamsController extends Controller
         }
 
         $attempt = ExamAttempt::with('exam')->where('student_id', Auth::guard('students')->id())->where('status', 'in_progress')->find($attemptId);
-        if (!$attempt) {
+        if (!$attempt || !$attempt->exam) {
             return response()->json(['status' => 'error']);
         }
 
@@ -259,7 +263,7 @@ class StudentExamsController extends Controller
         }
 
         $attempt = ExamAttempt::where('student_id', Auth::guard('students')->id())->where('status', 'in_progress')->find($attemptId);
-        if (!$attempt) {
+        if (!$attempt || !$attempt->exam) {
             abort(404, self::NOT_FOUND);
         }
 
