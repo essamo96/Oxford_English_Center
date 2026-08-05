@@ -110,6 +110,20 @@
     }
     .exam-fullscreen-gate__btn:hover { background: #1c2d54; }
 
+    /* Non-blocking reminder banner shown after leaving fullscreen mid-exam — unlike the
+       initial gate, this NEVER covers the page or blocks clicking Submit/answering. */
+    .exam-fullscreen-banner {
+        display: none;
+        background: #ffcc00; color: #14213d; padding: 10px 20px;
+        display: none; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+        font-weight: 700; text-align: center;
+    }
+    .exam-fullscreen-banner.is-visible { display: flex; }
+    .exam-fullscreen-banner__btn {
+        background: #14213d; color: #ffcc00; border: none; border-radius: 8px;
+        padding: 6px 18px; font-weight: 700; cursor: pointer; font-size: 13px;
+    }
+
     /* Anti-cheat: block text selection on the exam content itself, but keep it
        usable inside actual answer inputs (typing/selecting your own answer is fine). */
     .exam-locked-area, .exam-locked-area * {
@@ -137,6 +151,13 @@
         <div class="exam-timer" id="exam_timer">--:--</div>
     </div>
 </div>
+
+@if($exam->anti_cheat_enabled)
+<div class="exam-fullscreen-banner" id="exam_fullscreen_banner">
+    <span><i class="bi bi-arrows-fullscreen"></i> غادرت وضع ملء الشاشة — تم احتسابها كمخالفة. يمكنك المتابعة والتسليم بشكل طبيعي.</span>
+    <button type="button" id="exam_fullscreen_return_btn" class="exam-fullscreen-banner__btn">العودة لملء الشاشة</button>
+</div>
+@endif
 
 @if($exam->anti_cheat_enabled)
 <div class="exam-fullscreen-gate" id="exam_fullscreen_gate">
@@ -391,10 +412,15 @@
         });
     }
 
-    // ── Fullscreen gate: exam must run in fullscreen; leaving it counts as a violation ──
+    // ── Fullscreen: the initial gate (click-to-start) is the ONLY thing allowed to cover the
+    // whole screen. Leaving fullscreen afterwards is reported as a violation and shown via a
+    // small non-blocking banner — it must NEVER cover or disable the exam content, the answer
+    // inputs, or the Submit button. (A previous version re-showed the full gate on exit, which
+    // could trap the student and make Submit unclickable — that is exactly what this fixes.)
     var $gate = $('#exam_fullscreen_gate');
+    var $banner = $('#exam_fullscreen_banner');
     var fullscreenEverEntered = false;
-    var gateShowingExitWarning = false;
+    var exitWarningShown = false;
 
     function enterFullscreen() {
         var el = document.documentElement;
@@ -407,20 +433,20 @@
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
     }
     function showExitWarning() {
-        if (gateShowingExitWarning) return;
-        gateShowingExitWarning = true;
+        if (exitWarningShown) return;
+        exitWarningShown = true;
         reportViolation('fullscreen_exit');
-        $gate.find('h4').text('غادرت وضع ملء الشاشة');
-        $gate.find('p').text('يجب العودة لوضع ملء الشاشة لمتابعة الامتحان. هذا يُحتسب كمخالفة مراقبة.');
-        $gate.find('#exam_fullscreen_start_btn').html('<i class="bi bi-arrows-fullscreen"></i> العودة لملء الشاشة الآن');
-        $gate.fadeIn(150);
+        $banner.addClass('is-visible');
     }
 
     if (antiCheatEnabled && $gate.length) {
         $('#exam_fullscreen_start_btn').on('click', function () {
             enterFullscreen();
-            gateShowingExitWarning = false;
             $gate.fadeOut(150);
+        });
+
+        $('#exam_fullscreen_return_btn').on('click', function () {
+            enterFullscreen();
         });
 
         ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(function (evt) {
@@ -428,6 +454,8 @@
                 if (submitted) return;
                 if (isFullscreen()) {
                     fullscreenEverEntered = true;
+                    exitWarningShown = false;
+                    $banner.removeClass('is-visible');
                 } else if (fullscreenEverEntered) {
                     showExitWarning();
                 }
@@ -435,10 +463,11 @@
         });
 
         // Backup check every 2s: some browsers don't fire fullscreenchange reliably —
-        // this catches an actual exit even if the event itself never arrives.
+        // this catches an actual exit even if the event itself never arrives. Only ever
+        // shows the non-blocking banner, never the full gate.
         setInterval(function () {
             if (submitted || !fullscreenEverEntered) return;
-            if (!isFullscreen() && !gateShowingExitWarning) showExitWarning();
+            if (!isFullscreen() && !exitWarningShown) showExitWarning();
         }, 2000);
     }
 

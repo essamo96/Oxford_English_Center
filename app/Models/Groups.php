@@ -46,6 +46,11 @@ class Groups extends Model {
     {
         return $this->hasOne('App\Models\GroupExamDates', 'id', 'group_id');
     }
+    // Examination Center exams (category='group') attached to this group.
+    public function exams()
+    {
+        return $this->hasMany('App\Models\Exam', 'group_id');
+    }
     //////////////////////////////////////////////
     function addGroup($name, $program_id, $teacher_id, $date_id, $start_date, $end_date, $subjects, $status,$zoom, $image, $drive) {
         $this->name = $name;

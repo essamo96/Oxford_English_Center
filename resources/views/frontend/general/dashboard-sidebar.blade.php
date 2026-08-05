@@ -157,9 +157,13 @@
                     @endphp
                     <span class="ox-dash__navbadge" style="{{ $teacherPendingReviewsCount > 0 ? '' : 'display:none;' }}">{{ $teacherPendingReviewsCount }}</span>
                 </a>
-                <a class="ox-dash__navlink {{ Request::is('teacher/exam-attempts*') ? 'is-active' : '' }}"
+                <a class="ox-dash__navlink {{ Request::is('teacher/exam-attempts') ? 'is-active' : '' }}"
                    href="{{ route('teacher.exam_attempts.view') }}">
                     <i class="bi bi-clipboard-data"></i><span class="ox-dash__navtext">محاولات طلابي</span>
+                </a>
+                <a class="ox-dash__navlink {{ Request::is('teacher/exam-attempts/by-group') ? 'is-active' : '' }}"
+                   href="{{ route('teacher.exam_attempts.groups_report') }}">
+                    <i class="bi bi-bar-chart-line"></i><span class="ox-dash__navtext">تقرير المجموعات</span>
                 </a>
             </div>
 

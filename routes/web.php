@@ -147,6 +147,7 @@ Route::group(['middleware' => ['auth:teachers']], function () {
 
     // Examination Center - teacher attempts overview (own groups only)
     Route::get('teacher/exam-attempts', ['as' => 'teacher.exam_attempts.view', 'uses' => 'TeacherExamAttemptsController@getIndex']);
+    Route::get('teacher/exam-attempts/by-group', ['as' => 'teacher.exam_attempts.groups_report', 'uses' => 'TeacherExamAttemptsController@getGroupsReport']);
     Route::post('teacher/exam-attempts/answers', ['as' => 'teacher.exam_attempts.answers', 'uses' => 'TeacherExamAttemptsController@getAnswers']);
     Route::post('teacher/exam-attempts/wrong-answers', ['as' => 'teacher.exam_attempts.wrong_answers', 'uses' => 'TeacherExamAttemptsController@getWrongAnswers']);
 

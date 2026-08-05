@@ -40,6 +40,21 @@ class TeacherExamAttemptsController extends Controller
         return view('frontend.teachers.exams.attempts', array_merge(parent::$data, compact('attempts')));
     }
 
+    // Hierarchical report: every group this teacher owns -> its exams -> each student's
+    // attempt/score/violations for that exam. One consolidated view instead of a flat table.
+    public function getGroupsReport()
+    {
+        $groups = Groups::where('teacher_id', Auth::guard('teachers')->id())
+            ->where('status', 1)
+            ->with(['exams' => function ($q) {
+                $q->where('category', 'group')->with(['attempts.student'])->orderBy('title');
+            }])
+            ->orderBy('name')
+            ->get();
+
+        return view('frontend.teachers.exams.groups_report', array_merge(parent::$data, compact('groups')));
+    }
+
     public function getAnswers(Request $request)
     {
         try {
