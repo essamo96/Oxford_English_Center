@@ -480,6 +480,13 @@
     // ── Submit — wired to BOTH the main button and the one on the fullscreen gate, so
     // submitting always works no matter what's showing on screen. ──
     function confirmAndSubmit() {
+        // Fallback if SweetAlert2 failed to load (CDN/network issue) — never let a missing
+        // library be the reason the exam can't be submitted.
+        if (typeof Swal === 'undefined') {
+            if (window.confirm('هل أنت متأكد من تسليم الامتحان؟ لن تتمكن من التعديل بعد التسليم.')) doSubmit();
+            return;
+        }
+
         Swal.fire({
             title: 'هل أنت متأكد من تسليم الامتحان؟',
             text: 'لن تتمكن من التعديل بعد التسليم.',
@@ -506,7 +513,21 @@
             .prop('disabled', true).css('opacity', '0.75')
             .html('<span class="spinner-border spinner-border-sm"></span> جاري التسليم...');
 
-        if (document.exitFullscreen) { document.exitFullscreen().catch(function () {}); }
+        // Leaving fullscreen is a nice-to-have here, not a requirement — some browsers throw
+        // synchronously (instead of rejecting the promise) when exitFullscreen() is called while
+        // not actually in fullscreen. That must NEVER be able to stop the actual submission below,
+        // so it's isolated in its own try/catch instead of guarding the whole function.
+        try {
+            if (document.exitFullscreen) {
+                var exitResult = document.exitFullscreen();
+                if (exitResult && exitResult.catch) exitResult.catch(function () {});
+            }
+        } catch (e) { /* ignore — proceed to submit regardless */ }
+
+        submitExamForm();
+    }
+
+    function submitExamForm() {
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = urlFor('submit');
