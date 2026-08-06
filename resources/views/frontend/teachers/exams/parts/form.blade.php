@@ -97,39 +97,50 @@
         <span class="text-muted small ms-auto">أسئلتك الخاصة + بنك الأسئلة العام</span>
     </div>
     <div class="tex-section__body">
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <input type="text" id="tex_search_filter" class="form-control form-control-sm" placeholder="ابحث في نص السؤال...">
+        <div class="tex-filter-bar">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="tex-search-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="tex_search_filter" class="form-control" placeholder="ابحث في نص السؤال...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="tex_type_filter" class="form-select">
+                        <option value="">كل الأنواع</option>
+                        <option value="mcq">اختيار من متعدد</option>
+                        <option value="true_false">صح/خطأ</option>
+                        <option value="text">إجابة نصية</option>
+                        <option value="voice">إجابة صوتية</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="tex_difficulty_filter" class="form-select">
+                        <option value="">كل مستويات الصعوبة</option>
+                        <option value="easy">سهل</option>
+                        <option value="medium">متوسط</option>
+                        <option value="hard">صعب</option>
+                        <option value="custom">مخصص</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-md-end">
+                    <span class="tex-filter-count" id="tex_filter_count"></span>
+                </div>
             </div>
-            <div class="col-md-3">
-                <select id="tex_type_filter" class="form-select form-select-sm">
-                    <option value="">كل الأنواع</option>
-                    <option value="mcq">اختيار من متعدد</option>
-                    <option value="true_false">صح/خطأ</option>
-                    <option value="text">إجابة نصية</option>
-                    <option value="voice">إجابة صوتية</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select id="tex_difficulty_filter" class="form-select form-select-sm">
-                    <option value="">كل مستويات الصعوبة</option>
-                    <option value="easy">سهل</option>
-                    <option value="medium">متوسط</option>
-                    <option value="hard">صعب</option>
-                    <option value="custom">مخصص</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-center">
-                <span class="text-muted small" id="tex_filter_count"></span>
+            <div class="tex-filter-actions mt-3">
+                <button type="button" id="tex_select_all_btn" class="btn btn-outline-primary"><i class="bi bi-check2-square"></i> تحديد الكل (الظاهر)</button>
+                <button type="button" id="tex_clear_all_btn" class="btn btn-outline-danger"><i class="bi bi-x-square"></i> إلغاء التحديد</button>
             </div>
         </div>
 
-        <div class="d-flex gap-2 mb-3">
-            <button type="button" id="tex_select_all_btn" class="btn btn-sm btn-outline-primary"><i class="bi bi-check2-square"></i> تحديد الكل (الظاهر)</button>
-            <button type="button" id="tex_clear_all_btn" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-square"></i> إلغاء التحديد</button>
-        </div>
-
-        <div style="max-height:340px; overflow-y:auto;">
+        <div class="tex-question-list">
+            <div class="tex-question-list__head">
+                <span style="width:26px;"></span>
+                <span style="width:19px;"></span>
+                <span class="flex-grow-1">نص السؤال</span>
+                <span>النوع / الصعوبة</span>
+            </div>
+            <div class="tex-question-scroll">
             @php
                 $selectedIds = isset($info) ? $info->questions->pluck('id')->toArray() : [];
                 $typeLabels = ['mcq' => 'اختيار من متعدد', 'true_false' => 'صح/خطأ', 'text' => 'إجابة نصية', 'voice' => 'إجابة صوتية'];
@@ -138,12 +149,15 @@
                 $difficultyLabels = ['easy' => 'سهل', 'medium' => 'متوسط', 'hard' => 'صعب', 'custom' => 'مخصص'];
                 $difficultyPill = ['easy' => 'tex-pill--success', 'medium' => 'tex-pill--warning', 'hard' => 'tex-pill--danger', 'custom' => 'tex-pill--info'];
             @endphp
-            @forelse($questions as $q)
+            @forelse($questions as $index => $q)
             <label class="tex-question-row tex-question-item" data-type="{{ $q->type }}" data-difficulty="{{ $q->difficulty }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}" data-marks="{{ $q->marks }}">
+                <span class="tex-question-row__num">{{ $index + 1 }}</span>
                 <input type="checkbox" name="question_ids[]" class="tex-question-checkbox" value="{{ $q->id }}" {{ in_array($q->id, $selectedIds) ? 'checked' : '' }}>
                 <span class="tex-question-row__text" dir="auto">{{ \Illuminate\Support\Str::limit(strip_tags($q->question_text), 90) }}</span>
-                <span class="tex-pill {{ $typePill[$q->type] ?? 'tex-pill--muted' }}"><i class="bi {{ $typeIcons[$q->type] ?? '' }}"></i> {{ $typeLabels[$q->type] ?? $q->type }}</span>
-                <span class="tex-pill {{ $difficultyPill[$q->difficulty] ?? 'tex-pill--muted' }}">{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}</span>
+                <span class="tex-question-row__badges">
+                    <span class="tex-pill {{ $typePill[$q->type] ?? 'tex-pill--muted' }}"><i class="bi {{ $typeIcons[$q->type] ?? '' }}"></i> {{ $typeLabels[$q->type] ?? $q->type }}</span>
+                    <span class="tex-pill {{ $difficultyPill[$q->difficulty] ?? 'tex-pill--muted' }}">{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}</span>
+                </span>
             </label>
             @empty
                 <div class="tex-empty">
@@ -151,6 +165,7 @@
                     <p class="mb-0">لا توجد أسئلة متاحة بعد. أضف أسئلة من بنك الأسئلة أولاً.</p>
                 </div>
             @endforelse
+            </div>
         </div>
 
         <div class="tex-summary mt-3">
