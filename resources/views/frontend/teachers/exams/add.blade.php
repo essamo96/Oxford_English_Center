@@ -2,25 +2,42 @@
 @section('title', 'إضافة امتحان')
 @section('page-title', 'إضافة امتحان جديد')
 
+@section('css')
+@include('frontend.teachers.exams.parts.design')
+@include('frontend.teachers.exams.parts.form-design')
+@stop
+
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="mb-1"><i class="bi bi-journal-plus text-primary"></i> إضافة امتحان جديد</h4>
-        <p class="text-muted mb-0">أنشئ امتحاناً لإحدى مجموعاتك، واختر أسئلته من أسئلتك الخاصة أو من بنك الأسئلة العام.</p>
+<div class="tex-page-head">
+    <div class="tex-page-head__title">
+        <span class="tex-page-head__icon"><i class="bi bi-journal-plus"></i></span>
+        <div>
+            <h4>إضافة امتحان جديد</h4>
+            <p>أنشئ امتحاناً لإحدى مجموعاتك، واختر أسئلته من أسئلتك الخاصة أو من بنك الأسئلة العام.</p>
+        </div>
     </div>
-    <a href="{{ route('teacher.exams.view') }}" class="btn btn-light btn-sm"><i class="bi bi-arrow-right"></i> رجوع</a>
+    <a href="{{ route('teacher.exams.view') }}" class="tex-icon-btn" title="رجوع"><i class="bi bi-arrow-right"></i></a>
 </div>
 
 @if(session('danger'))
     <div class="alert alert-danger">{{ session('danger') }}</div>
 @endif
 
-<form method="post" action="{{ route('teacher.exams.add') }}">
+<form method="post" action="{{ route('teacher.exams.add') }}" id="tex_exam_form">
     {{ csrf_field() }}
     @include('frontend.teachers.exams.parts.form')
-    <div class="d-flex gap-2 mb-5">
-        <button type="submit" class="btn btn-primary px-5"><i class="bi bi-check-circle"></i> حفظ الامتحان</button>
+    <div class="tex-form-actions">
+        <button type="submit" class="tex-btn-primary tex-btn-lg"><i class="bi bi-check-circle"></i> حفظ الامتحان</button>
         <a href="{{ route('teacher.exams.view') }}" class="btn btn-light">إلغاء</a>
     </div>
 </form>
+@stop
+
+@section('js')
+<script src="{{ asset('assets/admin/ckeditor/ckeditor.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    if (typeof CKEDITOR !== 'undefined' && $('#exam_description').length) {
+        CKEDITOR.replace('exam_description', { language: 'ar', height: 160 });
+    }
+</script>
 @stop

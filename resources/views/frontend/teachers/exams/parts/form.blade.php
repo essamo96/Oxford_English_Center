@@ -1,29 +1,3 @@
-<style>
-    .tex-section { background: #fff; border-radius: 12px; border: 1px solid #e7eaf0; margin-bottom: 22px; overflow: hidden; }
-    .tex-section__header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; background: #f7f9fc; border-bottom: 1px solid #e7eaf0; }
-    .tex-section__header i { font-size: 20px; color: #14213d; }
-    .tex-section__header h6 { margin: 0; font-weight: 700; color: #14213d; }
-    .tex-section__body { padding: 20px; }
-    .tex-label { font-weight: 600; font-size: 13.5px; color: #4a5268; margin-bottom: 6px; display: block; }
-
-    .tex-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-    .tex-badge--primary { background: #e7f0ff; color: #1a56db; }
-    .tex-badge--info { background: #e0f7fa; color: #0891b2; }
-    .tex-badge--dark { background: #eef1f5; color: #374151; }
-    .tex-badge--danger { background: #fde8e8; color: #c81e1e; }
-    .tex-badge--success { background: #e6f6ec; color: #1e8e5a; }
-    .tex-badge--warning { background: #fff7e0; color: #a16207; }
-
-    .tex-question-row { border: 1px solid #e7eaf0; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-    .tex-question-row:hover { background: #f7f9fc; }
-    .tex-question-row__text { flex: 1; font-size: 14px; }
-
-    .tex-summary { background: #f2f6ff; border: 1px solid #d6e4ff; border-radius: 10px; padding: 14px 18px; display: flex; gap: 30px; flex-wrap: wrap; align-items: center; }
-    .tex-summary__item { text-align: center; }
-    .tex-summary__value { font-weight: 800; font-size: 18px; color: #14213d; }
-    .tex-summary__label { font-size: 12px; color: #7a8296; }
-</style>
-
 <div class="tex-section">
     <div class="tex-section__header">
         <i class="bi bi-info-circle"></i>
@@ -48,7 +22,7 @@
         <div class="row g-4">
             <div class="col-md-12">
                 <label class="tex-label">الوصف / التعليمات</label>
-                <textarea name="description" class="form-control" rows="2" placeholder="تعليمات مختصرة للطالب قبل بدء الامتحان...">{{ old('description', $info->description ?? '') }}</textarea>
+                <textarea name="description" id="exam_description" class="form-control" rows="4" placeholder="تعليمات مختصرة للطالب قبل بدء الامتحان...">{{ old('description', $info->description ?? '') }}</textarea>
             </div>
         </div>
     </div>
@@ -62,19 +36,19 @@
     <div class="tex-section__body">
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <label class="tex-label">المدة (دقيقة)</label>
+                <label class="tex-label"><i class="bi bi-clock"></i> المدة (دقيقة)</label>
                 <input type="number" min="1" name="duration_minutes" class="form-control" value="{{ old('duration_minutes', $info->duration_minutes ?? 30) }}">
             </div>
             <div class="col-md-3">
-                <label class="tex-label">أقصى عدد محاولات</label>
+                <label class="tex-label"><i class="bi bi-arrow-repeat"></i> أقصى عدد محاولات</label>
                 <input type="number" min="1" name="max_attempts" class="form-control" value="{{ old('max_attempts', $info->max_attempts ?? 1) }}">
             </div>
             <div class="col-md-3">
-                <label class="tex-label">درجة النجاح (%)</label>
+                <label class="tex-label"><i class="bi bi-trophy"></i> درجة النجاح (%)</label>
                 <input type="number" step="0.5" min="0" max="100" name="passing_score" class="form-control" value="{{ old('passing_score', $info->passing_score ?? 50) }}">
             </div>
             <div class="col-md-3">
-                <label class="tex-label">ظهور النتيجة</label>
+                <label class="tex-label"><i class="bi bi-eye"></i> ظهور النتيجة</label>
                 <select name="result_visibility" class="form-select">
                     <option value="immediate" {{ old('result_visibility', $info->result_visibility ?? 'immediate') == 'immediate' ? 'selected' : '' }}>فوري</option>
                     <option value="after_review" {{ old('result_visibility', $info->result_visibility ?? '') == 'after_review' ? 'selected' : '' }}>بعد المراجعة</option>
@@ -94,17 +68,23 @@
         </div>
 
         <div class="row g-3">
-            <div class="col-md-4 form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="shuffle_questions" value="1" {{ old('shuffle_questions', $info->shuffle_questions ?? true) ? 'checked' : '' }}>
-                <label class="form-check-label">ترتيب عشوائي للأسئلة</label>
+            <div class="col-md-4">
+                <div class="tex-switch-group form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" name="shuffle_questions" value="1" {{ old('shuffle_questions', $info->shuffle_questions ?? true) ? 'checked' : '' }}>
+                    <label class="form-check-label">ترتيب عشوائي للأسئلة</label>
+                </div>
             </div>
-            <div class="col-md-4 form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="review_available" value="1" {{ old('review_available', $info->review_available ?? true) ? 'checked' : '' }}>
-                <label class="form-check-label">السماح بمراجعة الإجابات</label>
+            <div class="col-md-4">
+                <div class="tex-switch-group form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" name="review_available" value="1" {{ old('review_available', $info->review_available ?? true) ? 'checked' : '' }}>
+                    <label class="form-check-label">السماح بمراجعة الإجابات</label>
+                </div>
             </div>
-            <div class="col-md-4 form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="anti_cheat_enabled" value="1" {{ old('anti_cheat_enabled', $info->anti_cheat_enabled ?? true) ? 'checked' : '' }}>
-                <label class="form-check-label">تفعيل مراقبة الغش</label>
+            <div class="col-md-4">
+                <div class="tex-switch-group form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" name="anti_cheat_enabled" value="1" {{ old('anti_cheat_enabled', $info->anti_cheat_enabled ?? true) ? 'checked' : '' }}>
+                    <label class="form-check-label">تفعيل مراقبة الغش</label>
+                </div>
             </div>
         </div>
     </div>
@@ -154,19 +134,22 @@
                 $selectedIds = isset($info) ? $info->questions->pluck('id')->toArray() : [];
                 $typeLabels = ['mcq' => 'اختيار من متعدد', 'true_false' => 'صح/خطأ', 'text' => 'إجابة نصية', 'voice' => 'إجابة صوتية'];
                 $typeIcons = ['mcq' => 'bi-ui-radios', 'true_false' => 'bi-toggle2-on', 'text' => 'bi-pencil-square', 'voice' => 'bi-mic-fill'];
-                $typeClasses = ['mcq' => 'primary', 'true_false' => 'info', 'text' => 'dark', 'voice' => 'danger'];
+                $typePill = ['mcq' => 'tex-pill--info', 'true_false' => 'tex-pill--muted', 'text' => 'tex-pill--muted', 'voice' => 'tex-pill--danger'];
                 $difficultyLabels = ['easy' => 'سهل', 'medium' => 'متوسط', 'hard' => 'صعب', 'custom' => 'مخصص'];
-                $difficultyClasses = ['easy' => 'success', 'medium' => 'warning', 'hard' => 'danger', 'custom' => 'info'];
+                $difficultyPill = ['easy' => 'tex-pill--success', 'medium' => 'tex-pill--warning', 'hard' => 'tex-pill--danger', 'custom' => 'tex-pill--info'];
             @endphp
             @forelse($questions as $q)
             <label class="tex-question-row tex-question-item" data-type="{{ $q->type }}" data-difficulty="{{ $q->difficulty }}" data-text="{{ \Illuminate\Support\Str::lower(strip_tags($q->question_text)) }}" data-marks="{{ $q->marks }}">
                 <input type="checkbox" name="question_ids[]" class="tex-question-checkbox" value="{{ $q->id }}" {{ in_array($q->id, $selectedIds) ? 'checked' : '' }}>
                 <span class="tex-question-row__text" dir="auto">{{ \Illuminate\Support\Str::limit(strip_tags($q->question_text), 90) }}</span>
-                <span class="tex-badge tex-badge--{{ $typeClasses[$q->type] ?? 'dark' }}"><i class="bi {{ $typeIcons[$q->type] ?? '' }}"></i> {{ $typeLabels[$q->type] ?? $q->type }}</span>
-                <span class="tex-badge tex-badge--{{ $difficultyClasses[$q->difficulty] ?? 'dark' }}">{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}</span>
+                <span class="tex-pill {{ $typePill[$q->type] ?? 'tex-pill--muted' }}"><i class="bi {{ $typeIcons[$q->type] ?? '' }}"></i> {{ $typeLabels[$q->type] ?? $q->type }}</span>
+                <span class="tex-pill {{ $difficultyPill[$q->difficulty] ?? 'tex-pill--muted' }}">{{ $difficultyLabels[$q->difficulty] ?? $q->difficulty }}</span>
             </label>
             @empty
-                <div class="text-muted text-center py-5">لا توجد أسئلة متاحة بعد. أضف أسئلة من بنك الأسئلة أولاً.</div>
+                <div class="tex-empty">
+                    <i class="bi bi-journal-x"></i>
+                    <p class="mb-0">لا توجد أسئلة متاحة بعد. أضف أسئلة من بنك الأسئلة أولاً.</p>
+                </div>
             @endforelse
         </div>
 
