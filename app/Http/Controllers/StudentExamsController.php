@@ -157,6 +157,16 @@ class StudentExamsController extends Controller
         ]));
     }
 
+    // AJAX: called periodically while an exam is open (long exams — e.g. 2 hours — can outlive
+    // the default session lifetime). Touching the session here resets its expiry clock and
+    // returns a fresh CSRF token for the page's JS to swap in, so autosave/submit never start
+    // silently failing with 419 errors partway through a long exam.
+    public function pingSession(Request $request)
+    {
+        $request->session()->put('exam_keepalive_at', now());
+        return response()->json(['status' => 'success', 'csrf_token' => csrf_token()]);
+    }
+
     // AJAX: save a single answer as the student progresses through the exam.
     public function saveAnswer(Request $request, $id)
     {

@@ -79,6 +79,13 @@
     }
     .exam-submit-btn:hover { background: #17703f; }
 
+    .exam-save-status {
+        font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 8px;
+        background: rgba(255,255,255,.1); color: #cfe8d8; white-space: nowrap;
+    }
+    .exam-save-status.is-saving { color: #ffe08a; }
+    .exam-save-status.is-error { color: #ff9d9d; background: rgba(179,38,30,.35); }
+
     .exam-violation-counter {
         background: rgba(255,255,255,.12);
         color: #fff;
@@ -134,6 +141,7 @@
 <div class="exam-shell__header">
     <h1 class="exam-shell__title">{{ $exam->title }}</h1>
     <div class="d-flex align-items-center gap-3">
+        <span class="exam-save-status" id="exam_save_status"><i class="bi bi-check2"></i> محفوظ</span>
         @if($exam->anti_cheat_enabled)
         <div class="exam-violation-counter" id="exam_violation_counter" title="عدد المخالفات المرصودة">
             <i class="bi bi-shield-exclamation"></i> <span id="exam_violation_count">0</span>/{{ $exam->anti_cheat_violation_limit }}
@@ -265,10 +273,23 @@
             answer: "{{ route('student.exams.answer', ['attempt' => 'ATTEMPT']) }}",
             voice: "{{ route('student.exams.voice_answer', ['attempt' => 'ATTEMPT']) }}",
             violation: "{{ route('student.exams.violation', ['attempt' => 'ATTEMPT']) }}",
-            submit: "{{ route('student.exams.submit', ['attempt' => 'ATTEMPT']) }}"
+            submit: "{{ route('student.exams.submit', ['attempt' => 'ATTEMPT']) }}",
+            ping: "{{ route('student.exams.ping') }}"
         };
-        return routes[name].replace('ATTEMPT', attemptEnc);
+        return name === 'ping' ? routes.ping : routes[name].replace('ATTEMPT', attemptEnc);
     }
+
+    // ── Session/CSRF keep-alive ── A 2-hour exam can easily outlive the 120-minute session
+    // lifetime; without this, every autosave/submit call would start silently failing (419)
+    // partway through a long exam. Pings every 4 minutes and swaps in the fresh CSRF token.
+    setInterval(function () {
+        $.post(urlFor('ping'), { _token: csrf }, function (data) {
+            if (data && data.csrf_token) csrf = data.csrf_token;
+        }).fail(function () {
+            // network hiccup on the ping itself isn't fatal — next answer save will surface
+            // any real problem via its own retry/error handling below.
+        });
+    }, 4 * 60 * 1000);
 
     // ── Countdown timer ──
     var timerEl = document.getElementById('exam_timer');
@@ -287,18 +308,60 @@
     tick();
     var timerInterval = setInterval(tick, 1000);
 
-    // ── Answer autosave ──
+    // ── Answer autosave — with visible status + automatic retry, so a failed save (e.g. a
+    // momentary network drop or an expired session before the keep-alive ping catches up)
+    // is never silent. The student always knows whether their last answer actually persisted. ──
+    var $saveStatus = $('#exam_save_status');
+
+    function setSaveStatus(state) {
+        $saveStatus.removeClass('is-saving is-error');
+        if (state === 'saving') {
+            $saveStatus.addClass('is-saving').html('<i class="bi bi-arrow-repeat"></i> جاري الحفظ...');
+        } else if (state === 'error') {
+            $saveStatus.addClass('is-error').html('<i class="bi bi-exclamation-triangle"></i> فشل الحفظ، تتم إعادة المحاولة...');
+        } else {
+            $saveStatus.html('<i class="bi bi-check2"></i> محفوظ');
+        }
+    }
+
+    function saveAnswer(data, attemptsLeft) {
+        attemptsLeft = attemptsLeft === undefined ? 3 : attemptsLeft;
+        setSaveStatus('saving');
+        $.post(urlFor('answer'), Object.assign({ _token: csrf }, data))
+            .done(function (res) {
+                if (res && res.status === 'success') {
+                    setSaveStatus('saved');
+                } else if (attemptsLeft > 0) {
+                    setTimeout(function () { saveAnswer(data, attemptsLeft - 1); }, 1500);
+                } else {
+                    setSaveStatus('error');
+                }
+            })
+            .fail(function () {
+                if (attemptsLeft > 0) {
+                    setTimeout(function () { saveAnswer(data, attemptsLeft - 1); }, 1500);
+                } else {
+                    setSaveStatus('error');
+                    Swal.fire({
+                        toast: true, position: 'top', icon: 'error', showConfirmButton: false, timer: 4000,
+                        title: 'تعذر حفظ آخر إجابة — تحقق من اتصالك بالإنترنت'
+                    });
+                }
+            });
+    }
+
     document.querySelectorAll('.answer-input').forEach(function (el) {
         el.addEventListener('change', function () {
-            $.post(urlFor('answer'), { question_id: el.dataset.question, selected_option_id: el.value, _token: csrf });
+            saveAnswer({ question_id: el.dataset.question, selected_option_id: el.value });
         });
     });
     document.querySelectorAll('.answer-text').forEach(function (el) {
         var timeout;
         el.addEventListener('input', function () {
             clearTimeout(timeout);
+            setSaveStatus('saving');
             timeout = setTimeout(function () {
-                $.post(urlFor('answer'), { question_id: el.dataset.question, answer_text: el.value, _token: csrf });
+                saveAnswer({ question_id: el.dataset.question, answer_text: el.value });
             }, 800);
         });
     });

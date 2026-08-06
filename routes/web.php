@@ -196,6 +196,7 @@ Route::group(['middleware' => ['auth:students']], function () {
     Route::get('student/exams', ['as' => 'student.exams.view', 'uses' => 'StudentExamsController@getIndex']);
     Route::get('student/exams/start/{id}', ['as' => 'student.exams.start', 'uses' => 'StudentExamsController@start']);
     Route::get('student/exams/take/{attempt}', ['as' => 'student.exams.take', 'uses' => 'StudentExamsController@take']);
+    Route::post('student/exams/ping', ['as' => 'student.exams.ping', 'uses' => 'StudentExamsController@pingSession']);
     Route::post('student/exams/answer/{attempt}', ['as' => 'student.exams.answer', 'uses' => 'StudentExamsController@saveAnswer']);
     Route::post('student/exams/voice-answer/{attempt}', ['as' => 'student.exams.voice_answer', 'uses' => 'StudentExamsController@saveVoiceAnswer']);
     Route::post('student/exams/violation/{attempt}', ['as' => 'student.exams.violation', 'uses' => 'StudentExamsController@logViolation']);
