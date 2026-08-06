@@ -72,6 +72,10 @@
     .tex-question-checkbox { width: 19px; height: 19px; flex-shrink: 0; cursor: pointer; accent-color: var(--tex-navy); }
     .tex-question-row__text { flex: 1; font-size: 14px; color: var(--tex-navy); min-width: 0; }
     .tex-question-row__badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    /* jQuery's show()/toggle() restores an inline "display" that fights with the flex
+       layout above (label's browser default is "inline"), misaligning the row's
+       checkbox/text/badges. Toggle via this class instead of jQuery show/hide. */
+    .tex-question-row.tex-row-hidden { display: none !important; }
 
     .tex-summary { background: var(--tex-info-bg); border: 1px solid #b9e9f2; border-radius: 10px; padding: 14px 18px; display: flex; gap: 30px; flex-wrap: wrap; align-items: center; }
     .tex-summary__item { text-align: center; }

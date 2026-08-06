@@ -197,7 +197,7 @@
                 var matchesType = !type || String($row.data('type')) === type;
                 var matchesDifficulty = !difficulty || String($row.data('difficulty')) === difficulty;
                 var show = matchesText && matchesType && matchesDifficulty;
-                $row.toggle(show);
+                $row.toggleClass('tex-row-hidden', !show);
                 if (show) visible++;
             });
 
