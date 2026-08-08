@@ -31,6 +31,11 @@ class TeacherExamsController extends Controller
 
     public function getIndex()
     {
+        // Fallback for servers where the `exams:publish-scheduled` cron job isn't (yet) set
+        // up: a due scheduled exam still flips to published — and its students still get
+        // notified — the moment a teacher opens this list, instead of never.
+        Exam::publishDueScheduled();
+
         $exams = Exam::with('group')
             ->where('category', 'group')
             ->whereIn('group_id', $this->ownedGroupIds())

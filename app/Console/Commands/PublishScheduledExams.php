@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\ExamNotifier;
 use App\Models\Exam;
 use Illuminate\Console\Command;
 
@@ -24,15 +23,9 @@ class PublishScheduledExams extends Command
 
     public function handle(): int
     {
-        $exams = Exam::where('category', 'group')
-            ->where('status', 'scheduled')
-            ->whereNotNull('start_date')
-            ->where('start_date', '<=', now())
-            ->get();
+        $exams = Exam::publishDueScheduled();
 
         foreach ($exams as $exam) {
-            $exam->update(['status' => 'published']);
-            ExamNotifier::notifyGroupExamPublished($exam);
             $this->info("Published exam #{$exam->id} ({$exam->title}) and notified its group.");
         }
 

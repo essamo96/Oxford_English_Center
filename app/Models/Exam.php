@@ -76,4 +76,24 @@ class Exam extends Model
     {
         return $query->where('category', 'placement');
     }
+
+    // Flips due Group Exams from 'scheduled' to 'published' and fires the student
+    // notification for each. Shared by the `exams:publish-scheduled` cron command AND a
+    // lazy fallback called from student/teacher/admin exam listings, so a scheduled exam
+    // still goes live (and notifies) even on a server where the cron job isn't configured yet.
+    public static function publishDueScheduled()
+    {
+        $exams = static::where('category', 'group')
+            ->where('status', 'scheduled')
+            ->whereNotNull('start_date')
+            ->where('start_date', '<=', now())
+            ->get();
+
+        foreach ($exams as $exam) {
+            $exam->update(['status' => 'published']);
+            \App\Http\Controllers\ExamNotifier::notifyGroupExamPublished($exam);
+        }
+
+        return $exams;
+    }
 }

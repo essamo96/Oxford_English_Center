@@ -62,6 +62,14 @@ class ExamsController extends AdminController
     public function getList(Request $request)
     {
         $category = $this->category($request);
+
+        // Fallback for servers where the `exams:publish-scheduled` cron job isn't (yet) set
+        // up: a due scheduled exam still flips to published — and its students still get
+        // notified — the moment this list is loaded, instead of never.
+        if ($category === 'group') {
+            Exam::publishDueScheduled();
+        }
+
         $keyword = $request->get('title', null);
         $status = $request->get('status', null);
         $programId = $request->get('program_id', null);
@@ -156,6 +164,13 @@ class ExamsController extends AdminController
             return redirect()->back()->withInput();
         }
 
+        // The add form lets the status be set to "published" directly (not only via the
+        // dedicated toggle/cycle endpoints) — a brand-new exam created that way must still
+        // notify its group's students, otherwise it goes live silently.
+        if ($exam->status === 'published' && $exam->category === 'group') {
+            \App\Http\Controllers\ExamNotifier::notifyGroupExamPublished($exam);
+        }
+
         $request->session()->flash('success', self::INSERT_SUCCESS_MESSAGE);
         return redirect($category === 'placement' ? route('exam_placement_tests.view') : route('group_exams.view'));
     }
@@ -224,6 +239,12 @@ class ExamsController extends AdminController
             return redirect()->back()->withInput();
         }
 
+        // Captured before the update so we can tell whether this save is the moment the exam
+        // actually TRANSITIONS into "published" (edit form lets status be changed directly,
+        // not only via the dedicated toggle/cycle endpoints) — re-saving an already-published
+        // exam must not re-notify every student on every unrelated edit.
+        $wasPublished = $exam->status === 'published';
+
         DB::beginTransaction();
         try {
             $exam->update([
@@ -255,6 +276,10 @@ class ExamsController extends AdminController
             DB::rollBack();
             $request->session()->flash('danger', self::EXECUTION_ERROR . ': ' . $e->getMessage());
             return redirect()->back()->withInput();
+        }
+
+        if (!$wasPublished && $exam->status === 'published' && $exam->category === 'group') {
+            \App\Http\Controllers\ExamNotifier::notifyGroupExamPublished($exam);
         }
 
         $request->session()->flash('success', self::UPDATE_SUCCESS);

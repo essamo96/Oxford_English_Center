@@ -30,6 +30,11 @@ class StudentExamsController extends Controller
     // Group Exams for groups the student is actually enrolled in.
     public function getIndex()
     {
+        // Fallback for servers where the `exams:publish-scheduled` cron job isn't (yet) set
+        // up: a scheduled exam still flips to published — and its students still get
+        // notified — the moment a student in its group opens this list, instead of never.
+        Exam::publishDueScheduled();
+
         $studentId = Auth::guard('students')->id();
         $now = now();
 
